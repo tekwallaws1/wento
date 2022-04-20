@@ -116,7 +116,7 @@ DATABASES = {
          'NAME': 'ssedb',
          'USER': 'clarorms',
          'PASSWORD': 'Clarorms1@3',
-         'HOST': '165.232.183.104',
+         'HOST': 'localhost',
          'PORT': '',
      }
  }
