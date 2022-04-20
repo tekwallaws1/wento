@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.css">
+<link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+<style type="text/css">
+  .card {
+    margin-bottom: 0px;}
+</style>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{% static 'charts/Chart.min.js' %}"></script>
+<script src="{% static 'charts/apexcharts.min.js' %}"></script>
+
+<script type="text/javascript">
+  // Work Orders Chart
+// var name = $scope.data.name
+
+var options = {
+  series: [{
+  // name: 'Total Orders Value ₹'+$scope.data.y1.reduce((pv, cv) => pv + cv, 0),
+    name: 'Proposals', data: {{y_365|safe}}, type: 'column',
+  }],
+
+  chart: {
+    height: 350,  toolbar: { show: true, tools: {download: true, selection: false, zoom: true, zoomin: false, zoomout: false, pan: false, reset: true},
+  }},
+
+  plotOptions: {bar: {columnWidth: '70%', endingShape: 'rounded',} },
+
+  stroke: {width: 0, curve: 'smooth'},
+  
+  xaxis: {type: 'datetime', categories: {{x_365|safe}},},
+  yaxis: { labels: { formatter: function (val) { return val + " KWp" } } },
+
+  legend: {position: 'top',showForSingleSeries: true, horizontalAlign: 'left', fontFamily: 'ubuntu-medium', fontSize: '13px',},
+      
+  fill: { type: ["gradient"], opacity: [1], gradient: { inverseColors: false, shade: 'light', type: "vertical", opacityFrom: 0.85, opacityTo: 0.85, stops: [0]}},
+
+};
+
+var chart = new ApexCharts(document.querySelector("#chart6"), options);
+chart.render();
+
+function fnc1(a) { 
+  chart.updateSeries([{ data: {{y_30|safe}}} ]);
+  chart.updateOptions({ xaxis: {categories: {{x_30|safe}}  } });    }
+function fnc2(b) { 
+  chart.updateSeries([{ data: {{y_90|safe}}} ]);
+  chart.updateOptions({ xaxis: {categories: {{x_90|safe}}  } });    }
+function fnc3(c) { 
+  chart.updateSeries([{ data: {{y_180|safe}}} ]);
+  chart.updateOptions({ xaxis: {categories: {{x_180|safe}}  } });    }
+function fnc4(d) { 
+  chart.updateSeries([{ data: {{y_365|safe}}} ]);
+  chart.updateOptions({ xaxis: {categories: {{x_365|safe}}  } });    }
+
+</script>
+{% endblock %}
+
+{% block content %}
+
+  <div>
+    <div style="float:left">
+      <div class="page-header">
+        <h3 class="page-title">
+          <span class="page-title-icon bg-gradient-primary text-white mr-2">
+            <i class="mdi mdi-home"></i>
+          </span> Dashboard - Solar Rooftop Proposals 
+        </h3>
+      </div>
+    </div>
+    <div style="float:right">
+      <button type="button"  onclick="location.href='{% url 'prop' %}'" class="btn btn-sm btn-primary mb-4">Proposals List</button>
+    </div>
+    <div style="clear:both"></div>
+  </div>
+
+  
+  <div class="row">
+  <div class="col-md-4 stretch-card grid-margin">
+    <div class="card bg-gradient-info card-img-holder text-white">
+      <div class="card-body1">
+        <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
+        <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-handshake-angle"></i></div></div>
+        <h4 class="font-weight-normal mb-3">Total Proposals - {{d.tprop}}
+        </h4>
+        <h2 class="mb-5">₹ {{d.prop_val|intcomma}}</h2>
+        <h6 class="card-text">Recent Month Proposals {{d.tprop_30d}}, ₹ {{d.prop_val_30d|intcomma}}</h6>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 stretch-card grid-margin">
+    <div class="card bg-gradient-success card-img-holder text-white">
+      <div class="card-body1">
+        <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
+        <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-shopping-cart"></i></div></div>
+        <h4 class="font-weight-normal mb-3">Orders Processed - {{d.tprop_confirm}}
+        </h4>
+        <h2 class="mb-5">₹ {{d.confirm_val|intcomma}}</h2>
+        <h6 class="card-text">Recent Month Orders Processed {{d.tprop_confirm_30d}}, ₹ {{d.confirm_30d|intcomma}}</h6>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 stretch-card grid-margin">
+    <div class="card bg-gradient-primary card-img-holder text-white">
+      <div class="card-body1">
+        <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
+        <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-bandage"></i></div></div>
+        <h4 class="font-weight-normal mb-3">Pending Proposals - {{d.pend_tprop|intcomma}}
+        </h4>
+        <h2 class="mb-5">₹ {{d.pend_prop_val|intcomma}}</h2>
+        <h6 class="card-text">Target ₹ {{d.pend_prop_val|intcomma}}</h6>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row"> 
+  <div class="col-xl-12 col-lg-7">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h7 class="m-1 font-weight-bold" style="color: black;">Proposals Vs Orders</h7>
+        <div>
+        <button class="btn1 btn1-danger" onclick="javascript:fnc1(30)">1M</button>
+        <button class="btn1 btn1-info" onclick="javascript:fnc2(90)">3M</button>
+        <button class="btn1 btn1-primary" onclick="javascript:fnc3(180)">6M</button>
+        <button class="btn1 btn1-success" onclick="javascript:fnc4(365)">1Y</button>
+      </div>                         
+      </div>
+      <div class="card-body1">
+        <div id="chart6"></div>   
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}

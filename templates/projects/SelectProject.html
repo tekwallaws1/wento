@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts %}
+<script type="text/javascript">
+  $('#sel').change(function () {
+    var url = '/modules/'
+    var k = $(this).val()
+    url = url + k + '/'
+    document.getElementById("search").action = url
+    document.getElementById("sbmt").click()
+});
+</script>
+
+{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+  <div class="col-md-8 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body"> 
+        <h4 class="card-title d-inline-block" style="margin-bottom: 30px;">Welcome {{user.first_name}} !</h4>
+        <br>
+          <!-- <div>
+            <div style="float:left">
+              <button type="button"  onclick="location.href='{% url 'home' %}'" class="btn btn-info mb-4"><i class="mdi mdi-monitor btn-icon-append"></i> All Projects</button>
+            </div>
+            <div style="float:right">
+              <button type="button"  onclick="location.href='{% url 'home' %}'" class="btn btn-primary mb-4"><i class="mdi mdi-plus btn-icon-append"></i> Add Project</button>
+            </div>
+            <div style="clear:both"></div>
+          </div>
+          <h5>or</h5>
+          <br> -->
+          <form class="forms-sample" id='search' action='' method="POST">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                  <label style="font-style: italic;">Please Select Specific Project</label>
+                  <select id='sel' name="Room_No" class="form-select form-control">
+                  <!-- <option selected>-------------</option> -->
+                  <option value="">----------</option>
+                  {% for x in pj %}
+                  <option >{{ x }}</option>
+                  {% endfor %}
+                </select>
+              </div>            
+            </div>
+          <button type="submit" id="sbmt" class="btn2 btn2-sm btn2-primary" style="margin-top: 10px; display: none;">Go to Work Area</button>     
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

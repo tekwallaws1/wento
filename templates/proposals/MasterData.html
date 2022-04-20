@@ -1,0 +1,480 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %}
+
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+{% endblock %} 
+
+{% block scripts %}
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
+  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
+  <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
+  <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script>
+
+  <script type="text/javascript">
+    function validate1(p) {
+      if(   document.getElementById("activitypswd1").value == "sse123" ){
+          url = '/fillforms/delete/addcompany/'+p+'/'
+          location.href=url;}
+      else{alert( "Incorrect Activity Password, Please Try Again" );}}
+      function validate2(p) {
+      if(   document.getElementById("activitypswd1").value == "sse123" ){
+          url = '/fillforms/delete/addcapacity/'+p+'/'
+          location.href=url;}
+      else{alert( "Incorrect Activity Password, Please Try Again" );}}
+      function validate3(p) {
+      if(   document.getElementById("activitypswd1").value == "sse123" ){
+          url = '/fillforms/delete/addcosting/'+p+'/'
+          location.href=url;}
+      else{alert( "Incorrect Activity Password, Please Try Again" );}}
+  </script>
+
+  <script type="text/javascript">
+    $('#html5-extension1').DataTable( {
+    autoWidth: false,
+    // dom: '<"row"<"col-md-12"<"row"<"col-md-6"B> > ><"col-md-12"rt> <"col-md-12"<"row"<"col-md-5"i><"col-md-7"p>>> >', 
+    dom: 'lBfrtip', 
+    buttons: {dom: {button: {tag: 'i',className: ''}},
+        buttons: [
+        {
+        extend: 'excel',
+        title: 'Registered Companies',
+        filename: 'Reg_Companies',
+        text:'',
+        titleAttr: 'Download as Excel',
+        className: 'custom-btn1 mdi mdi-file-excel',
+        exportOptions: {
+        columns: [0, 1, 2],
+        stripNewlines: false,
+        rows : {search:'applied'}},
+        },
+
+        {
+        extend: 'pdf',
+        title: 'Registered Companies',
+        filename: 'Reg_Companies',
+        pageSize: 'A4',
+        exportOptions: {
+        columns: [0,  1, 2],
+        stripNewlines: false,
+        rows : {search:'applied'}}, 
+        customize: function ( doc ) {
+
+        // doc.content.push( {
+        //   margin: [15, 20, 0, 0 ],
+        //   alignment: 'left',
+        //   text: 'ABCD'});
+
+        // doc.content[1].table.widths = 
+        // Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+        // doc.content[1].table.widths = [10, "*", "*"];
+        // doc.content[1].table.widths = [10, 40, 50]; //in pixels
+        doc.content[1].table.widths = ['5%', '40%', '55%']; //in %
+        // Remove spaces around page title
+        
+        doc.content[0].text = doc.content[0].text.trim();
+        doc.pageMargins = [40,20,20,30];
+        // doc.pageMargins = [left,top,right,bottom];
+        // Create a footer
+        doc['footer']=(function(page, pages) {
+            return {
+                columns: [
+                    'Sree Sai Electronics',
+                    {
+                        // This is the right column
+                        alignment: 'right',
+                        italics: true,
+                        text: ['page ', { text: page.toString()},  ' of ', { text: pages.toString()}]
+                    }
+                ],
+                margin: [40, 0]
+            }
+        });
+        // Styling the table: create style object
+        var objLayout = {};
+        // Horizontal line thickness
+        objLayout['hLineWidth'] = function(i) { return .5; };
+        // Vertikal line thickness
+        objLayout['vLineWidth'] = function(i) { return .5; };
+        // Horizontal line color
+        objLayout['hLineColor'] = function(i) { return '#aaa'; };
+        // Vertical line color
+        objLayout['vLineColor'] = function(i) { return '#aaa'; };
+        // Left padding of the cell
+        objLayout['paddingLeft'] = function(i) { return 5; };
+        // Right padding of the cell
+        objLayout['paddingRight'] = function(i) { return 5; };
+        // Inject the object in the document
+        doc.content[1].layout = objLayout;
+        
+        doc.defaultStyle.fontSize = 9;
+        doc.styles.title.fontSize = 13;
+        doc.styles.title.messageTop = 15;
+        doc.defaultStyle.alignment = 'left';
+        doc.styles.tableHeader = {
+        fillColor:'#525659',
+        color:'#FFF',
+        fontSize: '9',
+        alignment: 'left',
+        bold: true,  };},        
+        text:'',
+        titleAttr: 'Download as PDF',
+        className: 'custom-btn1 mdi mdi-file-pdf',
+        },
+
+        {
+        extend: 'print',
+        title: 'Registered Companies',
+        filename: 'Reg_Companies',
+        exportOptions: {
+        columns: [0, 1, 2],
+        stripHtml: false,
+        rows : {search:'applied'}},     
+        text:'',
+        titleAttr: 'Print',
+        className: 'custom-btn1 mdi mdi-printer style="color:blue"',
+        },
+    ]},
+    "oLanguage": {
+      "sSearch": '',
+      "sSearchPlaceholder": "Search/Filter...",
+      "sLengthMenu": "",},
+    "stripeClasses": [],
+    "lengthMenu": [ [20, 50, 100, -1], [20, 50, 100, "All"] ],
+    "pageLength": 20,} );
+  </script>
+
+  <script type="text/javascript">
+    $('#html5-extension2').DataTable( {
+    autoWidth: false,
+    dom: 'lBfrtip', 
+    buttons: {dom: {button: {tag: 'i',className: ''}},
+        buttons: [
+        {extend: 'excel', title: 'Product Categories', filename: 'Product_Categories', text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel',
+        exportOptions: {columns: [0, 1, 2, 3, 4],stripNewlines: false,rows : {search:'applied'}},},
+        {extend: 'pdf', title: 'Product Categories', filename: 'Product_Categories', pageSize: 'A4',
+        exportOptions: { columns: [0, 1, 2, 3, 4], stripNewlines: false, rows : {search:'applied'}}, 
+        customize: function ( doc ) {
+        doc.content[1].table.widths = ['5%', '20%', '40%', '20%', '15%']; 
+        doc.content[0].text = doc.content[0].text.trim();
+        doc.pageMargins = [40,20,20,30];
+        doc['footer']=(function(page, pages) {return {columns: ['Sree Sai Electronics',{alignment: 'right',italics: true,
+        text: ['page ', { text: page.toString()},  ' of ', { text: pages.toString()}]}],margin: [40, 0]}});
+        var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+        objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+        objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+        objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+        doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left';
+        doc.styles.tableHeader = {fillColor:'#525659',color:'#FFF',fontSize: '9',alignment: 'left',bold: true,  };},        
+        text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf',},
+        {extend: 'print',title: 'Product Categories',filename: 'Product_Categories',
+        exportOptions: {columns: [0, 1, 2, 3, 4],stripHtml: false,rows : {search:'applied'}},text:'',titleAttr: 'Print',
+        className: 'custom-btn1 mdi mdi-printer style="color:blue"',},]}, "oLanguage": {"sSearch": '',"sSearchPlaceholder": "Search/Filter...","sLengthMenu": "",}, "stripeClasses": [],"lengthMenu": [ [20, 50, 100, -1], [20, 50, 100, "All"] ],"pageLength": 20,} );
+  </script>
+
+  <script type="text/javascript">
+    $('#html5-extension3').DataTable( {
+    autoWidth: false,
+    dom: 'lBfrtip', 
+    buttons: {dom: {button: {tag: 'i',className: ''}},
+        buttons: [
+        {extend: 'excel', title: 'Product Price List', filename: 'Product_Pricelist', text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel',
+        exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6, 7],stripNewlines: false,rows : {search:'applied'}},},
+        {extend: 'pdf', title: 'Product Price List', filename: 'Product_Pricelist', pageSize: 'A4', orientation: 'landscape',
+        exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7], stripNewlines: false, rows : {search:'applied'}}, 
+        customize: function ( doc ) {
+        doc.content[1].table.widths = ['4%', '15%', '13%', '15%', '15%', '*', '8%', '*']; 
+        doc.content[0].text = doc.content[0].text.trim();
+        doc.pageMargins = [40,20,20,30];
+        doc['footer']=(function(page, pages) {return {columns: ['Sree Sai Electronics',{alignment: 'right',italics: true,
+        text: ['page ', { text: page.toString()},  ' of ', { text: pages.toString()}]}],margin: [40, 0]}});
+        var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+        objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+        objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+        objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+        doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left';
+        doc.styles.tableHeader = {fillColor:'#525659',color:'#FFF',fontSize: '9',alignment: 'left',bold: true,  };},        
+        text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf',},
+        {extend: 'print',title: 'Product Price List',filename: 'Product_Pricelist', orientation: 'landscape',
+        exportOptions: {columns: [0, 1, 2, 3, 4, 5, 6, 7],stripHtml: false,rows : {search:'applied'}},text:'',titleAttr: 'Print',
+        className: 'custom-btn1 mdi mdi-printer style="color:blue"',},]}, "oLanguage": {"sSearch": '',"sSearchPlaceholder": "Search/Filter...","sLengthMenu": "",}, "stripeClasses": [],"lengthMenu": [ [20, 50, 100, -1], [20, 50, 100, "All"] ],"pageLength": 20,} );
+  </script>
+
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+<div>
+  <div style="float:left">
+    <div class="page-header">
+      {% if var == 'addcompany' %}
+        <h3 class="page-title">Registered Companies</h3>
+      {% elif var == 'addcapacity' %}
+        <h3 class="page-title">Power Categories</h3>
+      {% elif var == 'addcosting' %}
+        <h3 class="page-title">Costing Details</h3>
+      {% endif %}
+    </div>
+  </div>
+  <div style="float:right">
+    {% if var == 'addcompany' %}
+      <button type="button"  onclick="location.href='{% url 'form' 'create' 'addcompany' 1 %}'" class="btn btn-sm btn-primary mb-4"><i class="mdi mdi-plus btn-icon-append"></i>New Entry</button>
+    {% elif var == 'addcapacity' %}
+      <button type="button"  onclick="location.href='{% url 'form' 'create' 'addcapacity' 1 %}'" class="btn btn-sm btn-primary mb-4"><i class="mdi mdi-plus btn-icon-append"></i>New Entry</button>
+    {% elif var == 'addcosting' %}
+      <button type="button"  onclick="location.href='{% url 'form' 'create' 'addcosting' 1 %}'" class="btn btn-sm btn-primary mb-4"><i class="mdi mdi-plus btn-icon-append"></i>New Entry</button>
+    {% endif %}
+  </div>
+  <div style="clear:both"></div>
+</div>
+
+  
+<!-- Registered Companies List -->
+  {% if var == 'addcompany' %}
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive m-t-40">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension1">
+        <thead style="color: white; background:  #02BAD6; font-weight: 10 ;">
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Address</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x in table %}
+          <tr>
+            <td >{{forloop.counter}}</td>
+
+            <td style="white-space: normal;">{{x.Name}}</td>
+
+            <td style="white-space: normal;">
+              {% if x.Address_Line_1 %}{{x.Address_Line_1}},{% endif %}
+              {% if x.Address_Line_2 %}<br>{{x.Address_Line_2}},{% endif %}
+              {% if x.State %}<br>{{x.State}}.{% endif %}
+              {% if x.GST_No %}<br><br>GSTIN: {{x.GST_No}}{% endif %}
+              <br><br><i class="mdi mdi-phone"></i>&nbsp;{{x.Phone_Number_1}}
+              {% if x.Phone_Number_2 %}<br><i class="mdi mdi-phone"></i>&nbsp;{{x.Phone_Number_2}}{% endif %}
+              {% if x.Email %}<br><i class="mdi mdi-email-outline"></i>&nbsp;{{x.Email}}{% endif %}
+              {% if x.Office_Type %}<br><br>{{x.Office_Type}} Office{% endif %}
+            </td>
+
+            <td>
+              <a class="mdi mdi-border-color bs-tooltip" title="Update" href="{% url 'form' 'update' 'addcompany' x.id %}"></a>&emsp;  
+              <a class="mdi mdi-content-copy bs-tooltip" title="Copy Data" href="{% url 'form' 'copy' 'addcompany' x.id %}"></a>&emsp;
+              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal11"></a>
+            </td>
+            <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content" id="modal-reload">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Data</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="forms-sample">
+                              <div class="form-group">
+                                  <label for="exampleInputPassword1">Password</label>
+                                  <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+                                  <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
+                                </div> 
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+<!-- Power Categories List -->
+  {% if var == 'addcapacity' %}
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive m-t-40">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension2">
+        <thead style="color: white; background:  #02BAD6; font-weight: 10 ;">
+          <tr>
+            <th>#</th>
+            <th>Capacity</th>
+            <th>Modules Details</th>
+            <th>Inverter Details</th>
+            <th>BOM No</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x in table %}
+          <tr>
+            <td style="width:7%;">{{forloop.counter}}</td>
+
+            <td style="width:20px;">{{x.Capacity}} KWp</td>
+
+            <td style="width:30px;">
+              {{x.Panel_Capacity}} Wp x {{x.No_of_Panels}} Nos<br>
+              {{x.Cells_Type}}, {{x.Module_Type}}
+            </td>
+
+            <td style="width:30px;">{{x.Phase_Configuration}}</td>
+
+            <td style="width:20px;">{% if x.Ref_No %}{{x.Ref_No}}{% endif %}</td>
+
+            <td style="width:10%;">
+              <a class="mdi mdi-border-color bs-tooltip" title="Update" href="{% url 'form' 'update' 'addcapacity' x.id %}"></a>&emsp;
+              <a class="mdi mdi-content-copy bs-tooltip" title="Copy Data" href="{% url 'form' 'copy' 'addcapacity' x.id %}"></a>&emsp;
+              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal12"></a>
+            </td>
+            <div class="modal fade text-left" id="exampleModal12" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content" id="modal-reload">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Data</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="forms-sample">
+                              <div class="form-group">
+                                  <label for="exampleInputPassword1">Password</label>
+                                  <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+                                  <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate2('{{x.id}}')" />
+                                </div> 
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+<!-- Costing List -->
+  {% if var == 'addcosting' %}
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive m-t-40">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension3">
+        <thead style="color: white; background:  #02BAD6; font-weight: 10 ;">
+          <tr>
+            <th>#</th>
+            <th>Product Capacity</th>
+            <th>Unit Cost</th>
+            <th>DD Charges</th>
+            <th>Structure</th>
+            <th>Total Cost</th>
+            <th>Subsidy</th>
+            <th>Cost to Client</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x, y, z in table %}
+          <tr>
+            <td>{{forloop.counter}}</td>
+
+            <td style="white-space:normal;">{{x.Capacity}}</td>
+
+            <td>
+            Tender Cost<br>
+            ₹ {{x.Tender_Cost|floatformat:0|intcomma}}
+            <br><br> Supplier Add On Cost
+            <br> ₹ {{x.Supplier_Add_On_Cost|floatformat:0|intcomma}}
+            </td>
+
+            <td>
+              Agency: {{x.Nodel_Agency}}
+              {% if x.Subsidy > 0 %}<br>
+              Net Metering. &emsp;₹ {{x.DD1_Charges|floatformat:0|intcomma}}{% endif %}
+              <br>Application Fee. ₹ {{x.DD2_Charges|floatformat:0|intcomma}}
+            </td>
+
+            <td>
+              Extra 9 Feet<br>
+              (Optional)<br><br>
+              ₹ {{x.High_Raised_Structure|floatformat:0|intcomma}}
+            </td>
+
+            <td>₹ {{y|floatformat:0|intcomma}}</td>
+
+            <td>
+              {% if x.Subsidy > 0 %}₹ {{x.Subsidy|floatformat:0|intcomma}}
+              {% else %}
+              Commercial<br><br>
+              No Subsidy
+              {% endif %}
+            </td>
+
+            <td style="color: green; font-weight: bold;">
+              {% if x.Subsidy > 0 %}₹ {{z|floatformat:0|intcomma}}{% else %}₹ {{z|floatformat:0|intcomma}}<br><br>
+              + GST 12%<br>
+              ₹ {{z|mul:0.12|floatformat:0|intcomma}}{% endif %}
+            </td>
+
+            <td style="width:10%;">
+              <a class="mdi mdi-border-color bs-tooltip" title="Update" href="{% url 'form' 'update' 'addcosting' x.id %}"></a>&nbsp;&nbsp;
+              <a class="mdi mdi-content-copy bs-tooltip" title="Copy Data" href="{% url 'form' 'copy' 'addcosting' x.id %}"></a>&nbsp;&nbsp;
+              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal13"></a>
+            </td>
+            <div class="modal fade text-left" id="exampleModal13" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content" id="modal-reload">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Data</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="forms-sample">
+                              <div class="form-group">
+                                  <label for="exampleInputPassword1">Password</label>
+                                  <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+                                  <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate3('{{x.id}}')" />
+                                </div> 
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}
+

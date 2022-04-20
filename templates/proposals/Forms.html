@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %} 
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        {% if var == 'addcompany' %}
+          <h3 class="page-title"></h3>
+          <h4 class="card-title d-inline-block">Add Compny Details</h4>
+        {% elif var == 'addcapacity' %}
+          <h4 class="card-title d-inline-block">Add Power Categories</h4>
+        {% elif var == 'addcosting' %}
+          <h4 class="card-title d-inline-block">Add Costing</h4>
+        {% endif %}
+
+        <div style="color: red; font-style: italic; font-size: 13px;">** Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                {% for field in form %}
+                  <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                {% endfor %}  
+              </div>
+            </div>
+          <button type="submit" class="btn1 btn1-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+
+{% endblock %}  
+ 

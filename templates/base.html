@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+{% load static %} 
+<html lang="en"> 
+  <head> 
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Smart Viewer</title>
+    <!-- plugins:css-->
+    <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'css/vendor.bundle.base.css' %}"> -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom-modal.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'css/apexcharts.css' %}" rel="stylesheet" > -->
+    {% block css %}{% endblock %}
+
+  </head>
+  <body class="sidebar-icon-only">
+    <div class="container-scroller">
+      <!-- partial:partials/_navbar.html -->
+      <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+        <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+          <!-- <a class="navbar-brand brand-logo font-weight-bold", style="font-size: 30px; color: #BA55D3;" href="{% url 'home' %}">ai-proj-lead</a> -->
+           <!-- <img class="img-responsive fit-image" src="{% static 'img/logo.png' %}" style="display: block;
+  margin-top: -50px;
+  margin-left: -72px;
+
+" > -->
+          <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-sss.png' %}" /></a>
+          <a class="navbar-brand brand-logo-mini" href="{% url 'home' %}"><img src="{% static 'img/logo-mini.svg' %}" alt="logo" /></a>
+
+          
+        </div>
+        <div class="navbar-menu-wrapper d-flex align-items-stretch">
+          <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+            <span class="mdi mdi-menu"></span>
+          </button>
+<!--           <div class="text-center  d-flex align-items-center justify-content-center">
+          <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img width="120" height="24" src="{% static 'img/logo.png' %}" /></a>
+        </div> -->
+          <!-- <div class="search-field d-none d-md-block">
+            <form class="d-flex align-items-center h-100" action="#">
+              <div class="input-group">
+                <div class="input-group-prepend bg-transparent">
+                  <i class="input-group-text border-0 mdi mdi-magnify"></i>
+                </div>
+                <input type="text" class="form-control bg-transparent border-0" placeholder="search for something">
+              </div>
+            </form>
+          </div> -->
+          <ul class="navbar-nav navbar-nav-right">
+            <li class="nav-item nav-profile dropdown">
+              <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
+                <div class="nav-profile-img">
+                  <img src="{% static 'img/suresh.jpg' %}" alt="image">
+                  <span class="availability-status online"></span>
+                </div>
+                <div class="nav-profile-text">
+                  <p class="mb-1 text-black">{{user.first_name}}</p>
+                </div>
+              </a>
+              <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
+                <a class="dropdown-item" href="#">
+                  <i class="mdi mdi-cached mr-2 text-success"></i> Activity Log </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{% url 'logout' %}">
+                  <i class="mdi mdi-logout mr-2 text-primary"></i> Signout </a>
+              </div>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
+                <i class="mdi mdi-bell-outline"></i>
+                <span class="count-symbol bg-success"></span>
+              </a>
+              <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
+                <h6 class="p-3 mb-0">Notifications</h6>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-thumbnail">
+                    <div class="preview-icon bg-success">
+                      <i class="mdi mdi-calendar"></i>
+                    </div>
+                  </div>
+                  <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                    <h6 class="preview-subject font-weight-normal mb-1">Event today</h6>
+                    <p class="text-gray ellipsis mb-0"> Just a reminder that you have an event today </p>
+                  </div>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-thumbnail">
+                    <div class="preview-icon bg-warning">
+                      <i class="mdi mdi-settings"></i>
+                    </div>
+                  </div>
+                  <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                    <h6 class="preview-subject font-weight-normal mb-1">Settings</h6>
+                    <p class="text-gray ellipsis mb-0"> Update Dashboard </p>
+                  </div>
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item preview-item">
+                  <div class="preview-thumbnail">
+                    <div class="preview-icon bg-info">
+                      <i class="mdi mdi-link-variant"></i>
+                    </div>
+                  </div>
+                  <div class="preview-item-content d-flex align-items-start flex-column justify-content-center">
+                    <h6 class="preview-subject font-weight-normal mb-1">Launch Admin</h6>
+                    <p class="text-gray ellipsis mb-0"> New admin wow! </p>
+                  </div>
+                </a>
+                <div class="dropdown-divider"></div>
+                <h6 class="p-3 mb-0 text-center">See all notifications</h6>
+              </div>
+            </li>
+            <li class="nav-item nav-logout d-none d-lg-block">
+              <a class="nav-link" href="{% url 'logout' %}">
+                <i class="mdi mdi-power" style="color: red;"></i>
+              </a>
+            </li>
+          </ul>
+          <button class="navbar-toggler navbar-toggler-right d-lg-none align-self-center" type="button" data-toggle="offcanvas">
+            <span class="mdi mdi-menu"></span>
+          </button>
+        </div>
+      </nav>
+      <!-- partial -->
+      <div class="container-fluid page-body-wrapper">
+        <!-- partial:partials/_sidebar.html -->
+        <nav class="sidebar sidebar-offcanvas" id="sidebar">
+          <ul class="nav">
+            <li class="nav-item nav-profile">
+              <a href="#" class="nav-link">
+                <div class="nav-profile-image">
+                  <img src="{% static 'img/suresh.jpg' %}" alt="profile">
+                  <span class="login-status online"></span>
+                  <!--change to offline or busy as needed-->
+                </div>
+                <div class="nav-profile-text d-flex flex-column">
+                  <span class="font-weight-bold mb-2">{{user.first_name}}</span>
+                  <span class="text-secondary text-small">CEO</span>
+                </div>
+                <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
+              </a>
+            </li>
+            <!-- <li class="nav-item">
+              <a class="nav-link" href="{% url 'home' %}" >
+                <span class="menu-title">Home</span>
+                <i class="mdi mdi-home menu-icon"></i>
+              </a>
+            </li> -->
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
+                <span class="menu-title">Proposals</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi mdi-monitor menu-icon"></i>
+              </a>
+              <div class="collapse" id="ui-basic">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="{% url 'propdb' %}">Dashboard</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="{% url 'prop' %}">Proposals</a></li>
+                  <!-- <li class="nav-item"> <a class="nav-link" href="{% url 'pform' %}">Request Form</a></li> -->
+                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcapacity' %}">Power Categories</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcosting' %}">Costing Details</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcompany' %}">Reg. Offices</a></li>             
+                </ul>
+              </div>
+            </li>
+            <!-- <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basic1" aria-expanded="false" aria-controls="ui-basic1">
+                <span class="menu-title">Master Data</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi mdi-book-open-page-variant menu-icon"></i>
+              </a>
+              <div class="collapse" id="ui-basic1">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item "> <a class="nav-link" href="{% url 'mdata' 'addcompany' %}">Reg. Offices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcapacity' %}">Power Categories</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcosting' %}">Costing</a></li>
+                </ul>
+              </div>
+            </li> -->
+
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basic2" aria-expanded="false" aria-controls="ui-basic2">
+                <span class="menu-title">Work Orders</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi mdi-wall menu-icon"></i>
+              </a>
+              <div class="collapse" id="ui-basic2">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="#">Work Orders</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="#">Create Work Order</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basiccontact" aria-expanded="false" aria-controls="ui-basiccontact">
+                <span class="menu-title">Contact Management</span>
+                <i class="menu-arrow"></i>
+                <i class="mdi mdi mdi-contact-mail menu-icon"></i>
+              </a>
+              <div class="collapse" id="ui-basiccontact">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="#">Vendor Contacts</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="#">Customer Contacts</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcompany' %}">My Reg. Offices</a></li>
+                </ul>
+              </div>
+            </li>
+
+          </ul> 
+        </nav>
+        <!-- partial -->
+        <div class="main-panel">
+          <div class="content-wrapper">
+
+{% if form.errors %}
+  {% for field in form %}
+    {% for error in field.errors %}
+      <p style="color: red;"> {{ error }} </p>
+    {% endfor %}
+  {% endfor %}
+{% endif %}
+
+{% if messages %}
+  {% for msg in messages %}
+    <div id="modalCustom" class="col-lg-12 layout-spacing">
+      <div class="statbox widget box box-shadow">
+        <div id="myButton" data-toggle="modal" data-target="#profileModal"></div>
+              <!-- Modal -->
+              <div class="modal fade profile-modal" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-sm" role="document">
+                  <div class="modal-content">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+                    <div class="modal-header justify-content-center" id="profileModalLabel">
+                      <div class="modal-profile mt-4">
+                          <img alt="avatar" src="{% static 'img/suresh.jpg' %}" class="rounded-circle">
+                      </div>
+                    </div>
+                    <div class="modal-body text-center">
+                      {% if user.is_authenticated %}
+                      <p class="mt-2">Hi, {{ user.first_name }}</p>
+                      {% else %}
+                      <a href="{% url django.contrib.auth.login %}">Please Login Here</a>
+                      {% endif %}
+                      <p class="mt-2">{{msg}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+      </div>
+  {% endfor %}
+{% endif %} 
+          <!-- MAIN CONTENT BEGIN -->
+          {% block content %}
+          {% endblock %}
+          <!-- MAIN CONTENT BEGIN -->
+          </div>
+
+          <!-- content-wrapper ends -->
+          <!-- partial:partials/_footer.html -->
+          <footer class="footer">
+            <div class="d-sm-flex justify-content-center justify-content-sm-between">
+              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2021 <a href="#" target="_blank">tekWall</a>. All rights reserved.</span>
+              <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"><a href="#" target="_blank">tekWall</a> Hyderabad</span>
+            </div>
+          </footer>
+          <!-- partial -->
+        </div>
+        <!-- main-panel ends -->
+      </div>
+      <!-- page-body-wrapper ends -->
+    </div>
+    <!-- container-scroller -->
+<script src="{% static 'js/vendor.bundle.base.js' %}"></script>
+<script src="{% static 'js/misc.js' %}"></script>
+<script src="{% static 'js/off-canvas.js' %}"></script>
+<script src="{% static 'js/hoverable-collapse.js' %}"></script>
+<!-- <script src="https://cdn.WebRTC-Experiment.com/MediaStreamRecorder.js"></script>
+<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script> -->
+<script>
+window.onload = function () {
+    document.getElementById('myButton').click()
+}
+</script>
+
+<!-- For different java files for different pages -->
+{% block scripts %}   
+{% endblock %}
+
+  </body>
+</html>

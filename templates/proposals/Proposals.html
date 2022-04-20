@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+{% endblock %} 
+
+{% block scripts %}
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
+  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
+  <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
+  <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script>
+
+<script type="text/javascript">
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/quote/delete/'+p+'/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+</script>
+
+<!-- Data Tables Export Script -->
+<script type="text/javascript">
+    $('#html5-extension').DataTable( {
+    autoWidth: false,
+    dom: 'lBfrtip', 
+    buttons: {dom: {button: {tag: 'i',className: ''}},
+        buttons: [
+        {extend: 'excel', title: 'SSE - Proposals List', filename: 'SSE_Proposals', text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel',
+        exportOptions: {columns: [0,  3, 4, 5, 6, 7],stripNewlines: false,rows : {search:'applied'}},},
+        {extend: 'pdf', title: 'SSE - Proposals List', filename: 'SSE_Proposals', pageSize: 'A4',
+        exportOptions: { columns: [0,  3, 4, 5, 6, 7], stripNewlines: false, rows : {search:'applied'}}, 
+        customize: function ( doc ) {
+        doc.content[1].table.widths = ['4%', '25%', '20%', '15%', '15%', '21%']; 
+        doc.content[0].text = doc.content[0].text.trim();
+        doc.pageMargins = [40,20,20,30];
+        doc['footer']=(function(page, pages) {return {columns: ['Sree Sai Electronics',{alignment: 'right',italics: true,
+        text: ['page ', { text: page.toString()},  ' of ', { text: pages.toString()}]}],margin: [40, 0]}});
+        var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+        objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+        objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+        objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+        doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left';
+        doc.styles.tableHeader = {fillColor:'#525659',color:'#FFF',fontSize: '9',alignment: 'left',bold: true,  };},        
+        text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf',},
+        {extend: 'print',title: 'SSE - Proposals List',filename: 'SSE_Proposals',
+        exportOptions: {columns: [0,  3, 4, 5, 6, 7],stripHtml: false,rows : {search:'applied'}},text:'',titleAttr: 'Print',
+        className: 'custom-btn1 mdi mdi-printer style="color:blue"',},]}, "oLanguage": {"sSearch": '',"sSearchPlaceholder": "Search/Filter...","sLengthMenu": "",}, "stripeClasses": [],"lengthMenu": [ [20, 50, 100, -1], [20, 50, 100, "All"] ],"pageLength": 20,} );
+</script>
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+<div class="page-header">
+  <h3 class="page-title">Proposals List</h3>
+</div>
+
+<div>
+  <div style="float:left">
+    <button type="button"  onclick="location.href='{% url 'pform' %}'" class="btn btn-sm   btn-primary mb-4">Request Form</button>&emsp;<button type="button"  onclick="location.href='{% url 'propdb' %}'" class="btn btn-sm  btn-info mb-4">Dash Board</button>
+  </div>
+  <div style="float:right">
+    <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+    &nbsp;&nbsp;&nbsp;
+    <button type="button" onclick="location.href='{% url 'prop' %}'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+  </div>
+  <div style="clear:both"></div>
+</div>
+
+
+
+<!--Filter/Serch History Form-->
+  <div id="addEventsModal" class="modal animated fadeIn"> 
+    <div class="modal-dialog modal-dialog-centered">                            
+      <!-- Modal content -->
+      <div class="card modal-content">
+          <div class="modal-body">
+              <span id="discard" data-dismiss="modal" class="close">&times;</span>
+              <div class="add-edit-event-box">
+                  <div class="add-edit-event-content">
+                      <div class="add-event-title edit-event-title"></div>
+                      <h5 class="modal-title">Search Data by Applying Filter</h5>
+                      <form class="">
+                          <div class="row">
+                            <!-- <div class="col-md-6 col-sm-6 col-12">
+                              <label style="font-weight: 200; color: black; font-size: 13px;">Capacity</label>
+                              {{ filter_data.form.Capacity__Capacity}}
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-12">
+                                <label style=" font-weight: 200; color: black; font-size: 13px;">Inverter Type</label>
+                                {{ filter_data.form.Inverter_Type}}
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-12">
+                              <label style=" font-weight: 200; color: black; font-size: 13px;">Modules Make</label>
+                              {{ filter_data.form.Solar_Panels_Make}}
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-12">
+                                <label style=" font-weight: 200; color: black; font-size: 13px;">Inverter Make</label>
+                                {{ filter_data.form.Inverter_Make}}
+                            </div> -->
+                            
+                            <div class="col-md-6 col-sm-6 col-12">
+                              <div class="form-group start-date">
+                                <label style="margin-top: 20px; font-weight: 200; color: black; font-size: 13px;">From</label>
+                                <input type="date" name="from_date" class="form-control">
+                              </div>
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-12">
+                              <div class="form-group start-date">
+                                <label style="margin-top: 20px; font-weight: 200; color: black; font-size: 13px;">To</label>
+                                <input type="date" name="to_date" class="form-control">
+                              </div>
+                            </div>
+                            <div class="" style=" float:left; margin-left: 10px;">
+                              <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                              <!-- <button id="add-e" class="btn">Add Task</button> -->
+                              <button id="edit-event" class="btn"></button>
+                            </div>
+                          </div>
+                          
+                      </form>
+                  </div>
+              </div>
+          </div>
+      </div>
+    </div>
+  </div>
+  
+<!-- Proposals List -->
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Proposal</th>
+            <th>Quote</th>
+            <th>Customer Details</th>
+            <th>Requested Capacity</th>
+            <th>Proposal No</th>
+            <th>Followup By</th>            
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x, y, z in data %}
+          <tr>
+            <td >{{forloop.counter}}</td>
+            <td><a class="mdi mdi-border-color" title="Edit Proposal" href="{% url 'propedit' x.Proposal_No_1 %}"></a>&nbsp;&nbsp;
+              <a style="cursor:pointer" class="mdi mdi-content-copy" title="Duplicate Proposal" href="{% url 'propcopy' x.Proposal_No_1 %}"></a>&nbsp;&nbsp;
+              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete Proposal" data-toggle="modal" data-target="#exampleModal11"></a>
+            </td>
+
+            <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content" id="modal-reload">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Proposal/Quote</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="forms-sample">
+                              <div class="form-group">
+                                  <label for="exampleInputPassword1">Password</label>
+                                  <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+                                  <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate1('{{x.Proposal_No_1}}')" />
+                                </div> 
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            {% if x.Is_Gen == 0 %}
+             <td style="width:20%;"><button type="button"  onclick="location.href='{% url 'quote' 'create' x.id %}'" class="btn1 btn1-primary">Generate Quote</button></td>
+            {% else %}
+              <td style="width:20px;"><button type="button"  onclick="location.href='{% url 'quote' 'view' x.Proposal_No_1  %}'" class="btn1 btn1-info">View</button>&nbsp;&nbsp;<button type="button"  onclick="location.href='{% url 'qtedit' x.Proposal_No_1  %}'" class="btn1 btn1-primary">Edit</button></td>
+            {% endif %}
+
+            
+            <td style="width:20%;">
+              {{x.Name}}<br><br>
+            <i class="mdi mdi-phone"></i>&nbsp;{{x.Phone_Number}}
+            {% if x.Address_Line_1 %}<br> {{x.Address_Line_1}}{% endif %}
+            {% if x.Address_Line_2 %}<br> {{x.Address_Line_2}}{% endif %}
+            {% if x.State %}<br> {{x.State}}{% endif %}
+            {% if x.Email %}<br> <i class="mdi mdi-email-outline"></i>&nbsp;{{x.Email}}{% endif %}
+            </td>
+            
+            <td style="white-space:normal; width:15%"><span style="color: green">{{x.Capacity}}</span><br><br> {% if y != 'None' %}<span style="color:blue">Client Price: ₹ {{y}}</span>{% else %}{% endif %}</td>
+
+            <td style="width:10%;">{{x.Proposal_No}}<br> {{x.Date|date:'d M Y'}}</td>
+
+            <td style="white-space:normal;">{% if z %}{{z}}{% endif %}</td>
+            
+            <td style="white-space:normal; width:25%;">{{x.Message}}</td>
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+

@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
+    <title>tekWall</title>
+    <link rel="icon" type="image/x-icon" href="assets/img/favicon.ico"/>
+
+
+    <!-- <link href="assets/css/loader.css" rel="stylesheet" type="text/css" /> -->
+    <link rel="stylesheet" href="{% static 'theme1/css/loader.css' %}" type="text/css">
+
+    <script src="{% static 'theme1/js/loader.js' %}"></script>
+
+    <!-- <script src="https://unpkg.com/feather-icons"></script> -->
+    <script src="{% static 'theme1/js/feather.min.js' %}"></script>
+
+    <!-- BEGIN GLOBAL MANDATORY STYLES -->
+    <link href="https://fonts.googleapis.com/css?family=Quicksand:400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom-modal.css' %}">
+
+    <link rel="stylesheet" href="{% static 'theme1/css/plugins.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/fontawsome.css' %}">
+
+    <!-- END GLOBAL MANDATORY STYLES -->
+
+    <!-- BEGIN PAGE LEVEL PLUGINS/CUSTOM STYLES -->
+    <!-- END PAGE LEVEL PLUGINS/CUSTOM STYLES -->
+    <style type="text/css">
+        *:-moz-full-screen,
+*:-webkit-full-screen,
+*:fullscreen *:-ms-fullscreen {
+  overflow: auto; }
+    </style>
+
+    {% block css %}{% endblock %}
+
+</head>
+<body class="dashboard-analytics">
+
+    <!-- BEGIN LOADER -->
+    <div id="load_screen"> <div class="loader"> <div class="loader-content">
+        <div class="spinner-grow align-self-center"></div>
+    </div></div></div>
+    <!--  END LOADER -->
+
+    <!--  BEGIN NAVBAR  -->
+    <div class="header-container fixed-top">
+        <header class="header navbar navbar-expand-sm">
+            <ul class="navbar-item flex-row">
+                <li class="nav-item align-self-center page-heading">
+                    <div class="page-header">
+                        <div class="page-title">
+                            <img src="{% static 'img/logo.png' %}" style="width:100px">
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <a href="javascript:void(0);" class="sidebarCollapse" data-placement="bottom"><i data-feather="list"></i><script>feather.replace()</script></a>
+
+            <ul class="navbar-item flex-row search-ul">
+                <!-- <li class="nav-item align-self-center search-animated">
+                    <i data-feather="search" class="toggle-search"></i><script>feather.replace()</script>
+                    <form class="form-inline search-full form-inline search" role="search">
+                        <div class="search-bar">
+                            <input type="text" class="form-control search-form-control  ml-lg-auto" placeholder="Type here to search">
+                        </div>
+                    </form>
+                </li> -->
+            </ul>
+
+            <ul class="navbar-item flex-row navbar-dropdown">
+
+               <!--  <li class="nav-item  dropdown message-dropdown full-screen-link">
+                  <a class="nav-link">
+                    <i data-feather="maximize" id="fullscreen-button"></i><script>feather.replace()</script>
+                  </a>
+                </li>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->
+
+                <!-- <li class="nav-item dropdown message-dropdown">
+                    <a href="javascript:void(0);" class="nav-link dropdown-toggle" id="messageDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i data-feather="message-circle"></i><script>feather.replace()</script><span class="badge badge-primary"></span>
+                    </a>
+                    <div class="dropdown-menu position-absolute animated fadeInUp" aria-labelledby="messageDropdown">
+                        <div class="">
+                            <a class="dropdown-item">
+                                <div class="">
+
+                                    <div class="media">
+                                        <div class="user-img">
+                                            <div class="avatar avatar-xl">
+                                                <span class="avatar-title rounded-circle">SB</span>
+                                            </div>
+                                        </div>
+                                        <div class="media-body">
+                                            <div class="">
+                                                <h5 class="usr-name">Suresh Babu</h5>
+                                                <p class="msg-title">ACCOUNT UPDATE</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </a>
+                            <a class="dropdown-item">
+                                <div class="">
+                                    <div class="media">
+                                        <div class="user-img">
+                                            <div class="avatar avatar-xl">
+                                                <span class="avatar-title rounded-circle">SR</span>
+                                            </div>
+                                        </div>
+                                        <div class="media-body">
+                                            <div class="">
+                                                <h5 class="usr-name">Stephen Raj</h5>
+                                                <p class="msg-title">ACCOUNT UPDATE</p>
+                                            </div>
+                                        </div>
+                                    </div>                                    
+                                </div>
+                            </a>
+                            <a class="dropdown-item">
+                                <div class="">
+
+                                    <div class="media">
+                                        <div class="user-img">
+                                            <div class="avatar avatar-xl">
+                                                <span class="avatar-title rounded-circle">P</span>
+                                            </div>
+                                        </div>
+                                        <div class="media-body">
+                                            <div class="">
+                                                <h5 class="usr-name">Praveen</h5>
+                                                <p class="msg-title">ACCOUNT UPDATE</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </li> -->
+
+                <li class="nav-item dropdown notification-dropdown">
+                    <a href="javascript:void(0);" class="nav-link dropdown-toggle" id="notificationDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i data-feather="bell"></i><script>feather.replace()</script><span class="badge badge-success"></span>
+                    </a>
+                    <div class="dropdown-menu position-absolute animated fadeInUp" aria-labelledby="notificationDropdown">
+                        <div class="notification-scroll">
+
+                            <div class="dropdown-item">
+                                <div class="media server-log">
+                                    <i data-feather="server"></i><script>feather.replace()</script>
+                                    <div class="media-body">
+                                        <div class="data-info">
+                                            <h6 class="">Server Rebooted</h6>
+                                            <p class="">45 min ago</p>
+                                        </div>
+
+                                        <div class="icon-status">
+                                           <i data-feather="x"></i><script>feather.replace()</script> 
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dropdown-item">
+                                <div class="media ">
+                                    <i data-feather="heart"></i><script>feather.replace()</script>
+                                    <div class="media-body">
+                                        <div class="data-info">
+                                            <h6 class="">Licence Expiring Soon</h6>
+                                            <p class="">8 hrs ago</p>
+                                        </div>
+
+                                        <div class="icon-status">
+                                            <i data-feather="x"></i><script>feather.replace()</script>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="dropdown-item">
+                                <div class="media file-upload">
+                                    <i data-feather="file-text"></i><script>feather.replace()</script>
+                                    <div class="media-body">
+                                        <div class="data-info">
+                                            <h6 class="">Latest Download.pdf</h6>
+                                            <p class="">670 kb</p>
+                                        </div>
+
+                                        <div class="icon-status">
+                                            <i data-feather="check"></i><script>feather.replace()</script>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="nav-item dropdown user-profile-dropdown  order-lg-0 order-1">
+                    <a href="javascript:void(0);" class="nav-link dropdown-toggle user" id="userProfileDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i data-feather="user"></i><script>feather.replace()</script>
+                    </a>
+                    <div class="dropdown-menu position-absolute animated fadeInUp" aria-labelledby="userProfileDropdown">
+                        <div class="user-profile-section">
+                            <div class="media mx-auto">
+                                <img src="{% static 'img/suresh.jpg' %}" class="img-fluid mr-2" alt="avatar">
+                                <div class="media-body">
+                                    <h5>Suresh Babu</h5>
+                                    <p>Project Leader</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="#">
+                                <i data-feather="user"></i><script>feather.replace()</script> <span>My Profile</span>
+                            </a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="#">
+                                <i data-feather="inbox"></i><script>feather.replace()</script><span>My Inbox</span>
+                            </a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="#">
+                                <i data-feather="lock"></i><script>feather.replace()</script> <span>Lock Screen</span>
+                            </a>
+                        </div>
+                        <div class="dropdown-item">
+                            <a href="{% url 'logout' %}">
+                                <i data-feather="log-out"></i><script>feather.replace()</script> <span>Log Out</span>
+                            </a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </header>
+    </div>
+    <!--  END NAVBAR  -->
+
+    <!--  BEGIN MAIN CONTAINER  -->
+    <div class="main-container" id="container">
+
+        <div class="overlay"></div>
+        <div class="search-overlay"></div>
+
+        <!--  BEGIN SIDEBAR  -->
+        <div class="sidebar-wrapper sidebar-theme">
+            
+            <nav id="compactSidebar">
+
+                <!-- <div class="theme-logo">
+                    
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <a href="{% url 'home' %}" class="bs-tooltip" title="Home Page"><i data-feather="home" style="color:yellow;"></i><script>feather.replace()</script></a>
+
+                                </div>
+                            </div>
+                </div> -->
+
+                <div class="external-links">
+                    <a href="{% url 'home' %}"><i data-feather="home" style="color: yellow;"></i><script>feather.replace()</script>
+                        <div class="tooltip"><span>Home Page</span></div>
+                    </a>
+                </div>
+
+                <ul class="menu-categories">
+                    <li class="menu ">
+                        <a href="#dashboard" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="book"></i><script>feather.replace()</script>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="tooltip"><span>Production</span></div>
+                    </li>
+
+                    <li class="menu">
+                        <a href="#app" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="settings"></i><script>feather.replace()</script>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="tooltip"><span>Engineering</span></div>
+                    </li>
+
+                    <li class="menu">
+                        <a href="#uiKit" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="zap"></i><script>feather.replace()</script>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <div class="tooltip"><span>UI Kit</span></div> -->
+                    </li>
+
+                    <li class="menu">
+                        <a href="#components" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="box"></i><script>feather.replace()</script>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <div class="tooltip"><span>Components</span></div> -->
+                    </li>
+
+                    <li class="menu">
+                        <a href="#forms" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="clipboard"></i><script>feather.replace()</script>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <div class="tooltip"><span>Forms</span></div> -->
+                    </li>
+
+                    <li class="menu">
+                        <a href="#tables" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="layout"></i><script>feather.replace()</script>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <div class="tooltip"><span>Tables</span></div> -->
+                    </li>
+
+                    <li class="menu">
+                        <a href="#users" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="users"></i><script>feather.replace()</script>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <div class="tooltip"><span>Users</span></div> -->
+                    </li>
+
+                    <li class="menu">
+                        <a href="#pages" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="file"></i><script>feather.replace()</script>                                </div>
+                            </div>
+                        </a>
+                        <!-- <div class="tooltip"><span>Pages</span></div> -->
+                    </li>
+
+                    <li class="menu">
+                        <a href="#more" data-active="false" class="menu-toggle">
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="plus-circle"></i><script>feather.replace()</script>
+                                </div>
+                            </div>
+                        </a>
+                        <!-- <div class="tooltip"><span>Extra Elements</span></div> -->
+                    </li>
+                    <!-- <li class="menu" >
+                        <a href="#more" data-active="false" class="menu-toggle" >
+                            <div class="base-menu">
+                                <div class="base-icons">
+                                    <i data-feather="plus-circle"></i><script>feather.replace()</script>
+                                </div>
+                            </div>
+                        </a>
+                        <div class="tooltip"><span>Extra Elements</span></div>
+                    </li> -->
+
+
+                </ul>
+
+                <div class="external-links">
+                    <a href="#" target=""><i data-feather="book-open"></i><script>feather.replace()</script>
+                        <div class="tooltip"><span>Documentation</span></div>
+                    </a>
+                </div>
+            </nav>
+
+            <div id="compact_submenuSidebar" class="submenu-sidebar" style="display:none">
+
+                <!-- <div class="theme-brand-name">
+                    <a href="index.html">t-pharma</a>
+                </div> -->
+
+                <div class="submenu" id="dashboard">
+                    <div class="category-info">
+                        <h5>PRODUCTION</h5>
+                        <p>All Production related Activities and Formats you can find here</p>
+                    </div>
+
+                    <ul class="submenu-list" data-parent-element="#dashboard"> 
+                        <li>
+                            <a href="/activities/{{room}}/"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>E-Log Book</a>
+                        </li>
+                        <li>
+                            <a href="/requests/requester/{{room}}/"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Requests</a>
+                        </li>
+                        <li>
+                            <a href="#"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>SOP Formats</a>
+                        </li>
+
+                    </ul>
+                </div>
+
+                <div class="submenu" id="app">
+                    <div class="category-info">
+                        <h5>ENGINEERING</h5>
+                        <p>All Engineering related data such as Activities, Equipments, Instruments and related Formats you can find here</p>
+                    </div>
+                    <ul class="submenu-list" data-parent-element="#app"> 
+                        <li>
+                            <a href="#"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>E-Log Book - All</a>
+                        </li>
+                        <li>
+                            {% if user.username == 'SPR001' %}
+                                <a href="/breakdownrequests/accept/{{room}}/"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Requests</a>
+                            {% elif user.username == 'TCH001' %}
+                                <a href="/breakdownrequests/attend/{{room}}/"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Requests</a>
+                            {% elif user.username == 'APR001' %}
+                                <a href="/breakdownrequests/approve/{{room}}/"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Requests</a>
+                            {% elif user.username == 'VAL001' %}
+                                <a href="/breakdownrequests/validate/{{room}}/"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Requests</a>
+                            {% else %}
+                                <a href=""><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Requests</a>
+                            {% endif %}
+                        </li>
+                        <li class="sub-submenu">
+                            <a role="menu" class="collapsed" data-toggle="collapse" data-target="#pmp" aria-expanded="false"><div><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>PMP</div> <i data-feather="chevron-right"></i><script>feather.replace()</script></a>
+                            <ul id="pmp" class="collapse" data-parent="#compact_submenuSidebar">
+                                <li>
+                                    <a href="#">E-Log Book</a>
+                                </li>
+                                <li>
+                                    <a href="#">Schedules</a>
+                                </li>
+                                <li>
+                                    <a href="#">SOP Formats</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="sub-submenu">
+                            <a role="menu" class="collapsed" data-toggle="collapse" data-target="#cal" aria-expanded="false"><div><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Calibration</div> <i data-feather="chevron-right"></i><script>feather.replace()</script></a>
+                            <ul id="cal" class="collapse" data-parent="#compact_submenuSidebar">
+                                <li>
+                                    <a href="#">E-Log Book</a>
+                                </li>
+                                <li>
+                                    <a href="#">Schedules</a>
+                                </li>                                
+                                <li>
+                                    <a href="#">SOP Formats</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="sub-submenu">
+                            <a role="menu" class="collapsed" data-toggle="collapse" data-target="#val" aria-expanded="false"><div><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Validation</div> <i data-feather="chevron-right"></i><script>feather.replace()</script></a>
+                            <ul id="val" class="collapse" data-parent="#compact_submenuSidebar">
+                                <li>
+                                    <a href="#">E-Log Book</a>
+                                </li>
+                                <li>
+                                    <a href="#">Schedules</a>
+                                </li>                                
+                                <li>
+                                    <a href="#">SOP Formats</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="sub-submenu">
+                            <a role="menu" class="collapsed" data-toggle="collapse" data-target="#eqp" aria-expanded="false"><div><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Equipments</div> <i data-feather="chevron-right"></i><script>feather.replace()</script></a>
+                            <ul id="eqp" class="collapse" data-parent="#compact_submenuSidebar">
+                                <li>
+                                    <a href="/masterdata/{{room}}/eqp/">Master Data</a>
+                                </li>
+                                <li>
+                                    <a href="#">Change History</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        <li class="sub-submenu">
+                            <a role="menu" class="collapsed" data-toggle="collapse" data-target="#inst" aria-expanded="false"><div><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span>Instruments</div> <i data-feather="chevron-right"></i><script>feather.replace()</script></a>
+                            <ul id="inst" class="collapse" data-parent="#compact_submenuSidebar">
+                                <li>
+                                    <a href="#">Master Data</a>
+                                </li>
+                                <li>
+                                    <a href="#">Change History</a>
+                                </li>
+                            </ul>
+                        </li>
+
+                    </ul>
+                </div>
+
+                <!-- <div class="submenu" id="uiKit">
+                    <div class="category-info">
+                        <h5>UI Kit</h5>
+                        <p>Lorem ipsum dolor sit amet sed incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                    <ul class="submenu-list" data-parent-element="#uiKit"> 
+                        <li>
+                            <a href="ui_alerts.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Alerts </a>
+                        </li>
+                        <li>
+                            <a href="ui_avatar.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Avatar </a>
+                        </li>
+                        <li>
+                            <a href="ui_badges.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Badges </a>
+                        </li>
+                        <li>
+                            <a href="ui_breadcrumbs.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Breadcrumbs </a>
+                        </li>                            
+                        <li>
+                            <a href="ui_buttons.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Buttons </a>
+                        </li>
+                        <li>
+                            <a href="ui_buttons_group.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Button Groups </a>
+                        </li>
+                        <li>
+                            <a href="ui_color_library.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Color Library </a>
+                        </li>
+                        <li>
+                            <a href="ui_dropdown.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Dropdown </a>
+                        </li>
+                        <li>
+                            <a href="ui_infobox.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Infobox </a>
+                        </li>
+                        <li>
+                            <a href="ui_jumbotron.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Jumbotron </a>
+                        </li>
+                        <li>
+                            <a href="ui_loader.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Loader </a>
+                        </li>
+                        <li>
+                            <a href="ui_pagination.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Pagination </a>
+                        </li>
+                        <li>
+                            <a href="ui_popovers.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Popovers </a>
+                        </li>
+                        <li>
+                            <a href="ui_progress_bar.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Progress Bar </a>
+                        </li>
+                        <li>
+                            <a href="ui_search.html"> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Search </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="submenu" id="components">
+                    <div class="category-info">
+                        <h5>Components</h5>
+                        <p>Lorem ipsum dolor sit amet sed incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                    <ul class="submenu-list" data-parent-element="#components"> 
+                        <li>
+                            <a href="component_tabs.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Tabs </a>
+                        </li>
+                        <li>
+                            <a href="component_accordion.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Accordions  </a>
+                        </li>
+                        <li>
+                            <a href="component_modal.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Modals </a>
+                        </li>                            
+                        <li>
+                            <a href="component_cards.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Cards </a>
+                        </li>
+                        <li>
+                            <a href="component_bootstrap_carousel.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Carousel </a>
+                        </li>
+                        <li>
+                            <a href="component_blockui.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Block UI </a>
+                        </li>
+                        <li>
+                            <a href="component_countdown.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Countdown </a>
+                        </li>
+                        <li>
+                            <a href="component_counter.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Counter </a>
+                        </li>
+                        <li>
+                            <a href="component_sweetalert.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Sweet Alerts </a>
+                        </li>
+                        <li>
+                            <a href="component_timeline.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Timeline </a>
+                        </li>
+                        <li>
+                            <a href="component_snackbar.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Notifications </a>
+                        </li>
+                        <li>
+                            <a href="component_session_timeout.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Session Timeout </a>
+                        </li>
+                        <li>
+                            <a href="component_media_object.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Media Object </a>
+                        </li>
+                        <li>
+                            <a href="component_list_group.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> List Group </a>
+                        </li>
+                        <li>
+                            <a href="component_pricing_table.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Pricing Tables </a>
+                        </li>
+                        <li>
+                            <a href="component_lightbox.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Lightbox </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="submenu" id="forms">
+                    <div class="category-info">
+                        <h5>Forms</h5>
+                        <p>Lorem ipsum dolor sit amet sed incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                    <ul class="submenu-list" data-parent-element="#forms">
+                        <li>
+                            <a href="form_bootstrap_basic.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Basic </a>
+                        </li>
+                        <li>
+                            <a href="form_input_group_basic.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Input Group </a>
+                        </li>
+                        <li>
+                            <a href="form_layouts.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Layouts </a>
+                        </li>
+                        <li>
+                            <a href="form_validation.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Validation </a>
+                        </li>
+                        <li>
+                            <a href="form_input_mask.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Input Mask </a>
+                        </li>
+                        <li>
+                            <a href="form_bootstrap_select.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Bootstrap Select </a>
+                        </li>
+                        <li>
+                            <a href="form_select2.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Select2 </a>
+                        </li>
+                        <li>
+                            <a href="form_bootstrap_touchspin.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> TouchSpin </a>
+                        </li>
+
+                    </ul>
+                </div>
+
+
+                <div class="submenu" id="tables">
+                    <div class="category-info">
+                        <h5>Tables</h5>
+                        <p>Lorem ipsum dolor sit amet sed incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                    <ul class="submenu-list" data-parent-element="#tables">
+                        <li>
+                            <a href="table_basic.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Basic </a>
+                        </li>
+                        <li class="sub-submenu">
+                            <a role="menu" class="collapsed" data-toggle="collapse" data-target="#datatables" aria-expanded="false"><div><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Datatables</div> <i data-feather="chevron-right"></i><script>feather.replace()</script></a>
+                            <ul id="datatables" class="collapse" data-parent="#compact_submenuSidebar">
+                                <li>
+                                    <a href="table_dt_basic.html"> Basic </a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_basic-dark.html"> Dark </a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_ordering_sorting.html"> Order Sorting </a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_multi-column_ordering.html"> Multi-Column </a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_multiple_tables.html"> Multiple Tables</a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_alternative_pagination.html"> Alt. Pagination</a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_custom.html"> Custom </a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_range_search.html"> Range Search </a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_html5.html"> HTML5 Export </a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_live_dom_ordering.html"> Live DOM ordering </a>
+                                </li>
+                                <li>
+                                    <a href="table_dt_miscellaneous.html"> Miscellaneous </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="submenu" id="users">
+                    <div class="category-info">
+                        <h5>Users</h5>
+                        <p>Lorem ipsum dolor sit amet sed incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                    <ul class="submenu-list" data-parent-element="#users">
+                        <li>
+                            <a href="user_profile.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Profile </a>
+                        </li>
+                        <li>
+                            <a href="user_account_setting.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Account Settings </a>
+                        </li>
+                        <li>
+                            <a href="fonticons.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Font Icons </a>
+                        </li>
+                        <li>
+                            <a href="widgets.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Widgets </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="submenu" id="pages">
+                    <div class="category-info">
+                        <h5>Pages</h5>
+                        <p>Lorem ipsum dolor sit amet sed incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                    <ul class="submenu-list" data-parent-element="#pages">
+                        <li>
+                            <a href="pages_helpdesk.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Helpdesk </a>
+                        </li>
+                        <li>
+                            <a href="pages_contact_us.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Contact Form </a>
+                        </li>
+                        <li>
+                            <a href="pages_faq.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> FAQ </a>
+                        </li>
+                        <li>
+                            <a href="pages_faq2.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> FAQ 2 </a>
+                        </li>
+                        <li>
+                            <a href="pages_privacy.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Privacy Policy </a>
+                        </li>
+                        <li>
+                            <a href="pages_coming_soon.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Coming Soon </a>
+                        </li>
+                        <li class="sub-submenu">
+                            <a role="menu" class="collapsed" data-toggle="collapse" data-target="#error" aria-expanded="false"><div><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Error</div><i data-feather="chevron-right"></i><script>feather.replace()</script></a>
+                            <ul id="error" class="collapse" data-parent="#compact_submenuSidebar">
+                                <li>
+                                    <a href="pages_error404.html"> 404 </a>
+                                </li>
+                                <li>
+                                    <a href="pages_error500.html"> 500 </a>
+                                </li>
+                                <li>
+                                    <a href="pages_error503.html"> 503 </a>
+                                </li>
+                                <li>
+                                    <a href="pages_maintenence.html"> Maintanence </a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="submenu" id="more">
+                    <div class="category-info">
+                        <h5>Extra Elements</h5>
+                        <p>Lorem ipsum dolor sit amet sed incididunt ut labore et dolore magna aliqua.</p>
+                    </div>
+                    <ul class="submenu-list" data-parent-element="#more">
+
+                        <li class="sub-submenu">
+                            <a role="menu" class="collapsed" data-toggle="collapse" data-target="#auth" aria-expanded="false"><div> <span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Authentication</div> <i data-feather="chevron-right"></i><script>feather.replace()</script></a>
+                            <ul id="auth" class="collapse" data-parent="#compact_submenuSidebar">
+                                <li>
+                                    <a href="auth_login.html"> Login </a>
+                                </li>
+                                <li>
+                                    <a href="auth_login_boxed.html"> Login Boxed </a>
+                                </li>
+                                <li>
+                                    <a href="auth_register.html"> Register </a>
+                                </li>
+                                <li>
+                                    <a href="auth_register_boxed.html"> Register Boxed </a>
+                                </li>
+                                <li>
+                                    <a href="auth_lockscreen.html"> Unlock </a>
+                                </li>
+                                <li>
+                                    <a href="auth_lockscreen_boxed.html"> Unlock Boxed </a>
+                                </li>
+                                <li>
+                                    <a href="auth_pass_recovery.html"> Recover ID </a>
+                                </li>
+                                <li>
+                                    <a href="auth_pass_recovery_boxed.html"> Recover ID Boxed </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="dragndrop_dragula.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Drag and Drop </a>
+                        </li>
+                        <li>
+                            <a href="charts_apex.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Charts </a>
+                        </li>
+                        <li>
+                            <a href="map_jvector.html"><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Maps </a>
+                        </li>
+                        <li class="sub-submenu">
+                            <a role="menu" class="collapsed" data-toggle="collapse" data-target="#starter-kit" aria-expanded="false"><div><span class="icon"><i data-feather="circle"></i><script>feather.replace()</script></span> Starter Kit</div> <i data-feather="chevron-right"></i><script>feather.replace()</script></a>
+                            <ul id="starter-kit" class="collapse" data-parent="#compact_submenuSidebar">
+                                <li>
+                                    <a href="starter_kit_blank_page.html"> Blank Page </a>
+                                </li>
+                                <li>
+                                    <a href="starter_kit_breadcrumb.html"> Breadcrumb </a>
+                                </li>
+                                <li>
+                                    <a href="starter_kit_boxed.html"> Boxed </a>
+                                </li>
+                            </ul>
+                        
+                    </ul>
+                </div> -->
+
+            </div>
+
+        </div>
+        <!--  END SIDEBAR  -->
+
+        {% if form.errors %}
+  {% for field in form %}
+    {% for error in field.errors %}
+      <p style="color: red;"> {{ error }} </p>
+    {% endfor %}
+  {% endfor %}
+{% endif %}
+
+{% if messages %}
+  {% for msg in messages %}
+    <div id="modalCustom" class="col-lg-12 layout-spacing">
+      <div class="statbox widget box box-shadow">
+        <div id="myButton" data-toggle="modal" data-target="#profileModal"></div>
+              <!-- Modal -->
+              <div class="modal fade profile-modal" id="profileModal" tabindex="-1" role="dialog" aria-labelledby="profileModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-sm" role="document">
+                  <div class="modal-content">
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span></button>
+                    <div class="modal-header justify-content-center" id="profileModalLabel">
+                      <div class="modal-profile mt-4">
+                          <img alt="avatar" src="{% static 'img/suresh.jpg' %}" class="rounded-circle">
+                      </div>
+                    </div>
+                    <div class="modal-body text-center">
+                      {% if user.is_authenticated %}
+                      <p class="mt-2">Hi, {{ user.first_name }}</p>
+                      {% else %}
+                      <a href="{% url django.contrib.auth.login %}">Please Login Here</a>
+                      {% endif %}
+                      <p class="mt-2">{{msg}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+      </div>
+  {% endfor %}
+{% endif %}
+        
+        <!--  BEGIN CONTENT AREA  -->
+        <div id="content" class="main-content">
+            <div class="layout-px-spacing">
+                <div><br></div>
+
+            {% block content %}
+          {% endblock %}
+
+          
+
+
+                <div class="row layout-top-spacing">
+
+            
+
+
+                </div>
+            </div>
+
+            <div class="footer-wrapper">
+                <div class="footer-section f-section-1">
+                    <p class="">Copyright © 2021 <a target="_blank" href="https://designreset.com">tekWall</a>, All rights reserved.</p>
+                </div>
+                <div class="footer-section f-section-2">
+                    <p class="">tekWall <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg></p>
+                </div>
+            </div>
+        </div>
+        <!--  END CONTENT AREA  -->
+
+
+    </div>
+    <!-- END MAIN CONTAINER -->
+
+    <!-- BEGIN GLOBAL MANDATORY SCRIPTS -->
+<!--     <script src="assets/js/libs/jquery-3.1.1.min.js"></script>
+    <script src="bootstrap/js/popper.min.js"></script>
+    <script src="bootstrap/js/bootstrap.min.js"></script>
+    <script src="plugins/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="assets/js/app.js"></script> -->
+
+    <script src="{% static 'theme1/js/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'theme1/js/popper.min.js' %}"></script>
+    <script src="{% static 'theme1/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'theme1/js/perfect-scrollbar.min.js' %}"></script>
+    <script src="{% static 'theme1/js/app.js' %}"></script>
+
+
+
+    <script>
+        $(document).ready(function() {
+            App.init();
+        });
+    </script>
+    <!-- <script src="assets/js/custom.js"></script> -->
+    <script src="{% static 'theme1/js/custom.js' %}"></script>
+    <!-- END GLOBAL MANDATORY SCRIPTS -->
+
+    <!-- BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS -->
+    <script src="plugins/apex/apexcharts.min.js"></script>
+    <script src="assets/js/dashboard/dash_1.js"></script>
+    <!-- BEGIN PAGE LEVEL PLUGINS/CUSTOM SCRIPTS -->
+    <script type="text/javascript">
+            //fullscreen
+    $("#fullscreen-button").on("click", function toggleFullScreen() {
+      if ((document.fullScreenElement !== undefined && document.fullScreenElement === null) || (document.msFullscreenElement !== undefined && document.msFullscreenElement === null) || (document.mozFullScreen !== undefined && !document.mozFullScreen) || (document.webkitIsFullScreen !== undefined && !document.webkitIsFullScreen)) {
+        if (document.documentElement.requestFullScreen) {
+          document.documentElement.requestFullScreen();
+        } else if (document.documentElement.mozRequestFullScreen) {
+          document.documentElement.mozRequestFullScreen();
+        } else if (document.documentElement.webkitRequestFullScreen) {
+          document.documentElement.webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+        } else if (document.documentElement.msRequestFullscreen) {
+          document.documentElement.msRequestFullscreen();
+        }
+      } else { 
+        if (document.cancelFullScreen) {
+          document.cancelFullScreen();
+        } else if (document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if (document.webkitCancelFullScreen) {
+          document.webkitCancelFullScreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      }
+    })
+    </script>
+
+    <script>
+        window.onload = function () {
+            document.getElementById('myButton').click()
+        }
+    </script>
+{% block scripts %}   
+{% endblock %}
+
+</body>
+</html>

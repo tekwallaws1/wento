@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+{% load static %} 
+ 
+<html lang="en">
+<head>
+    <title>SSE-RooftopSolar</title>
+   
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+    <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'css/vendor.bundle.base.css' %}"> -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+
+
+    <style type="text/css">
+      .bimg{
+    background-size: 1800px 900px;
+    background-repeat: no-repeat;
+    background-position: top;
+    background-attachment: fixed;
+    background-image: url( "{% static 'img/spv.jpg' %}");
+}
+
+.container {
+    justify-content: space-between;
+flex-direction: row;
+flex-wrap: wrap;
+  }
+   .card{
+    border-radius: 0px;
+}
+    </style>
+
+</head>
+<body class="override bimg">
+    
+   
+    <div class="container ">
+  <div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card" style="">
+      <div class="card-body">
+        <div style="float:right;">
+        <div id="logo">
+        <img style=" height:60px; width:70px" src="{% static 'img/sss-logo.png' %}">
+      </div>
+    </div>
+            <h4 style="color: #09788f; font-size: 20px; font-weight: bold; margin-bottom: 0px;">SREE SAI ELECTRONICS</h4>
+            <div><i class="mdi mdi-search-web"></i><a href="http://sreesaielectronics.com/" target="_blank">&nbsp;www.sreesaielectronics.com</a></div>
+            <div><i class="mdi mdi-phone"></i>&nbsp;9440210773</div>
+
+      <br>
+        <h4 class="card-title d-inline-block">Customer Requirement Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">** Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                {% for field in form %}
+                  <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                {% endfor %}  
+              </div>
+            </div>
+          <button type="submit" class="btn1 btn1-primary">Request Quote</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+    </div>
+  
+</body>
+</html>
