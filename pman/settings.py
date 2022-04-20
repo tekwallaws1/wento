@@ -114,7 +114,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'db_sse',
-        'USER': 'tekwall',
+        'USER': 'postgres',
         'PASSWORD': 'Tekwall1@3',
         'HOST': 'localhost',
         'PORT': '',
