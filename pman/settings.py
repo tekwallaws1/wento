@@ -114,8 +114,8 @@ DATABASES = {
      'default': {
          'ENGINE': 'django.db.backends.postgresql_psycopg2',
          'NAME': 'ssedb',
-         'USER': 'clarorms',
-         'PASSWORD': 'Clarorms1@3',
+         'USER': 'ssedbuser',
+         'PASSWORD': 'Tekwall1@3',
          'HOST': 'localhost',
          'PORT': '',
      }
