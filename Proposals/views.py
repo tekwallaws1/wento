@@ -20,7 +20,7 @@ from django.urls import reverse
 import os
 from django.conf import settings
 from django.template.loader import get_template
-from num2words import num2words  
+from num2words import num2words 
 
 
 # Proposals Dashboard 
@@ -137,15 +137,17 @@ def Proposals(request):
 			usr = None
 		price.append(fcost)
 		user.append(usr)
-		print(user)
 	data = zip(table, price, user)
 	return render(request, 'proposals/Proposals.html', {'data':data, 'filter_data':filter_data,})
 
 @login_required
 def Gen_Quote(request, fnc, var):
-	user = Account.objects.get(User_Name=request.user.username)
-	if not user:
-		user = None 
+	try:
+		user = Account.objects.get(user=request.user)
+	except Account.DoesNotExist:
+		user = None
+	# print('var', var)
+	# return HttpResponse('hu')
 	if fnc == 'create':
 		pl = Proposal.objects.get(id=var)
 		if pl.State != None: #if customer gave state, then company address based on state
@@ -184,8 +186,11 @@ def Gen_Quote(request, fnc, var):
 		word = num2words(fcost, to='cardinal', lang='en_IN')
 		return render(request, 'proposals/Quote.html', {'qt':qt, 'word':word, 'tcost':tcost, 'fcost':fcost, 'gst':gst, 'user':user})
 	elif fnc == 'delete':
-		qt = Quote.objects.get(Proposal_No_1=var)
-		qt.delete()
+		try:
+			qt = Quote.objects.get(Proposal_No_1=var)
+			qt.delete()
+		except Quote.DoesNotExist:
+			pass
 		prop = Proposal.objects.get(Proposal_No_1=var)
 		prop.delete()
 		messages.success(request, "Selected Proposal/Quote Details Has Been Deleted")
@@ -193,7 +198,6 @@ def Gen_Quote(request, fnc, var):
 
 	else:
 		qt = Quote.objects.get(Proposal_No_1=var)
-		print(user.Designation)
 		if qt.Type == 'Commercial':
 			gst = int((qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure)*0.12)
 		else:
@@ -213,7 +217,6 @@ def Quote_Edit(request, var):
 		if form.is_valid():
 			p = form.save()
 			fdata = Quote.objects.get(id=p.id)
-			print(fdata)
 			if fdata.Type == 'Commercial':
 				gst = int((fdata.Tender_Cost+fdata.Supplier_Add_On_Cost++fdata.DD1_Charges+fdata.DD2_Charges+fdata.High_Raised_Structure)*0.12)
 				fdata.Subsidy = 0
@@ -244,8 +247,7 @@ def Prop_Edit(request, var):
 			pl = Proposal.objects.get(id=p.id)
 			if pl.Type == None:
 				pl.Type = 'Residential'
-				pl.save()
-			
+				pl.save()			
 			try:
 				qt = Quote.objects.filter(Proposal_No_1=pl.Proposal_No_1)
 				if pl.State != None: #if customer gave state, then company address based on state
@@ -382,7 +384,17 @@ def Forms(request, fnc, var, rid):
 			form = CostingForm(request.POST, request.FILES)
 
 		if form.is_valid():
-			form.save()
+			p = form.save()
+			if var == 'addcapacity':
+				ref1 = PowerCat.objects.get(id=p.id)
+				cap_count = len(PowerCat.objects.filter(Capacity=ref1.Capacity, ds=1))
+				new_ref_no = cap_count
+				if cap_count>9:
+					ref_no = str(ref1.Capacity)+'KW'+str(new_ref_no)
+				else:
+					ref_no = str(ref1.Capacity)+'KW0'+str(new_ref_no)
+				ref1.Ref_No = ref_no
+				ref1.save()
 			messages.success(request, "Data Has Been Added")
 			return redirect('/masterdatas/%s/'%var)
 		else:

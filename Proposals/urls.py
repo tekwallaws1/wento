@@ -17,8 +17,6 @@ urlpatterns = [
     path('fillforms/<fnc>/<var>/<rid>/', views.Forms, name='form'),
     path('masterdatas/<var>/', views.Master_Data, name='mdata'), 
 
-
-
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 

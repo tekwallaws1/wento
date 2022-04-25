@@ -26,7 +26,8 @@ SECRET_KEY = 'c_t1jqgyw#$o2a8)yk*lqoj7zlp1)#hvk_$^(0d@3&@29zvcn^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['sseproman.com', 'www.sseproman.com', '165.232.183.104']
 
 
 # Application definition
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'django_extensions',
     # 'dbbackup',
 ]
+
 
 # DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 # DBBACKUP_STORAGE_OPTIONS = {'location': BASE_DIR / 'backup'}
@@ -92,6 +94,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                "Projects.basedata.profiledata",
             ],
         },
     },
@@ -108,7 +111,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': str(BASE_DIR / 'db.sqlite3'),
     }
-}
+# }
 
 DATABASES = {
      'default': {
@@ -162,8 +165,8 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'

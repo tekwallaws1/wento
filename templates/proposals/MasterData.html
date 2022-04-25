@@ -27,19 +27,20 @@
   <script src="{% static 'js/tableexport.js' %}"></script>
 
   <script type="text/javascript">
+    function rid(tid) {getid = tid}
     function validate1(p) {
       if(   document.getElementById("activitypswd1").value == "sse123" ){
-          url = '/fillforms/delete/addcompany/'+p+'/'
+          url = '/fillforms/delete/addcompany/'+getid+'/'
           location.href=url;}
       else{alert( "Incorrect Activity Password, Please Try Again" );}}
       function validate2(p) {
       if(   document.getElementById("activitypswd1").value == "sse123" ){
-          url = '/fillforms/delete/addcapacity/'+p+'/'
+          url = '/fillforms/delete/addcapacity/'+getid+'/'
           location.href=url;}
       else{alert( "Incorrect Activity Password, Please Try Again" );}}
       function validate3(p) {
       if(   document.getElementById("activitypswd1").value == "sse123" ){
-          url = '/fillforms/delete/addcosting/'+p+'/'
+          url = '/fillforms/delete/addcosting/'+getid+'/'
           location.href=url;}
       else{alert( "Incorrect Activity Password, Please Try Again" );}}
   </script>
@@ -279,7 +280,7 @@
             <td>
               <a class="mdi mdi-border-color bs-tooltip" title="Update" href="{% url 'form' 'update' 'addcompany' x.id %}"></a>&emsp;  
               <a class="mdi mdi-content-copy bs-tooltip" title="Copy Data" href="{% url 'form' 'copy' 'addcompany' x.id %}"></a>&emsp;
-              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal11"></a>
+              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}')"></a>
             </td>
             <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
@@ -346,7 +347,7 @@
             <td style="width:10%;">
               <a class="mdi mdi-border-color bs-tooltip" title="Update" href="{% url 'form' 'update' 'addcapacity' x.id %}"></a>&emsp;
               <a class="mdi mdi-content-copy bs-tooltip" title="Copy Data" href="{% url 'form' 'copy' 'addcapacity' x.id %}"></a>&emsp;
-              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal12"></a>
+              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal12" onclick="javascript:rid('{{x.id}}')"></a>
             </td>
             <div class="modal fade text-left" id="exampleModal12" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
@@ -444,7 +445,7 @@
             <td style="width:10%;">
               <a class="mdi mdi-border-color bs-tooltip" title="Update" href="{% url 'form' 'update' 'addcosting' x.id %}"></a>&nbsp;&nbsp;
               <a class="mdi mdi-content-copy bs-tooltip" title="Copy Data" href="{% url 'form' 'copy' 'addcosting' x.id %}"></a>&nbsp;&nbsp;
-              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal13"></a>
+              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal13" onclick="javascript:rid('{{x.id}}')"></a>
             </td>
             <div class="modal fade text-left" id="exampleModal13" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">

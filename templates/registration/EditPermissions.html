@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %} 
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Manage Permissions</h4>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <p style="color:green">All Permissions: If Admin Selected, No Need to Select Other Permissions, Admin Itself Can Give All Permissions</p>
+              {% for field in form %}
+                <div class="form-check form-check-flat form-check-primary">
+                  {% if field.label == 'Admin' %}
+                    <label class="form-check-label">{{ field }} {{field.help_text}}</label>
+                  {% endif %}
+                </div>
+              {% endfor %}
+              <br>
+              <p style="color:blue">View Peromissions: Select Required Permissions for User</p>
+              {% for field in form %}
+                <div class="form-check form-check-flat form-check-primary">
+                  {% if field.label == 'Main Dashboard' or field.label == 'Proposals Dashboard' or field.label == 'Expenses Dashboard' %}
+                    <label class="form-check-label">{{ field }} {{field.help_text}}</label>
+                  {% endif %}
+                </div>
+              {% endfor %}
+              <br>
+              <p style="color:#c9951a;">Can Give Create, Edit and Delete Permissions for Selected View Permissions if Required</p>
+              {% for field in form %}
+                <div class="form-check form-check-flat form-check-primary">
+                  {% if field.label == 'Create' or field.label == 'Edit' or field.label == 'Delete' %}
+                    <label class="form-check-label">{{ field }} {{field.help_text}}</label>
+                  {% endif %}
+                </div>
+              {% endfor %}
+            </div>
+          <button type="submit" class="btn1 btn1-primary">Manage Permissions</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

@@ -20,13 +20,16 @@ import os
 from django.conf import settings
 from django.template.loader import get_template
 from num2words import num2words 
+from UserAccounts.models import *
+from .basedata import basedata
 
-@login_required
+
+# @login_required
 def Select_Project(request):
-	pj = Projects.objects.filter(Status='Active', ds=True)
-	return render(request, 'projects/SelectProject.html', {'pj':pj})
+	pdata = basedata(request, None)
+	return render(request, 'projects/SelectProject.html', {'pdata':pdata})
 
 @login_required
 def Select_Module(request, proj):
-	pj = Projects.objects.filter(Status='Active', ds=True)
-	return render(request, 'projects/SelectModule.html', {'pj':proj})
+	pdata = basedata(request, proj)
+	return render(request, 'projects/SelectModule.html', {'pdata':pdata})

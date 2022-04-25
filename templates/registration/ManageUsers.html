@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+{% endblock %} 
+
+{% block scripts %}
+<script type="text/javascript">
+  function rid(tid) {getid = tid}
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/editusers/delete/'+getid+'/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+</script>
+<!-- Data Tables Export Script -->
+
+{% endblock %} <!-- For Scripts --> 
+
+
+{% block content %}
+<div class="page-header">
+  <h3 class="page-title">Manage Users</h3>
+</div>
+
+<div><button type="button"  onclick="location.href='{% url 'signup' %}'" class="btn btn-sm   btn-primary mb-4">+ Add User</button></div>
+
+<!-- Users List List -->
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>User</th>
+            <th>User Details</th>
+            <th>Permissions</th>
+            <th>Other Details</th>            
+          </tr>
+        </thead>
+        <tbody>
+          {% for x, y in data %}
+          <tr>
+            <td style="width: 5%;">{{forloop.counter}}</td>
+            <td style="width: 5%;" class="py-1">
+              {% if x.Upload_Photo %}
+                <img src="/media/{{x.Upload_Photo}}/" alt="image" />
+              {% else %}
+                <img src="/media/employeephotos/sss-logo.png/" alt="image" />
+              {% endif %}
+            </td>
+            <td>{{x.Name}}<br>
+                username: {{x.user.username}}<br>                
+                Created On: {{x.user.date_joined|date:'d M Y'}}<br><br>
+              <a class="mdi mdi-border-color" title="Edit User" href="/editusers/editaccount/{{x.id}}/"></a>&nbsp;&nbsp;
+              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete User" data-toggle="modal" data-target="#exampleModal11"  onclick="javascript:rid('{{x.id}}')"></a>
+            
+            <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                      <div class="modal-content" id="modal-reload">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Proposal/Quote</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                            <form class="forms-sample">
+                              <div class="form-group">
+                                  <label for="exampleInputPassword1">Password</label>
+                                  <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+                                  <input type="button" class="btn1 btn1-primary hit" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
+                                </div> 
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                </div></td>
+  
+            {% if x.user.is_active == 0 %}
+             <td><button type="button"  onclick="location.href='/editusers/edit/{{x.id}}/'" class="btn1 btn1-primary">Activate User</button></td>
+            {% else %}
+              <td>{% for p in y %}
+                    {{p}}<br>
+                  {% endfor %}
+                  <br><button type="button"  onclick="location.href='/editusers/edit/{{x.id}}/'" class="btn1 btn1-primary">Edit Permissions</button></td>
+            {% endif %}
+
+            <td>{% if x.Designation %}{{x.Designation}}<br>{% endif %}
+              {% if x.Department %}{{x.Department}}<br>{% endif %}
+              <i class="mdi mdi-phone"></i>&nbsp;{{x.Phone_Number}}<br>
+              {% if x.user.email %}<i class="mdi mdi-email-outline"></i>&nbsp;{{x.user.email}}{% endif %}
+            </td>
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+

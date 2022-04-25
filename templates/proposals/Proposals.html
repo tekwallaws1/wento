@@ -22,9 +22,10 @@
   <script src="{% static 'js/tableexport.js' %}"></script>
 
 <script type="text/javascript">
+  function rid(tid) {getid = tid}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/quote/delete/'+p+'/'
+        url = '/quote/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -159,7 +160,7 @@
             <td >{{forloop.counter}}</td>
             <td><a class="mdi mdi-border-color" title="Edit Proposal" href="{% url 'propedit' x.Proposal_No_1 %}"></a>&nbsp;&nbsp;
               <a style="cursor:pointer" class="mdi mdi-content-copy" title="Duplicate Proposal" href="{% url 'propcopy' x.Proposal_No_1 %}"></a>&nbsp;&nbsp;
-              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete Proposal" data-toggle="modal" data-target="#exampleModal11"></a>
+              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete Proposal" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.Proposal_No_1}}')"></a>
             </td>
 
             <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -215,4 +216,4 @@
   </div>
 
 {% endblock %}
-
+ 

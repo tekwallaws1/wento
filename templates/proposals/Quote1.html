@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8">
     <title>SSE Proposals</title>
-    <link rel="stylesheet" href="{% static 'css/inv1.css' %}">
+    <link rel="stylesheet" href="{% static 'css/quote.css' %}">
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
 
@@ -19,9 +19,7 @@
 
   </head>
   <body>
-    <!-- <button onclick="Convert_HTML_To_PDF();">Convert HTML to PDF</button> -->
-    <br><br>
-      <a href="javascript:generatePDF()" id="download"><button type="button"  onclick="href='javascript:generatePDF()'" class="btn2 btn2-sm btn2-info">Download</button></a>&nbsp;&nbsp;
+    
     <br><br>
 
 <div id="invoicee" >
@@ -110,7 +108,7 @@
 
         <div id="invoice">
           <h1 style="font-size:28px">PROPOSAL</h1>
-          <div class="date" style="font-size:17px; color:blue">{{qt.Proposal_To.Capacity.Capacity}}KWP SOLAR ROOFTOP {% if qt.Proposal_To.Inverter_Type %}{{ qt.Proposal_To.Inverter_Type }} {% else %}ON-GRID{% endif %} SYSTEM</div>
+          <div class="date" style="font-size:17px; color:blue">{{qt.Proposal_To.Capacity.Capacity}}KWP SOLAR ROOFTOP ON-GRIDSYSTEM</div>
           <div class="date">Proposal No: {{ qt.Proposal_To.Proposal_No }}</div>
           <div class="date">Date: {{qt.Date|date:'d M Y'}}</div>
         </div>
@@ -130,11 +128,11 @@
         <tbody>
           <tr>
             <td class="no">PV Modules</td>
-            <td class="desc"><h3>Poly Crystalline/<br>Multicrystalline<br>Modules</h3>ISO Certified</td>
+            <td class="desc"><h3>Poly Crystalline/<br>Multicrystalline<br>Modules</h3>MNRE Approved</td>
             <td class="unit">
               {% if qt.Proposal_To.Solar_Panels_Make %}{{ qt.Proposal_To.Solar_Panels_Make }}<br><br><br><br><br><br>
               {% else %}
-              Vikram<br>Waaree<br>Satvik Green<br>Renewsys<br>Adani<br>Tata
+              Renewsys/<br>Sova/EN-Icon/<br>Saatvik/<br>Vikram/Tata/<br>Polycab/<br>Pennar
               {% endif %}
             </td>
             <td class="qty">{{qt.Proposal_To.Capacity.Panel_Capacity}} Wp x {{qt.Proposal_To.Capacity.No_of_Panels}} Nos</td>
@@ -149,12 +147,12 @@
             <td class="no">Inverter</td>
             <td class="desc"><h3>High Efficiency<br>
               {{ qt.Proposal_To.Capacity.Phase_Configuration }}
-              {% if qt.Proposal_To.Inverter_Type == 'Off-Grid' %}Off-Grid{% else %}Grid Tied{% endif %}
+              Grid Tied
               <br>Solar Inverter</h3></td>
             <td class="unit">
               {% if qt.Proposal_To.Inverter_Make %}{{ qt.Proposal_To.Inverter_Make }}<br><br><br><br><br>
               {% else %}
-              Powerone<br>Growatt<br>Polycab<br>Waaree
+              Powerone/<br>Growatt/<br>Polycab/<br>Sungrow
               {% endif %}
             </td>
             <td class="qty">Suitable for<br>{{qt.Proposal_To.Capacity.Capacity}}KWp</td>
@@ -270,24 +268,29 @@
 
 <h1 style="font-size:20px; margin-top:0px; font-style: italic; color: black;">Details of {{qt.Proposal_To.Capacity.Capacity}}KWP Project Cost</h1>
 
-{% if qt.Subsidy != 0 %}
+
+{% if qt.Type != 'Commercial' %}
 <table border="0" cellspacing="0" cellpadding="0">
   <tbody>
     <tr>
-      <td class="no" style="font-size:17px; background: #0087C3; width: 32%;">Unit Cost</td>
-      <td class="desc" style="font-size:16px; font-weight: bold">₹ {{qt.Unit_Cost|floatformat:2|intcomma}}</td>
+      <td class="no" style="font-size:17px; background: #0087C3; width: 32%;">Tender Cost</td>
+      <td class="desc" style="font-size:16px; font-weight: bold">₹ {{qt.Tender_Cost|floatformat:2|intcomma}}</td>
     </tr>
-        <tr>
-      <td class="no" style="font-size:17px; background: #0087C3;">(+) DD Charges for Power Distribution Dept.</td>
+    <tr>
+      <td class="no" style="font-size:17px; background: #0087C3; width: 32%;">Supplier Add On Price As Per Market</td>
+      <td class="desc" style="font-size:16px; font-weight: bold">₹ {{qt.Supplier_Add_On_Cost|floatformat:2|intcomma}}</td>
+    </tr>
+    <tr>
+      <td class="no" style="font-size:17px; background: #0087C3;">Net Metering (DD)</td>
       <td class="desc" style="font-size:16px;">₹ {{qt.DD1_Charges|floatformat:2|intcomma}}</td>
     </tr>
     <tr>
-      <td class="no" style="font-size:17px; background: #0087C3;">(+) DD Charges for Nodel Agency</td>
+      <td class="no" style="font-size:17px; background: #0087C3;">Application Fee (DD)</td>
       <td class="desc" style="font-size:16px;">₹ {{qt.DD2_Charges|floatformat:2|intcomma}}</td>
     </tr>
     <tr>
-      <td class="no" style="font-size:17px; background: #0087C3;">Heigh Raised Structure 9 Feet</td>
-      <td class="desc" style="font-size:16px;">₹ {{qt.High_Raised_Structure|floatformat:2|intcomma}}</td>
+      <td class="no" style="font-size:17px; background: #0087C3;">Heigh Raised Structure</td>
+      <td class="desc" style="font-size:16px;">{% if qt.High_Raised_Structure %}₹ {{qt.High_Raised_Structure|floatformat:2|intcomma}}{% else %}Not Requested{% endif %}</td>
     </tr>
     <tr>
       <td class="no" style="font-size:17px; background: #0087C3;">Total Cost</td>
@@ -312,24 +315,36 @@
 <table border="0" cellspacing="0" cellpadding="0">
   <tbody>
     <tr>
-      <td class="no" style="font-size:17px; background: #0087C3; width: 32%;">Unit Cost</td>
-      <td class="desc" style="font-size:16px; font-weight: bold">₹ {{qt.Unit_Cost|floatformat:2|intcomma}}</td>
-    </tr>
-        <tr>
-      <td class="no" style="font-size:17px; background: #0087C3;">(+) DD Charges for Power Distribution Dept. TSSPDCL</td>
-      <td class="desc" style="font-size:16px;">₹ {{qt.DD1_Charges|floatformat:2|intcomma}}</td>
+      <td class="no" style="font-size:17px; background: #0087C3; width: 32%;">Tender Cost</td>
+      <td class="desc" style="font-size:16px; font-weight: bold">₹ {{qt.Tender_Cost|floatformat:2|intcomma}}</td>
     </tr>
     <tr>
-      <td class="no" style="font-size:17px; background: #0087C3;">Heigh Raised Structure 10 Feet</td>
-      <td class="desc" style="font-size:16px;">₹ {{qt.High_Raised_Structure|floatformat:2|intcomma}}</td>
+      <td class="no" style="font-size:17px; background: #0087C3; width: 32%;">Supplier Add On Price As Per Market</td>
+      <td class="desc" style="font-size:16px; font-weight: bold">₹ {{qt.Supplier_Add_On_Cost|floatformat:2|intcomma}}</td>
+    </tr>
+    <tr>
+      <td class="no" style="font-size:17px; background: #0087C3;">Application Fee (DD)</td>
+      <td class="desc" style="font-size:16px;">₹ {{qt.DD2_Charges|floatformat:2|intcomma}}</td>
+    </tr>
+    <!-- <tr>
+      <td class="no" style="font-size:17px; background: #0087C3;">Net Metering (DD)</td>
+      <td class="desc" style="font-size:16px;">Exclusive</td>
+    </tr> -->
+    <tr>
+      <td class="no" style="font-size:17px; background: #0087C3;">Heigh Raised Structure</td>
+      <td class="desc" style="font-size:16px;">{% if qt.High_Raised_Structure %}₹ {{qt.High_Raised_Structure|floatformat:2|intcomma}}{% else %}Not Requested{% endif %}</td>
     </tr>
     <tr>
       <td class="no" style="font-size:17px; background: #0087C3;">Total Cost</td>
-      <td class="desc" style="font-size:16px;">₹ {{tcost|floatformat:2|intcomma}}</td>
+      <td class="desc" style="font-size:16px;">₹ {{tcost|floatformat:2|intcomma}} Exclusive GST</td>
+    </tr>
+    <tr>
+      <td class="no" style="font-size:17px; background: #0087C3;">GST 12%</td>
+      <td class="desc" style="font-size:16px;">₹ {{gst|floatformat:2|intcomma}}</td>
     </tr>
     <tr>
       <td class="no" style="font-size:17px; font-weight: bold; background: #0087C3;">Project Cost to Client</td>
-      <td class="desc" style="font-size:16px; font-weight: bold;">₹ {{fcost|floatformat:2|intcomma}}</td>
+      <td class="desc" style="font-size:16px; font-weight: bold;">₹ {{fcost|floatformat:2|intcomma}} Inclusive GST</td>
     </tr>
     <tr>
       <td class="no" style="font-size:17px; background: #0087C3;">IN WORDS</td>
@@ -360,7 +375,9 @@
     <tr>
       <td class="no" style="font-size:17px; background: #0087C3;">Solar Plant Monthly Generation</td>
       <td class="desc" style="font-size:16px;">{{ qt.Proposal_To.Capacity.Capacity | mul:120 |floatformat:0}} Units @Minimum Avg. 4 Units/Per Day Generation <br>
-      {{qt.Proposal_To.Capacity.Capacity}}KWP x 4Units x 30Days = {{ qt.Proposal_To.Capacity.Capacity | mul:120 |floatformat:0}} Units</td>
+      {{qt.Proposal_To.Capacity.Capacity}}KWP x 4Units x 30Days = {{ qt.Proposal_To.Capacity.Capacity | mul:120 |floatformat:0}} Units <br>
+      <span style="font-weight:bold;">Condition:</span> Panels Should Be Clean With Water Every 15 Days and Shadow Free Area Should Maintain
+      </td>
     </tr>
     <tr>
       <td class="no" style="font-size:17px; background: #0087C3;">Savings of Project Life</td>
@@ -372,19 +389,21 @@
     </tr>
     <tr>
       <td class="no" style="font-size:17px; background: #0087C3;">Area Required</td>
-      <td class="desc" style="font-size:16px;">{{ qt.Proposal_To.Capacity.Capacity | mul:100 | sub:20 |floatformat:0|intcomma}} SFT</td>
+      <td class="desc" style="font-size:16px;">{{ qt.Proposal_To.Capacity.Capacity | mul:100 | sub:20 |floatformat:0|intcomma}} SFT Shadow Free</td>
     </tr>
   </tbody>
 </table>
 
-<br><br>
-{% if qt.Subsidy == 0 %}
-  <br><br><br><br><br><br>
-  {% endif %}
+
+{% if qt.Type == 'Commercial' %}
+  <br>
+{% endif %}
 <header></header>
   <div style="text-align:center; font-size:16px; margin-top: -10px;"><i class="mdi mdi-search-web"></i><a href="http://sreesaielectronics.com/" target="_blank">&nbsp;{{qt.From_Company.Website}}</a>&nbsp;&nbsp;
     <i class="mdi mdi-email-outline"></i><a href="mailto:sreesaielectronics@gmail.com">&nbsp;{{qt.From_Company.Email}}</a>&nbsp;&nbsp;<i class="mdi mdi-phone"></i>&nbsp;{{qt.From_Company.Phone_Number_1}}{% if qt.From_Company.Phone_Number_2 %}, {{qt.From_Company.Phone_Number_2}}{% else %}&emsp;&emsp;&emsp;{% endif %} &emsp;  Page 4/5
   </div>
+
+
 
 <!-- 4th Page -->
 <br><br><br>
@@ -441,18 +460,25 @@
 <table border="0" cellspacing="0" cellpadding="0">
   <tbody>
     <tr>
+      <td class="no" style="font-size:17px; background: #09788f; width:20%">Bank Account Details</td>
+      <td class="desc" style="font-size:16px;">
+        Name: Sree Sai Electronics<br>
+        Account Number: 36976801119<br>
+        Bank: SBI Bank, Moulali Branch<br>
+        IFSC Code: SBIN0020096
+      </td>
       <td class="no" style="font-size:17px; background: green; width:20%">Contact Person Details</td>
       <td class="desc" style="font-size:16px;">
-        T. SHYAM PRASAD<br>
-        SM & TECHNICAL<br>
-        <i class="mdi mdi-phone"></i>&nbsp;+91 9347920454
+        {% if user.Name %}{{user.Name}}{% endif %}<br>
+        {% if user.Designation %}{{user.Designation}}{% endif %}<br>
+        <i class="mdi mdi-phone"></i>&nbsp;+91 {% if user.Phone_Number %}{{user.Phone_Number}}{% endif %}
       </td>
     </tr>
   </tbody>
 </table>
 
 <br>
-<div style="text-align: center; color:#09788f; font-size: 25px; font-weight: bold;">Thank You</div>
+<div style="text-align: center; color:#09788f; font-size: 18px; font-weight: bold;">Thank You</div>
 <header></header>
   <div style="text-align:center; font-size:16px; margin-top: -10px;"><i class="mdi mdi-search-web"></i><a href="http://sreesaielectronics.com/" target="_blank">&nbsp;{{qt.From_Company.Website}}</a>&nbsp;&nbsp;
     <i class="mdi mdi-email-outline"></i><a href="mailto:sreesaielectronics@gmail.com">&nbsp;{{qt.From_Company.Email}}</a>&nbsp;&nbsp;<i class="mdi mdi-phone"></i>&nbsp;{{qt.From_Company.Phone_Number_1}}{% if qt.From_Company.Phone_Number_2 %}, {{qt.From_Company.Phone_Number_2}}{% else %}&emsp;&emsp;&emsp;{% endif %} &emsp;  Page 5/5
@@ -486,7 +512,6 @@
         })
 }
     </script>
-
 
   
   </body>

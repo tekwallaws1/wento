@@ -74,7 +74,7 @@ class CompanyDetailsForm(forms.ModelForm):
 class PowerCatForm(forms.ModelForm):	
 	class Meta:
 		model = PowerCat
-		exclude = ['Revision_Date', 'Status', 'ds', 'Ref_No']
+		exclude = ['Revision_Date', 'Status', 'ds']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
