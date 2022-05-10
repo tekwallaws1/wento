@@ -10,7 +10,7 @@
   function rid(tid) {getid = tid}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/editusers/delete/'+getid+'/'
+        url = '/{{pdata.pj}}/editusers/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -54,7 +54,7 @@
             <td>{{x.Name}}<br>
                 username: {{x.user.username}}<br>                
                 Created On: {{x.user.date_joined|date:'d M Y'}}<br><br>
-              <a class="mdi mdi-border-color" title="Edit User" href="/editusers/editaccount/{{x.id}}/"></a>&nbsp;&nbsp;
+              <a class="mdi mdi-border-color" title="Edit User" href="/{{pdata.pj}}/editusers/editaccount/{{x.id}}/"></a>&nbsp;&nbsp;
               <a style="cursor:pointer" class="mdi mdi-delete" title="Delete User" data-toggle="modal" data-target="#exampleModal11"  onclick="javascript:rid('{{x.id}}')"></a>
             
             <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -80,12 +80,12 @@
                 </div></td>
   
             {% if x.user.is_active == 0 %}
-             <td><button type="button"  onclick="location.href='/editusers/edit/{{x.id}}/'" class="btn1 btn1-primary">Activate User</button></td>
+             <td><button type="button"  onclick="location.href='/{{pdata.pj}}/editusers/edit/{{x.id}}/'" class="btn1 btn1-primary">Activate User</button></td>
             {% else %}
               <td>{% for p in y %}
                     {{p}}<br>
                   {% endfor %}
-                  <br><button type="button"  onclick="location.href='/editusers/edit/{{x.id}}/'" class="btn1 btn1-primary">Edit Permissions</button></td>
+                  <br><button type="button"  onclick="location.href='/{{pdata.pj}}/editusers/edit/{{x.id}}/'" class="btn1 btn1-primary">Edit Permissions</button></td>
             {% endif %}
 
             <td>{% if x.Designation %}{{x.Designation}}<br>{% endif %}

@@ -12,7 +12,14 @@
               {% csrf_token %}
               <div class="form-group">
                 {% for field in form %}
-                  {% if field.label != 'Status' %}
+                  {% if field.label == 'Cost To Client' %}
+                  <label for="{{ field.label }}">{{ field.label }} (Excluding Extra Structure [If Commercial Excuding GST Also] )</label>{{ field}} 
+                  {% endif %}
+                {% endfor %}  
+              </div>
+              <div class="form-group">
+                {% for field in form %}
+                  {% if field.label != 'Status' and field.label != 'Cost To Client' %}
                   <label for="{{ field.label }}">{{ field.label }}</label>{{ field}} 
                   {% endif %}
                 {% endfor %}  

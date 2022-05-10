@@ -26,8 +26,8 @@ SECRET_KEY = 'c_t1jqgyw#$o2a8)yk*lqoj7zlp1)#hvk_$^(0d@3&@29zvcn^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['sseproman.com', 'www.sseproman.com', '165.232.183.104']
+ALLOWED_HOSTS = ['*']
+#ALLOWED_HOSTS = ['sseproman.com', 'www.sseproman.com', '165.232.183.104']
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'UserAccounts',
     'Projects',
     'Proposals',
+    'Orders',
     # 'rooftop',
     'import_export',
     'mathfilters',
@@ -111,18 +112,18 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': str(BASE_DIR / 'db.sqlite3'),
     }
-# }
-
-DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-         'NAME': 'ssedb',
-         'USER': 'ssedbuser',
-         'PASSWORD': 'Tekwall1@3',
-         'HOST': 'localhost',
-         'PORT': '',
-     }
  }
+
+# DATABASES = {
+#      'default': {
+#          'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#          'NAME': 'ssedb',
+#          'USER': 'ssedbuser',
+#          'PASSWORD': 'Tekwall1@3',
+#          'HOST': 'localhost',
+#          'PORT': '',
+#      }
+#  }
 
 
 # Password validation
@@ -165,8 +166,8 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 STATIC_URL = '/static/'
-#STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'

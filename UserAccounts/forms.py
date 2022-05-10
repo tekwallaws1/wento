@@ -7,13 +7,12 @@ class SignUpForm(UserCreationForm):
     # first_name      = forms.CharField(max_length=20, required=True, help_text='First Name')
     # last_name       = forms.CharField(max_length=20, required=False, help_text='Last Name')
     email = forms.EmailField(max_length=254, required=False, widget=forms.TextInput(attrs={'placeholder': 'Ener a Vaild Email Address'}))
+    username = forms.CharField(max_length=20, required=True, widget=forms.TextInput(attrs={'placeholder': 'Required Username'}))
 
     class Meta:
         model = User
         fields = ('username', 'email', 'password1', 'password2')
-        help_texts = {
-                'email': ('enter valid email address'),
-        }
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

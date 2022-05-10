@@ -33,45 +33,89 @@ flex-wrap: wrap;
     border-radius: 0px;
 }
     </style>
-
+ 
 </head>
 <body class="override bimg">
+  <div class="container ">
     
-   
-    <div class="container ">
-  <div class="row justify-content-center">
-  <div class="col-md-6 grid-margin stretch-card">
-    <div class="card" style="">
-      <div class="card-body">
-        <div style="float:right;">
-        <div id="logo">
-        <img style=" height:60px; width:70px" src="{% static 'img/sss-logo.png' %}">
-      </div>
-    </div>
-            <h4 style="color: #09788f; font-size: 20px; font-weight: bold; margin-bottom: 0px;">SREE SAI ELECTRONICS</h4>
-            <div><i class="mdi mdi-search-web"></i><a href="http://sreesaielectronics.com/" target="_blank">&nbsp;www.sreesaielectronics.com</a></div>
-            <div><i class="mdi mdi-phone"></i>&nbsp;9440210773</div>
-
-      <br>
-        <h4 class="card-title d-inline-block">Customer Requirement Form</h4>
-        <div style="color: red; font-style: italic; font-size: 13px;">** Fields are Mandatory</div>
-        <br>
-          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
-            <div class="form-group mb-4">
-              {% csrf_token %}
-              <div class="form-group">
-                {% for field in form %}
-                  <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
-                {% endfor %}  
+    <div class="row justify-content-center">
+      <div class="col-md-6 grid-margin stretch-card">
+        <div class="card" style="border-radius: 0px 0px 10px 10px; margin-bottom: -20px;">
+          <div class="card-body">
+            <div style="float:right;">
+              <div id="logo">
+                <img style=" height:60px; width:70px" src="{% static 'img/sss-logo.png' %}">
               </div>
             </div>
-          <button type="submit" class="btn1 btn1-primary">Request Quote</button>
-        </form>
+              <h4 style="color: #09788f; font-size: 20px; font-weight: bold; margin-bottom: 0px;">SREE SAI ELECTRONICS</h4>
+              <div><i class="mdi mdi-search-web"></i><a href="http://sreesaielectronics.com/" target="_blank">&nbsp;www.sreesaielectronics.com</a></div>
+              <br>
+              <div><i class="mdi mdi-whatsapp"></i><a href="https://wa.me/919347920454?text=Hello Sree Sai Solar! Here is an equiry!!"><span class="flash">&nbsp;Chat With Us</span></a></div>
+              <br>
+              <div><i class="mdi mdi-phone"></i><a href='tel:9440210773'><span class="flash">&nbsp;9440210773</span></a></div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <div class="row justify-content-center">
+      <div class="col-md-6 grid-margin stretch-card">
+        <div class="card" style="border-radius: 15px;">
+          <div class="card-body">
+          
+            <h4 class="card-title d-inline-block">Request Quote</h4>
+              <div style="color: red; font-style: italic; font-size: 13px;">** Fields are Mandatory</div>
+              <br>
+                <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+                  <div class="form-group mb-4">
+                    {% csrf_token %}
+                    <div class="form-group">
+                      {% for field in form %}
+                        {% if field.label != 'Type' and field.label != 'Capacity' and field.label != 'Address Line 1' and field.label != 'Address Line 2' and field.label != 'State' and field.label != 'Email' and field.label != 'Solar Panels Make' and field.label != 'Inverter Make' and field.label != 'Message' %}
+                        <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                        {% endif %}
+                      {% endfor %}  
+                    </div>
+
+                    <button  onclick="$('#hiddenSpan').toggle();" type="button" class="btn1 btn1-info col text-center">If have patience, Click here! to address more</button>
+                    <br><br>
+                    <div class="form-group" id='hiddenSpan' style="display:none">
+                      {% for field in form %}
+                        {% if field.label == 'Capacity' or field.label == 'Address Line 1' or field.label == 'Address Line 2' or field.label == 'State' or field.label == 'Email' or field.label == 'Solar Panels Make' or field.label == 'Inverter Make' or field.label == 'Message' %}
+                        <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                        {% endif %}
+                      {% endfor %}  
+                    </div>
+
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input type="radio" class="form-check-input" name="Type" id="Type" value="Residential" checked>Residential</label>
+                    </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input type="radio" class="form-check-input" name="Type" id="Type" value="Commercial">Commercial</label>
+                    </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input type="radio" class="form-check-input" name="Type" id="Type" value="Industrial">Industrial</label>
+                    </div>
+                  </div>
+                  
+                    <button type="submit" class="btn btn-primary">Get Quote</button>
+                </form>
+          </div>
+        </div>
+      </div>
+    </div> 
   </div>
-</div> 
-    </div>
-  
+
+  <script src="{% static 'js/vendor.bundle.base.js' %}"></script>
+  <script src="{% static 'js/misc.js' %}"></script>
+
+  <script type="text/javascript">
+  $(document).ready(function(){setInterval(function(){
+    $('.flash').toggleClass('active');
+  }, 500);});
+  </script>
 </body>
 </html>

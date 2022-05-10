@@ -17,7 +17,7 @@
     <!-- <link rel="stylesheet" href="{% static 'css/apexcharts.css' %}" rel="stylesheet" > -->
     {% block css %}{% endblock %}
 
-  </head>
+  </head> 
   <body class="sidebar-icon-only">
     <div class="container-scroller">
       <!-- partial:partials/_navbar.html -->
@@ -163,28 +163,13 @@
               </a>
               <div class="collapse" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'propdb' %}">Dashboard</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'prop' %}">Proposals</a></li>
-                  <!-- <li class="nav-item"> <a class="nav-link" href="{% url 'pform' %}">Request Form</a></li> -->
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcapacity' %}">Power Categories</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcosting' %}">Costing Details</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/proposalsdashboard/">Dashboard</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/proposalslist/">Proposals</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcapacity/">Power Categories</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcosting/">Costing Details</a></li>
                 </ul>
               </div>
             </li>
-            <!-- <li class="nav-item">
-              <a class="nav-link" data-toggle="collapse" href="#ui-basic1" aria-expanded="false" aria-controls="ui-basic1">
-                <span class="menu-title">Master Data</span>
-                <i class="menu-arrow"></i>
-                <i class="mdi mdi mdi-book-open-page-variant menu-icon"></i>
-              </a>
-              <div class="collapse" id="ui-basic1">
-                <ul class="nav flex-column sub-menu">
-                  <li class="nav-item "> <a class="nav-link" href="{% url 'mdata' 'addcompany' %}">Reg. Offices</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcapacity' %}">Power Categories</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcosting' %}">Costing</a></li>
-                </ul>
-              </div>
-            </li> -->
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basic2" aria-expanded="false" aria-controls="ui-basic2">
@@ -195,7 +180,7 @@
               </a>
               <div class="collapse" id="ui-basic2">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="#">Work Orders</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pj}}/orderslist/">Orders List</a></li>
                   <li class="nav-item"> <a class="nav-link" href="#">Create Work Order</a></li>
                 </ul>
               </div>
@@ -225,9 +210,9 @@
               </a>
               <div class="collapse" id="ui-basiccontact">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="#">Vendor Contacts</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="#">Customer Contacts</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'mdata' 'addcompany' %}">My Reg. Offices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/customerslist/">Customers List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/vendorslist/">Vendors List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcompany/">My Reg. Offices</a></li>
                 </ul>
               </div>
             </li>
@@ -240,7 +225,7 @@
               </a>
               <div class="collapse" id="ui-basicusers">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'users' %}">Manage Users</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/userslist/">Manage Users</a></li>
                   <li class="nav-item"> <a class="nav-link" href="{% url 'signup' %}">Signup New User</a></li>
                   <li class="nav-item"> <a class="nav-link" href="{% url 'logout' %}">Signin User</a></li>
                 </ul>
@@ -293,6 +278,8 @@
   {% endfor %}
 {% endif %} 
           <!-- MAIN CONTENT BEGIN -->
+                    <h5>{{pj}}</h5>
+
           {% block content %}
           {% endblock %}
           <!-- MAIN CONTENT BEGIN -->

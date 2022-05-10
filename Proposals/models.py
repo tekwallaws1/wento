@@ -55,8 +55,9 @@ class Costing(models.Model):
  
 class Proposal(models.Model):
 	Name					= models.CharField(max_length=40, null=True, help_text='Name of The Customer')
-	Phone_Number 			= models.CharField(max_length=10, blank=True, null=True, help_text='10 Digit Main Phone Number')
-	Capacity 				= models.ForeignKey(PowerCat, on_delete=models.CASCADE, null=True, help_text='Choose Your Required Capacity in KW')
+	Phone_Number 			= models.CharField(max_length=10, null=True, help_text='10 Digit Main Phone Number')
+	Capacity 				= models.ForeignKey(PowerCat, on_delete=models.CASCADE, blank=True, null=True, help_text='Choose Your Required Capacity in KW')
+	Power_Bill				= models.CharField(max_length=30, null=True, blank=True, choices=(('Less than 1000', 'Less than 1000'), ('1000 to 3000', '1000 to 3000'), ('3000 to 6000', '3000 to 6000'), ('Above 6000', 'Above 6000')))
 
 	Address_Line_1			= models.CharField(blank=True, max_length=40, null=True, help_text='Address Line 1')
 	Address_Line_2			= models.CharField(blank=True, max_length=40, null=True, help_text='Address Line 2')
@@ -65,13 +66,14 @@ class Proposal(models.Model):
 	
 	Solar_Panels_Make		= models.CharField(blank=True, max_length=40, null=True, help_text='Specify if You Need any Specific Make')
 	Inverter_Make			= models.CharField(blank=True, max_length=40, null=True, help_text='Specify if You Need any Specific Make')
+	Inverter_Capacity 		= models.IntegerField(null=True, blank=True, help_text='Capacity in KW such as 1, 2, 3, 5, 7 KW')
 	Message					= models.TextField(max_length=500, blank=True, null=True, help_text='Message If Anything Specific To Discuss or Request')
 	
 	Proposal_No_1			= models.IntegerField(null=True, blank=True, unique=True) #Automatically Generated Only Number
 	Proposal_No				= models.CharField(max_length=30, null=True, blank=True, unique=True) #Automatically Generated Total Proposal No
 	Date					= models.DateTimeField(null=True, blank=True) #Automatically Generated
 	Is_Gen 					= models.BooleanField(default = False) #backend if quote generated hide generate button
-	Type 					= models.CharField(blank=True, max_length=40, null=True, choices=(('Residential', 'Residential'), ('Commercial', 'Commercial')), help_text='Choose Wether it Resedential or Commercial')
+	Type 					= models.CharField(blank=True, max_length=40, null=True, choices=(('Residential', 'Residential'), ('Commercial', 'Commercial'), ('Industrial', 'Industrial')), help_text='Choose Wether it Resedential or Commercial')
 
 	def __str__(self):
 		return str(self.Name)+'-'+str(self.Phone_Number)+'-'+str(self.Capacity)

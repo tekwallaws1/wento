@@ -4,7 +4,7 @@ from .models import *
 class ProposalForm(forms.ModelForm):	
 	class Meta:
 		model = Proposal
-		exclude = ['Date', 'Proposal_No', 'Proposal_No_1', 'Is_Gen']
+		exclude = ['Date', 'Proposal_No', 'Proposal_No_1', 'Is_Gen', 'Power_Bill']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -16,7 +16,7 @@ class ProposalForm(forms.ModelForm):
 	        })
 
 class ProposalEditForm(forms.ModelForm):	
-	class Meta:
+	class Meta: 
 		model = Proposal
 		exclude = ['Proposal_No_1', 'Is_Gen']
 
@@ -32,7 +32,7 @@ class ProposalEditForm(forms.ModelForm):
 class Proposal1Form(forms.ModelForm):	#For Customer
 	class Meta:
 		model = Proposal
-		exclude = ['Date', 'Proposal_No', 'Proposal_No_1', 'Is_Gen', 'Type', 'Solar_Panels_Make', 'Inverter_Make', 'Email']
+		exclude = ['Date', 'Proposal_No', 'Proposal_No_1', 'Is_Gen', 'Inverter_Capacity']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -46,7 +46,7 @@ class Proposal1Form(forms.ModelForm):	#For Customer
 class QuoteForm(forms.ModelForm):	
 	class Meta:
 		model = Quote
-		exclude = ['Date', 'Proposal_No', 'Proposal_No_1', 'Rivision', 'Account', 'Cost_To_Client', 'Type', 'GST_Amount']
+		exclude = ['Date', 'Proposal_No', 'Proposal_No_1', 'Rivision', 'Account', 'From_Company', 'Proposal_To', 'Supplier_Add_On_Cost', 'Tender_Cost', 'Type', 'GST_Amount']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -74,7 +74,7 @@ class CompanyDetailsForm(forms.ModelForm):
 class PowerCatForm(forms.ModelForm):	
 	class Meta:
 		model = PowerCat
-		exclude = ['Revision_Date', 'Status', 'ds']
+		exclude = ['Revision_Date', 'Status', 'ds', 'Ref_No']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

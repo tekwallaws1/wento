@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %} 
+{% load static %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -14,11 +14,36 @@
               {% csrf_token %}
               <div class="form-group">
                 {% for field in form %}
+                  {% if field.label != 'Type' and field.label != 'Address Line 1' and field.label != 'Address Line 2' and field.label != 'State' and field.label != 'Email' and field.label != 'Solar Panels Make' and field.label != 'Inverter Make' and field.label != 'Message' and field.label != 'Inverter Capacity' %}
                   <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                  {% endif %}
                 {% endfor %}  
               </div>
+
+              <button  onclick="$('#hiddenSpan').toggle();" type="button" class="btn1 btn1-info col text-center">If have patience, Click here! to address more</button>
+              <br><br>
+              <div class="form-group" id='hiddenSpan' style="display:none">
+                {% for field in form %}
+                  {% if field.label == 'Inverter Capacity' or field.label == 'Address Line 1' or field.label == 'Address Line 2' or field.label == 'State' or field.label == 'Email' or field.label == 'Solar Panels Make' or field.label == 'Inverter Make' or field.label == 'Message' %}
+                  <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                  {% endif %}
+                {% endfor %}  
+              </div>
+
+              <div class="form-check">
+                <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="Type" id="Type" value="Residential" checked>Residential</label>
+              </div>
+              <div class="form-check">
+                <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="Type" id="Type" value="Commercial">Commercial</label>
+              </div>
+              <div class="form-check">
+                <label class="form-check-label">
+                  <input type="radio" class="form-check-input" name="Type" id="Type" value="Industrial">Industrial</label>
+              </div>
             </div>
-          <button type="submit" class="btn1 btn1-primary">Update/Create Proposal</button>
+          <button type="submit" class="btn btn-primary">Update/Create Proposal</button>
         </form>
       </div>
     </div>

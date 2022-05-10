@@ -13,3 +13,11 @@ def get_financial_year(datestring):
 	else:
 	        # return 'April, '+ str(financial_year_start_date.year)+' to March, '+ str(financial_year_start_date.year+1)
 	        return (str(financial_year_start_date.year))[-2:]+'-'+(str(financial_year_start_date.year+1))[-2:]
+
+
+def get_fy_date():
+	date = datetime.strptime(date.today(), "%Y-%m-%d").date()
+	#initialize the current year
+	year_of_date=date.year
+	financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()
+	return financial_year_start_date

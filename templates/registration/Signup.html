@@ -21,9 +21,18 @@
                 </div>
 
 
-                {% if form.errors %}
-                  <p style="color: red">Your username and password didn't match. Please try again.</p>
-                {% endif %}
+                <!-- {% if form1.errors %}
+                  <div id="errors">
+                    <div class="inner">
+                      <p>There were some errors in the information you entered. Please correct the following:</p>
+                      <ul>
+                        {% for field in form1 %}
+                          {% if field.errors %}<li>{{ field.label }}: {{ field.errors|striptags }}</li>{% endif %}
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  </div>
+                {% endif %} -->
 
                 {% if next %}
                   {% if user.is_authenticated %}
@@ -42,18 +51,21 @@
                       {% csrf_token %}
                       <div class="form-group">
                         {% for field in form1 %}
-                          <div><label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                          <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
                             {% if field.label == 'Password' %}
                               <small style="color: grey;">{{ field.help_text }}</small>
                             {% endif %}
                             {% for error in field.errors %}
-                              <p style="color: red">{{ error }}</p>
-                            {% endfor %}</div>
+                              <p style="color: red; margin-top: -20px">{{ error }}</p>
+                            {% endfor %}
                         {% endfor %}  
                       </div>
                       <div class="form-group">
                         {% for field in form2 %}
-                          <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                          <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                          {% for error in field.errors %}
+                            <p style="color: red; margin-top: -20px">{{ error }}</p>
+                          {% endfor %} 
                         {% endfor %}  
                       </div>
                     </div>
