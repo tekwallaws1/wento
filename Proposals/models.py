@@ -37,7 +37,7 @@ class PowerCat(models.Model):
 	def __str__(self):
 		return str(self.Capacity)+'KWp'+'-'+str(self.Phase_Configuration)+'-'+str(self.Panel_Capacity)+'Wp'+'-'+str(self.Module_Type)+'-'+str(self.Cells_Type)
 
-class Costing(models.Model):
+class Costing(models.Model): 
 	Capacity 				= models.ForeignKey(PowerCat, unique=True, on_delete=models.CASCADE, null=True)
 	Nodel_Agency			= models.CharField(max_length=30, null=True, choices=(('TSREDCO', 'TSREDCO'), ('NREDCAP', 'NREDCAP'), ('CREDA', 'CREDA')))
 	Tender_Cost	 			= models.FloatField(max_length=10, null=True, help_text='Tender Cost As Per Govt. in INR')
@@ -46,6 +46,7 @@ class Costing(models.Model):
 	DD2_Charges 			= models.FloatField(max_length=7, null=True, help_text='DD Against Nodel Agency Ex: TSREDCO, NREDCAP..')
 	High_Raised_Structure	= models.FloatField(max_length=7, null=True, help_text='Cost of High Raised Structure Extra')
 	Subsidy					= models.FloatField(max_length=7, null=True, help_text='Subsidy Amount Provided By Govt.')
+	Cables					= models.FloatField(default=0, max_length=7, null=True, blank=True, help_text='Cable Charges')
 	Ref_No					= models.CharField(max_length=30, null=True, blank=True) #Automatically Generated
 	Revision_Date			= models.DateField(null=True, blank=True) #Automatically Generated
 	ds						= models.BooleanField(default=True)
@@ -90,10 +91,13 @@ class Quote(models.Model):
 	DD2_Charges 			= models.FloatField(max_length=7, null=True, help_text='DD Against Nodel Agency Ex: TSSPDCL, APSPDCL..')
 	High_Raised_Structure	= models.FloatField(max_length=7, null=True, help_text='Cost of High Raised Structure Extra')
 	Subsidy					= models.FloatField(max_length=7, null=True, help_text='Subsidy Part')
+	Cables					= models.FloatField(default=0, max_length=7, null=True, blank=True, help_text='Cable Charges')
+
 	Type 					= models.CharField(blank=True, max_length=40, null=True, help_text='Choose Wether it Resedential or Commercial')
 	GST_Amount 				= models.FloatField(max_length=5, null=True, blank=True, help_text='Add GST % if it is commercial, such as 12, 18, 28 etc') #Automatically Generated
 	Cost_To_Client	 		= models.FloatField(max_length=10, null=True, blank=True, help_text='Cost to Client')
-	
+	# Additional_Cost			= models.CharField(blank=True, max_length=40, null=True, help_text='Example: ₹ 15,000 **Some Transport Cost Included')
+
 	Date					= models.DateTimeField(null=True, blank=True) #Automatically Generated
 	Status 					= models.BooleanField(default = False, help_text='Tick if Order Confirmed and Received PO')
 	Rivision				= models.IntegerField(null=True, blank=True) #Automatically Generated Only Number

@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import View
 from django.http import HttpResponse, JsonResponse
 from .models import *
+from Orders.models import Orders
+from Projects.models import *
 from .forms import *
 from .filters import *
 from Projects.fyear import get_financial_year
@@ -16,7 +18,7 @@ from django.utils.decorators import method_decorator
 from django.contrib import messages
 from django.db.models import Q
 import random 
-from django.urls import reverse  
+from django.urls import reverse   
 import os
 from django.conf import settings
 from django.template.loader import get_template
@@ -94,7 +96,7 @@ def Proposal_Form1(request):
 			form = Proposal1Form(request.POST)
 		if form.is_valid():
 			p = form.save()
-			fdata = Proposal.objects.get(id=p.id)
+			fdata = Proposal.objects.get(id=p.id) 
 			fdata.Date = datetime.now()
 			if fdata.Capacity == None:
 				if fdata.Power_Bill == 'Less than 1000':
@@ -191,20 +193,68 @@ def Proposals(request, proj):
 	table = Proposal.objects.all().order_by('Is_Gen').order_by('-id')
 	filter_data = ProposalFilter(request.GET, queryset=table)
 	table = filter_data.qs
-	price = []
-	user = []
+	price, user, is_order, pending, pc = [], [], [], 0, 0
 	for x in table:
 		try:
 			qt = Quote.objects.get(Proposal_No_1=x.Proposal_No_1)
+			if qt.Type != 'Residential':
+				qt.Subsidy = 0
+				cables = qt.Cables
+			else:
+				cables = 0
 			fcost = int(qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure-qt.Subsidy)
+			if qt.Type != 'Residential':
+				fcost = int(fcost + (fcost*0.12))
 			usr = qt.Account
+
+			if qt.Status == 1:
+				is_order.append(1)
+			else:
+				is_order.append(0)
+				pending = fcost + pending
+				pc = pc+1
+
 		except Quote.DoesNotExist:
 			fcost = 'None' #Not yet generated
 			usr = None
+			is_order.append(0)
 		price.append(fcost)
 		user.append(usr)
-	data = zip(table, price, user)
-	return render(request, 'proposals/Proposals.html', {'data':data, 'filter_data':filter_data, 'pdata':pdata})
+
+	
+	data = zip(table, price, user, is_order)
+	return render(request, 'proposals/Proposals.html', {'data':data, 'filter_data':filter_data, 'pdata':pdata, 'pending':pending, 'pc':pc})
+
+@login_required
+def Proposal_To_Order(request, proj, var):
+	pdata = projectname(request, proj)
+	p = Quote.objects.get(Proposal_No_1=var)
+	if p.Status != 1:
+		# create customer details
+		c_cust = CustDt.objects.create(Customer_Name=p.Proposal_To.Name, Short_Name=p.Proposal_To.Name[0:14], Address_Line_1=p.Proposal_To.Address_Line_1, Address_Line_2=p.Proposal_To.Address_Line_2, 
+			State=p.Proposal_To.State, Phone_Number_1=p.Proposal_To.Phone_Number, Email=p.Proposal_To.Email, Related_Project=pdata['pj'])
+		# create customer contact details
+		c_custcont = CustContDt.objects.create(Customer_Name=c_cust, Contact_Person=c_cust.Customer_Name, 
+			Phone_Number_1=c_cust.Phone_Number_1, Email=c_cust.Email)
+		
+		t1 = int(p.Tender_Cost+p.Supplier_Add_On_Cost+p.DD1_Charges+p.DD2_Charges+p.High_Raised_Structure)
+
+		if p.Type != 'Residential':
+			gst = (t1 + p.Cables)*0.12
+		else:
+			gst, p.Cables = 0, 0
+		tf = t1 + gst + p.Cables
+		
+		create_order = Orders.objects.create(user=p.Account, Related_Project=pdata['pj'], Customer_Name=c_cust, Order_No=p.Proposal_To.Proposal_No, Order_Details=str(p.Proposal_To.Capacity), Order_Value=tf, 
+			Order_Type='Confirmed', Order_Received_Date=datetime.now(), Order_Reference_Person=c_custcont, Order_Through='By Phone')
+		messages.success(request, "Selected Proposal Has Been Converted as Order, Please Click on Edit Order If You Want To Edit Order Details")
+		p.Status = 1
+		p.save()
+		return redirect('/%s/orderslist/Inprogress/'%pdata['pj'])
+	else:
+		messages.error(request, "Proposal already converted as order, if you wnat to modify/edit, go to orders and edit/modify.      Or Create duplicate proposal and convert as order")
+		return redirect('/%s/proposalslist/'%pdata['pj'])
+
 
 @login_required
 def Gen_Quote(request, proj, fnc, var):
@@ -223,34 +273,33 @@ def Gen_Quote(request, proj, fnc, var):
 		if cm:
 			pass
 		else:
-			return HttpResponse('First Register Communication Company Address Under Specified State or Any State Based on Customer Request')
-
+			messages.error(request, "First Register Communication Company Address Under Specified State or Any State Based on Customer Request")
+			return redirect('/%s/proposalslist/'%pdata['pj'])
 		# Get Costing Data Filter by Customer Requirement
 		try:
 			cost = Costing.objects.get(Capacity=pl.Capacity)
 		except Costing.DoesNotExist:
 			cost = Costing.objects.filter(Capacity=pl.Capacity.Capacity).last()
 			if not cost:
-				return HttpResponse('Costing Details For Customer Requested Model Capacity Has Not Been Generated')
+				messages.error(request, "Costing Details For Customer Requested Model Capacity Has Not Been Generated, Go to costing and add costing details for the product")
+				return redirect('/%s/proposalslist/'%pdata['pj'])
 		
 		if pl.Type == 'Commercial' or pl.Type == 'Industrial':
-			gst = int((cost.Tender_Cost+cost.Supplier_Add_On_Cost+cost.DD2_Charges+cost.High_Raised_Structure)*0.12)
-			cost.DD1_Charges = 0
-			cost.Subsidy = 0
+			gst = int((cost.Tender_Cost+cost.Supplier_Add_On_Cost+cost.DD1_Charges+cost.DD2_Charges+cost.High_Raised_Structure+cost.Cables)*0.12)
 		else:
 			gst = 0
 
-		fcost = int(cost.Tender_Cost+cost.Supplier_Add_On_Cost+cost.DD1_Charges+cost.DD2_Charges+cost.High_Raised_Structure+gst)
-		cl_cost = int(cost.Tender_Cost+cost.Supplier_Add_On_Cost+cost.DD1_Charges+cost.DD2_Charges-cost.Subsidy)
+		fcost = int(cost.Tender_Cost+cost.Supplier_Add_On_Cost+cost.DD1_Charges+cost.DD2_Charges)
+		cl_cost = int(fcost-cost.Subsidy) #excluding structure and gst (if commercial excluding cables)
 		
 		qt = Quote.objects.create(Account=user, From_Company=cm, Proposal_To=pl, Proposal_No_1=pl.Proposal_No_1, Tender_Cost=cost.Tender_Cost, Supplier_Add_On_Cost=cost.Supplier_Add_On_Cost, DD1_Charges=cost.DD1_Charges, 
-			DD2_Charges=cost.DD2_Charges, High_Raised_Structure=cost.High_Raised_Structure, Subsidy=cost.Subsidy, Cost_To_Client=cl_cost, Date=datetime.now(), GST_Amount=gst, Type=pl.Type, Rivision=1)
+			DD2_Charges=cost.DD2_Charges, High_Raised_Structure=0, Subsidy=cost.Subsidy, Cost_To_Client=cl_cost, Date=datetime.now(), GST_Amount=gst, Type=pl.Type, Rivision=1)
 		# update proposal quote generation
 		pl.Is_Gen = True
 		pl.save()
 
-		tcost = int(qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure)
-		fcost = int(tcost+gst-qt.Subsidy)
+		tcost = int(qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure+qt.Cables) #excluding subsidy and gst
+		fcost = int(tcost+gst-qt.Subsidy) #final quote cost
 		word = num2words(fcost, to='cardinal', lang='en_IN')
 		return render(request, 'proposals/Quote.html', {'qt':qt, 'word':word, 'tcost':tcost, 'fcost':fcost, 'gst':gst, 'user':user, 'pdata':pdata})
 	elif fnc == 'delete':
@@ -266,14 +315,14 @@ def Gen_Quote(request, proj, fnc, var):
 
 	else:
 		qt = Quote.objects.get(Proposal_No_1=var)
-		if qt.Type == 'Commercial' or qt.Type == 'Industrial':
-			gst = int((qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure)*0.12)
+		if qt.Type != 'Residential':
+			gst = int((qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure+qt.Cables)*0.12)
 		else:
 			gst = 0
-		tcost = int(qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure)
+		tcost = int(qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure+qt.Cables)
 		fcost = int(tcost+gst-qt.Subsidy)
 
-		cl_cost = int(qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges-qt.Subsidy)
+		cl_cost = fcost - gst - qt.High_Raised_Structure - qt.Cables
 
 		if qt.Cost_To_Client != cl_cost:
 			diff = qt.Cost_To_Client - cl_cost
@@ -293,8 +342,7 @@ def Quote_Edit(request, proj, var):
 			p = form.save()
 			fdata = Quote.objects.get(id=p.id)
 			if fdata.Type == 'Commercial' or fdata.Type == 'Industrial':
-				gst = int((fdata.Tender_Cost+fdata.Supplier_Add_On_Cost+fdata.DD1_Charges+fdata.DD2_Charges+fdata.High_Raised_Structure)*0.12)
-				fdata.Subsidy = 0
+				gst = int((fdata.Tender_Cost+fdata.Supplier_Add_On_Cost+fdata.DD1_Charges+fdata.DD2_Charges+fdata.High_Raised_Structure+fdata.Cables)*0.12)
 			else:
 				gst = 0
 			fdata.GST_Amount = gst
@@ -305,7 +353,8 @@ def Quote_Edit(request, proj, var):
 				fdata.Supplier_Add_On_Cost = fdata.Supplier_Add_On_Cost + diff
 
 			fdata.Date = datetime.now()
-			fdata.save()
+			l = fdata.save()
+			print(l)
 
 			form = QuoteForm()
 			# messages.success(request, "Selected Quote Details Has Been Updated")
@@ -313,7 +362,8 @@ def Quote_Edit(request, proj, var):
 			# return HttpResponse(url)
 			return redirect(url)
 		else:
-			return HttpResponse('Data You Have Submitted is Not Valid/Sufficient, Please Go Back and Check and Submit Again')
+			messages.error(request, "Data You Have Submitted is Not Valid/Sufficient, Please Go Back and Check and Submit Again")
+			return redirect('/%s/proposalslist/'%pdata['pj'])
 	else:
 		form = QuoteForm(instance=data)
 		return render(request, 'proposals/Quoteedit.html', {'form':form, 'pdata':pdata})
@@ -346,12 +396,12 @@ def Prop_Edit(request, proj, var):
 					return HttpResponse('Costing Details For Customer Requested Model Capacity Has Not Been Generated')
 
 				if pl.Type == 'Commercial' or pl.Type == 'Industrial':
-					gst = int((cost.Tender_Cost+cost.Supplier_Add_On_Cost+cost.DD2_Charges+cost.High_Raised_Structure)*0.12)
+					gst = int((cost.Tender_Cost+cost.Supplier_Add_On_Cost+cost.DD2_Charges+cost.High_Raised_Structure+cost.Cables)*0.12)
 					cost.Subsidy = 0
 				else:
 					gst = 0
 
-				fcost = int(cost.Tender_Cost+cost.Supplier_Add_On_Cost+cost.DD1_Charges+cost.DD2_Charges+cost.High_Raised_Structure+gst+cost.Subsidy)
+				fcost = int(cost.Tender_Cost+cost.Supplier_Add_On_Cost+cost.DD1_Charges+cost.DD2_Charges+cost.High_Raised_Structure+gst+cost.Subsidy+cost.Cables)
 					
 				updt = qt.update(From_Company=cm, Proposal_To=pl, Proposal_No_1=pl.Proposal_No_1, Tender_Cost=cost.Tender_Cost, Supplier_Add_On_Cost=cost.Supplier_Add_On_Cost, DD1_Charges=cost.DD1_Charges,
 					DD2_Charges=cost.DD2_Charges, High_Raised_Structure=cost.High_Raised_Structure, Subsidy=cost.Subsidy, Date=datetime.now(), GST_Amount=gst, Cost_To_Client=fcost, Type=pl.Type, Rivision=1)
@@ -402,14 +452,11 @@ def Prop_Copy(request, proj, var):
 def Gen_Quote1(request, var, var1):
 	pl = Proposal.objects.get(Proposal_No_1=var)
 	qt = Quote.objects.filter(Proposal_No_1=var, Proposal_To__Phone_Number=var1).last()
-	if pl.Type == 'Commercial' or pl.Type == 'Industrial':
-		gst = int((qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD2_Charges+qt.High_Raised_Structure)*0.12)
-		qt.DD1_Charges = 0
-		qt.Subsidy = 0
+	if qt.Type != 'Residential':
+		gst = int((qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure+qt.Cables)*0.12)
 	else:
 		gst = 0
-
-	tcost = int(qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure)
+	tcost = int(qt.Tender_Cost+qt.Supplier_Add_On_Cost+qt.DD1_Charges+qt.DD2_Charges+qt.High_Raised_Structure+qt.Cables)
 	fcost = int(tcost+gst-qt.Subsidy)
 	word = num2words(fcost, to='cardinal', lang='en_IN')
 	return render(request, 'proposals/Quote1.html', {'qt':qt, 'word':word, 'tcost':tcost, 'fcost':fcost, 'gst':gst})
@@ -525,14 +572,12 @@ def Master_Data(request, proj, var):
 		tcost = []
 		fcost = []
 		for x in cost:
-			tc = int(x.Tender_Cost+x.Supplier_Add_On_Cost+x.DD1_Charges+x.DD2_Charges) or 0
+			tc = int(x.Tender_Cost+x.Supplier_Add_On_Cost+x.DD1_Charges+x.DD2_Charges+x.Cables) or 0
 			fc = int(tc-x.Subsidy) or 0
 			tcost.append(tc)
 			fcost.append(fc)
 		table = zip(cost, tcost, fcost)
 	return render(request, 'proposals/MasterData.html', {'table':table, 'var':var, 'pdata':pdata})
-
-
 
 
 

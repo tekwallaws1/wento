@@ -1,0 +1,360 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %} 
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+{% endblock %}  
+
+{% block scripts %} 
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
+  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
+  <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
+  <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script>
+
+<script type="text/javascript">
+
+  // function rid(tid, can_gen_invoice, billed, ordervalue) {getid = tid;
+  //   if (can_gen_invoice=='False' | ordervalue <= billed){
+  //     document.getElementById('hidebillbutton').style.display='none';
+  //     document.getElementById('showbillbutton').style.display='block';}
+  //   else {
+  //     document.getElementById('hidebillbutton').style.display='block';
+  //     document.getElementById('showbillbutton').style.display='none';}
+  // };
+
+  function editinv(po_id, inv_id) {poid=po_id; invid=inv_id; }
+  function fnchide() {$("#editModal .close").click()}
+
+  function alertpopup(){
+    // document.getElementById('exampleModal11').style.display = 'none';
+    $('.widget-content .message', function () {
+        swal({
+            title: 'Error Alert !',
+            text: 'Invoice generation not allowed due to all Invoices value under this order exceeding the order value',
+            padding: '2em'
+          })
+      }) 
+  }
+
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/{{pdata.pj}}/vendorinvoicesform/delete/'+poid+'/'+invid+'/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
+</script>
+
+<!-- Data Tables Export Script -->
+<script src="{% static 'js/datatablesexport.js' %}"></script>
+<script type="text/javascript">
+  // Datatables Excel Formating Before Export//
+  var customexcel = function( xlsx ) {
+    var sheet = xlsx.xl.worksheets['sheet1.xml'];
+    var style = xlsx.xl['styles.xml'];
+    var tagName = style.getElementsByTagName('sz');
+    for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+    $('row:first c', sheet).attr('s', '2')
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); //wrap text
+    var col = $('col', sheet);
+    // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
+    $(col[1]).attr('width', 25); $(col[2]).attr('width', 25); $(col[3]).attr('width', 45); }; 
+  //--End--//
+
+  var cl = [0,  1, 2, 3]
+  var wdths = ['4%', '25%', '25%', '46%'];
+  var ort = 'portrait'; //landscape
+  
+   if ('{{status}}' == 'Issued' ) { var msgTop = 'Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} \n Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}}  |  Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}}';}
+    else { var msgTop = ''};
+    var title = '{{pdata.pj}} - Vendor Invoices List';
+    var filename = '{{pdata.pj}}-VendorInvoicesList_{{table.last.Invoice_Date|date:'dMy'}}to{{table.first.Invoice_Date|date:'dMy'}}'
+
+  // Datatables Customise PDF Before Export//
+  var pdf_custom = function ( doc ) {
+    doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+    doc.pageMargins = [40,60,20,30];
+    doc['footer']= footer1;
+    doc['header']= header1;
+    var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+    objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+    objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+    objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+    // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+  doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+  {text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+  };
+
+  //--End--//
+</script>
+
+<!-- Data Tables Export Script -->
+<script type="text/javascript">
+  $('#{{status}}').DataTable( {
+  autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
+  buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
+      
+    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
+
+    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
+
+    {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
+</script>
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+<div class="page-header">
+  <h3 class="page-title">{{pdata.pj.Short_Name}} - Vendor Billing Details - {{status}} Invoices</h3>
+</div>
+
+<div>
+  <div style="float:left">
+    <button type="button" target="_blank"  onclick="location.href='/{{pdata.pj}}/vendorinvoicesform/create/1/1/'" class="btn btn-sm btn-primary mb-4" ht="register vendor issued invoices againt PO">Register Invoice Details Here</button>
+  </div>
+
+  <div style="float:right">
+      <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+      &nbsp;&nbsp;&nbsp;
+      <button type="button" onclick="location.href='/{{pdata.pj}}/vendorinvoiceslist/Issued/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+  </div>
+  <div style="clear:both"></div>
+</div>
+
+<!--Filter/Serch History Form-->
+  <div id="addEventsModal" class="modal animated fadeIn"> 
+    <div class="modal-dialog modal-dialog-centered">                            
+      <!-- Modal content -->
+      <div class="card modal-content">
+        <div class="modal-body">
+          <span id="discard" data-dismiss="modal" class="close">&times;</span>
+          <div class="add-edit-event-box">
+            <div class="add-edit-event-content">
+              <div class="add-event-title edit-event-title"></div>
+                <h5 class="modal-title">Search Data by Applying Filter</h5>
+                  <form class="">
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-12">
+                          <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
+                          <input type="date" name="from_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
+                          <input type="date" name="to_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Invoice Value From</label>
+                          <input  name="from_value" class="form-control">
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Invoice Value To</label>
+                          <input  name="to_value" class="form-control">
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">PO Details</label>
+                        {{ filter_data.form.PO_No}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 ">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Vendor Details</label>
+                        {{ filter_data.form.PO_No__Vendor}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style="font-weight: 200; color: black; font-size: 13px;">Only Due Invoices</label>
+                          <select class="form-control" name="duestatus">
+                            <option value="">Select</option>
+                            <option value="1">Yes</option>
+                          </select>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style="font-weight: 200; color: black; font-size: 13px;">Only Cleared Invoices</label>
+                          <select class="form-control" name="clearstatus">
+                            <option value="">Select</option>
+                            <option value="0">Yes</option>
+                          </select>
+                      </div>
+                     
+                      <div style="float:left; margin-left: 10px; margin-top:20px;" style="">
+                        <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                        <!-- <button id="add-e" class="btn">Add Task</button> -->
+                        <button id="edit-event" class="btn"></button>
+                      </div>
+                    </div>   
+                  </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% if status == 'Issued' %}
+  <div class="row"> 
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-dark shadow h-100 py-2">
+        <a ht="total issued invoices i.e due and cleared" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Vendor Bills - {{count.tbc}}</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_billing|floatformat:0|intcomma}} <span style="color:red">[ Due ₹ {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}} ]</span></div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="payment not yet started" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Full Due Invoices  - {{count.fdc}}</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <a ht="payment started but not cleared fully" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Partial Due Invoices - {{count.pdc}}</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.part_due_inv|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="toatl payment cleared invoices" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Payment Cleared Invoices - {{count.fcc}}</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_clear_inv|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+<!-- Invoices List -->
+<!-- Locked Invoices -->
+{% if status == 'Issued' %}
+    <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="{{status}}">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Vendor Details</th>
+            <th>PO Details</th>
+            <th>Billing Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x, y in table_items %}
+          <tr>
+            <td >{{forloop.counter}}</td>
+
+            <td style="white-space:normal;">
+              {{x.Vendor.Supplier_Name}}
+              <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Vendor.Phone_Number_1}}</a>
+            </td>
+
+            <td style="white-space:normal;">
+              {{x.Purchase_Details}}
+              <br><br><span class="hlt2">PO Value: ₹ {{x.PO_Value|floatformat:0|intcomma}}</span>
+              <br><span class='hlt5'>PO No: </span>{{x.PO_No}}
+              {% if x.user.Nick_Name %}<br>Followup By: {{x.user.Nick_Name}}{% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+                {% for p in y %}
+                  <a class="ahr" ht="open/edit invoice" target="_blank" data-toggle="modal" data-target="#editModal" onclick="editinv('{{x.id}}', '{{p.id}}')">
+                    <span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
+                    <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} | {% if p.Invoice_Amount != p.Due_Amount %}<span class='hlt5'>Paid Amount: </span>₹ {{p.Due_Amount|mul:-1|add:p.Invoice_Amount|floatformat:0|intcomma}}{% else %}<span class='hlt3'>No Payments Paid</span>{% endif %}
+                  {% if p.Due_Amount > 0  %}
+                    <br><span class='hlt3 font-weight-bold'>Due Amount: </span>₹ {{p.Due_Amount|floatformat:0|intcomma}} | <span class='hlt5'>Due Date: </span>{{p.Payment_Due_Date|date:'d M Y'}}{% if p.Payment_Over_Due_Days == 0  %}<span class="hlt2 font-weight-bold">**</span>{% endif %}
+                    {% if p.Payment_Over_Due_Days > 0 %}<br><span class='hlt3 font-weight-bold'>Over Due Days: </span>{{p.Payment_Over_Due_Days}}{% endif %}
+                  {% else %}
+                    <br><span class='hlt2'>Payment Done</span>
+                  {% endif %}
+                  </a>
+                  {% if p.Attach %}<br><a class="ahr" ht='click here to download copy' href="{{p.Attach.url}}" target="_blank"><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
+                  {% if x.user.Nick_Name %}<br>Updated By: {{p.user.Nick_Name}}{% endif %}
+                  <br><br>
+                {% endfor %}
+                {% if due_date == 'True' %}<span class='hlt2 italic font-weight-bold'>**</span>Due Date Not Yet Came{% endif %}
+            </td>
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+<div class="modal fade text-left" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <!-- <button type="button"  onclick="location.href='/{{pdata.pj}}/popaymentsform/'+poid+'/'" class="btn btn-sm btn-success">Add New Payment</button> -->
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/vendorinvoicesform/edit/'+poid+'/'+invid+'/'" class="btn btn-sm btn-primary">Edit Invoice Details</button>
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/vendorinvoicesform/copy/'+poid+'/'+invid+'/'" class="btn btn-sm btn-danger">Copy Invoice Details</button>
+            <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning">Delete Invoice Details</button>            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade text-left" id="exampleModal12" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Data</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form class="forms-sample">
+            <div class="form-group">
+              <label for="exampleInputPassword1">Password</label>
+              <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+              <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
+            </div> 
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+ 

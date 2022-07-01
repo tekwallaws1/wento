@@ -1408,3 +1408,65 @@ input[type="button"].btn2-block {
 
 .flash {color: pink;}
 .flash.active {color: blue;}
+
+.flts {font-weight: 200; color: black; font-size: 13px;}
+
+.table-striped>tbody>tr.customtr1:nth-child(odd)>td,
+    .table-striped>tbody>tr.customtr1:nth-child(even)>td {
+    background-color: #9fedc5;}
+
+
+a:hover {
+  cursor:pointer;
+ }
+
+ .ahr:hover {
+  text-decoration: none;
+  background-color: yellow;
+ }
+
+ .ahr1:hover {
+  background-color: green;
+ }
+
+ .ahr {
+  color: black;
+ }
+
+ 
+[ht]:hover:after {
+    opacity: 1;
+    transition: all 0.1s ease 0.5s;
+    visibility: visible;
+}
+/* box for title text */
+[ht]:after {
+  content: attr(ht);
+  opacity: 0;
+  /* position for title view box */
+  visibility: hidden;
+    /* optional */
+  padding: 4px 8px;
+  color: white;
+  font-size: 15px;
+  text-align: left;
+  position: absolute;
+  left: 0%;
+  top: 100%;
+/*  white-space: nowrap;
+*/  z-index: 2;
+  border-radius: 5px ;
+  background: linear-gradient(150deg, #f731db, #4600f1 100%);
+  box-shadow:0 1px 8px rgba(0,0,0,0.5);
+}
+[ht] {
+    position: relative;
+}
+
+.hlt1 {font-weight:bold; color:#1a0f7d; background:yellow;}
+.hlt2 {font-style:italic; color: blue;}
+.hlt3 {color: red;}
+.hlt4 {color: green;}
+
+.hlt5 {color: #077d25}
+.italic {font-style: italic;}

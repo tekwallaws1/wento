@@ -6,20 +6,840 @@ from django.http import HttpResponse, JsonResponse
 from django.views.generic import View
 from .filters import *
 from django.shortcuts import get_object_or_404, render
+from django.db import IntegrityError
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth import logout
 from django.db.models import Q
-from django.utils.datastructures import MultiValueDictKeyError
+from django.utils.datastructures import MultiValueDictKeyError 
 from django.db.models import Sum, Avg, Count
 from Projects.fyear import get_financial_year, get_fy_date
 from Projects.basedata import projectname
+from .customfunctions import assign_paystatus_to_order, workstatus, updateduedays, get_invoice_number, inv_amoumt_update, inv_amount_exceed, adjust_payments_to_invoices, genOrderNo
+from num2words import num2words
+from django.urls import reverse
  
-# Create your views here.  
+
+# Create your views here. 
 @login_required
-def Orders_List(request, proj):
-	table = Orders.objects.filter(Related_Project=proj, ds=1)
-	table_fy = Orders.objects.filter(Related_Project=proj, Order_Received_Date__lte=date.today(), Order_Received_Date__gte=get_fy_date(), ds=1)
-	filter_data = OrdersFilter(request.GET, queryset=table)
-	table = filter_data.qs
-	return render(request, 'orders/OrdersList.html', {'table_fy':table_fy, 'filter_data':filter_data})
+def Orders_List(request, proj, status):
+	pdata = projectname(request, proj)
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	# lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	if status == 'Inprogress':
+		table = Orders.objects.filter(**lookup, Final_Status=0, ds=1).order_by('-Order_Received_Date', 'Final_Status')
+		table_fy = Orders.objects.filter(**lookup, Final_Status=0, Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date(), ds=1).order_by('-Order_Received_Date', 'Final_Status')
+	else:
+		table = Orders.objects.filter(**lookup, ds=1).order_by('-Order_Received_Date', 'Final_Status')
+		table_fy = Orders.objects.filter(**lookup, Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date(), ds=1).order_by('-Order_Received_Date', 'Final_Status')
+
+	# initiall it will take financial year table_fy data **when no filter applies
+	# if any filter apply ut should take noram table
+	filter_data = OrdersFilter(request.GET, queryset=table_fy)
+	table_fy = filter_data.qs
+	table_data = table_fy
+	has_filter = any(field in request.GET for field in set(filter_data.get_fields()))
+	
+	if has_filter: #update filter data queyset
+		filter_data = OrdersFilter(request.GET, queryset=table)
+		table = filter_data.qs
+		table_data = table
+	
+	if status == 'Pipeline':
+		table_data = table_data.filter(Order_Type='Pipeline')
+	else:
+		table_data = table_data.filter(Order_Type='Confirmed')
+
+	total, closed, inprogress, pipeline, tc, cc, ic, pc = 0,0,0,0,0,0,0,0
+	billed, received, bills_count, t_received, t_billed, t_bills_count = 0, 0, 0, [], [], []
+	for x in table_data:
+		if x.Billing_Status:
+			bills = Invoices.objects.filter(Order=x, Is_Proforma=False, Lock_Status=1)
+			for y in bills:
+				billed = billed + y.Invoice_Amount
+				bills_count = bills_count + 1
+			t_billed.append(int(billed))
+			t_bills_count.append(bills_count)
+			billed=0
+			bills_count = 0
+		else:
+			t_billed.append(int(billed))
+			t_bills_count.append(bills_count)
+		
+		if x.Payment_Status:
+			pays = Payment_Status.objects.filter(Order_No=x)
+			for z in pays:
+				received = received + z.Received_Amount
+			t_received.append(int(received))
+			received=0
+		else:
+			t_received.append(int(received))
+
+	for x in table_data:
+		if x.Order_Type == 'Confirmed':
+			total, tc = int(total + x.Order_Value), tc+1
+		if x.Order_Type == 'Pipeline':
+			pipeline, pc = int(pipeline + x.Order_Value), pc+1
+		elif x.Final_Status == 1:
+			closed, cc = int(closed + x.Order_Value), cc+1
+		else:
+			inprogress, ic = int(inprogress + x.Order_Value), ic+1	
+	orders = {'total':total, 'closed':closed, 'inprogress':inprogress, 'pipeline':pipeline}
+	count = {'tc':tc, 'cc':cc, 'ic':ic, 'pc':pc}
+
+	tableset = zip(table_data, t_billed, t_received, t_bills_count)
+	return render(request, 'orders/OrdersList.html', {'tableset':tableset, 'table':table_data, 'filter_data':filter_data, 'pdata':pdata, 'status':status, 
+		'orders':orders, 'count':count})
+
+@login_required
+def Orders_Form(request, proj, fnc, rid):
+	pdata = projectname(request, proj)
+	if fnc != 'create' and fnc != 'delete' and fnc!='copy' : #update
+		if request.method ==  'POST':
+			getdata = get_object_or_404(Orders, id=rid)
+			form = OrdersForm(request.POST, request.FILES, instance=getdata)
+			if form.is_valid():
+				p = form.save()
+				fd = Orders.objects.get(id=p.id)
+				fd.user = Account.objects.get(user=request.user)
+				fd.save()
+				messages.success(request, "Selected Order Details Has Been Updated")
+				return redirect('/%s/orderslist/Inprogress/'%pdata['pj'])
+			else:
+				return render(request, 'orders/OrdersForm.html', {'form': form, 'pdata':pdata})
+		else:
+			getdata = get_object_or_404(Orders, id=rid)
+			form = OrdersForm(instance=getdata)
+			return render(request, 'orders/OrdersForm.html', {'form': form, 'pdata':pdata})
+
+	elif fnc == 'delete': #Delete
+		getdata = get_object_or_404(Orders, id=rid)
+		getdata.delete()
+		messages.success(request, "Selected Orders Details Has Been Send to Recyclebin")
+		return redirect('/%s/orderslist/Inprogress/'%pdata['pj'])
+
+	if request.method ==  'POST': #Create
+		last_order_id = Orders.objects.filter(Order_Type='Confirmed').order_by('Order_No_1').last()
+		last_order_id = last_order_id.id if last_order_id != None else None
+		form = OrdersForm(request.POST, request.FILES)
+		if form.is_valid():
+			p = form.save()
+			fd = Orders.objects.get(id=p.id) 
+			fd.Related_Project = pdata['pj']
+			fd.user = Account.objects.get(user=request.user)
+			fd.save()
+			genOrderNo(request, fd.id, last_order_id)
+			messages.success(request, "Order Has Been Generated")
+			return redirect('/%s/orderslist/Inprogress/'%pdata['pj'])
+		else:
+			return render(request, 'orders/OrdersForm.html', {'form': form, 'pdata':pdata})
+	else:
+		if fnc == 'copy':
+			getdata = get_object_or_404(Orders, id=rid)
+			form = OrdersForm(instance=getdata)
+			return render(request, 'orders/OrdersForm.html', {'form': form, 'pdata':pdata})
+		else:
+			form = OrdersEmptyForm()
+			form.fields["Customer_Name"].queryset = CustDt.objects.filter(ds=1, Status=1) #load only active and non deleted customers
+			form.fields["Order_Reference_Person"].queryset = CustContDt.objects.filter(ds=1) #load only non deleted customers
+
+			return render(request, 'orders/OrdersForm.html', {'form': form, 'pdata':pdata})
+
+#create payment from orderlsit, only create
+@login_required
+def Orders_Payments_Form(request, proj, rid):
+	pdata = projectname(request, proj)
+	order = Orders.objects.get(id=rid)
+	last_payment_status = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date')
+	if request.method ==  'POST': #Create
+		form = OrdersPaymentsForm(request.POST, request.FILES)
+		if form.is_valid():
+			p = form.save()
+			assign_paystatus_to_order(request, p.id, order.id)
+			adjust_payments_to_invoices(request, order.id)
+			messages.success(request, "Payment Has Been Added")
+			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+		else:
+			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
+	else:
+		form = OrdersPaymentsForm()
+		return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
+
+
+#payments create and updates
+@login_required
+def Payments_Form(request, proj, fnc, rid):
+	pdata = projectname(request, proj)
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	if fnc == 'edit':
+		if request.method ==  'POST':
+			getdata = get_object_or_404(Payment_Status, id=rid)
+			form = PaymentsForm(request.POST, request.FILES, instance=getdata)
+			if form.is_valid():
+				p = form.save(commit=False)
+				p= form.save()
+				order = Orders.objects.get(id=p.Order_No.id)
+				assign_paystatus_to_order(request, p.id, order.id)
+				adjust_payments_to_invoices(request, order.id)
+				messages.success(request, "Selected Payment Details Has Been Updated")
+				return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+			else:
+				return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
+		else:
+			getdata = get_object_or_404(Payment_Status, id=rid)
+			form = PaymentsForm(instance=getdata)
+			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
+
+	elif fnc == 'delete': #Delete
+		getdata = get_object_or_404(Payment_Status, id=rid)
+		order = getdata.Order_No
+		getdata.delete()
+		order = Orders.objects.get(id=order.id)
+		adjust_payments_to_invoices(request, order.id)
+		if not order.Payment_Status:
+			order.Payment_Status = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date').last()
+			order.save()
+		messages.success(request, "Selected Payment Details Has Deleted")
+		return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+
+	if request.method ==  'POST': #Create
+		form = PaymentsForm(request.POST, request.FILES)
+		if form.is_valid():
+			p = form.save(commit=False)
+			if p.Order_No==None and p.Invoice_No==None:
+				messages.error(request, "Either Order Details or Invoice Details Must Be Geiven to Record Payment")
+				return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+			p= form.save()
+			if not p.Order_No: # when paymentbthrough invoice number
+				p.Order_No = p.Invoice_No.Order
+				p.save()
+				assign_paystatus_to_order(request, p.id, p.Order_No.id)
+			else:
+				assign_paystatus_to_order(request, p.id, p.Order_No.id)
+			order = Orders.objects.get(id=p.Order_No.id)
+			adjust_payments_to_invoices(request, order.id)
+			messages.success(request, "Payment Has Been Added")
+			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+		else:
+			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
+	else:
+		if fnc == 'copy':
+			getdata = get_object_or_404(Payment_Status, id=rid)
+			form = PaymentsForm(instance=getdata)
+			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
+		else:
+			form = PaymentsEmptyForm()
+			form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=0))
+			form.fields["Invoice_No"].queryset = Invoices.objects.filter(Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
+			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
+
+# Create your views here. 
+@login_required
+def Payments_List(request, proj, status):
+	pdata = projectname(request, proj)
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	lookup1 = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
+	total, estimate, received, due, overdue, advance= 0,0,0,0,0,0
+	
+	form = PaymentsEmptyForm()
+	form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=0))
+	form.fields["Invoice_No"].queryset = Invoices.objects.filter(**lookup1, Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
+	
+	lookup = {'Order_No__Related_Project__isnull':False} if proj == 'All' else {'Order_No__Related_Project':pdata['pj']}
+	table_pays = Payment_Status.objects.filter(**lookup).order_by('Payment_Date')
+	table_fy_pays = Payment_Status.objects.filter(**lookup, Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
+	
+
+	filter_data = PaymentsFilter(request.GET, queryset=table_fy_pays)
+	table_fy_pays = filter_data.qs
+	table_data = table_fy_pays
+	has_filter_pays = any(field in request.GET for field in set(filter_data.get_fields()))
+	
+	if has_filter_pays: #update filter data queyset
+		filter_data = PaymentsFilter(request.GET, queryset=table_pays)
+		table_pays = filter_data.qs
+		table_data = table_pays
+
+	pays_list, bills_list, t_rec, t_due, adv, t_billed, due_date, isallbill_clear, t_adv, advances, = [], [], [], [], [], [], [], [], 0, 0
+	t_due_all, t_due_overdue, t_due_unbilled, t_due_coming, total_billed, total_balance_as_advance = 0,0,0,0,0, 0
+
+	orders_table_data = []
+	for x in table_data:
+		orders_table_data.append(Orders.objects.get(id=x.Order_No.id))
+
+	orders_table_data = list(dict.fromkeys(orders_table_data))
+	# table_data = orders_table_data
+	
+	for x in orders_table_data:
+		pays 	 = Payment_Status.objects.filter(Order_No=x).order_by('Payment_Date')
+		bills    = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=0).order_by('Invoice_Date')
+		for p in pays:
+			if p.Payment_Type=='Advance':
+				t_adv = t_adv + p.Received_Amount
+		if pays:
+			pays_list.append(pays)
+			rec = pays.aggregate(sum=Sum('Received_Amount')).get('sum') or 0
+			t_rec.append(rec)
+			for k in pays:
+				ad = 'True' if k.Payment_Type=='Advance' else 'False'
+				if ad == 'True':
+					break 
+			adv.append(ad)
+		else:
+			pays_list.append(None)
+			t_rec.append(0)
+			rec = 0
+
+		if bills:
+			billtotal = bills.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0
+			bills_list.append(bills)
+			t_due.append(bills.aggregate(sum=Sum('Due_Amount')).get('sum') or 0)
+			t_billed.append(billtotal)
+			
+			for j in bills: #if all bills clear no need to show note text as coming due date etc..
+				dt = 'False' if j.Due_Amount==0 else 'True'
+				if dt == 'True':
+					break
+			if dt=='True': #means all bills not clear
+				for j in bills:
+					dt = 'True' if j.Payment_Over_Due_Days==0 else 'False'
+					if dt == 'True':
+						break
+			
+			for n in bills:
+				clr = 'False' if n.Due_Amount!=0 else 'True'
+				if clr == 'False':
+					break
+
+			due_date.append(dt)
+			isallbill_clear.append(clr)
+		else:
+			bills_list.append(None)
+			t_due.append(None)
+			due_date.append(None)
+			t_billed.append(None)
+			isallbill_clear.append(None)
+			billtotal = 0
+
+		advances = advances + t_adv
+		t_adv=0
+
+		due_overdue = 0
+		due_coming = 0
+		for d in bills:
+			if d.Payment_Over_Due_Days > 0:
+				due_overdue = due_overdue+d.Due_Amount
+			else:
+				due_coming = due_coming+d.Due_Amount
+
+
+		t_due_overdue = t_due_overdue + due_overdue
+		t_due_coming = t_due_coming + due_coming
+		total_billed = total_billed + billtotal
+
+		if billtotal < rec:
+			total_balance_as_advance = total_balance_as_advance + rec - billtotal
+
+	# t_due_unbilled = t_orders_value - total_billed - total_balance_as_advance
+	t_due_all = t_due_overdue + t_due_coming
+	pc = {'t_due_all':t_due_all, 't_due_overdue':t_due_overdue, 't_due_coming':t_due_coming,'total_balance_as_advance':total_balance_as_advance}
+
+	data = zip(orders_table_data, pays_list, bills_list, t_rec, t_due, adv, t_billed, due_date, isallbill_clear)
+	total_rec = sum(t_rec) or 0
+	billed_rec = total_rec - total_balance_as_advance
+	
+	return render(request, 'orders/PaymentsList.html', {'table':table_data, 'data':data, 'filter_data':filter_data, 
+		'pdata':pdata, 'status':status, 'pc':pc, 'total_rec':total_rec, 'billed_rec':billed_rec, 'advances':advances, 'form_payments':form})
+
+#create work from orderlsit, only create
+@login_required
+def Orders_Work_Form(request, proj, rid):
+	pdata = projectname(request, proj)
+	if request.method ==  'POST': #Create
+		form = OrdersWorkForm(request.POST, request.FILES)
+		if form.is_valid():
+			p = form.save()
+			workstatus(request, p.id, rid) #call common function for calculations
+			messages.success(request, "Work Status Has Been Added")
+			if p.Closing_Status == 1:
+				status = 'Delivered'
+			else:
+				status = 'Inprogress'
+			url = '/'+str(pdata['pj'])+'/worklist/'+status+'/'
+			return redirect(url)
+			# return redirect('/%s/orderslist/Inprogress/'%pdata['pj'])
+		else:
+			return render(request, 'orders/WorkForm.html', {'form': form, 'pdata':pdata})
+	else:
+		form = OrdersWorkForm()
+		return render(request, 'orders/WorkForm.html', {'form': form, 'pdata':pdata})
+
+
+#work create and updates
+@login_required
+def Work_Form(request, proj, fnc, rid):
+	pdata = projectname(request, proj)
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	if fnc != 'create' and fnc != 'delete' and fnc!='copy' : #update
+		if request.method ==  'POST':
+			getdata = get_object_or_404(Work_Status, id=rid)
+			form = WorkForm(request.POST, request.FILES, instance=getdata)
+			if form.is_valid():
+				p= form.save()
+				workstatus(request, p.id, p.Order_No.id)
+				messages.success(request, "Selected Work Details Has Been Updated")
+				if p.Closing_Status == 1:
+					status = 'Delivered'
+				else:
+					status = 'Inprogress'
+				url = '/'+str(pdata['pj'])+'/worklist/'+status+'/'
+				return redirect(url)
+			else:
+				return render(request, 'orders/WorkForm.html', {'form': form, 'pdata':pdata})
+		else:
+			getdata = get_object_or_404(Work_Status, id=rid)
+			form = WorkForm(instance=getdata)
+			return render(request, 'orders/WorkForm.html', {'form': form, 'pdata':pdata})
+
+	elif fnc == 'delete': #Delete
+		getdata = get_object_or_404(Work_Status, id=rid)
+		getdata.delete()
+		lastwork = Work_Status.objects.filter(Order_No=getdata.Order_No).order_by('Date').last()
+		if lastwork:
+			workstatus(request, lastwork.id, lastwork.Order_No.id)
+			if lastwork.Closing_Status == 1:
+				status = 'Delivered'
+			else:
+				status = 'Inprogress'
+			url = '/'+str(pdata['pj'])+'/worklist/'+status+'/'			
+			messages.success(request, "Selected Work Details Has Been Send to Recyclebin")
+			return redirect(url)
+		else:
+			url = '/'+str(pdata['pj'])+'/worklist/Pending/'		
+			messages.success(request, "Selected Work Details Has Been Send to Recyclebin")
+			return redirect(url)
+
+	if request.method ==  'POST': #Create
+		form = WorkForm(request.POST, request.FILES)
+		if form.is_valid():
+			p= form.save()
+			workstatus(request, p.id, p.Order_No.id)
+			messages.success(request, "Work Status Has Been Added")
+			if p.Closing_Status == 1:
+				status = 'Delivered'
+			else:
+				status = 'Inprogress'
+			url = '/'+str(pdata['pj'])+'/worklist/'+status+'/'
+			return redirect(url)
+		else:
+			return render(request, 'orders/WorkForm.html', {'form': form, 'pdata':pdata})
+	else:
+		if fnc == 'copy':
+			getdata = get_object_or_404(Work_Status, id=rid)
+			form = WorkForm(instance=getdata)
+			return render(request, 'orders/WorkForm.html', {'form': form, 'pdata':pdata})
+		else:
+			form = WorkEmptyForm()
+			form.fields["Order_No"].queryset = Orders.objects.filter(Billing_Status__Final_Payment_Status=0, **lookup) #load only unfineshed payment orders
+			return render(request, 'orders/WorkForm.html', {'form': form, 'pdata':pdata})
+
+@login_required
+def Work_Update_List(request, proj, status):
+	pdata = projectname(request, proj)
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	if status == 'Pending':
+		table = Orders.objects.filter(**lookup, Work_Status=None, Order_Type='Confirmed', ds=1).order_by('Order_Received_Date')
+		table_fy = Orders.objects.filter(**lookup, Work_Status=None, Order_Type='Confirmed', Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date(), ds=1).order_by('Order_Received_Date')
+	elif status == 'Delivered':
+		table = Orders.objects.filter(**lookup, Final_Work_Status=1, ds=1).order_by('Work_Status__Date')
+		table_fy = Orders.objects.filter(**lookup, Final_Work_Status=1, Work_Status__Date__date__lte=date.today(), Work_Status__Date__date__gte=get_fy_date(), ds=1).order_by('Work_Status__Date')
+	else:
+		table = Orders.objects.filter(**lookup, Work_Status__isnull=False, Final_Work_Status=0, ds=1).order_by('Work_Status__Date')
+		table_fy = Orders.objects.filter(**lookup, Work_Status__isnull=False, Final_Work_Status=0, Work_Status__Date__date__lte=date.today(), Work_Status__Date__date__gte=get_fy_date(), ds=1).order_by('Work_Status__Date')
+
+	filter_data = WorksFilter(request.GET, queryset=table_fy)
+	table_fy = filter_data.qs
+	table_data = table_fy
+	has_filter = any(field in request.GET for field in set(filter_data.get_fields()))
+	
+	if has_filter: #update filter data queyset
+		filter_data = WorksFilter(request.GET, queryset=table)
+		table = filter_data.qs
+		table_data = table
+
+	count = table_data.count
+
+	orders_list = []
+	work_list = []
+	
+	for x in table_data:
+		orders_list.append(x)
+		if status != 'Pending':
+			work_list.append(Work_Status.objects.filter(Order_No__Order_No=x.Order_No))
+		else:
+			work_list.append(None)
+
+	works = zip(orders_list, work_list)
+
+	return render(request, 'orders/WorkUpdateList.html', {'table':table_data,'filter_data':filter_data, 'works':works, 'pdata':pdata, 'status':status, 'count':count})
+
+@login_required
+def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
+	pdata = projectname(request, proj)
+	last_invid = Invoices.objects.filter(Lock_Status=1, Is_Proforma=0).order_by('Invoice_No_1').last()
+	last_invid = last_invid.id if last_invid else None
+	
+	if request.method == 'POST' and fnc=='create':
+		form = InvoicesForm1(request.POST, request.FILES)
+		if form.is_valid():
+			p = form.save()
+			rid = p.Order.id
+			invid = p.id
+
+	order = Orders.objects.get(id=rid)
+	
+	if inv_amount_exceed(request, rid)==1 and fnc == 'create':
+		return redirect('/%s/orderslist/Inprogress/'%pdata['pj']) 
+		messages.error(request, 'Invoice generation not allowed due to all Invoices value under this order exceeding the order value')
+	else:
+		if order.Can_Gen_Invoice != 0:
+			if fnc == 'create':
+				if request.method == 'POST':
+					Invoices.objects.filter(id=invid).update(user=Account.objects.get(user=request.user), Billing_From=CompanyDetails.objects.all().last(), 
+					Billing_To=order.Customer_Name, Shipping_To=order.Customer_Name, Bank_Details=Bank_Accounts.objects.all().last(), 
+					Invoice_Date=datetime.now(), Payment_Due_Date=date.today())
+					inv = Invoices.objects.get(id=invid)
+				else:
+					inv = Invoices.objects.create(user=Account.objects.get(user=request.user), Order=order, Billing_From=CompanyDetails.objects.all().last(), 
+					Billing_To=order.Customer_Name, Shipping_To=order.Customer_Name, Bank_Details=Bank_Accounts.objects.all().last(), 
+					Invoice_Date=datetime.now(), Payment_Due_Date=date.today())
+
+				get_invoice_number(request, last_invid, inv.id)
+				inv = Invoices.objects.get(id=inv.id)
+				order.Billing_Status = inv
+				order.save()
+				order_items = Order_Items.objects.filter(Order_No=order) #check wether items addded in order
+				if order_items:
+					for x in order_items:
+						itm = Billed_Items.objects.create(user=Account.objects.get(user=request.user), Invoice_No=inv, 
+							Add_Item=FG_Price.objects.get(Product_Name=order_items.Add_Item, Quantity=order_items.Quantity))
+						copy_itm = Copy_Billed_Items.objects.create(Invoice_No=inv, Item_Description=p.Add_Item.Product_Name.Product_Name, Quantity=itm.Quantity, UOM=order.Add_Item.Product_Name.UOM,
+							Unit_Price=order.Add_Item.Unit_Price, HSN_Code=order.Add_Item.HSN_Code, GST=order.Add_Item.GST, 
+							CESS=order.Add_Item.CESS, Other_Taxes=order.Add_Item.Other_Taxes, Item_From_Product=itm)
+				else:
+					order_items = None
+				dtc = Sales_TC.objects.all().last()
+				if dtc:
+					tc = Terms_Conditions.objects.create(Invoice_No=inv, Terms_and_Condition1=dtc.Terms_and_Condition1 or None, Terms_and_Condition2=dtc.Terms_and_Condition2 or None, 
+						Terms_and_Condition3=dtc.Terms_and_Condition3 or None, Terms_and_Condition4=dtc.Terms_and_Condition4 or None)
+				else:
+					tc = None
+			else:
+				inv =Invoices.objects.get(id=invid)
+		else:
+			messages.error(request, 'Invoice generation not allowed due to all Invoices value under this order exceeding the order value')
+			return redirect('/%s/orderslist/Inprogress/'%pdata['pj'])
+
+	if Terms_Conditions.objects.filter(Invoice_No=inv).last():
+		tc = Terms_Conditions.objects.get(Invoice_No=inv)
+	else:
+		tc = None
+	
+	items = Copy_Billed_Items.objects.filter(Invoice_No = inv)
+	amount, total_gst, total_amount, final_gst, final_without_tax_amount, final_with_tax_amount = [],[],[],[],[],[] 
+	for x in items:
+		amount.append(x.Quantity*x.Unit_Price)
+		total_gst.append(x.Quantity*x.Unit_Price*x.GST/100)
+		total_amount.append((x.Quantity*x.Unit_Price)+(x.Quantity*x.Unit_Price*x.GST/100))
+	final_gst, final_without_tax_amount, final_with_tax_amount = int(sum(total_gst)), sum(amount), int(sum(total_amount))
+
+	itm = zip(items, amount, total_gst, total_amount)
+	ss = {'final_gst':final_gst, 'final_without_tax_amount':final_without_tax_amount, 'final_with_tax_amount':final_with_tax_amount}
+
+	
+
+	form_invoice = InvoicesForm(instance=get_object_or_404(Invoices, id=inv.id))
+	
+	if Delivery_Note.objects.filter(Invoice_No=inv).last():
+		form_deliverynote = DeliveryNoteForm(instance=get_object_or_404(Delivery_Note, Invoice_No=inv))
+	else:
+		form_deliverynote = DeliveryNoteForm()
+
+	if Terms_Conditions.objects.filter(Invoice_No=inv).last():
+		form_tc = InvoiceTCForm(instance=get_object_or_404(Terms_Conditions, Invoice_No=inv))
+	else:
+		form_tc = InvoiceTCForm()
+
+	if itemid != 'itemid':
+		form_item = CopyBilledItemsForm(instance=get_object_or_404(Copy_Billed_Items, id=itemid))
+	else:
+		form_item = BilledItemsForm()
+
+	amount_in_words =  num2words(int(inv.Invoice_Amount), to='cardinal', lang='en_IN') if inv.Invoice_Amount else None 
+	len_words = len(amount_in_words) if inv.Invoice_Amount else 0
+	return render(request, 'docformats/Invoice1.html', {'pdata':pdata, 'inv':inv, 'itm':itm, 'ss':ss, 'tc':tc, 'form_invoice':form_invoice,
+		'form_deliverynote':form_deliverynote, 'form_tc':form_tc, 'amount_in_words':amount_in_words, 'len_words':len_words, 
+		'item_id':itemid, 'form_item':form_item, 'fnc':fnc, 'msg':msg})
+	
+@login_required
+def Edit_Invoice_Form(request, proj, fnc, invid):
+	pdata = projectname(request, proj)
+	inv_order_id = Invoices.objects.get(id=invid).Order.id
+	msg='msg'
+	url = '/'+str(pdata['pj'])+'/invoice/edit/'+invid+'/'+str(inv_order_id)+'/itemid/'
+	
+	if request.method == 'POST':
+		form = InvoicesForm(request.POST, request.FILES, instance=get_object_or_404(Invoices, id=invid))
+		if form.is_valid():
+			p= form.save()
+			updateduedays(request, p.id)
+			#update when invoice locked
+			if inv_amount_exceed(request, inv_order_id)==1:
+				p.Lock_Status = 0
+				p.save()
+				msg = 'Invoice generation not allowed due to all Invoices value under related received work order exceeding the order value'
+				url = url+msg+'/'
+				return redirect(url)
+
+			if p.Is_Proforma == 1: #lock status meant for main invoice
+				p.Lock_Status = 1
+				p.save()
+						
+			order = Orders.objects.get(id=p.Order.id)
+			if p.Lock_Status==1 and p.Is_Proforma==0:
+				order.Billing_Status = p
+				k = adjust_payments_to_invoices(request, order.id)
+			else:
+				# last order billing status opdate
+				inv = Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0).last()
+				order.Billing_Status = inv
+
+			inv = Invoices.objects.filter(Order=p.Order, Lock_Status=1, Is_Proforma=0)
+			order.Is_Billed = 1 if inv != None else 0
+			order.save()
+			
+			if p.Lock_Status == 1:
+				msg = "Invoice Has Been Locked and Generated Successfully"
+			else:
+				msg = "Requested Details Has Been Updated Successfully"
+
+			url = url+msg+'/'	
+			return redirect(url)
+		else:
+			url = url+msg+'/'
+			return redirect(url)
+	else:
+		url = url+msg+'/'
+		if fnc == 'delete':
+			Invoices.objects.get(id=invid).delete()
+			return redirect('/%s/orderslist/Inprogress/'%pdata['pj'])
+		else:
+			return redirect(url)
+
+
+
+@login_required
+def Add_Item_Form(request, proj, fnc, invid, itemid):
+	pdata = projectname(request, proj)
+	inv_order_id = Invoices.objects.get(id=invid).Order.id
+	msg = 'msg'
+	url = '/'+str(pdata['pj'])+'/invoice/edit/'+invid+'/'+str(inv_order_id)+'/itemid/'
+	if request.method == 'POST':
+		if fnc == 'edit':
+			form = CopyBilledItemsForm(request.POST, request.FILES, instance=get_object_or_404(Copy_Billed_Items, id=itemid))
+			if form.is_valid():
+				p= form.save()
+				inv_amoumt_update(request, invid)
+				msg = "Item Details Has Been Updated Successfully"
+				url = url+msg+'/'
+				return redirect(url)
+			else:
+				url = url+msg+'/'
+				return redirect(url)
+		else:
+			form = BilledItemsForm(request.POST, request.FILES)
+			if form.is_valid():
+				p = form.save()
+				p = Billed_Items.objects.get(id=p.id)
+				p.Invoice_No = Invoices.objects.get(id=invid)
+				p.save()
+				if Billed_Items.objects.filter(Invoice_No=p.Invoice_No, Add_Item=p.Add_Item).order_by('id').count() > 1:
+					Billed_Items.objects.filter(Invoice_No=p.Invoice_No, Add_Item=p.Add_Item).order_by('id').last().delete()
+					msg = "This Item Aleady Added, You Can Modify Quantity from Existing Items List"
+					url = url+msg+'/'
+					return redirect(url)
+				else:
+					copy_item = Copy_Billed_Items.objects.create(Invoice_No=p.Invoice_No, Item_Description=p.Add_Item.Product_Name.Product_Name, Quantity=p.Quantity, UOM=p.Add_Item.Product_Name.UOM,
+				Unit_Price=p.Add_Item.Unit_Price, HSN_Code=p.Add_Item.HSN_Code, GST=p.Add_Item.GST, 
+				CESS=p.Add_Item.CESS, Other_Taxes=p.Add_Item.Other_Taxes, Item_From_Product=p)
+				inv_amoumt_update(request, invid)
+				msg = "Item Details Has Been Updated Successfully"
+				url = url+msg+'/'
+				return redirect(url)
+			else:
+				url = url+msg+'/'
+				return redirect(url)
+	else:
+		url = url+msg+'/'
+		if fnc == 'delete':
+			copy_item = Copy_Billed_Items.objects.get(id=itemid)
+			item = Billed_Items.objects.filter(Add_Item__Product_Name__Product_Name=copy_item.Item_From_Product.Add_Item.Product_Name.Product_Name)
+			copy_item.delete()
+			item.delete()
+			inv_amoumt_update(request, invid)
+			return redirect(url)
+		else:
+			return redirect(url)
+
+@login_required
+def Invoice_Delivery_Note_Form(request, proj, fnc, invid, rid):
+	pdata = projectname(request, proj)
+	inv_order_id = Invoices.objects.get(id=invid).Order.id
+	msg = 'msg'
+	url = '/'+str(pdata['pj'])+'/invoice/edit/'+invid+'/'+str(inv_order_id)+'/itemid/'
+	if request.method == 'POST':
+		if fnc == 'edit':
+			form = DeliveryNoteForm(request.POST, request.FILES, instance=get_object_or_404(Delivery_Note, id=rid))
+			if form.is_valid():
+				p= form.save()
+				msg = "Delivery Note Details Has Been Updated Successfully"
+				url = url+msg+'/'
+				return redirect(url)
+			else:
+				url = url+msg+'/'
+				return redirect(url)
+		else:
+			form = DeliveryNoteForm(request.POST, request.FILES)
+			if form.is_valid():
+				p= form.save()
+				p.Invoice_No = Invoices.objects.get(id=invid)
+				p.save()
+				inv = Invoices.objects.filter(id=invid).last()
+				inv.Delivery_Note = p
+				inv.save()
+				msg = "Delivery Details Has Been Added Successfully"
+				url = url+msg+'/'
+				return redirect(url)
+			else:
+				url = url+msg+'/'
+				return redirect(url)
+	else:
+		url = url+msg+'/'
+		if fnc == 'delete':
+			dn = Delivery_Note.objects.get(id=rid)
+			dn.delete()
+			return redirect(url)
+		
+		return redirect(url)
+
+@login_required
+def Invoice_TC_Form(request, proj, fnc, invid, rid):
+	pdata = projectname(request, proj)
+	inv_order_id = Invoices.objects.get(id=invid).Order.id
+	msg = 'msg'
+	url = '/'+str(pdata['pj'])+'/invoice/edit/'+invid+'/'+str(inv_order_id)+'/itemid/'
+	if request.method == 'POST':
+		if fnc == 'edit':
+			form = InvoiceTCForm(request.POST, request.FILES, instance=get_object_or_404(Terms_Conditions, id=rid))
+			if form.is_valid():
+				p= form.save()
+				msg = "Terms and Condition Details Has Been Updated Successfully"
+				url = url+msg+'/'
+				return redirect(url)
+			else:
+				url = url+msg+'/'
+				return redirect(url)
+		else:
+			form = InvoiceTCForm(request.POST, request.FILES)
+			if form.is_valid():
+				p= form.save()
+				p.Invoice_No = Invoices.objects.get(id=invid)
+				p.save()
+				inv = Invoices.objects.filter(id=invid).last()
+				inv.Terms_and_Conditions = p
+				inv.save()
+				msg = "Terms and Condition Details Has Been Added Successfully"
+				url = url+msg+'/'
+				return redirect(url)
+			else:
+				url = url+msg+'/'
+				return redirect(url)
+	else:
+		url = url+msg+'/'
+		if fnc == 'delete':
+			tc = Terms_Conditions.objects.get(id=rid)
+			tc.delete()
+			return redirect(url)
+		return redirect(url)
+
+@login_required
+def Invoices_List(request, proj, status):
+	pdata = projectname(request, proj)
+	
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	form = InvoicesForm1()
+	form.fields["Order"].queryset = Orders.objects.filter(**lookup, Can_Gen_Invoice=1)
+	
+	lookup = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
+	table_inv = Invoices.objects.filter(**lookup).order_by('-Invoice_Date')
+	table_fy_inv = Invoices.objects.filter(**lookup, Invoice_Date__date__lte=date.today(), Invoice_Date__date__gte=get_fy_date()).order_by('-Invoice_Date')
+	
+	filter_data = InvoicesFilter(request.GET, queryset=table_fy_inv)
+	table_fy_inv = filter_data.qs
+	table_data = table_fy_inv
+	has_filter_inv = any(field in request.GET for field in set(filter_data.get_fields()))
+	
+	if has_filter_inv: #update filter data queyset
+		filter_data = InvoicesFilter(request.GET, queryset=table_inv)
+		table_inv = filter_data.qs
+		table_data = table_inv
+
+	full_due_inv, part_due_inv, full_clear_inv, total_billing = 0, 0, 0, 0
+	fdc, pdc, fcc, tbc = 0, 0, 0, 0 #count
+	orders_list, invoices_list  = [], []
+
+	if status == 'Issued':
+		table_data = table_data.filter(Lock_Status=1, Is_Proforma=0)
+	elif status == 'Proforma':
+		table_data = table_data.filter(Lock_Status=1, Is_Proforma=1)
+	else:
+		table_data = table_data.filter(Lock_Status=0, Is_Proforma=0)
+
+
+	for x in table_data:
+		orders_list.append(x.Order)
+	orders_list = list(dict.fromkeys(orders_list))
+
+	for x in orders_list:
+		if status == 'Issued':
+			inv = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=0)
+		elif status == 'Proforma':
+			inv = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=1)
+		else:
+			inv = Invoices.objects.filter(Order=x, Lock_Status=0, Is_Proforma=0)
+
+		invoices_list.append(inv)
+		inv = inv.filter(Invoice_Amount__isnull=False)
+		inv_total 	 = sum(inv.values_list('Invoice_Amount', flat=True)) or 0
+		
+		total_billing = total_billing + inv_total
+		tbc = tbc + len(inv)
+
+		for a in inv:
+			if a.Due_Amount == a.Invoice_Amount:
+				full_due_inv = full_due_inv + a.Invoice_Amount
+				fdc = fdc + 1
+			elif a.Due_Amount == 0:
+				full_clear_inv = full_clear_inv + a.Invoice_Amount
+				fcc = fcc + 1
+			elif a.Due_Amount > 0 and a.Due_Amount != a.Invoice_Amount:
+				part_due_inv = part_due_inv + a.Due_Amount
+				pdc = pdc + 1
+			else:
+				pass
+	count = {'fdc':fdc, 'pdc':pdc, 'fcc':fcc, 'tbc':tbc}
+	heads = {'full_due_inv':full_due_inv, 'part_due_inv':part_due_inv, 'full_clear_inv':full_clear_inv, 'total_billing':total_billing}
+	table_items  = zip(orders_list, invoices_list)	
+	
+	return render(request, 'orders/InvoicesList.html', {'table':table_data, 'table_items':table_items, 'count':count, 'heads':heads, 
+		'filter_data':filter_data, 'pdata':pdata, 'status':status, 'form':form})

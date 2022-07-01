@@ -30,11 +30,11 @@
         <div id="logo">
           <img src="{% static 'img/sss-logo.png' %}">
         </div>
-        <div id="company" style="font-size:16px; ">
-          <h2 class="name" style="color: blue;">{{qt.From_Company.Name}}</h2>
-          <div  style="color: green;">{{qt.From_Company.Address_Line_1}}</div>
-          <div  style="color: green">{{qt.From_Company.Address_Line_2}}-{{qt.From_Company.State}}</div>
-          <div style="font-weight:bold; color:green;">{% if qt.From_Company.GST_No %} GSTIN: {{ qt.From_Company.GST_No }} {% endif %}</div>
+        <div id="company" style="font-size:14px; ">
+          <h2 class="name" style="color: #d4061b; font-weight: bold; font-style: italic; font-size:22px; text-shadow: 1px 1px #ff0000;">{{qt.From_Company.Name}}</h2>
+          <div  style="color: #586263;">{{qt.From_Company.Address_Line_1}}</div>
+          <div  style="color: #586263">{{qt.From_Company.Address_Line_2}}-{{qt.From_Company.State}}</div>
+          <div style=" color:#586263;">{% if qt.From_Company.GST_No %} GSTIN: {{ qt.From_Company.GST_No }} {% endif %}</div>
         </div>
       </header>
 
@@ -206,7 +206,7 @@
           </tr>
           <tr>
             <td class="no" style="font-size:19px;">Power Generation</td>
-            <td class="desc" style="font-size:16px;">We will guarantee {{ qt.Proposal_To.Capacity.Capacity | mul:1.440 |floatformat:2}} MWH/year subject to grid availability and assuming 300 working days/consuming days</td>
+            <td class="desc" style="font-size:16px;">We will guarantee {{ qt.Proposal_To.Capacity.Capacity | mul:1.440 |floatformat:2}} MWH/year subject to grid availability and assuming 365 working days/consuming days</td>
           </tr>
           <tr>
             <td class="no" style="font-size:19px;">Project Life & Degradation</td>
@@ -229,7 +229,14 @@
         <tbody>
           <tr>
             <td class="no" style="font-size:17px; background: #0087C3;">Total Unit Cost</td>
-            <td class="desc" style="font-size:16px;">₹ {{tcost|floatformat:2|intcomma}} {% if qt.High_Raised_Structure %}(Including Extra Structure Cost ₹ {{qt.High_Raised_Structure|floatformat:0|intcomma}}){% endif %}</td>
+            <td class="desc" style="font-size:16px;">₹ {{tcost|floatformat:2|intcomma}}
+              {% if qt.High_Raised_Structure %} 
+                <br>₹ {{qt.High_Raised_Structure|floatformat:0|intcomma}}  **Extra Structure Cost Included 
+              {% endif %}
+              {% if qt.Additional_Cost  %} 
+                <br>{{qt.Additional_Cost}}
+              {% endif %}
+            </td>
           </tr>
           <tr>
             <td class="no" style="font-size:17px; background: #0087C3;">Subsidy Part</td>
@@ -251,7 +258,20 @@
         <tbody>
           <tr>
             <td class="no" style="font-size:17px; background: #0087C3;">Total Unit Cost</td>
-            <td class="desc" style="font-size:16px;">₹ {{tcost|floatformat:2|intcomma}} {% if qt.High_Raised_Structure %}(Including Extra Structure Cost ₹ {{qt.High_Raised_Structure|floatformat:0|intcomma}}){% endif %}</td>
+            <td class="desc" style="font-size:16px;">₹ {{tcost|floatformat:2|intcomma}}
+              {% if qt.High_Raised_Structure %} 
+                <br>₹ {{qt.High_Raised_Structure|floatformat:0|intcomma}}  **Extra Structure Cost Included 
+              {% endif %}
+              {% if qt.DD1_Charges %} 
+                <br>₹ {{qt.DD1_Charges|floatformat:0|intcomma}}  **Net Metering Cost Included
+              {% endif %}
+              {% if qt.Cables != 0 %} 
+                <br>₹ {{qt.Cables|floatformat:0|intcomma}}  **Cables Cost Included
+              {% endif %}
+              {% if qt.Additional_Cost  %} 
+                <br>{{qt.Additional_Cost}}
+              {% endif %}
+            </td>
           </tr>
           <tr>
             <td class="no" style="font-size:17px; background: #0087C3;">GST 12%</td>
@@ -350,7 +370,7 @@
           <tr>
             <td class="no" style="font-size:17px; background: #09788f; font-weight:bold;">Payment Terms</td>
             <td class="desc" style="font-size:16px; font-weight:bold;">
-                <i class="mdi mdi-18px mdi-chevron-double-right"></i>&nbsp;50% of the otal order value as Advance Paymente<br>
+                <i class="mdi mdi-18px mdi-chevron-double-right"></i>&nbsp;50% of the total order value as Advance Paymente<br>
                 <i class="mdi mdi-18px mdi-chevron-double-right"></i>&nbsp;40% of the total order value to be Paid Before Installation of the System<br>
                 <i class="mdi mdi-18px mdi-chevron-double-right"></i>&nbsp;10% of the total order value to be paid 3 days to Commissioning of the Project<br>
           </tr>

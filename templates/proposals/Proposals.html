@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
+{% load mathfilters %} 
 
 {% block css %}
   <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
@@ -22,12 +24,14 @@
   <script src="{% static 'js/tableexport.js' %}"></script>
 
 <script type="text/javascript">
-  function rid(tid) {getid = tid}
+  function rid(tid1, tid2) {pno = tid1; qid = tid2;}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/quote/delete/'+getid+'/'
+        url = '/{{pdata.pj}}/quote/delete/'+pno+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
+  function hidefnc(){document.getElementById('hide').style.display = 'none';}
 </script>
 
 <!-- Data Tables Export Script -->
@@ -40,25 +44,36 @@
     var tagName = style.getElementsByTagName('sz');
     for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
     $('row:first c', sheet).attr('s', '2')
-    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); $('row c[r^="F"]', sheet).attr( 's', '55' );//wrap text
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); $('row c[r^="F"]', sheet).attr( 's', '55' ); //wrap text
     var col = $('col', sheet);
     // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
-    $(col[1]).attr('width', 23); $(col[2]).attr('width', 23); $(col[3]).attr('width', 15); $(col[4]).attr('width', 15); $(col[5]).attr('width', 20);}; 
+    $(col[1]).attr('width', 25); $(col[2]).attr('width', 35); $(col[3]).attr('width', 20); $(col[4]).attr('width', 20); $(col[5]).attr('width', 25);}; 
   //--End--//
 
-  var cl = [0,  3, 4, 5, 6, 7]
-  var wdths = ['4%', '23%', '23%', '15%', '15%', '20%'];
+  var cl = [0, 2, 3, 4, 5, 6]
+  var wdths = ['4%', '20%', '25%', '15%', '16%', '20%'];
+  var ort = 'portrait'; //landscape
+  
+  var msgTop = 'Just Proposals {{pc}}, INR {{pending|floatformat:0|intcomma}}'
+  var title = '{{pdata.pj}} - Proposals List';
+  var filename = '{{pdata.pj}}_Proposals'
 
   // Datatables Customise PDF Before Export//
   var pdf_custom = function ( doc ) {
     doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
-    doc.pageMargins = [40,20,20,30];
+    doc.pageMargins = [40,60,20,30];
     doc['footer']= footer1;
+    doc['header']= header1;
     var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
     objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
     objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
     objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
-    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header;};
+    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+    // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+  doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+  {text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+  };
+
   //--End--//
 </script>
 
@@ -68,11 +83,11 @@
   autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
   buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       
-    {extend: 'excel', title: 'SSE-Rooftop-Proposals', filename: 'Rooftop_Proposals', text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}},},
+    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
 
-    {extend: 'pdf', title: 'SSE-Rooftop-Proposals', filename: 'Rooftop_Proposals', pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom,},
+    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
 
-    {extend: 'print',title: 'SSE-Rooftop-Proposals',filename: 'Rooftop_Proposals', exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"',},]}, } );
+    {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
 </script>
 {% endblock %} <!-- For Scripts -->
 
@@ -144,32 +159,32 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>Proposal</th>
-            <th>Quote</th>
+            <th>Action</th>
             <th>Customer Details</th>
             <th>Requested Capacity</th>
             <th>Proposal No</th>
-            <th>Followup By</th>            
+            <th>Status</th>            
             <th>Message</th>
           </tr>
         </thead>
         <tbody>
-          {% for x, y, z in data %}
-          <tr>
+          {% for x, y, z, r in data %}
+          {% if z == None or z.user == user  or user.username == 'ashok' %}
+          {% if r == 1 %}
+            <tr class="customtr1">
+          {% else %}
+            <tr>
+          {% endif %}
+
             <td >{{forloop.counter}}</td>
-            <td><a class="mdi mdi-border-color" title="Edit Proposal" href="/{{pdata.pj}}/proposaledit/{{x.Proposal_No_1}}/"></a>&nbsp;&nbsp;
-              <a style="cursor:pointer" class="mdi mdi-content-copy" title="Duplicate Proposal" href="/{{pdata.pj}}/proposalcopy/{{x.Proposal_No_1}}/"></a>&nbsp;&nbsp;
-              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete Proposal" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.Proposal_No_1}}')"></a>
-            </td>
 
             {% if x.Is_Gen == 0 %}
-             <td style="width:20%;"><button type="button"  onclick="location.href='/{{pdata.pj}}/quote/create/{{x.id}}/'" class="btn1 btn1-primary">Generate Quote</button></td>
+              <td ><button type="button"  onclick="location.href='/{{pdata.pj}}/quote/create/{{x.id}}/'" class="btn1 btn1-primary">Generate Quote</button></td>
             {% else %}
-              <td style="width:20px;"><button type="button"  onclick="location.href='/{{pdata.pj}}/quote/view/{{x.Proposal_No_1}}/'" class="btn1 btn1-info">View</button>&nbsp;&nbsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/quoteedit/{{x.Proposal_No_1}}/'" class="btn1 btn1-primary">Edit</button></td>
+              <td><a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.Proposal_No_1}}, {{x.id}})">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
             {% endif %}
 
-            
-            <td style="width:20%;">
+            <td style="white-space:normal;">
               {{x.Name}}
               <br><br><i class="mdi mdi-phone"></i>&nbsp;{{x.Phone_Number}}
               {% if x.Address_Line_1 %}<br> {{x.Address_Line_1}}{% endif %}
@@ -178,29 +193,36 @@
               {% if x.Email %}<br> <i class="mdi mdi-email-outline"></i>&nbsp;{{x.Email}}{% endif %}
             </td>
             
-            <td style="white-space:normal; width:15%"><span style="color: green">
+            <td style="white-space:normal; width:30%"><span style="color: green">
               {% if x.Power_Bill %}Suggested Capacity
               <br>{{x.Capacity}}
               {% else %}{{ x.Capacity }}{% endif %}
               <br>Inverter: {{ x.Inverter_Capacity }}KW
-              </span>{% if y != 'None' %}<br><br><span style="color:blue">Client Price: ₹ {{y}}</span>{% else %}{% endif %}
+              {% if x.Type != 'Residential' %}
+                <br><br>Commercial Proposal
+                {% if y != 'None' %}<br>(Price Inclusive GST){% endif %}
+              {% endif %}
+              </span>{% if y != 'None' %}<br><span style="color:blue">Client Price: ₹ {{y}}</span>{% else %}{% endif %}
             </td>
 
-            <td style="width:10%;">
+            <td>
               {{x.Proposal_No}}
               <br>{{x.Date|date:'d M Y'}}
             </td>
 
             <td style="white-space:normal;">
-              {% if z %}{{z}}{% endif %}
+              {% if r == 1 %}<span style="color: blue;">Order Confirmed</span>{% endif%}
+              {% if z %}<br><br>Followup By
+              <br>{{z}}{% endif %}
             </td>
             
-            <td style="white-space:normal; width:25%;">
+            <td style="white-space:normal;">
               {% if x.Power_Bill %}Power Bill
               <br>{{ x.Power_Bill }}
               {% else %}<br>{{x.Message}}{% endif %}
             </td>
           </tr>
+          {% endif %}
           {% endfor %} 
         </tbody>
       </table>
@@ -208,7 +230,32 @@
     </div>
   </div>
 
-  <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div id='hide'>
+    <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document" style="width:250px;%">
+        <div class="modal-content" id="modal-reload">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="template-demo">
+              <button type="button"  onclick="location.href='/{{pdata.pj}}/quote/view/'+pno+'/'" class="btn btn-sm btn-primary mb-4">View Quote</button>
+              <button type="button"  onclick="location.href='/{{pdata.pj}}/quoteedit/'+pno+'/'" class="btn btn-sm btn-info mb-4">Edit Quote</button>
+              <button  type="button"  onclick="location.href='/{{pdata.pj}}/proposaltoorder/'+pno+'/'" class="btn btn-sm btn-danger mb-4">Convert as Order</button>
+              <button type="button"  onclick="location.href='/{{pdata.pj}}/proposaledit/'+pno+'/'" class="btn btn-sm btn-success mb-4">Edit Proposal</button>
+              <button type="button"  onclick="location.href='/{{pdata.pj}}/proposalcopy/'+pno+'/'" class="btn btn-sm btn-secondary mb-4">Duplicate Proposal</button>
+              <button type="button" onclick="hidefnc();" data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning mb-4">Delete Proposal</button>            
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="exampleModal12" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">

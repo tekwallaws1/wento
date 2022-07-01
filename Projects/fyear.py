@@ -16,8 +16,8 @@ def get_financial_year(datestring):
 
 
 def get_fy_date():
-	date = datetime.strptime(date.today(), "%Y-%m-%d").date()
+	dt = date.today()
 	#initialize the current year
-	year_of_date=date.year
+	year_of_date=dt.year
 	financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()
 	return financial_year_start_date

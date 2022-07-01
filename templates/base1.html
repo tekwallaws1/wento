@@ -5,36 +5,62 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Smart Viewer</title>
+    <title>SSE-ProMan</title>
     <!-- plugins:css-->
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <!-- <link rel="stylesheet" href="{% static 'css/vendor.bundle.base.css' %}"> -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom-modal.css' %}">
-    <!-- <link rel="stylesheet" href="{% static 'css/apexcharts.css' %}" rel="stylesheet" > -->
+    <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.css">
     {% block css %}{% endblock %}
 
-  </head>
+  </head> 
   <body class="sidebar-icon-only">
     <div class="container-scroller">
       <!-- partial:partials/_navbar.html -->
       <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
+        <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
+          <!-- <a class="navbar-brand brand-logo font-weight-bold", style="font-size: 30px; color: #BA55D3;" href="{% url 'home' %}">ai-proj-lead</a> -->
+           <!-- <img class="img-responsive fit-image" src="{% static 'img/logo.png' %}" style="display: block;
+  margin-top: -50px;
+  margin-left: -72px;
 
+" > -->
+          <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-sss.png' %}" /></a>
+          <!-- <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-sss.png' %}" /></a> -->
+          <a class="navbar-brand brand-logo-mini" href="{% url 'home' %}"><img style="margin-left: 30px;width: 250px; height: 40px;" src="{% static 'img/logo-sss.png' %}" alt="logo" /></a>
 
-<!-- Missed -->
-
-
+          
+        </div>
         <div class="navbar-menu-wrapper d-flex align-items-stretch">
+          <!-- <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+            <span class="mdi mdi-menu"></span>
+          </button> -->
+<!--           <div class="text-center  d-flex align-items-center justify-content-center">
+          <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img width="120" height="24" src="{% static 'img/logo.png' %}" /></a>
+        </div> -->
+          <!-- <div class="search-field d-none d-md-block">
+            <form class="d-flex align-items-center h-100" action="#">
+              <div class="input-group">
+                <div class="input-group-prepend bg-transparent">
+                  <i class="input-group-text border-0 mdi mdi-magnify"></i>
+                </div>
+                <input type="text" class="form-control bg-transparent border-0" placeholder="search for something">
+              </div>
+            </form>
+          </div> -->
           <ul class="navbar-nav navbar-nav-right">
             <li class="nav-item nav-profile dropdown">
               <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                 <div class="nav-profile-img">
-                  <img src="{% static 'img/suresh.jpg' %}" alt="image">
+                  <!-- <img src="{{profilepic_url}}" alt="image"> -->
+                  <img src="{% static 'img/praveen.jpg' %}" alt="image">
                   <span class="availability-status online"></span>
                 </div>
                 <div class="nav-profile-text">
-                  <p class="mb-1 text-black">{{user.first_name}}</p>
+                  <p class="mb-1 text-black">{{name}}</p>
                 </div>
               </a>
               <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
@@ -48,7 +74,8 @@
             <li class="nav-item dropdown">
               <a class="nav-link count-indicator dropdown-toggle" id="notificationDropdown" href="#" data-toggle="dropdown">
                 <i class="mdi mdi-bell-outline"></i>
-                <span class="count-symbol bg-danger"></span>
+                <!-- <i class="fas fa-bell"></i> -->
+                <span class="count-symbol bg-success"></span>
               </a>
               <div class="dropdown-menu dropdown-menu-right navbar-dropdown preview-list" aria-labelledby="notificationDropdown">
                 <h6 class="p-3 mb-0">Notifications</h6>
@@ -94,7 +121,7 @@
             </li>
             <li class="nav-item nav-logout d-none d-lg-block">
               <a class="nav-link" href="{% url 'logout' %}">
-                <i class="mdi mdi-power"></i>
+                <i class="mdi mdi-power" style="color: red;"></i>
               </a>
             </li>
           </ul>
@@ -106,27 +133,26 @@
       <!-- partial -->
       <div class="container-fluid page-body-wrapper">
         <!-- partial:partials/_sidebar.html -->
-        <nav class="sidebar sidebar-offcanvas" id="sidebar">
 
-
-<!-- Missed -->
-
-
-        </nav>
         <!-- partial -->
         <div class="main-panel">
           <div class="content-wrapper">
 
-{% if form.errors %}
+<!-- {% if form.errors %}
   {% for field in form %}
     {% for error in field.errors %}
       <p style="color: red;"> {{ error }} </p>
     {% endfor %}
   {% endfor %}
-{% endif %}
+{% endif %} -->
+                                                          
 
+        
+                      
+                       
 {% if messages %}
   {% for msg in messages %}
+    {% if msg.tags == 'success' %}
     <div id="modalCustom" class="col-lg-12 layout-spacing">
       <div class="statbox widget box box-shadow">
         <div id="myButton" data-toggle="modal" data-target="#profileModal"></div>
@@ -138,12 +164,12 @@
                         <span aria-hidden="true">&times;</span></button>
                     <div class="modal-header justify-content-center" id="profileModalLabel">
                       <div class="modal-profile mt-4">
-                          <img alt="avatar" src="{% static 'img/suresh.jpg' %}" class="rounded-circle">
+                          <img alt="avatar" src="{{profilepic_url}}" style="width:90px; height:90px;" class="rounded-circle">
                       </div>
                     </div>
                     <div class="modal-body text-center">
                       {% if user.is_authenticated %}
-                      <p class="mt-2">Hi, {{ user.first_name }}</p>
+                      <p class="mt-2">Hi, {{ name }}</p>
                       {% else %}
                       <a href="{% url django.contrib.auth.login %}">Please Login Here</a>
                       {% endif %}
@@ -154,9 +180,31 @@
               </div>
           </div>
       </div>
+      {% else %}
+       <!-- <div class="modal fade " id='openmodal'  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Error Message !</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-text-red" style="color: red">{{msg}}</p>
+                </div>
+                <br>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Discard</button>
+                    <button type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+      </div>   --> 
+      {% endif %}
   {% endfor %}
 {% endif %} 
           <!-- MAIN CONTENT BEGIN -->
+                    <h5>{{pj}}</h5>
+
           {% block content %}
           {% endblock %}
           <!-- MAIN CONTENT BEGIN -->
@@ -181,13 +229,38 @@
 <script src="{% static 'js/misc.js' %}"></script>
 <script src="{% static 'js/off-canvas.js' %}"></script>
 <script src="{% static 'js/hoverable-collapse.js' %}"></script>
+<script src="{% static 'js/sweetalert2.min.js' %}"></script>
+
 <!-- <script src="https://cdn.WebRTC-Experiment.com/MediaStreamRecorder.js"></script>
 <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script> -->
 <script>
 window.onload = function () {
-    document.getElementById('myButton').click()
+    document.getElementById('myButton').click();
+    // document.getElementById('load').click();
 }
+// $(function() {
+//     $('#openmodal').modal('show');
+// });
+
 </script>
+<!-- <div class="widget-content widget-content-area text-center">    
+  <button class="mr-2 btn btn-primary message" id='load' ></button>    
+</div> -->
+{% if messages %}
+  {% for msg in messages %}
+    {% if msg.tags == 'error' %}
+      <script>
+        $('.widget-content .message', function () {
+        swal({
+            title: 'Error Alert !',
+            text: '{{msg}}',
+            padding: '2em'
+          })
+      })          
+      </script>
+    {% endif %}
+  {% endfor %}
+{% endif %}
 
 <!-- For different java files for different pages -->
 {% block scripts %}   

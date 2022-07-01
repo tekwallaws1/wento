@@ -46,7 +46,7 @@ class Proposal1Form(forms.ModelForm):	#For Customer
 class QuoteForm(forms.ModelForm):	
 	class Meta:
 		model = Quote
-		exclude = ['Date', 'Proposal_No', 'Proposal_No_1', 'Rivision', 'Account', 'From_Company', 'Proposal_To', 'Supplier_Add_On_Cost', 'Tender_Cost', 'Type', 'GST_Amount']
+		exclude = ['Date', 'Proposal_No', 'Proposal_No_1', 'Rivision', 'Account', 'From_Company', 'Proposal_To', 'Supplier_Add_On_Cost', 'Tender_Cost', 'Type', 'GST_Amount', 'Status']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

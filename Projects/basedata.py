@@ -7,6 +7,12 @@ def projectname(request, var):
 		pj = Projects.objects.filter(Short_Name = var, Status='Active', ds=True).last()
 	else:
 		pj = Projects.objects.filter(Status='Active', ds=True) #Before Select Project All should load
+
+	# if request.user.username:
+	# 	carry_msg_update = Carry_Msg.objects.filter(user__user__username = request.user.username).last()
+	# 	carry_msg_update.Status = 0
+	# 	carry_msg_update.save()
+
 	return {'pj':pj}
 
 def profiledata(request):

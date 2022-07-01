@@ -12,9 +12,8 @@
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom-modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.css">
-
-    <!-- <link rel="stylesheet" href="{% static 'css/apexcharts.css' %}" rel="stylesheet" > -->
     {% block css %}{% endblock %}
 
   </head> 
@@ -30,7 +29,8 @@
 
 " > -->
           <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-sss.png' %}" /></a>
-          <a class="navbar-brand brand-logo-mini" href="{% url 'home' %}"><img src="{% static 'img/logo-mini.svg' %}" alt="logo" /></a>
+          <!-- <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-sss.png' %}" /></a> -->
+          <a class="navbar-brand brand-logo-mini" href="{% url 'home' %}"><img src="{% static 'img/logo-mini.png' %}" alt="logo" /></a>
 
           
         </div>
@@ -55,7 +55,8 @@
             <li class="nav-item nav-profile dropdown">
               <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                 <div class="nav-profile-img">
-                  <img src="{{profilepic_url}}" alt="image">
+                  <!-- <img src="{{profilepic_url}}" alt="image"> -->
+                  <img src="{% static 'img/praveen.jpg' %}" alt="image">
                   <span class="availability-status online"></span>
                 </div>
                 <div class="nav-profile-text">
@@ -164,31 +165,94 @@
               <div class="collapse" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/proposalsdashboard/">Dashboard</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/proposalslist/">Proposals</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcapacity/">Power Categories</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcosting/">Costing Details</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/proposalslist/">Proposals List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcapacity/">Products List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcosting/">Product Costings</a></li>
                 </ul>
               </div>
             </li>
 
             <li class="nav-item">
-              <a class="nav-link" data-toggle="collapse" href="#ui-basic2" aria-expanded="false" aria-controls="ui-basic2">
-                <span class="menu-title">Work Orders</span>
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicorders" aria-expanded="false" aria-controls="ui-basicorders">
+                <span class="menu-title">Sales Orders</span>
                 <i class="menu-arrow"></i>
                 <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
                 <i class="fas fa-lg fa-cart-flatbed-suitcase"></i>
               </a>
-              <div class="collapse" id="ui-basic2">
+              <div class="collapse" id="ui-basicorders">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pj}}/orderslist/">Orders List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="#">Create Work Order</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/orderslist/Inprogress/">Sales Orders List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/ordersform/create/1/">Add New Received<br>Sales Order</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicsalesinv" aria-expanded="false" aria-controls="ui-basicsalesinv">
+                <span class="menu-title">Sales Invoices</span>
+                <i class="menu-arrow"></i>
+                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
+                <i class="fas fa-lg fa-file-invoice"></i>
+              </a>
+              <div class="collapse" id="ui-basicsalesinv">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/invoiceslist/Issued/">Issued Invoices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/invoiceslist/Proforma/">Proforma Invoices</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicpay" aria-expanded="false" aria-controls="ui-basicpay">
+                <span class="menu-title">Customer Payments</span>
+                <i class="menu-arrow"></i>
+                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
+                <i class="fas fa-lg fa-money-check"></i>
+              </a>
+              <div class="collapse" id="ui-basicpay">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentslist/Received/">Received Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentslist/Due/">Due Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentsform/create/1/">Add New Payment</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicpurchase" aria-expanded="false" aria-controls="ui-basicpurchase">
+                <span class="menu-title">Purchases</span>
+                <i class="menu-arrow"></i>
+                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
+                <i class="fas fa-lg fa-cart-shopping"></i>
+              </a>
+              <div class="collapse" id="ui-basicpurchase">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/purchaseslist/Total/">PO's List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/vendorinvoiceslist/Issued/">Vendor Invoices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/vendorpaymentslist/Paid/">Vendor Payments</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicwork" aria-expanded="false" aria-controls="ui-basicwork">
+                <span class="menu-title">Work Progress</span>
+                <i class="menu-arrow"></i>
+                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
+                <i class="fas fa-lg fa-boxes-packing"></i>
+              </a>
+              <div class="collapse" id="ui-basicwork">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/worklist/Delivered/">Delivered Works</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/worklist/Inprogress/">Inprogress Works</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/worklist/Pending/">Not Started Works</a></li>
                 </ul>
               </div>
             </li>
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicsupport" aria-expanded="false" aria-controls="ui-basicsupport">
-                <span class="menu-title">Support</span>
+                <span class="menu-title">Support</span> 
                 <i class="menu-arrow"></i>
                 <!-- <i class="fas fa-lg fa-headset"></i> -->
                 <i class="fas fa-lg fa-screwdriver-wrench"></i>
@@ -238,16 +302,21 @@
         <div class="main-panel">
           <div class="content-wrapper">
 
-{% if form.errors %}
+<!-- {% if form.errors %}
   {% for field in form %}
     {% for error in field.errors %}
       <p style="color: red;"> {{ error }} </p>
     {% endfor %}
   {% endfor %}
-{% endif %}
+{% endif %} -->
+                                                          
 
+        
+                      
+                       
 {% if messages %}
   {% for msg in messages %}
+    {% if msg.tags == 'success' %}
     <div id="modalCustom" class="col-lg-12 layout-spacing">
       <div class="statbox widget box box-shadow">
         <div id="myButton" data-toggle="modal" data-target="#profileModal"></div>
@@ -275,6 +344,26 @@
               </div>
           </div>
       </div>
+      {% else %}
+       <!-- <div class="modal fade " id='openmodal'  tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="myLargeModalLabel">Error Message !</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p class="modal-text-red" style="color: red">{{msg}}</p>
+                </div>
+                <br>
+                <div class="modal-footer">
+                    <button class="btn" data-dismiss="modal"><i class="flaticon-cancel-12"></i> Discard</button>
+                    <button type="button" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </div>
+      </div>   --> 
+      {% endif %}
   {% endfor %}
 {% endif %} 
           <!-- MAIN CONTENT BEGIN -->
@@ -304,13 +393,38 @@
 <script src="{% static 'js/misc.js' %}"></script>
 <script src="{% static 'js/off-canvas.js' %}"></script>
 <script src="{% static 'js/hoverable-collapse.js' %}"></script>
+<script src="{% static 'js/sweetalert2.min.js' %}"></script>
+
 <!-- <script src="https://cdn.WebRTC-Experiment.com/MediaStreamRecorder.js"></script>
 <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script> -->
 <script>
 window.onload = function () {
-    document.getElementById('myButton').click()
+    document.getElementById('myButton').click();
+    // document.getElementById('load').click();
 }
+// $(function() {
+//     $('#openmodal').modal('show');
+// });
+
 </script>
+<!-- <div class="widget-content widget-content-area text-center">    
+  <button class="mr-2 btn btn-primary message" id='load' ></button>    
+</div> -->
+{% if messages %}
+  {% for msg in messages %}
+    {% if msg.tags == 'error' %}
+      <script>
+        $('.widget-content .message', function () {
+        swal({
+            title: 'Error Alert !',
+            text: '{{msg}}',
+            padding: '2em'
+          })
+      })          
+      </script>
+    {% endif %}
+  {% endfor %}
+{% endif %}
 
 <!-- For different java files for different pages -->
 {% block scripts %}   

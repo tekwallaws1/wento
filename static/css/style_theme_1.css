@@ -103,6 +103,11 @@
   margin-top: 15px;
 }
 
+.text-blue-1000 {
+  color: blue !important;
+  margin-top: 15px;
+}
+
 .text-gray-900 {
   color: #3a3b45 !important;
 }

@@ -13,7 +13,7 @@
               <div class="form-group">
                 {% for field in form %}
                   {% if field.label == 'Cost To Client' %}
-                  <label for="{{ field.label }}">{{ field.label }} (Excluding Extra Structure [If Commercial Excuding GST Also] )</label>{{ field}} 
+                  <label for="{{ field.label }}">{{ field.label }} (Excluding Extra Structure [If Commercial Excluding GST, Cables Also] )</label>{{ field}} 
                   {% endif %}
                 {% endfor %}  
               </div>
@@ -24,9 +24,9 @@
                   {% endif %}
                 {% endfor %}  
               </div>
-              <div class="form-check form-check-flat form-check-primary">
+              <!-- <div class="form-check form-check-flat form-check-primary">
                 <label class="form-check-label">{{ form.Status }}tick if order is processed</label>
-              </div>
+              </div> -->
             </div>
           <button type="submit" class="btn1 btn1-primary">Update Quote</button>
         </form>

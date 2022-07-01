@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from datetime import date, datetime, timedelta 
 
-# Create your models here.
+# Create your models here. 
 
 states = (("Andhra Pradesh","Andhra Pradesh"),("Telangana","Telangana"),("Tamil Nadu","Tamil Nadu"),("Karnataka","Karnataka"),("Maharashtra","Maharashtra"),("Kerala","Kerala"),
 	("Chhattisgarh","Chhattisgarh"),("Delhi","Delhi"),("Goa","Goa"),("Gujarat","Gujarat"),("Punjab","Punjab"),("Rajasthan","Rajasthan"),("Haryana","Haryana"),("West Bengal","West Bengal"),("Himachal Pradesh","Himachal Pradesh"),
@@ -18,6 +18,7 @@ class CompanyDetails(models.Model):
 	Address_Line_2			= models.CharField(max_length=35, blank=True, null=True, help_text='Address Line 2')
 	State 					= models.CharField(max_length=50, null=True, choices=states)
 	GST_No 					= models.CharField(max_length=15, blank=True, null=True, help_text='Provide If Company under GST')
+	State_Code 				= models.IntegerField(null=True, blank=True, help_text='State Code Ex. 36, 37')
 	Phone_Number_1 			= models.CharField(max_length=20, null=True, help_text='Main Phone Number')
 	Phone_Number_2 			= models.CharField(max_length=10, null=True, blank=True, help_text='Optional Phone Number')
 	Email 					= models.EmailField(max_length=40, null=True, help_text='Company Contact Mail Address')
@@ -48,6 +49,7 @@ class CustDt(models.Model):
 	Address_Line_2			= models.CharField(max_length=35, blank=True, null=True, help_text='Address Line 2')
 	State 					= models.CharField(max_length=50, null=True, choices=states)
 	GST_No 					= models.CharField(max_length=15, blank=True, null=True, help_text='Provide If Company under GST')
+	State_Code 				= models.IntegerField(null=True, blank=True, help_text='State Code Ex. 36, 37')
 	Phone_Number_1 			= models.CharField(max_length=20, null=True, help_text='Main Contact Phone Number')
 	Phone_Number_2 			= models.CharField(max_length=20, null=True, blank=True, help_text='Optional/Alternative Phone Number')
 	Email 					= models.EmailField(max_length=40, null=True, blank=True, help_text='Customer/Company Contact Mail Address')
@@ -78,6 +80,7 @@ class VendDt(models.Model):
 	Address_Line_2			= models.CharField(max_length=35, blank=True, null=True, help_text='Address Line 2')
 	State 					= models.CharField(max_length=50, null=True, choices=states)
 	GST_No 					= models.CharField(max_length=15, blank=True, null=True, help_text='Provide If Company under GST')
+	State_Code 				= models.IntegerField(null=True, blank=True, help_text='State Code Ex. 36, 37')
 	Phone_Number_1 			= models.CharField(max_length=20, null=True, help_text='Main Contact Phone Number')
 	Phone_Number_2 			= models.CharField(max_length=20, null=True, blank=True, help_text='Optional/Alternative Phone Number')
 	Email 					= models.EmailField(max_length=40, null=True, blank=True, help_text='Customer/Company Contact Mail Address')
@@ -103,7 +106,7 @@ class VendDt(models.Model):
 		return str(self.Supplier_Name)+'-'+str(self.Address_Line_1)+'-'+str(self.Address_Line_2)+'-'+str(self.State)+'-'+str(self.Address_Type)
 
 class CustContDt(models.Model):
-	Customer_Name 			= models.ForeignKey(CustDt, null=True, blank=True, on_delete=models.CASCADE)
+	Customer_Name 			= models.ForeignKey(CustDt, null=True, blank=True, on_delete=models.SET_NULL)
 	Contact_Person 			= models.CharField(max_length=30, null=True, help_text='Contact Person Name')
 	Phone_Number_1 			= models.CharField(max_length=20, null=True, help_text='Main Contact Phone Number')
 	Phone_Number_2 			= models.CharField(max_length=20, null=True, blank=True, help_text='Optional/Alternative Phone Number')
@@ -114,10 +117,10 @@ class CustContDt(models.Model):
 	ds						= models.BooleanField(default=True)
 
 	def __str__(self):
-		return str(self.Customer_Name)+'-'+str(self.Contact_Person)
+		return str(self.Customer_Name.Customer_Name)+'-'+str(self.Contact_Person)+'-'+str(self.Phone_Number_1)
 
 class VendContDt(models.Model):
-	Supplier_Name 			= models.ForeignKey(VendDt, null=True, on_delete=models.CASCADE)
+	Supplier_Name 			= models.ForeignKey(VendDt, null=True, on_delete=models.SET_NULL)
 	Contact_Person 			= models.CharField(max_length=30, null=True, help_text='Contact Person Name')
 	Phone_Number_1 			= models.CharField(max_length=20, null=True, help_text='Main Contact Phone Number')
 	Phone_Number_2 			= models.CharField(max_length=20, null=True, blank=True, help_text='Optional/Alternative Phone Number')
@@ -129,5 +132,25 @@ class VendContDt(models.Model):
 
 	def __str__(self):
 		return str(self.Supplier_Name)+'-'+str(self.Contact_Person)
+
+
+class Bank_Accounts(models.Model):
+	Related_Company 		= models.ForeignKey(CompanyDetails, null=True, on_delete=models.SET_NULL)
+	Account_No 				= models.IntegerField(null=True, help_text='Bank Account Number')
+	Bank_Name 				= models.CharField(max_length=30, null=True, help_text='Bank Name')
+	Branch 					= models.CharField(max_length=40, null=True, blank=True, help_text='bank branch details')
+	IFSC_Code 				= models.CharField(max_length=11, null=True, blank=True, help_text='bank IFSC code')
+	Account_Type			= models.CharField(max_length=40, null=True, choices=(('CC', 'CC'), ('Current', 'Current')))
+	Status					= models.BooleanField(default=True, help_text='active status')
+
+	def __str__(self):
+		return str(self.Related_Company.Company_Name)+'-'+str(self.Account_No)+'-'+str(self.Bank_Name)+'-'+str(self.Account_Type)
+
+class No_Formats(models.Model):
+	No_Format_Related_To	= models.CharField(max_length=20, null=True, choices=(('Invoice', 'Invoice'), ('Proforma Invoice', 'Proforma Invoice'), ('PO', 'PO'), ('DC', 'DC'), ('Expenses Voucher', 'Expenses Voucher')))
+	No_Format 				= models.CharField(max_length=30, null=True, unique=True, help_text='excluding financial year and sequence number such as PS/AP/Service/ etc..')
+
+	def __str__(self):
+		return str(self.No_Format)
 
 

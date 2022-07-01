@@ -8,6 +8,8 @@ from .models import *
 @admin.register(VendDt)
 @admin.register(CustContDt)
 @admin.register(VendContDt)
+@admin.register(Bank_Accounts)
+@admin.register(No_Formats)
 
 class ProjectsAdmin(ImportExportModelAdmin):
 	pass

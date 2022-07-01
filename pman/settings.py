@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'Projects',
     'Proposals',
     'Orders',
+    'Products',
     # 'rooftop',
     'import_export',
     'mathfilters',
@@ -110,7 +111,7 @@ WSGI_APPLICATION = 'pman.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / 'db.sqlite3'),
+        'NAME': str(BASE_DIR / 'db1.sqlite3'),
     }
  }
 

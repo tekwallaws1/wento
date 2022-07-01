@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+{% endblock %} 
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    
+    <script>
+    // This code activates flatpickr on fields with the 'datetimefield' class when the document has loaded
+    window.addEventListener("DOMContentLoaded", function () {
+        flatpickr(".datetimefield", {
+            enableTime: true,
+            enableSeconds: true,
+            dateFormat: "Y-m-d H:i:S",
+        });
+    });
+</script>
+{% endblock %} <!-- For Scripts -->
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Purchase Order Delivery Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                {% for field in form %}
+                  {% if field.label != 'Attach' and field.label != 'Is Delivered Fully' and field.label != 'Want To Close PO' and field.label != 'Next Commitment Date' %}
+                    <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}
+                  <label style="color:#32a852;">attach below if any vendor issued invoice copy</label>{{form.Attach}} 
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label" style="color:#32a852;">{{ form.Is_Delivered_Fully }}mark it if all material against PO delevered. if it marked, all material in PO will be added to stock directly</label>
+                </div>
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label" style="color:#32a852;">{{ form.Want_To_Close_PO  }}mark it if not want futher delivery with this PO</label>
+                </div>
+                <br>
+                  <label for="{{ field.label }}">specify if any pending material and committed to deliver on coming date{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form.Next_Commitment_Date}}
+              </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

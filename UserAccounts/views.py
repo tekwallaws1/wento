@@ -92,7 +92,7 @@ def Edit_Permissions(request, proj, fnc, var):
 				user = User.objects.get(username=acnt.user.username)
 				user.is_active = True
 				user.save()
-				messages.success(request, 'User Permissions Has Been Update')
+				messages.success(request, 'User Permissions Has Been Updated')
 				return redirect('/%s/userslist/'%pdata['pj'])
 			else:
 				return render(request, 'registration/EditPermissions.html', {'form':form, 'pdata':pdata})

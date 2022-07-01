@@ -1,13 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load humanize %}
+{% load mathfilters %} 
 
 {% block css %}
   <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
-{% endblock %} 
+{% endblock %}  
 
-{% block scripts %}
+{% block scripts %} 
   <script src="{% static 'js/filterdate.js' %}"></script>
   <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
   <script src="{% static 'js/datatables/datatables.js' %}"></script>
@@ -22,10 +25,30 @@
   <script src="{% static 'js/tableexport.js' %}"></script>
 
 <script type="text/javascript">
-  function rid(tid) {getid = tid}
+
+  function rid(tid, can_gen_invoice, billed, ordervalue) {getid = tid;
+    if (can_gen_invoice=='False' | ordervalue <= billed){
+      document.getElementById('hidebillbutton').style.display='none';
+      document.getElementById('showbillbutton').style.display='block';}
+    else {
+      document.getElementById('hidebillbutton').style.display='block';
+      document.getElementById('showbillbutton').style.display='none';}
+  };
+
+  function alertpopup(){
+    // document.getElementById('exampleModal11').style.display = 'none';
+    $('.widget-content .message', function () {
+        swal({
+            title: 'Error Alert !',
+            text: 'Invoice generation not allowed due to all Invoices value under this order exceeding the order value',
+            padding: '2em'
+          })
+      }) 
+  }
+
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/quote/delete/'+getid+'/'
+        url = '/{{pdata.pj}}/ordersform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -40,25 +63,38 @@
     var tagName = style.getElementsByTagName('sz');
     for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
     $('row:first c', sheet).attr('s', '2')
-    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); $('row c[r^="F"]', sheet).attr( 's', '55' );//wrap text
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); $('row c[r^="F"]', sheet).attr( 's', '55' ); //wrap text
     var col = $('col', sheet);
     // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
-    $(col[1]).attr('width', 23); $(col[2]).attr('width', 23); $(col[3]).attr('width', 15); $(col[4]).attr('width', 15); $(col[5]).attr('width', 20);}; 
+    $(col[1]).attr('width', 25); $(col[2]).attr('width', 25); $(col[3]).attr('width', 25); $(col[4]).attr('width', 25); $(col[5]).attr('width', 30);}; 
   //--End--//
 
-  var cl = [0,  3, 4, 5, 6, 7]
-  var wdths = ['4%', '23%', '23%', '15%', '15%', '20%'];
+  var cl = [0,  1, 2, 3, 4, 5]
+  var wdths = ['4%', '*', '*', '*', '*', '*'];
+  
+   if ('{{status}}' == 'Inprogress' ) { var msgTop = 'Total Inprogress Sales Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}';}
+   else if ('{{status}}' == 'Pipeline' ) { var msgTop = 'Pipeline Sales Orders {{count.pc}}, Value {{orders.pipeline|floatformat:0|intcomma}}';}
+    else { var msgTop = 'Total Orders {{count.tc}}, Value {{orders.total|floatformat:0|intcomma}}  |  Closed Orders {{count.cc}}, Value {{orders.closed|floatformat:0|intcomma}}{% if count.ic != 0 %}  |  Inprogress Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}{% endif %}';};
+    var title = '{{pdata.pj}} - {{status}} Sales Orders List';
+    var filename = '{{pdata.pj}}-SalesOrders_{{table.first.Order_Received_Date|date:'dMy'}}to{{table.last.Order_Received_Date|date:'dMy'}}'
 
   // Datatables Customise PDF Before Export//
   var pdf_custom = function ( doc ) {
     doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
-    doc.pageMargins = [40,20,20,30];
+    doc.pageMargins = [40,60,20,30];
+    // doc.content[1].margin = [ 0, 50, 0, 50 ]
     doc['footer']= footer1;
+    doc['header']= header1;
     var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
     objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
     objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
     objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
-    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header;};
+    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+    // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+  doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+  {text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+  };
+
   //--End--//
 </script>
 
@@ -68,196 +104,415 @@
   autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
   buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       
-    {extend: 'excel', title: 'SSE-Rooftop-Proposals', filename: 'Rooftop_Proposals', text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}},},
+    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:'landscape', messageTop: msgTop, },
 
-    {extend: 'pdf', title: 'SSE-Rooftop-Proposals', filename: 'Rooftop_Proposals', pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom,},
+    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:'landscape', },
 
-    {extend: 'print',title: 'SSE-Rooftop-Proposals',filename: 'Rooftop_Proposals', exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"',},]}, } );
+    {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:'landscape', messageTop: msgTop },]}, } );
 </script>
 {% endblock %} <!-- For Scripts -->
 
 
 {% block content %}
 <div class="page-header">
-  <h3 class="page-title">{{first.table_fy.Related_Project.Short_Name}} Orders List</h3>
+  <h3 class="page-title">{{pdata.pj.Short_Name}} - {{status}} Sales Orders List</h3>
 </div>
 
-<!-- <div>
+<div>
   <div style="float:left">
-    <button type="button"  onclick="location.href='{% url 'ordersform' 'proj' %}'" class="btn btn-sm   btn-primary mb-4">+New Order</button>&emsp;<button type="button"  onclick="location.href='{% url 'ordersdb' %}'" class="btn btn-sm  btn-info mb-4">Dash Board</button>
+    <button type="button" onclick="location.href='/{{pdata.pj}}/ordersform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="Create New Order">Add New Order</button>
+    {% if status == 'Total' %}
+      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
+      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button>
+    {% elif status == 'Inprogress' %}
+      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-success mb-4">All Orders</button>
+      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button>
+    {% else %}
+      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
+      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-info mb-4">All Orders</button>
+    {% endif %}
   </div>
+
   <div style="float:right">
-    <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-    &nbsp;&nbsp;&nbsp;
-    <button type="button" onclick="location.href='{% url 'orderslist' %}'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+    {% if status == 'Total' or status == 'Inprogress' %}
+      <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+      &nbsp;&nbsp;&nbsp;
+      {% if status == 'Total' %}
+        <button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      {% else %}
+        <button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      {% endif %}
+    {% endif %}
   </div>
   <div style="clear:both"></div>
 </div>
- -->
-
 
 <!--Filter/Serch History Form-->
   <div id="addEventsModal" class="modal animated fadeIn"> 
     <div class="modal-dialog modal-dialog-centered">                            
       <!-- Modal content -->
       <div class="card modal-content">
-          <div class="modal-body">
-              <span id="discard" data-dismiss="modal" class="close">&times;</span>
-              <div class="add-edit-event-box">
-                  <div class="add-edit-event-content">
-                      <div class="add-event-title edit-event-title"></div>
-                      <h5 class="modal-title">Search Data by Applying Filter</h5>
-                      <form class="">
-                          <div class="row">
-                            <div class="col-md-6 col-sm-6 col-12">
-                              <label style="font-weight: 200; color: black; font-size: 13px;">Related Project</label>
-                              {{ filter_data.form.Related_Project.Project_Name}}
-                            </div>
-                            <div class="col-md-6 col-sm-6 col-12">
-                                <label style=" font-weight: 200; color: black; font-size: 13px;">Customer Name</label>
-                                {{ filter_data.form.Customer_Name.Customer_Name}}
-                            </div>
-                            <div class="col-md-6 col-sm-6 col-12">
-                              <label style=" font-weight: 200; color: black; font-size: 13px;">Product Details</label>
-                              {{ filter_data.form.Add_Product__Product_Description}}
-                            </div>
-                            <div class="col-md-6 col-sm-6 col-12">
-                                <label style=" font-weight: 200; color: black; font-size: 13px;">Is Completed</label>
-                                {{ filter_data.form.Status}}
-                            </div>
-                            
-                            <div class="col-md-6 col-sm-6 col-12">
-                              <div class="form-group start-date">
-                                <label style="margin-top: 20px; font-weight: 200; color: black; font-size: 13px;">From Date</label>
-                                <input type="date" name="from_date" class="form-control">
-                              </div>
-                            </div>
-                            <div class="col-md-6 col-sm-6 col-12">
-                              <div class="form-group start-date">
-                                <label style="margin-top: 20px; font-weight: 200; color: black; font-size: 13px;">To Date</label>
-                                <input type="date" name="to_date" class="form-control">
-                              </div>
-                            </div>
-
-                            <div class="col-md-6 col-sm-6 col-12">
-                              <div class="form-group start-date">
-                                <label style="margin-top: 20px; font-weight: 200; color: black; font-size: 13px;">From Order Value</label>
-                                <input  name="from_value" class="form-control">
-                              </div>
-                            </div>
-                            <div class="col-md-6 col-sm-6 col-12">
-                              <div class="form-group start-date">
-                                <label style="margin-top: 20px; font-weight: 200; color: black; font-size: 13px;">From Order Value</label>
-                                <input  name="to_value" class="form-control">
-                              </div>
-                            </div>
-
-                            <div class="" style=" float:left; margin-left: 10px;">
-                              <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
-                              <!-- <button id="add-e" class="btn">Add Task</button> -->
-                              <button id="edit-event" class="btn"></button>
-                            </div>
-                          </div>   
-                      </form>
-                  </div>
-              </div>
-          </div>
-      </div>
-    </div>
-  </div>
-  
-<!-- Proposals List -->
-  <div class="card">
-    <div class="card-body2">
-      <div class="table-responsive mb-4 mt-4">
-      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Proposal</th>
-            <th>Quote</th>
-            <th>Customer Details</th>
-            <th>Requested Capacity</th>
-            <th>Proposal No</th>
-            <th>Followup By</th>            
-            <th>Message</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for x, y, z in data %}
-          <tr>
-            <td >{{forloop.counter}}</td>
-            <td><a class="mdi mdi-border-color" title="Edit Proposal" href="{% url 'propedit' x.Proposal_No_1 %}"></a>&nbsp;&nbsp;
-              <a style="cursor:pointer" class="mdi mdi-content-copy" title="Duplicate Proposal" href="{% url 'propcopy' x.Proposal_No_1 %}"></a>&nbsp;&nbsp;
-              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete Proposal" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.Proposal_No_1}}')"></a>
-            </td>
-
-            <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content" id="modal-reload">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Proposal/Quote</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-                            <form class="forms-sample">
-                              <div class="form-group">
-                                  <label for="exampleInputPassword1">Password</label>
-                                  <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
-                                  <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate1('{{x.Proposal_No_1}}')" />
-                                </div> 
-                          </form>
+        <div class="modal-body">
+          <span id="discard" data-dismiss="modal" class="close">&times;</span>
+          <div class="add-edit-event-box">
+            <div class="add-edit-event-content">
+              <div class="add-event-title edit-event-title"></div>
+                <h5 class="modal-title">Search Data by Applying Filter</h5>
+                  <form class="">
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-12">
+                          <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
+                          <input type="date" name="from_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
+                          <input type="date" name="to_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Order Value From</label>
+                          <input  name="from_value" class="form-control">
                         </div>
                       </div>
-                    </div>
-                </div>
-            {% if x.Is_Gen == 0 %}
-             <td style="width:20%;"><button type="button"  onclick="location.href='{% url 'quote' 'create' x.id %}'" class="btn1 btn1-primary">Generate Quote</button></td>
-            {% else %}
-              <td style="width:20px;"><button type="button"  onclick="location.href='{% url 'quote' 'view' x.Proposal_No_1  %}'" class="btn1 btn1-info">View</button>&nbsp;&nbsp;<button type="button"  onclick="location.href='{% url 'qtedit' x.Proposal_No_1  %}'" class="btn1 btn1-primary">Edit</button></td>
-            {% endif %}
-
-            
-            <td style="width:20%;">
-              {{x.Name}}
-              <br><br><i class="mdi mdi-phone"></i>&nbsp;{{x.Phone_Number}}
-              {% if x.Address_Line_1 %}<br> {{x.Address_Line_1}}{% endif %}
-              {% if x.Address_Line_2 %}<br> {{x.Address_Line_2}}{% endif %}
-              {% if x.State %}<br> {{x.State}}{% endif %}
-              {% if x.Email %}<br> <i class="mdi mdi-email-outline"></i>&nbsp;{{x.Email}}{% endif %}
-            </td>
-            
-            <td style="white-space:normal; width:15%"><span style="color: green">
-              {% if x.Power_Bill %}Suggested Capacity
-              <br>{{x.Capacity}}
-              {% else %}{{ x.Capacity }}{% endif %}
-              <br>Inverter: {{ x.Inverter_Capacity }}KW
-              </span>{% if y != 'None' %}<br><br><span style="color:blue">Client Price: ₹ {{y}}</span>{% else %}{% endif %}
-            </td>
-
-            <td style="width:10%;">
-              {{x.Proposal_No}}
-              <br>{{x.Date|date:'d M Y'}}
-            </td>
-
-            <td style="white-space:normal;">
-              {% if z %}{{z}}{% endif %}
-            </td>
-            
-            <td style="white-space:normal; width:25%;">
-              {% if x.Power_Bill %}Power Bill
-              <br>{{ x.Power_Bill }}
-              {% else %}<br>{{x.Message}}{% endif %}
-            </td>
-          </tr>
-          {% endfor %} 
-        </tbody>
-      </table>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Order Value To</label>
+                          <input  name="to_value" class="form-control">
+                        </div>
+                      </div>
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Product Delivery Status</label>
+                        {{ filter_data.form.Final_Work_Status}}
+                      </div> -->
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Payment Cleared Orders</label>
+                        {{ filter_data.form.Final_Payment_Status}}
+                      </div> -->
+                      <div class="col-md-6 col-sm-6 col-12 ">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Customer Name</label>
+                        {{ filter_data.form.Customer_Name}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 ">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Order Follow Up By</label>
+                        {{ filter_data.form.user}}
+                      </div>
+                      <!-- <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Product Details</label>
+                        {{ filter_data.form.Add_Product__Product_Description}}
+                      </div> -->
+                      
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Billing Status</label>
+                        {{ filter_data.form.Is_Billed}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Closed Orders</label>
+                        {{ filter_data.form.Final_Status}}
+                      </div>
+                     
+                      <div style="float:left; margin-left: 10px; margin-top:20px;" style="">
+                        <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                        <!-- <button id="add-e" class="btn">Add Task</button> -->
+                        <button id="edit-event" class="btn"></button>
+                      </div>
+                    </div>   
+                  </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+{% if status == 'Total' %}
+  <div class="row">
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="including closed and inprogress i.e all confirmed orders" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Orders - {{count.tc}}</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{orders.total|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <a ht="closed orders means order/all splitted orders under PO must be deliver, all billings must be done and all payments must be received against all bills" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Closed Orders - {{count.cc}}</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{orders.closed|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    {% if count.ic != 0 %}
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="may be work not delivered or payments may not received or both not done" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Inprogress Orders - {{count.ic}}</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{orders.inprogress|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+{% elif status == 'Inprogress' %}
+  <div class="row">
+    {% if count.ic != 0 %}
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Inprogress Orders - {{count.ic}}</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{orders.inprogress|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+{% else %}
+  <div class="row">
+    {% if count.pc != 0 %}
+      <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+          <div class="card-body2">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Pipeline Orders - {{count.pc}}</div>
+                <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{orders.pipeline|floatformat:0|intcomma}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
+
+<!-- Orders List -->
+<!-- Confirmed or Pipeline -->
+{% if status != 'Pipeline' %}
+    <div class="card">
+      <div class="card-body2">
+        <div class="table-responsive mb-4 mt-4">
+        <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Customer Details</th>
+              <th>Order Description</th>
+              <th>Order Details</th>
+              <th>Billing&Payment Status</th>
+              <th>Work Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for x, y, z, c in tableset %}
+              {% if x.Order_Type == 'Confirmed' %}
+               {% if x.Final_Status == 1 %}
+                <tr class="customtr1" >
+                  <!-- <tr> -->
+               {% else %}
+                <tr>
+               {% endif %}
+              
+                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}<a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
+
+                <td style="white-space:normal;">
+                  {{x.Customer_Name.Customer_Name}}
+                  <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Customer_Name.Phone_Number_1}}</a>
+                </td>
+
+                <td style="white-space:normal;">
+                  {% if x.Order_Details %}{{x.Order_Details}}{% endif %}
+                </td>
+
+                <td style="white-space:normal;">
+                  <span class="hlt2">Order/PO Value: ₹ {{x.Order_Value|floatformat:0|intcomma}}</span>
+                  
+                  {% if x.PO_No %}<br><span class='hlt5'>Purchase Order No
+                    <br></span>{{x.PO_No}}
+                  {% else %}
+                    <br><span class='hlt5'>Order Reference No
+                    <br></span>{{x.Order_No}}
+                  {% endif %}
+                  <br><span class='hlt5'>Order/PO Date: </span>{{x.Order_Received_Date|date:'d M Y'}}
+                  <br><span class='hlt5'>Order Through: </span>{{x.Order_Through}}{% if x.Attach %}, Copy <span class='hlt5'>Order Copy</span> - Yes <a class="ahr" class="mdi mdi-attachment bs-tooltip" ht='order document/copy' href="{{x.Attach.url}}" target="_blank"></a>{% endif %}
+                  {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
+                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}
+                </td>
+
+                <td style="white-space:normal;">                  
+                  {% if c %}
+                    <span class='hlt5'>No of Bills: </span>{{c}}
+                    <span class='hlt5'><br>Billing Amount: </span>₹ {{y|floatformat:0|intcomma}}
+                    {% if z != 0 %}
+                      <span class='hlt5'><br>Received Amount: </span>₹ {{z|floatformat:0|intcomma}}
+                      {% if z > y %}
+                        <br><span class='hlt2'>Balance as Advance: </span>₹ {{y|mul:-1|add:z|floatformat:0|intcomma}}
+                      {% endif %}
+                    {% else %}
+                      <br><span class="hlt3">No Payments Started Yet</span>
+                    {% endif %}
+                    {% if y != z %}
+                      {% if z < y %}
+                        <span class='hlt3' style="font-weight:bold"><br>Due Amount: </span><span style="font-weight:bold;">₹ {{z|mul:-1|add:y|floatformat:0|intcomma}}</span>
+                      {% endif %}
+                    {% else %}
+                      <br><span class="hlt2">Payments Done Against Issued Bills</span>
+                    {% endif %}
+                    {% if x.Payment_Status.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span> {{x.Payment_Status.user.Nick_Name}}{% endif %}
+                  {% else %}
+                    <span class="hlt3">No Bills Generted</span>
+                    {% if x.Payment_Status %}
+                      <span class='hlt5'><br><br>Total Received Advances</span>
+                      <br>₹ {{z|floatformat:0|intcomma}}
+                      {% if x.Payment_Status.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span> {{x.Payment_Status.user.Nick_Name}}{% endif %}
+                    {% else %}
+                      <span class="hlt3"><br><br>No Payments/Advances Recieved</span>
+                    {% endif %}
+                  {% endif %}
+                </td>
+
+                <td style="white-space:normal;">
+                  {% if x.Work_Status %}                
+                    {% if x.Work_Status.Closing_Status == 1 %}
+                      <span class="hlt2">Product Delivered</span>
+                      <span style="color:#cc3b06"><br>Last Status:</span> {{x.Work_Status.Current_Status}}
+                      {% if x.Work_Status.Date %}<br>Updated On: {{x.Work_Status.Date|date:'d M Y'}}{% endif %}
+                      {% if x.Work_Status.user.Nick_Name %}<br>Followup By: {{x.Work_Status.user.Nick_Name}}{% endif %}
+                    {% else %}
+                      <span class="hlt2">work in progress</span>
+                      <br><span style="color:#cc3b06">Current Status:</span> {{x.Work_Status.Current_Status}}
+                      {% if x.Work_Status.Date %}<br>Updated On: {{x.Work_Status.Date|date:'d M Y'}}{% endif %}
+                      {% if x.Work_Status.Next_Task %}<br><span style="color:#cc3b06">Next Task:</span> {{x.Work_Status.Next_Task}}{% endif %}
+                      {% if x.Work_Status.Target_Date %}<br>Target Date: {{x.Work_Status.Target_Date|date:'d M Y'}}{% endif %}
+                      {% if x.Work_Status.user.Nick_Name %}<br>Followup By: {{x.Work_Status.user.Nick_Name}}{% endif %}
+                    {% endif %}
+                  {% else %}
+                    <span class="hlt3">No Work Updates Yet</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %} 
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="card">
+      <div class="card-body2">
+        <div class="table-responsive mb-4 mt-4">
+        <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Customer Details</th>
+              <th>Order Description</th>
+              <th>Order Details</th>
+              <th>Payment Status</th>
+              <th>Work Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for x in table %}
+              
+                <tr>
+                  <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}<a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
+
+                  <td style="white-space:normal;">
+                    {{x.Customer_Name.Customer_Name}}
+                    <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Customer_Name.Phone_Number_1}}</a>
+                  </td>
+
+                  <td style="white-space:normal;">
+                    {% if x.Order_Details %}{{x.Order_Details}}{% endif %}
+                  </td>
+
+                  <td style="white-space:normal;">
+                    <span class="hlt2">Expected Order Value
+                    <br>₹ {{x.Order_Value|floatformat:0|intcomma}}</span>
+                  </td>
+
+                  <td style="white-space:normal;">
+                    <span class="hlt3">Order Not Yet Confirmed</span>
+                  </td>
+
+                  <td style="white-space:normal;">
+                    <span class="hlt3">Order Not Yet Confirmed</span>
+                  </td>
+                </tr>
+              
+            {% endfor %} 
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit Order Details</button>
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersform/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy Order</button>
+            <button type="button"  data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning">Delete Order</button>
+            {% if status != 'Pipeline' %}
+              <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-info">Update Work Status</button>
+              <button type="button"  onclick="location.href='/{{pdata.pj}}/orderspaymentsform/'+getid+'/'" class="btn btn-sm btn-success">Update Payment Status</button>
+              <br><button type="button" id='hidebillbutton' target='_blank' style="display:none"  onclick="location.href='/{{pdata.pj}}/invoice/create/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-dark">Generate Invoice</button>
+            <button type="button" id='showbillbutton' style="display:none"  onclick="javascript:alertpopup()" class="btn btn-sm btn-dark">Generate Invoice</button>  
+            {% endif %}       
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="exampleModal12" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Data</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form class="forms-sample">
+            <div class="form-group">
+              <label for="exampleInputPassword1">Password</label>
+              <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+              <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
+            </div> 
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
 
 {% endblock %}
  

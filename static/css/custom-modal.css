@@ -185,30 +185,7 @@
 .modal-content .modal-body a:not(.btn) {
   opacity: 1; }
 
-/*
-    Login
-*/
-.login-modal .modal-header, .register-modal .modal-header {
-  text-align: center;
-  border: none;
-  padding-bottom: 0; }
 
-.login-modal .modal-body .form-group, .register-modal .modal-body .form-group {
-  position: relative; }
-  .login-modal .modal-body .form-group svg, .register-modal .modal-body .form-group svg {
-    position: absolute;
-    width: 20px;
-    top: 11px;
-    left: 9px;
-    color: #1b55e2;
-    fill: rgba(27, 85, 226, 0.239216); }
-  .login-modal .modal-body .form-group input, .register-modal .modal-body .form-group input {
-    padding-left: 35px;
-    border: none;
-    border-bottom: 1px solid #e0e6ed;
-    border-radius: 0; }
-    .login-modal .modal-body .form-group input.form-control:focus, .register-modal .modal-body .form-group input.form-control:focus {
-      box-shadow: none; }
 
 .login-modal .modal-body .division, .register-modal .modal-body .division {
   text-align: center;

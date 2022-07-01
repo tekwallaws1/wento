@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Received Orders Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                {% for field in form %}
+                  {% if field.label != 'Status' and field.label != 'Attach' and field.label != 'PO Status' and field.label != 'Customer Name' and field.label != 'Order Reference Person' %}
+                    <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                  {% endif %}
+                  {% if field.label == 'Customer Name' %}
+                    <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
+                    <a title="add new customer" target="_blank" href="/{{pdata.pj}}/customerform/create/1/"><i class="fas fa-lg fa-square-plus float-right" style="color:purple"></i></a>{{ field}}
+                  {% endif %}
+                  {% if field.label == 'Order Reference Person' %}
+                    <label for="{{ field.label }}">Customer Contact/Reference Person{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
+                    <a title="add conact person name" target="_blank" href="/{{pdata.pj}}/customercontactform/create/1/"><i class="fas fa-lg fa-square-plus float-right" style="color:purple"></i></a>{{ field}}
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}  
+              </div>
+              <div class="form-group">
+                {% for field in form %}
+                  {% if field.label ==  'Attach' %}
+                    <label style="color:#32a852;">attach below if any oder copy</label>{{field}} 
+                  {% endif %}
+                {% endfor %}
+              </div>
+              <div class="form-check form-check-flat form-check-primary">
+                <label class="form-check-label">{{ form.PO_Status }}mark it if all orders under PO completed</label>
+              </div>
+              <!-- <div class="form-check form-check-flat form-check-primary">
+                <label class="form-check-label" style="color:#32a852;">{{ form.Status }}mark it if this order delivered</label>
+              </div> -->
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

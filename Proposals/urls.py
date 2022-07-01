@@ -17,6 +17,7 @@ urlpatterns = [
     path('<proj>/proposalcopy/<var>/', views.Prop_Copy, name='propcopy'),
     path('<proj>/fillforms/<fnc>/<var>/<rid>/', views.Forms, name='form'),
     path('<proj>/masterdatas/<var>/', views.Master_Data, name='mdata'), 
+    path('<proj>/proposaltoorder/<var>/', views.Proposal_To_Order, name='proposaltoorder'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

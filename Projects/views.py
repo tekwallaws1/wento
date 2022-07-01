@@ -36,7 +36,7 @@ def CustDt_Form(request, proj, fnc, rid):
 				messages.success(request, "Selected Customer Details Has Been Updated")
 				return redirect('/%s/customerslist/'%pdata['pj'])
 			else:
-				return render(request, 'projects/CustDtForm.html.html', {'form': form, 'pdata':pdata})
+				return render(request, 'projects/CustDtForm.html', {'form': form, 'pdata':pdata})
 		else:
 			getdata = get_object_or_404(CustDt, id=rid)
 			form = CustomerForm(instance=getdata)
@@ -91,7 +91,7 @@ def CustContDt_Form(request, proj, fnc, rid):
 				messages.success(request, "Selected Customer Contact Details Has Been Updated")
 				return redirect('/%s/customerslist/'%pdata['pj'])
 			else:
-				return render(request, 'projects/CustContDtForm.html.html', {'form': form, 'pdata':pdata})
+				return render(request, 'projects/CustContDtForm.html', {'form': form, 'pdata':pdata})
 		else:
 			getdata = get_object_or_404(CustContDt, id=rid)
 			form = CustomerContactForm(instance=getdata)
@@ -134,7 +134,7 @@ def VendDt_Form(request, proj, fnc, rid):
 				messages.success(request, "Selected Vendor Details Has Been Updated")
 				return redirect('/%s/vendorslist/'%pdata['pj'])
 			else:
-				return render(request, 'projects/VendDtForm.html.html', {'form': form, 'pdata':pdata})
+				return render(request, 'projects/VendDtForm.html', {'form': form, 'pdata':pdata})
 		else:
 			getdata = get_object_or_404(VendDt, id=rid)
 			form = VendorForm(instance=getdata)
@@ -189,7 +189,7 @@ def VendContDt_Form(request, proj, fnc, rid):
 				messages.success(request, "Selected Vendor Contact Details Has Been Updated")
 				return redirect('/%s/vendorslist/'%pdata['pj'])
 			else:
-				return render(request, 'projects/VendContDtForm.html.html', {'form': form, 'pdata':pdata})
+				return render(request, 'projects/VendContDtForm.html', {'form': form, 'pdata':pdata})
 		else:
 			getdata = get_object_or_404(VendContDt, id=rid)
 			form = VendorContactForm(instance=getdata)
