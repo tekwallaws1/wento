@@ -5,6 +5,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [ 
+    path('<proj>/salesdb/<dur>/', views.Sales_Dashboard, name='salesdb'),
     path('<proj>/orderslist/<status>/', views.Orders_List, name='orderslist'),
     path('<proj>/ordersform/<fnc>/<rid>/', views.Orders_Form, name='ordersform'),
 

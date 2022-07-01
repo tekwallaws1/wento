@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'UserAccounts',
     'Projects',
-    'Proposals',
     'Orders',
     'Products',
     # 'rooftop',

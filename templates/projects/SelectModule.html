@@ -10,7 +10,7 @@
 {% endblock %} 
 
 {% block scripts %}
-
+ 
 {% endblock %}
 
 {% block content %}
@@ -24,8 +24,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-chart-column"></i></div>
                     <div >
                         <div class="mbt">Dashboards</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Sales and Payments</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Purchases and Payments</div></a>
+                        <a href="/{{pdata.pj}}/salesdb/FY/"><div class="mb">Sales and Payments</div></a>
+                        <a href="#"><div class="mb">Purchases and Payments</div></a>
                     </div>
                 </div>
             </div>
@@ -54,8 +54,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-shopping-cart"></i></div>
                     <div >
                         <div class="mbt">Orders</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Sales Orders</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Purchase Orders</div></a>
+                        <a href="/{{pdata.pj}}/orderslist/Inprogress/"><div class="mb">Sales Orders</div></a>
+                        <a href="/{{pdata.pj}}/purchaseslist/Total/"><div class="mb">Purchase Orders</div></a>
                     </div>
                 </div>
             </div>
@@ -67,8 +67,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-file-invoice"></i></div>
                     <div >
                         <div class="mbt">Billing</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Sales Billing</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Vendor Billing</div></a>
+                        <a href="/{{pdata.pj}}/invoiceslist/Issued/"><div class="mb">Sales Billing</div></a>
+                        <a href="/{{pdata.pj}}/vendorinvoiceslist/Issued/"><div class="mb">Vendor Billing</div></a>
                     </div>
                 </div>
             </div>
@@ -80,8 +80,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-wallet"></i></div>
                     <div >
                         <div class="mbt">Payments</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Customer Payments</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Vendor Payments</div></a>
+                        <a href="/{{pdata.pj}}/paymentslist/Received/"><div class="mb">Customer Payments</div></a>
+                        <a href="/{{pdata.pj}}/vendorpaymentslist/Paid/"><div class="mb">Vendor Payments</div></a>
                     </div>
                  </div>
             </div>
@@ -95,8 +95,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-coins"></i></div>
                     <div >
                         <div class="mbt">Expenses</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Company Wise Expenses</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">PO Wise Expenses</div></a>
+                        <a href="#"><div class="mb">Company Wise Expenses</div></a>
+                        <a href="#"><div class="mb">PO Wise Expenses</div></a>
                     </div>
                 </div>
             </div>
@@ -107,8 +107,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-address-card"></i></div>
                     <div >
                         <div class="mbt">Contacts</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Customer Contacts</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Vendor Contacts</div></a>
+                        <a href="/{{pdata.pj}}/customerslist/"><div class="mb">Customer Contacts</div></a>
+                        <a href="/{{pdata.pj}}/vendorslist/"><div class="mb">Vendor Contacts</div></a>
                     </div>
                 </div>
             </div>
@@ -119,8 +119,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-laptop-file"></i></div>
                     <div >
                         <div class="mbt">Work Progress</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Work Orders Progress</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">PO's Progress</div></a>
+                        <a href="/{{pdata.pj}}/worklist/Inprogress/"><div class="mb">Work Orders Progress</div></a>
+                        <a href="/{{pdata.pj}}/purchaseslist/Total/"><div class="mb">PO's Progress</div></a>
                     </div>
                 </div>
             </div></a>
@@ -131,8 +131,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-users"></i></div>
                     <div >
                         <div class="mbt">Users</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Manage Users</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Add New User</div></a>
+                        <a href="/{{pdata.pj}}/userslist/"><div class="mb">Manage Users</div></a>
+                        <a href="{% url 'signup' %}"><div class="mb">Add New User</div></a>
                     </div>
                 </div>
             </div>
@@ -145,9 +145,9 @@
                 <div class="card-statistic-3 p-4">
                     <div class="card-icon card-icon-large" ><i class="fas fa-boxes-stacked"></i></div>
                     <div >
-                        <div class="mbt">Products</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Products</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Services</div></a>
+                        <div class="mbt">Inventory</div>
+                        <a href="#"><div class="mb">Finished Good</div></a>
+                        <a href="#"><div class="mb">Raw Material</div></a>
                     </div>
                 </div>
             </div>
@@ -164,14 +164,14 @@
                 </div>
             </div>
         </div>
-        <!-- <div class="col-xl-3 col-lg-6">
+        <div class="col-xl-3 col-lg-6">
             <a href=""><div class="card l-bg-green-dark">
                 <div class="card-statistic-3 p-4">
-                    <div class="card-icon card-icon-large" ><i class="fas fa-laptop-file"></i></div>
+                    <div class="card-icon card-icon-large" ><i class="fas fa-gears"></i></div>
                     <div >
-                        <div class="mbt">Work Progress</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Work Orders Progress</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">PO's Progress</div></a>
+                        <div class="mbt">Settings</div>
+                        <a href="#"><div class="mb">Default Settings</div></a>
+                        <a href="#"><div class="mb">Custom Settings</div></a>
                     </div>
                 </div>
             </div></a>
@@ -179,15 +179,15 @@
         <div class="col-xl-3 col-lg-6">
             <div class="card l-bg-orange-dark">
                 <div class="card-statistic-3 p-4">
-                    <div class="card-icon card-icon-large" ><i class="fas fa-users"></i></div>
+                    <div class="card-icon card-icon-large" ><i class="fas fa-headset"></i></div>
                     <div >
-                        <div class="mbt">Users</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Manage Users</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Add New User</div></a>
+                        <div class="mbt">Support</div>
+                        <a href="#"><div class="mb">Pending Complaints</div></a>
+                        <a href="#"><div class="mb">Closed Complaints</div></a>
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
     </div>
 
     <!-- <div class="row ">

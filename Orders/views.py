@@ -22,6 +22,88 @@ from django.urls import reverse
 
 # Create your views here. 
 @login_required
+def Sales_Dashboard(request, proj, dur):
+	pdata = projectname(request, proj)
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	lookup1 = {'Order_No__Related_Project__isnull':False} if proj == 'All' else {'Order_No__Related_Project':pdata['pj']}
+	lookup2 = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
+
+	if dur == 'FY':
+		orders = Orders.objects.filter(**lookup, Order_Type='Confirmed', Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date(), ds=1).order_by('Order_Received_Date')
+		payments = Payment_Status.objects.filter(**lookup1,  Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
+	elif dur == 'All':
+		orders = Orders.objects.filter(**lookup, Order_Type='Confirmed', ds=1).order_by('Order_Received_Date')
+		payments = Payment_Status.objects.filter(**lookup1).order_by('Payment_Date')		
+	else:
+		orders = Orders.objects.filter(**lookup, Order_Type='Confirmed', Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=date.today()-timedelta(days=int(dur)), ds=1).order_by('Order_Received_Date')
+		payments = Payment_Status.objects.filter(**lookup1,  Payment_Date__date__lte=date.today(), Payment_Date__date__gte=date.today()-timedelta(days=int(dur))).order_by('Payment_Date')
+
+	customers_list, t_orders, t_billed, t_rec_pay, t_due_pay, t_unbilled = [], [], [], [], [], []
+	order_val, order_date, cust_list, pay_val, pay_date, pay_cust = [], [], [], [], [], []
+	toc, ioc, toc_30, tbc, cbc, tbc_30 = 0,0,0,0,0,0 #counts
+	tov, iov, tov_30, tbv, cbv, tbv_30, tdp, trp, trp_30 = 0,0,0,0,0,0,0,0,0 #value
+
+	# orders
+	toc, tov = len(orders), orders.aggregate(sum=Sum('Order_Value')).get('sum') or 0
+	f_30 = orders.filter(Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=date.today()-timedelta(days=30))
+	toc_30, tov_30 = len(f_30), f_30.aggregate(sum=Sum('Order_Value')).get('sum') or 0
+	ip = orders.filter(Final_Status=0)
+	ioc, iov = len(ip), ip.aggregate(sum=Sum('Order_Value')).get('sum') or 0
+
+	# billing
+	invs = Invoices.objects.filter(**lookup2, Lock_Status=1)
+	f_30 = invs.filter(Invoice_Date__date__lte=date.today(), Invoice_Date__date__gte=date.today()-timedelta(days=30))
+	tbc, tbv = len(invs), invs.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0
+	tbc_30, tbv_30 = len(f_30), f_30.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0
+	cbc, cbv = len(invs.filter(Due_Amount=0)), invs.filter(Due_Amount=0).aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0
+
+	# payments_30 days
+	trp_30 = payments.filter(Payment_Date__date__lte=date.today(), Payment_Date__date__gte=date.today()-timedelta(days=30)).aggregate(sum=Sum('Received_Amount')).get('sum') or 0
+
+	for x in orders:
+		cust_list.append(x.Customer_Name.Short_Name)
+		order_val.append(int(x.Order_Value))
+		order_date.append(str((x.Order_Received_Date+timedelta(days=1)).strftime('%m-%d-%Y')))
+	
+	customers_list = list(dict.fromkeys(cust_list))
+
+	for x in payments:
+		pay_cust.append(x.Order_No.Customer_Name.Short_Name)
+		pay_val.append(int(x.Received_Amount))
+		lst = [str((x.Payment_Date+timedelta(days=1)).strftime('%m-%d-%Y')), int(x.Received_Amount), int(x.Received_Amount)]
+		pay_date.append(lst)
+
+	#total billings and payments **Customer Wise
+	for x in customers_list:
+		ordr = orders.filter(Customer_Name__Short_Name=x)
+		t_ord = ordr.aggregate(sum=Sum('Order_Value')).get('sum')
+		t_orders.append(int(t_ord))
+
+		billed, pay, due, unbilled = 0, 0, 0, 0
+		for y in ordr:
+			billed = billed + Invoices.objects.filter(Order=y, Lock_Status=1).aggregate(sum=Sum('Invoice_Amount')).get('sum')
+			pay = pay + Payment_Status.objects.filter(Order_No=y).aggregate(sum=Sum('Received_Amount')).get('sum')
+		due = billed - pay
+		unbilled = t_ord - billed
+
+		# due = 0 if due < 0 else due
+		unbilled = 0 if unbilled < 0 else unbilled
+
+		t_billed.append(int(billed))
+		t_rec_pay.append(int(pay))
+		t_due_pay.append(int(due))
+		t_unbilled.append(int(unbilled))
+
+	trp = sum(pay_val) #total rec pay
+	tdp = tbv - trp #total due
+	count = {'toc':toc, 'toc_30':toc_30, 'ioc':ioc, 'tbc':tbc, 'tbc_30':tbc_30, 'cbc':cbc}
+	val = {'tov':tov, 'tov_30':tov_30, 'iov':iov, 'tbv':tbv, 'tbv_30':tbv_30, 'cbv':cbv, 'trp':trp, 'trp_30':trp_30, 'tdp':tdp}
+		
+	return render(request, 'orders/SalesDashboard.html', {'pdata':pdata, 'customers_list':customers_list, 't_orders':t_orders,
+		't_billed':t_billed, 't_rec_pay':t_rec_pay, 't_due_pay':t_due_pay, 't_unbilled':t_unbilled, 'order_date':order_date, 'order_val':order_val, 
+		'cust_list':cust_list, 'dur':dur, 'pay_val':pay_val, 'pay_date':pay_date, 'pay_cust':pay_cust, 'count':count, 'val':val})
+
+@login_required
 def Orders_List(request, proj, status):
 	pdata = projectname(request, proj)
 	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}

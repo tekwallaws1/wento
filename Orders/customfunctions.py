@@ -157,8 +157,8 @@ def get_invoice_number(request, last_invid, invid):
 	else:
 		invno1 = fd.Invoice_No_1
 	
-	fd.Invoice_No_Format = No_Formats.objects.filter(No_Format_Related_To='Invoice').last().No_Format
-	fd.Invoice_No = str(fd.Invoice_No_Format)+str(fd.FY)+'/'+str(invno1)
+	fd.Invoice_No_Format = No_Formats.objects.filter(No_Format_Related_To='Invoice').last()
+	fd.Invoice_No = str(fd.Invoice_No_Format.No_Format)+str(fd.FY)+'/'+str(invno1)
 	fd.save()
 
 def inv_amoumt_update(request, invid):

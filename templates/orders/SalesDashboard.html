@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'css/index.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.css">
+<link rel="stylesheet" href="{% static 'css/custom.css' %}">
+<link rel="stylesheet" href="{% static 'css/chart.css' %}">
+{% endblock %}
+
+
+{% block scripts %}
+  <script src="{% static 'charts/Chart.min.js' %}"></script>
+  <script src="{% static 'charts/apexcharts.min.js' %}"></script>
+
+<!-- Charts -->
+<!-- Sales Orders and Its Progress Charts -->
+  <script>
+    var options5 = {
+      series: [{
+        name: 'Work Orders ₹' + {{t_orders|safe}}.reduce((pv, cv) => pv + cv, 0) ,
+        type: 'column',
+        data: {{t_orders|safe}}}, 
+        {
+        name: 'Billed ₹' + {{t_billed|safe}}.reduce((pv, cv) => pv + cv, 0),
+        type: 'column', 
+        data: {{t_billed|safe}}}, 
+        {
+        name: 'Unbilled ₹' + {{t_unbilled|safe}}.reduce((pv, cv) => pv + cv, 0),
+        type: 'column',
+        data: {{t_unbilled|safe}},
+        stacked: false}, 
+        {
+        name: 'Due Pay.₹' + {{t_due_pay|safe}}.reduce((pv, cv) => pv + cv, 0),
+        type: 'area',
+        data: {{t_due_pay|safe}},
+        stacked: false},
+        {
+        name: 'Received Pay.₹' + {{t_rec_pay|safe}}.reduce((pv, cv) => pv + cv, 0),
+        type: 'column',
+        data: {{t_rec_pay|safe}},
+        stacked: false}],
+  
+      chart: {
+        height: 350,
+        //type: 'line',
+        stacked: false,
+        toolbar: {
+          show: true,
+          tools: {
+              download: true,
+              selection: false,
+              zoom: true,
+              zoomin: false,
+              zoomout: false,
+              pan: false,
+              reset: true},}},
+      grid: {
+        show: true,
+        // padding: {
+        //   left: 30,
+        //   right: 30}
+        },
+      stroke: {
+        width: [0, 2, 3, 3, 0],
+        curve: 'smooth'},
+      plotOptions: {
+        bar: {
+          columnWidth: '70%',
+          endingShape: 'rounded',}},
+      fill: {
+        type: ["gradient", "solid", "solid", "gradient", "gradient"],
+        opacity: [1, 1, 1, 1, 1],
+        gradient: {
+          inverseColors: false,
+          shade: 'light',
+          type: "vertical",
+          opacityFrom: 0.85,
+          opacityTo: 0.85,
+          stops: [0, 100, 100, 100, 100]}},
+      labels: ['ABX', 'XYZ'],
+      markers: {size: 0},
+      xaxis: {
+        labels: {
+        show: true,
+        rotate: -45,
+        rotateAlways: true,
+        // minHeight: 60,
+        // maxHeight: 180,
+        style: {colors: ""}}},
+      yaxis: {min: 0,},
+      legend: {
+        position: 'top',
+        horizontalAlign: 'left',
+        fontFamily: 'ubuntu-medium',
+        fontSize: '13px',},
+      custseries: [{name: 'Orders'}, {name: 'Billed'}, {name: 'Unbilled'}, {name: 'Due'}, {name: 'Paid'}],
+      tooltip: {
+        shared: true,
+        // theme: "dark",
+        intersect: false,
+
+      y: {
+        formatter: function(value, { series, custseries, seriesIndex, dataPointIndex, w }) {
+          return  w.config.custseries[seriesIndex].name + ":  " + value},
+        title: {
+          formatter: function (seriesName) {
+            return ''}}}
+      }};
+    var chart = new ApexCharts(document.querySelector("#salesandpaymentsdb"), options5);
+    chart.render();   
+  </script>
+
+  <script>
+    // Work Orders Chart
+    var options ={
+            series: [{
+            name: 'Total Work Orders Value ₹'+{{order_val|safe}}.reduce((pv, cv) => pv + cv, 0),
+            data: {{order_val|safe}},}],
+            chart: {
+            height: 350,
+            type: 'area',
+            toolbar: {
+        show: true,
+        tools: {
+            download: true,
+            selection: false,
+            zoom: true,
+            zoomin: false,
+            zoomout: false,
+            pan: false,
+            reset: true},}},
+          stroke: {
+            width: 2,
+            curve: 'smooth'},
+          xaxis: {
+            type: 'datetime',
+            categories: {{order_date|safe}},
+          },
+        legend: {
+            position: 'top',
+            showForSingleSeries: true,
+            horizontalAlign: 'left',
+            fontFamily: 'ubuntu-medium',
+            fontSize: '13px',},
+          tooltip: {
+            x: {
+                format: 'dd MMM yyyy',
+                formatter: undefined,},
+            y: {
+              formatter: function(value, { series, custseries, seriesIndex, dataPointIndex, w }) {
+                return {{cust_list|safe}}[dataPointIndex]+': ₹'+value },
+              title: {
+                formatter: function (seriesName) {
+                  return ''}}}},
+          fill: {
+            type: 'gradient',
+            gradient: {
+              shade: 'dark',
+              gradientToColors: ['#FDD835'],
+              shadeIntensity: 1,
+              type: 'horizontal',
+              opacityFrom: 1,
+              opacityTo: 1,
+              stops: []},},};
+    var chart = new ApexCharts(document.querySelector("#sales_db"), options);
+    chart.render();
+    
+  </script>
+
+  <script>
+    var options7 = {
+      series: [{
+        name: 'Received Payments ₹'+{{pay_val|safe}}.reduce((pv, cv) => pv + cv, 0),
+        data: {{pay_date|safe}},}],
+      chart: {
+      height: 350,
+      type: 'bubble',
+      toolbar: {
+        show: true,
+        tools: {
+            download: true,
+            selection: false,
+            zoom: true,
+            zoomin: false,
+            zoomout: false,
+            pan: false,
+            reset: true},}},
+    dataLabels: {
+      enabled: false},
+      legend: {
+        position: 'top',
+        showForSingleSeries: true,
+        horizontalAlign: 'left',
+        fontFamily: 'ubuntu-medium',
+        fontSize: '13px',},
+    fill: {
+      type: 'gradient',},
+    // title: {
+    //   text: "Recived Payments: " + $scope.data.total,
+    //   style: {
+    //       fontSize:  '15px',
+    //       fontWeight:  'normal',
+    //       fontFamily:  'ubuntu-bold',},},
+    xaxis: {
+      tickAmount: 12,
+      type: 'datetime',
+      labels: {rotate: 0,}},
+    tooltip: {
+      y: {
+          formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
+                return {{pay_cust|safe}}[dataPointIndex]+': ₹'+value },
+        title: {
+          formatter: function () {
+              return ''}}},
+      z: {
+        formatter: function(value, {series, seriesIndex, dataPointIndex, w }) {
+                return '' },
+        title: ''}
+      },
+    theme: {palette: 'palette1'}
+    };
+    var chart = new ApexCharts(document.querySelector("#payments"), options7);
+    chart.render();    
+  </script>
+
+  <script>
+    var donutChart = {
+      chart: {
+          height: 350,
+          type: 'donut',
+          toolbar: {
+            show: false,}},
+      dataLabels: {
+          enabled: false},
+
+      fill: {
+      gradient: {
+        shade: 'light' }},
+      // colors: ['#1b55e2', '#888ea8', '#acb0c3', '#d3d3d3'],
+      series: [{{val.trp|safe}}, {{val.tdp|safe}}],
+      labels: ['Recieved Payments', 'Due Payments'],
+      plotOptions: {
+      pie: {
+        donut: {
+          labels: {
+            show: true,
+            total: {
+         show: true,
+         label: 'Total',
+         color: '#373d3f',
+         formatter: function (w) {
+           return w.globals.seriesTotals.reduce((a, b) => {
+               return a + b}, 0)}} } } } },
+      legend: {
+        position: 'bottom',
+        offsetY: 0,
+        offsetX: 0,
+        horizontalAlign: 'center', 
+        floating: false,
+        itemMargin: {
+          horizontal: 10,
+          vertical: 5},},
+    }
+    var chart = new ApexCharts(document.querySelector("#Rec-Due"), donutChart);
+    chart.render();
+  </script>
+
+
+{% endblock %}
+
+{% block content %}
+    
+<div>
+  <!-- <div class="page-header">
+    <h3 class="page-title">
+      <span class="page-title-icon bg-gradient-primary text-white mr-2">
+        <i class="mdi mdi-home"></i>
+      </span> Dashboard
+    </h3>
+  </div> -->
+
+  <div>
+  <div style="float:left">
+    <div class="page-header">
+    <h3 class="page-title">
+      <span class="page-title-icon bg-gradient-primary text-white mr-2"><i class="mdi mdi-home"></i></span> Dashboard
+    </h3>
+  </div>
+  </div>
+
+  <div style="float:right">
+    <h3 class="page-title">
+      <div>
+        <button class="btn1 btn1-danger" onclick="location.href='/{{pdata.pj}}/salesdb/30/'">1M</button>
+        <button class="btn1 btn1-info" onclick="location.href='/{{pdata.pj}}/salesdb/90/'">3M</button>
+        <button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/salesdb/180/'">6M</button>
+        <button class="btn1 btn1-success" onclick="location.href='/{{pdata.pj}}/salesdb/All/'">ALL</button>
+        <button class="btn1 btn1-dark" onclick="location.href='/{{pdata.pj}}/salesdb/FY/'">Fin.Year</button>
+      
+        &emsp; <span style="color: #0854a6">
+        {% if dur == 'FY' %} During This Financial Year - 
+        {% elif dur == '30' %} Latest One Month - 
+        {% elif dur == '90' %} Latest 3 Months - 
+        {% elif dur == '180' %} Latest 6 Months - 
+        {% elif dur == 'All' %} Entire Duration - 
+        {% else %}{% endif %}</span>
+        <span style="color:#0854a6">Received Orders and It's Payments</span> </div>
+    </h3>
+  </div>
+  <div style="clear:both"></div>
+</div> 
+
+  <div class="row">
+  <div class="col-md-4 stretch-card grid-margin">
+    <div class="card bg-gradient-info card-img-holder text-white">
+      <div class="card-body1">
+        <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
+        <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-handshake-angle"></i></div></div>
+        <h4 class="mb-3 blk">Total Received Work Orders - {{count.toc}}
+        </h4>
+        <h2 class="mb-3 blk" style="color:yellow">₹ {{val.tov|floatformat:0|intcomma}}</h2>
+        <h5 class="mb-3 blk">Inprogress-{{count.ioc}}, ₹ {{val.iov|floatformat:0|intcomma}}</h5>
+        {% if dur != '30' %}<h6 class="card-text blk">Recent Month Received Orders-{{count.toc_30}}, ₹ {{val.tov_30|floatformat:0|intcomma}}</h6>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 stretch-card grid-margin">
+    <div class="card bg-gradient-success card-img-holder text-white">
+      <div class="card-body1">
+        <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
+        <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-shopping-cart"></i></div></div>
+        <h4 class="mb-3 blk">Total Billing - {{count.tbc}}</h4>
+        <h2 class="mb-3 blk" style="color:blue">₹ {{val.tbv|floatformat:0|intcomma}}</h2>
+        <h5 class="mb-3 blk">Fully Closed Bills-{{count.cbc}}, ₹ {{val.cbv|floatformat:0|intcomma}}</h5>
+        {% if dur != '30' %}<h6 class="card-text blk">Recent Month Billings-{{count.tbc_30}}, ₹ {{val.tbv_30|floatformat:0|intcomma}}</h6>{% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4 stretch-card grid-margin">
+    <div class="card bg-gradient-primary card-img-holder text-white">
+      <div class="card-body1">
+        <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
+        <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-bandage"></i></div></div>
+        <h4 class="mb-3 blk">Due Payments</h4>
+        <h2 class="mb-3 blk" style="color: red">₹ {{val.tdp|floatformat:0|intcomma}}</h2>
+        <h5 class="mb-3 blk" style="color:yellow">Total Received Payments  ₹ {{val.trp|floatformat:0|intcomma}}</h5>
+        {% if dur != '30' %}<h6 class="card-text blk">Recent Month Received Payments  ₹ {{val.trp_30|floatformat:0|intcomma}}</h6>{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row"> 
+  <div class="col-xl-12 col-lg-7">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h7 class="m-1 font-weight-bold ">Customer Wise Orders, Billing and Payment Statuses - <span style="color: #0854a6">
+        {% if dur == 'FY' %} During This Financial Year
+        {% elif dur == '30' %} Latest One Month
+        {% elif dur == '90' %} Latest 3 Months
+        {% elif dur == '180' %} Latest 6 Months
+        {% elif dur == 'All' %} Entire Duration
+        {% else %}{% endif %}</span></h7>
+        <div><button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/salesdb/FY/'">Fin.Year</button></div>
+      </div>                         
+      <div class="card-body1">
+        <div id="salesandpaymentsdb"></div>   
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row"> 
+  <div class="col-xl-12 col-lg-7">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h7 class="m-1 font-weight-bold ">Received Work Orders Graph - <span style="color: #0854a6">
+        {% if dur == 'FY' %} During This Financial Year
+        {% elif dur == '30' %} Latest One Month
+        {% elif dur == '90' %} Latest 3 Months
+        {% elif dur == '180' %} Latest 6 Months
+        {% elif dur == 'All' %} Entire Duration
+        {% else %}{% endif %}</span></h7>
+        <div><button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/salesdb/FY/'">Fin.Year</button></div>
+      </div>                         
+      <div class="card-body1">
+        <div id="sales_db"></div>   
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="row">
+  <div class="col-md-8 grid-margin stretch-card"> 
+    <div class="card shadow mb-4">
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h7 class="m-1 font-weight-bold ">Received Payments Progress - <span style="color: #0854a6">
+        {% if dur == 'FY' %} During This Financial Year
+        {% elif dur == '30' %} Latest One Month
+        {% elif dur == '90' %} Latest 3 Months
+        {% elif dur == '180' %} Latest 6 Months
+        {% elif dur == 'All' %} Entire Duration
+        {% else %}{% endif %}</span></h7>
+        <div><button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/salesdb/FY/'">Fin.Year</button></div>
+      </div>                         
+      <div class="card-body1">
+        <div id="payments"></div>   
+      </div>
+  </div>
+</div>
+
+  <div class="col-md-4 grid-margin stretch-card">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h7 class="m-1 font-weight-bold ">Received Vs Due Payments</h7>
+    </div>
+    <div class="card-body1">
+          <div id="Rec-Due"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+{% endblock %}

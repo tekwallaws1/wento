@@ -38,6 +38,7 @@
           <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
             <span class="mdi mdi-menu"></span>
           </button>
+
 <!--           <div class="text-center  d-flex align-items-center justify-content-center">
           <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img width="120" height="24" src="{% static 'img/logo.png' %}" /></a>
         </div> -->
@@ -51,18 +52,21 @@
               </div>
             </form>
           </div> -->
+
           <ul class="navbar-nav navbar-nav-right">
+            <li><span style="font-size: 19px; color: #17b367; font-weight:bold">Automation</span></li>
             <li class="nav-item nav-profile dropdown">
               <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                 <div class="nav-profile-img">
-                  <!-- <img src="{{profilepic_url}}" alt="image"> -->
-                  <img src="{% static 'img/praveen.jpg' %}" alt="image">
+                  <img src="{{profilepic_url}}" alt="image">
+                  <!-- <img src="{% static 'img/praveen.jpg' %}" alt="image"> -->
                   <span class="availability-status online"></span>
                 </div>
                 <div class="nav-profile-text">
                   <p class="mb-1 text-black">{{name}}</p>
                 </div>
               </a>
+
               <div class="dropdown-menu navbar-dropdown" aria-labelledby="profileDropdown">
                 <a class="dropdown-item" href="#">
                   <i class="mdi mdi-cached mr-2 text-success"></i> Activity Log </a>
@@ -157,17 +161,15 @@
             </li> -->
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-                <span class="menu-title">Proposals Dashbaord</span>
+                <span class="menu-title">Dashbaords</span>
                 <i class="menu-arrow"></i>
                 <!-- <i class="mdi mdi mdi-monitor menu-icon"></i> -->
-                <i class="fas fa-lg fa-heart-circle-plus"></i>
+                <i class="fas fa-lg fa-chart-simple"></i>
               </a>
               <div class="collapse" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/proposalsdashboard/">Dashboard</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/proposalslist/">Proposals List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcapacity/">Products List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcosting/">Product Costings</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/salesdb/FY/">Sales and Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="">Purchases <br>and Payments</a></li>
                 </ul>
               </div>
             </li>
