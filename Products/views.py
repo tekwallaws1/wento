@@ -19,6 +19,90 @@ from .customfunctions import genPO_initial_dataload, update_po_amount, assign_pa
 from num2words import num2words
 from django.urls import reverse
  
+
+@login_required
+def Purchases_Dashboard(request, proj, dur):
+	pdata = projectname(request, proj)
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	lookup1 = {'PO_No__Related_Project__isnull':False} if proj == 'All' else {'PO_No__Related_Project':pdata['pj']}
+
+	if dur == 'FY':
+		pos = Purchases.objects.filter(**lookup, Lock_Status=1, PO_Date__date__lte=date.today(), PO_Date__date__gte=get_fy_date(), ds=1).order_by('PO_Date')
+		payments = Vendor_Payment_Status.objects.filter(**lookup1,  Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
+	elif dur == 'All':
+		pos = Purchases.objects.filter(**lookup, Lock_Status=1, ds=1).order_by('PO_Date')
+		payments = Vendor_Payment_Status.objects.filter(**lookup1).order_by('Payment_Date')		
+	else:
+		pos = Purchases.objects.filter(**lookup, Lock_Status=1, PO_Date__date__lte=date.today(), PO_Date__date__gte=date.today()-timedelta(days=int(dur)), ds=1).order_by('PO_Date')
+		payments = Vendor_Payment_Status.objects.filter(**lookup1,  Payment_Date__date__lte=date.today(), Payment_Date__date__gte=date.today()-timedelta(days=int(dur))).order_by('Payment_Date')
+
+	vendors_list, t_pos, t_billed, t_paid_pay, t_due_pay, t_unbilled = [], [], [], [], [], []
+	po_val, po_date, vend_list, pay_val, pay_date, pay_vend = [], [], [], [], [], []
+	toc, ioc, toc_30, tbc, cbc, tbc_30 = 0,0,0,0,0,0 #counts
+	tov, iov, tov_30, tbv, cbv, tbv_30, tdp, tpp, tpp_30 = 0,0,0,0,0,0,0,0,0 #value
+
+	# pos
+	toc, tov = len(pos), (pos.aggregate(sum=Sum('PO_Value')).get('sum') or 0)
+	f_30 = pos.filter(PO_Date__date__lte=date.today(), PO_Date__date__gte=date.today()-timedelta(days=30))
+	toc_30, tov_30 = len(f_30), (f_30.aggregate(sum=Sum('PO_Value')).get('sum') or 0)
+	ip = pos.filter(Final_Status=0)
+	ioc, iov = len(ip), (ip.aggregate(sum=Sum('PO_Value')).get('sum') or 0)
+
+	# billing
+	invs = Vendor_Invoices.objects.filter(**lookup1)
+	f_30 = invs.filter(Invoice_Date__date__lte=date.today(), Invoice_Date__date__gte=date.today()-timedelta(days=30))
+	tbc, tbv = len(invs), (invs.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0)
+	tbc_30, tbv_30 = len(f_30), (f_30.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0)
+	cbc, cbv = len(invs.filter(Due_Amount=0)), (invs.filter(Due_Amount=0).aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0)
+
+	# payments_30 days
+	tpp_30 = payments.filter(Payment_Date__date__lte=date.today(), Payment_Date__date__gte=date.today()-timedelta(days=30)).aggregate(sum=Sum('Paid_Amount')).get('sum') or 0
+
+	for x in pos:
+		vend_list.append(x.Vendor.Short_Name)
+		po_val.append(int(x.PO_Value))
+		po_date.append(str((x.PO_Date+timedelta(days=1)).strftime('%m-%d-%Y')))
+	
+	vendors_list = list(dict.fromkeys(vend_list))
+
+	for x in payments:
+		pay_vend.append(x.PO_No.Vendor.Short_Name)
+		pay_val.append(int(x.Paid_Amount))
+		lst = [str((x.Payment_Date+timedelta(days=1)).strftime('%m-%d-%Y')), int(x.Paid_Amount), int(x.Paid_Amount)]
+		pay_date.append(lst)
+
+	#total billings and payments **Customer Wise
+	for x in vendors_list:
+		ordr = pos.filter(Vendor__Short_Name=x)
+		t_ord = ordr.aggregate(sum=Sum('PO_Value')).get('sum')
+		t_pos.append(int(t_ord))
+
+		billed, pay, due, unbilled = 0, 0, 0, 0
+		for y in ordr:
+			billed = billed + (Vendor_Invoices.objects.filter(PO_No=y).aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0)
+			pay = pay + (Vendor_Payment_Status.objects.filter(PO_No=y).aggregate(sum=Sum('Paid_Amount')).get('sum') or 0)
+		due = billed - pay
+		unbilled = t_ord - billed
+
+		# due = 0 if due < 0 else due
+		unbilled = 0 if unbilled < 0 else unbilled
+
+		t_billed.append(int(billed))
+		t_paid_pay.append(int(pay))
+		t_due_pay.append(int(due))
+		t_unbilled.append(int(unbilled))
+
+	tpp = sum(pay_val) #total rec pay
+	tdp = tbv - tpp #total due
+	count = {'toc':toc, 'toc_30':toc_30, 'ioc':ioc, 'tbc':tbc, 'tbc_30':tbc_30, 'cbc':cbc}
+	val = {'tov':tov, 'tov_30':tov_30, 'iov':iov, 'tbv':tbv, 'tbv_30':tbv_30, 'cbv':cbv, 'tpp':tpp, 'tpp_30':tpp_30, 'tdp':tdp}
+		
+	return render(request, 'products/PurchasesDashboard.html', {'pdata':pdata, 'vendors_list':vendors_list, 't_pos':t_pos,
+		't_billed':t_billed, 't_paid_pay':t_paid_pay, 't_due_pay':t_due_pay, 't_unbilled':t_unbilled, 'po_date':po_date, 'po_val':po_val, 
+		'vend_list':vend_list, 'dur':dur, 'pay_val':pay_val, 'pay_date':pay_date, 'pay_vend':pay_vend, 'count':count, 'val':val})
+
+
+
 @login_required
 def PO_List(request, proj, status):
 	pdata = projectname(request, proj)

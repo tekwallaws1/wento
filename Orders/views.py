@@ -6,7 +6,7 @@ from django.http import HttpResponse, JsonResponse
 from django.views.generic import View
 from .filters import *
 from django.shortcuts import get_object_or_404, render
-from django.db import IntegrityError
+from django.db import IntegrityError 
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django.contrib.auth import logout
@@ -44,18 +44,18 @@ def Sales_Dashboard(request, proj, dur):
 	tov, iov, tov_30, tbv, cbv, tbv_30, tdp, trp, trp_30 = 0,0,0,0,0,0,0,0,0 #value
 
 	# orders
-	toc, tov = len(orders), orders.aggregate(sum=Sum('Order_Value')).get('sum') or 0
+	toc, tov = len(orders), (orders.aggregate(sum=Sum('Order_Value')).get('sum') or 0)
 	f_30 = orders.filter(Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=date.today()-timedelta(days=30))
-	toc_30, tov_30 = len(f_30), f_30.aggregate(sum=Sum('Order_Value')).get('sum') or 0
+	toc_30, tov_30 = len(f_30), (f_30.aggregate(sum=Sum('Order_Value')).get('sum') or 0)
 	ip = orders.filter(Final_Status=0)
 	ioc, iov = len(ip), ip.aggregate(sum=Sum('Order_Value')).get('sum') or 0
 
 	# billing
 	invs = Invoices.objects.filter(**lookup2, Lock_Status=1)
 	f_30 = invs.filter(Invoice_Date__date__lte=date.today(), Invoice_Date__date__gte=date.today()-timedelta(days=30))
-	tbc, tbv = len(invs), invs.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0
-	tbc_30, tbv_30 = len(f_30), f_30.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0
-	cbc, cbv = len(invs.filter(Due_Amount=0)), invs.filter(Due_Amount=0).aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0
+	tbc, tbv = len(invs), (invs.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0)
+	tbc_30, tbv_30 = len(f_30), (f_30.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0)
+	cbc, cbv = len(invs.filter(Due_Amount=0)), (invs.filter(Due_Amount=0).aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0)
 
 	# payments_30 days
 	trp_30 = payments.filter(Payment_Date__date__lte=date.today(), Payment_Date__date__gte=date.today()-timedelta(days=30)).aggregate(sum=Sum('Received_Amount')).get('sum') or 0
@@ -81,8 +81,8 @@ def Sales_Dashboard(request, proj, dur):
 
 		billed, pay, due, unbilled = 0, 0, 0, 0
 		for y in ordr:
-			billed = billed + Invoices.objects.filter(Order=y, Lock_Status=1).aggregate(sum=Sum('Invoice_Amount')).get('sum')
-			pay = pay + Payment_Status.objects.filter(Order_No=y).aggregate(sum=Sum('Received_Amount')).get('sum')
+			billed = billed + (Invoices.objects.filter(Order=y, Lock_Status=1).aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0)
+			pay = pay + (Payment_Status.objects.filter(Order_No=y).aggregate(sum=Sum('Received_Amount')).get('sum') or 0)
 		due = billed - pay
 		unbilled = t_ord - billed
 
@@ -253,6 +253,7 @@ def Orders_Payments_Form(request, proj, rid):
 def Payments_Form(request, proj, fnc, rid):
 	pdata = projectname(request, proj)
 	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	lookup1 = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
 	if fnc == 'edit':
 		if request.method ==  'POST':
 			getdata = get_object_or_404(Payment_Status, id=rid)
@@ -312,7 +313,7 @@ def Payments_Form(request, proj, fnc, rid):
 		else:
 			form = PaymentsEmptyForm()
 			form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=0))
-			form.fields["Invoice_No"].queryset = Invoices.objects.filter(Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
+			form.fields["Invoice_No"].queryset = Invoices.objects.filter(**lookup1, Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
 			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
 
 # Create your views here. 
@@ -522,48 +523,57 @@ def Work_Form(request, proj, fnc, rid):
 			return render(request, 'orders/WorkForm.html', {'form': form, 'pdata':pdata})
 		else:
 			form = WorkEmptyForm()
-			form.fields["Order_No"].queryset = Orders.objects.filter(Billing_Status__Final_Payment_Status=0, **lookup) #load only unfineshed payment orders
+			form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, PO_Status=0)
 			return render(request, 'orders/WorkForm.html', {'form': form, 'pdata':pdata})
 
 @login_required
 def Work_Update_List(request, proj, status):
 	pdata = projectname(request, proj)
 	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
-	if status == 'Pending':
-		table = Orders.objects.filter(**lookup, Work_Status=None, Order_Type='Confirmed', ds=1).order_by('Order_Received_Date')
-		table_fy = Orders.objects.filter(**lookup, Work_Status=None, Order_Type='Confirmed', Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date(), ds=1).order_by('Order_Received_Date')
-	elif status == 'Delivered':
-		table = Orders.objects.filter(**lookup, Final_Work_Status=1, ds=1).order_by('Work_Status__Date')
-		table_fy = Orders.objects.filter(**lookup, Final_Work_Status=1, Work_Status__Date__date__lte=date.today(), Work_Status__Date__date__gte=get_fy_date(), ds=1).order_by('Work_Status__Date')
-	else:
-		table = Orders.objects.filter(**lookup, Work_Status__isnull=False, Final_Work_Status=0, ds=1).order_by('Work_Status__Date')
-		table_fy = Orders.objects.filter(**lookup, Work_Status__isnull=False, Final_Work_Status=0, Work_Status__Date__date__lte=date.today(), Work_Status__Date__date__gte=get_fy_date(), ds=1).order_by('Work_Status__Date')
+	
+	table = Orders.objects.filter(**lookup, Order_Type='Confirmed', ds=1).order_by('-Order_Received_Date')
+	table_fy = Orders.objects.filter(**lookup, Order_Type='Confirmed', Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date(), ds=1).order_by('-Order_Received_Date')
 
-	filter_data = WorksFilter(request.GET, queryset=table_fy)
+	filter_data = OrdersFilter(request.GET, queryset=table_fy)
 	table_fy = filter_data.qs
 	table_data = table_fy
 	has_filter = any(field in request.GET for field in set(filter_data.get_fields()))
 	
 	if has_filter: #update filter data queyset
-		filter_data = WorksFilter(request.GET, queryset=table)
+		filter_data = OrdersFilter(request.GET, queryset=table)
 		table = filter_data.qs
 		table_data = table
 
-	count = table_data.count
-
-	orders_list = []
-	work_list = []
+	orders_ip, orders_dl, orders_ns, works_ip, works_dl, works_ns = [], [], [], [], [], []
 	
+	if status == 'Inprogress':
+		table_data = table_data.filter(Work_Status__isnull=False, PO_Status=0)
+	elif status == 'Delivered':
+		table_data = table_data.filter(PO_Status=1)
+	else: #not yet started
+		table_data = table_data.filter(Work_Status=None, PO_Status=0,)
+
+	count = len(table_data)
+
 	for x in table_data:
-		orders_list.append(x)
-		if status != 'Pending':
-			work_list.append(Work_Status.objects.filter(Order_No__Order_No=x.Order_No))
+		works = Work_Status.objects.filter(Order_No=x).order_by('Date') or None
+		if status == 'Inprogress':
+			orders_ip.append(x)
+			works_ip.append(works)
+		elif status == 'Delivered':
+			orders_dl.append(x)
+			works_dl.append(works)
 		else:
-			work_list.append(None)
+			orders_ns.append(x)
+			works_ns.append(works)
 
-	works = zip(orders_list, work_list)
+	inprogress = zip(orders_ip, works_ip)
+	delivered = zip(orders_dl, works_dl)
+	notstarted = zip(orders_ns, works_ns)
 
-	return render(request, 'orders/WorkUpdateList.html', {'table':table_data,'filter_data':filter_data, 'works':works, 'pdata':pdata, 'status':status, 'count':count})
+	print(orders_ip, works_ip)
+	return render(request, 'orders/WorkUpdateList.html', {'table':table_data,'filter_data':filter_data, 'pdata':pdata, 'status':status, 
+		'count':count, 'inprogress':inprogress, 'delivered':delivered, 'notstarted':notstarted})
 
 @login_required
 def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):

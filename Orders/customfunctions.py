@@ -111,22 +111,9 @@ def workstatus(request, workid, orderid):
 	fd.save()
 			
 	# update order final statuses and payment final statuses
-	order = Orders.objects.get(Order_No=fd.Order_No.Order_No)
+	order = Orders.objects.get(id=orderid)
 	fd = Work_Status.objects.filter(Order_No=order).order_by('Date').last()
 	order.Work_Status = fd #assign that work status id data to order
-
-	if fd.Closing_Status == 1:
-		order.Billing_Status.Payment_Due_Date = fd.Date + timedelta(days=order.Credit_Days)
-		order.Billing_Status.Payment_Over_Due_Days = (datetime.now() - order.Billing_Status.Payment_Due_Date).days 
-		if order.Billing_Status.Payment_Over_Due_Days < 0:
-			order.Billing_Status.Payment_Over_Due_Days = 0
-		order.Closing_Status = 1
-		if order.Final_Payment_Status == 1:
-			order.Final_Status = 1
-	else:
-		order.Closing_Status = 0
-		order.Final_Status = 0
-
 	order.save()
 
 def updateduedays(request, invid):

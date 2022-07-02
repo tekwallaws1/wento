@@ -6,6 +6,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     
+    path('<proj>/purchasesdb/<dur>/', views.Purchases_Dashboard, name='purchasesdb'),
+
     path('<proj>/purchaseslist/<status>/', views.PO_List, name='polist'),
     path('<proj>/purchasesform/<fnc>/<poid>/', views.PO_Form, name='poform'),
     

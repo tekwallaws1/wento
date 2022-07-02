@@ -26,6 +26,7 @@
 
 <script type="text/javascript">
   function rid(tid) {getid = tid}
+  function hide() { $("#exampleModal11 .close").click() }
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
         url = '/{{pdata.pj}}/workform/delete/'+getid+'/'
@@ -139,7 +140,7 @@
                 <h5 class="modal-title">Search Data by Applying Filter</h5>
                   <form class="">
                     <div class="row">
-                      <div class="col-md-6 col-sm-6 col-12">
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
                         <div class="form-group start-date">
                           <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
                           <input type="date" name="from_date" class="form-control">
@@ -150,20 +151,20 @@
                           <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
                           <input type="date" name="to_date" class="form-control">
                         </div>
-                      </div>
-                      <div class="col-md-6 col-sm-6 col-12">
+                      </div> -->
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Order No</label>
                         {{ filter_data.form.Work_Status__Order_No}}
-                      </div>
+                      </div> -->
                       <div class="col-md-6 col-sm-6 col-12">
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Customer Name</label>
                         {{ filter_data.form.Customer_Name}}
                       </div>
-                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                      <!-- <div class="col-md-6 col-sm-6 col-12 mt-4">
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Follow Up By</label>
                         {{ filter_data.form.Work_Status__user}}
-                      </div>
-                      <div style=" float:left; margin-left: 10px; margin-top: 48px;">
+                      </div> -->
+                      <div style=" float:left; margin-left: 10px; margin-top: 20px;">
                         <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
                         <!-- <button id="add-e" class="btn">Add Task</button> -->
                         <button id="edit-event" class="btn"></button>
@@ -191,7 +192,7 @@
           </div></a>
         </div>
       </div>
-    {% elif status == 'Progress' %}
+    {% elif status == 'Inprogress' %}
       <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-primary shadow h-100 py-2">
           <a ht="Delivered Orders" ><div class="card-body2">
@@ -221,7 +222,7 @@
   
   </div>
 
-
+{% if status == 'Inprogress' %}
 <!-- Work Progress List -->
   <div class="card">
     <div class="card-body2">
@@ -236,45 +237,31 @@
           </tr>
         </thead>
         <tbody>
-          {% for x, y in works %}
+          {% for x, y in inprogress %}
           <tr>
             <td >{{forloop.counter}}</td>
 
             <td style="white-space:normal;">
-              {% if y %} <!-- if any work exists neither delivered nor inprogress -->
-                {% if x.Final_Work_Status == 1 %} <!-- delivered -->
-                  <span class="hlt2">product delivered</span>
-                  {% for p in y %}
-                    <a class="ahr" ht="Edit Work Details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{p.id}}')">
-                      <br><span style="color:#cc3b06">Update {{forloop.counter}}:</span> {{p.Current_Status}}
-                      {% if p.Date %}<br>Updated On: {{p.Date|date:'d M Y'}}{% endif %}
-                      {% if p.user.Nick_Name %}<br>Followup By: {{p.user.Nick_Name}}{% endif %}
-                    </a>
-                    <br>
-                  {% endfor %}
-                {% else %} <!-- inprogress -->
-                <span class="hlt2">work in progress</span>
-                  {% for p in y %}
-                    <a class="ahr" ht="Edit Work Details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{p.id}}')">
-                      <br><span style="color:#cc3b06">Update {{forloop.counter}}:</span> {{p.Current_Status}}
-                      {% if p.Date %}<br>Updated On: {{p.Date|date:'d M Y'}}{% endif %}
-                      {% if p.Next_Task %}<br>Next Task: {{p.Next_Task}}{% endif %}
-                      {% if p.Target_Date %}<br>Target Date: {{p.Target_Date|date:'d M Y'}}{% endif %}
-                      {% if p.user.Nick_Name %}<br>Followup By: {{p.user.Nick_Name}}{% endif %}
-                    </a>
-                    <br>
-                  {% endfor %}
-                {% endif %}
-              {% else %}
-                <a class="ahr" ht="Add Work Progress Details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}')"><span class="hlt3">Work Not Yet Started</span></a>
-              {% endif %}
+              <span class="hlt2">work in progress</span>
+              <br>Works under PO not delivered fully
+              <br>
+                {% for p in y %}
+                  <a class="ahr" ht="Edit Work Details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{p.id}}')">
+                    <br><span class="hlt5">Update {{forloop.counter}}: </span> {{p.Current_Status}}
+                    {% if p.Date %}<br><span class="hlt5">Update On: </span> {{p.Date|date:'d M Y'}}{% endif %}
+                    {% if p.Next_Task %}<br><span class="hlt5">Next Task: </span> {{p.Next_Task}}{% endif %}
+                    {% if p.Target_Date %}<br><span class="hlt5">Target Date: </span> {{p.Target_Date|date:'d M Y'}}{% endif %}
+                    {% if p.user.Nick_Name %}<br><span class="hlt5">Followup By: </span> {{p.user.Nick_Name}}{% endif %}
+                  </a>
+                  <br>
+                {% endfor %}
             </td>
 
             <td style="white-space:normal;">
-              {% if x.Order_No %}Order No: {{x.Order_No}}{% endif %}
-              {% if x.Order_Received_Date %}<br>Received Date: {{x.Order_Received_Date|date:'d M Y'}}{% endif %}
-              {% if x.Order_Details %}<br>Order Details: {{x.Order_Details}}{% endif %}
-              {% if x.user.Nick_Name %}<br>Followup By: {{x.user.Nick_Name}}{% endif %}
+              {% if x.Order_No %}<br><span class="hlt5">Order No: </span> {{x.Order_No}}{% endif %}
+              {% if x.Order_Received_Date %}<br><span class="hlt5">Received Date: </span> {{x.Order_Received_Date|date:'d M Y'}}{% endif %}
+              {% if x.Order_Details %}<br><span class="hlt5">Order Details: </span> {{x.Order_Details}}{% endif %}
+              {% if x.user.Nick_Name %}<br><span class="hlt5">Followup By: </span> {{x.user.Nick_Name}}{% endif %}
             </td>
 
             <td style="white-space:normal;">
@@ -289,6 +276,108 @@
       </div>
     </div>
   </div>
+{% endif %}
+
+{% if status == 'Delivered' %}
+<!-- Work Progress List -->
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="{{status}}">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Work Status</th>
+            <th>Order Details</th>
+            <th>Customer Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x, y in delivered %}
+          <tr>
+            <td >{{forloop.counter}}</td>
+
+            <td style="white-space:normal;">
+              <span class="hlt2">Works Under PO Delivered Fully</span>
+              <br>
+                {% for p in y %}
+                  <a class="ahr" ht="Edit Work Details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{p.id}}')">
+                    <br><span class="hlt5">Update {{forloop.counter}}: </span> {{p.Current_Status}}
+                    {% if p.Date %}<br><span class="hlt5">Update On: </span> {{p.Date|date:'d M Y'}}{% endif %}
+                    {% if p.Next_Task %}<br><span class="hlt5">Next Task: </span> {{p.Next_Task}}{% endif %}
+                    {% if p.Target_Date %}<br><span class="hlt5">Target Date: </span> {{p.Target_Date|date:'d M Y'}}{% endif %}
+                    {% if p.user.Nick_Name %}<br><span class="hlt5">Followup By: </span> {{p.user.Nick_Name}}{% endif %}
+                  </a>
+                  <br>
+                {% endfor %}
+            </td>
+
+            <td style="white-space:normal;">
+              {% if x.Order_No %}<br><span class="hlt5">Order No: </span> {{x.Order_No}}{% endif %}
+              {% if x.Order_Received_Date %}<br><span class="hlt5">Received Date: </span> {{x.Order_Received_Date|date:'d M Y'}}{% endif %}
+              {% if x.Order_Details %}<br><span class="hlt5">Order Details: </span> {{x.Order_Details}}{% endif %}
+              {% if x.user.Nick_Name %}<br><span class="hlt5">Followup By: </span> {{x.user.Nick_Name}}{% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {{x.Customer_Name.Customer_Name}}
+              <br><br><i class="mdi mdi-phone"></i>&nbsp;<a ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Customer_Name.Phone_Number_1}}</a>
+            </td>
+
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% if status == 'Pending' %}
+<!-- Work Progress List -->
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="{{status}}">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Work Status</th>
+            <th>Order Details</th>
+            <th>Customer Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x, y in notstarted %}
+          <tr>
+            <td >{{forloop.counter}}</td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="Add Work Progress Details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}')"><span class="hlt3">Work Not Yet Started</span></a>
+            </td>
+
+            <td style="white-space:normal;">
+              {% if x.Order_No %}<br><span class="hlt5">Order No: </span> {{x.Order_No}}{% endif %}
+              {% if x.Order_Received_Date %}<br><span class="hlt5">Received Date: </span> {{x.Order_Received_Date|date:'d M Y'}}{% endif %}
+              {% if x.Order_Details %}<br><span class="hlt5">Order Details: </span> {{x.Order_Details}}{% endif %}
+              {% if x.user.Nick_Name %}<br><span class="hlt5">Followup By: </span> {{x.user.Nick_Name}}{% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {{x.Customer_Name.Customer_Name}}
+              <br><br><i class="mdi mdi-phone"></i>&nbsp;<a ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Customer_Name.Phone_Number_1}}</a>
+            </td>
+
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+
 
   <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" style="width:250px;%">
@@ -305,7 +394,7 @@
               <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-success mb-4">Add Work Progress</button>
               <button type="button"  onclick="location.href='/{{pdata.pj}}/workform/edit/'+getid+'/'" class="btn btn-sm btn-primary mb-4">Edit Work Details</button>
               <button type="button"  onclick="location.href='/{{pdata.pj}}/workform/copy/'+getid+'/'" class="btn btn-sm btn-danger mb-4">Copy Work Details</button>
-              <button type="button"  data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning mb-4">Delete Work Details</button> 
+              <button type="button" onclick="hide()"  data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning mb-4">Delete Work Details</button> 
             {% else %}
             <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-primary mb-4">Add Work Progress</button>
             {% endif %}          

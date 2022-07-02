@@ -44,16 +44,16 @@ class PaymentsFilter(django_filters.FilterSet):
 
 
 class WorksFilter(django_filters.FilterSet):
-	def __init__(self, *args, **kwargs):
-  		super().__init__(*args, **kwargs)
-  		for field in self.form.fields:
-  			self.form.fields[field].widget.attrs.update({'class': 'form-control'})
-	from_date 	= DateFilter(field_name='Work_Status__Date', lookup_expr='gte')
-	to_date 	= DateFilter(field_name='Work_Status__Date', lookup_expr='lte')
+	# def __init__(self, *args, **kwargs):
+ #  		super().__init__(*args, **kwargs)
+ #  		for field in self.form.fields:
+ #  			self.form.fields[field].widget.attrs.update({'class': 'form-control'})
+	# from_date 	= DateFilter(field_name='Work_Status__Date', lookup_expr='gte')
+	# to_date 	= DateFilter(field_name='Work_Status__Date', lookup_expr='lte')
 	
 	class Meta:
 		model 	= Orders
-		fields = ['Work_Status__user', 'Work_Status__Order_No', 'Customer_Name']
+		fields = ['Work_Status__Order_No', 'Customer_Name']
 
 class InvoicesFilter(django_filters.FilterSet):
 	def __init__(self, *args, **kwargs):

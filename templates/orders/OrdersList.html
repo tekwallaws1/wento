@@ -338,7 +338,7 @@
                   {% if x.Order_Details %}{{x.Order_Details}}{% endif %}
                 </td>
 
-                <td style="white-space:normal;">
+                <td style="white-space:normal; width: 21%;">
                   <span class="hlt2">Order/PO Value: ₹ {{x.Order_Value|floatformat:0|intcomma}}</span>
                   
                   {% if x.PO_No %}<br><span class='hlt5'>Purchase Order No
@@ -387,19 +387,18 @@
 
                 <td style="white-space:normal;">
                   {% if x.Work_Status %}                
-                    {% if x.Work_Status.Closing_Status == 1 %}
-                      <span class="hlt2">Product Delivered</span>
-                      <span style="color:#cc3b06"><br>Last Status:</span> {{x.Work_Status.Current_Status}}
-                      {% if x.Work_Status.Date %}<br>Updated On: {{x.Work_Status.Date|date:'d M Y'}}{% endif %}
-                      {% if x.Work_Status.user.Nick_Name %}<br>Followup By: {{x.Work_Status.user.Nick_Name}}{% endif %}
+                    {% if x.PO_Status == 1 %} 
+                      <span class="hlt2">Works Under PO Delivered Fully</span>
                     {% else %}
                       <span class="hlt2">work in progress</span>
-                      <br><span style="color:#cc3b06">Current Status:</span> {{x.Work_Status.Current_Status}}
-                      {% if x.Work_Status.Date %}<br>Updated On: {{x.Work_Status.Date|date:'d M Y'}}{% endif %}
-                      {% if x.Work_Status.Next_Task %}<br><span style="color:#cc3b06">Next Task:</span> {{x.Work_Status.Next_Task}}{% endif %}
-                      {% if x.Work_Status.Target_Date %}<br>Target Date: {{x.Work_Status.Target_Date|date:'d M Y'}}{% endif %}
-                      {% if x.Work_Status.user.Nick_Name %}<br>Followup By: {{x.Work_Status.user.Nick_Name}}{% endif %}
+                      <br>Works under PO not delivered fully
+                      <br>                      
                     {% endif %}
+                    <br><span class="hlt5">Latest Status: </span> {{x.Work_Status.Current_Status}}
+                      {% if x.Work_Status.Date %}<br><span class="hlt5">Updated On: </span> {{x.Work_Status.Date|date:'d M Y'}}{% endif %}
+                      {% if x.Work_Status.Next_Task %}<br><span class="hlt5">Next Task:</span> {{x.Work_Status.Next_Task}}{% endif %}
+                      {% if x.Work_Status.Target_Date %}<br><span class="hlt5">Target Date: </span>{{x.Work_Status.Target_Date|date:'d M Y'}}{% endif %}
+                      {% if x.Work_Status.user.Nick_Name %}<br><span class="hlt5">Followup By: </span> {{x.Work_Status.user.Nick_Name}}{% endif %}
                   {% else %}
                     <span class="hlt3">No Work Updates Yet</span>
                   {% endif %}

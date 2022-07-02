@@ -1,6 +1,6 @@
 from django.db import models
 from Projects.models import *
-from Products.models import *
+from Products.models import * 
 from UserAccounts.models import *
 # Create your models here.    
 
@@ -26,7 +26,7 @@ class Orders(models.Model):
 	# Final_Work_Status	= models.BooleanField(default=False, help_text='Final Work Status')
 	Final_Status		= models.BooleanField(default=False, help_text='Total Works and Payments Status')
 	PO_No 				= models.CharField(max_length=30, blank=True, null=True, help_text='Purchase Order Number if available')
-	PO_Status			= models.BooleanField(default=False, help_text='PO completion status, mark if PO completed')
+	PO_Status			= models.BooleanField(default=False, help_text='PO work completion status, mark if PO work completed')
 	Can_Gen_Invoice		= models.BooleanField(default=True, help_text='False if PO amount less than all onvoices amount') #backend
 	Is_Billed			= models.BooleanField(default=False) #backend
 	Attach				= models.FileField(upload_to='orders/', blank=True, null=True, help_text='attach PO copy if available')

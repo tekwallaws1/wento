@@ -28,9 +28,9 @@
   margin-left: -72px;
 
 " > -->
-          <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-sss.png' %}" /></a>
+          <a class="navbar-brand brand-logo" href="/modules/{{pdata.pj}}/"><img src="{% static 'img/logo-sss.png' %}" /></a>
           <!-- <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-sss.png' %}" /></a> -->
-          <a class="navbar-brand brand-logo-mini" href="{% url 'home' %}"><img src="{% static 'img/logo-mini.png' %}" alt="logo" /></a>
+          <a class="navbar-brand brand-logo-mini" href="/modules/{{pdata.pj}}/"><img src="{% static 'img/logo-mini.png' %}" alt="logo" /></a>
 
           
         </div>
@@ -51,10 +51,10 @@
                 <input type="text" class="form-control bg-transparent border-0" placeholder="search for something">
               </div>
             </form>
-          </div> -->
+          </div> --> 
 
           <ul class="navbar-nav navbar-nav-right">
-            <li><span style="font-size: 19px; color: #17b367; font-weight:bold">Automation</span></li>
+            <li><span style="font-size: 19px; color: #17b367; font-weight:bold">{{pdata.pj}}</span></li>
             <li class="nav-item nav-profile dropdown">
               <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                 <div class="nav-profile-img">
@@ -169,31 +169,31 @@
               <div class="collapse" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/salesdb/FY/">Sales and Payments</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="">Purchases <br>and Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/purchasesdb/FY/">Purchases <br>and Payments</a></li>
                 </ul>
               </div>
             </li>
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicorders" aria-expanded="false" aria-controls="ui-basicorders">
-                <span class="menu-title">Sales Orders</span>
+                <span class="menu-title">Work Orders</span>
                 <i class="menu-arrow"></i>
                 <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
                 <i class="fas fa-lg fa-cart-flatbed-suitcase"></i>
               </a>
               <div class="collapse" id="ui-basicorders">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/orderslist/Inprogress/">Sales Orders List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/ordersform/create/1/">Add New Received<br>Sales Order</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/orderslist/Inprogress/">Work Orders List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/ordersform/create/1/">Add New Received<br>Work Order</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/invoiceslist/Issued/">Customer Invoices</a></li>
                 </ul>
               </div>
             </li>
 
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicsalesinv" aria-expanded="false" aria-controls="ui-basicsalesinv">
                 <span class="menu-title">Sales Invoices</span>
                 <i class="menu-arrow"></i>
-                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
                 <i class="fas fa-lg fa-file-invoice"></i>
               </a>
               <div class="collapse" id="ui-basicsalesinv">
@@ -202,7 +202,7 @@
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/invoiceslist/Proforma/">Proforma Invoices</a></li>
                 </ul>
               </div>
-            </li>
+            </li> -->
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicpay" aria-expanded="false" aria-controls="ui-basicpay">

@@ -12,11 +12,18 @@
 {% block scripts %}
  
 {% endblock %}
-
+ 
 {% block content %}
 <div class="col-md-10 mx-auto">
-    <h4 class="card-title mb-0">{{pdata.pj.Project_Name}}</h4>
-    <br><br>
+    <div>
+      <div style="float:left">
+        <h4 class="card-title mb-0">{{pdata.pj.Project_Name}}</h4>
+      </div>
+      <div style="float:right">
+        <button type="button" onclick="location.href='/'"  class="btn btn-sm  btn-primary mb-4" >Change WorlArea/Division</button>     
+      </div>
+      <div style="clear:both"></div>
+    </div>
     <div class="row ">
         <div class="col-xl-3 col-lg-6 ">
             <div class="card l-bg-cherry">
@@ -24,8 +31,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-chart-column"></i></div>
                     <div >
                         <div class="mbt">Dashboards</div>
-                        <a href="/{{pdata.pj}}/salesdb/FY/"><div class="mb">Sales and Payments</div></a>
-                        <a href="#"><div class="mb">Purchases and Payments</div></a>
+                        <a href="/{{pdata.pj}}/salesdb/FY/"><div class="mb">Work Orders and Payments</div></a>
+                        <a href="/{{pdata.pj}}/purchasesdb/FY/"><div class="mb">Purchases and Payments</div></a>
                     </div>
                 </div>
             </div>
@@ -54,7 +61,7 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-shopping-cart"></i></div>
                     <div >
                         <div class="mbt">Orders</div>
-                        <a href="/{{pdata.pj}}/orderslist/Inprogress/"><div class="mb">Sales Orders</div></a>
+                        <a href="/{{pdata.pj}}/orderslist/Inprogress/"><div class="mb">Work Orders</div></a>
                         <a href="/{{pdata.pj}}/purchaseslist/Total/"><div class="mb">Purchase Orders</div></a>
                     </div>
                 </div>
@@ -67,7 +74,7 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-file-invoice"></i></div>
                     <div >
                         <div class="mbt">Billing</div>
-                        <a href="/{{pdata.pj}}/invoiceslist/Issued/"><div class="mb">Sales Billing</div></a>
+                        <a href="/{{pdata.pj}}/invoiceslist/Issued/"><div class="mb">Work Orders Billing</div></a>
                         <a href="/{{pdata.pj}}/vendorinvoiceslist/Issued/"><div class="mb">Vendor Billing</div></a>
                     </div>
                 </div>
