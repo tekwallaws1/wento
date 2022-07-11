@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Product Registration Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              {% if status == 'Products' %}
+                <div class="form-group">
+                  {% for field in form1 %}
+                    {% if field.label != 'Attach' and field.label != 'Related Project' and field.label != 'Status' %}
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                    {% endif %}
+                    {% if field.label ==  'Related Project' %}
+                      <label>Related Division/Work Area (leave blank if product related to many)</label>{{ field}}
+                    {% endif %}
+                    {% if field.label ==  'Attach' %}
+                      <label style="color:#32a852;">attach below if any product datasheet</label>{{field}} 
+                    {% endif %}
+                    {% if field.label ==  'Status' %}
+                      <div class="form-check form-check-flat form-check-primary">
+                        <label class="form-check-label">{{ form1.Status }}unmark it if product is not in active</label>
+                      </div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                      <p style="color: red; margin-top: -20px">{{ error }}</p>
+                    {% endfor %}
+                  {% endfor %}
+                </div>
+                <div class="form-group">
+                  {% for field in form2 %}
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                    {% for error in field.errors %}
+                      <p style="color: red; margin-top: -20px">{{ error }}</p>
+                    {% endfor %}
+                  {% endfor %}
+                </div>
+              {% else %}
+                 <div class="form-group">
+                  {% for field in form1 %}
+                    {% if field.label == 'Product Name' %}
+                      <label for="{{ field.label }}">Service Name{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                    {% endif %}
+                    {% if field.label == 'Active From' %}
+                      <label for="{{ field.label }}">Service Active From{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                    {% endif %}
+                    {% if field.label ==  'Related Project' %}
+                      <label>Related Division/Work Area (leave blank if product related to many)</label>{{ field}}
+                    {% endif %}
+                    {% if field.label ==  'Attach' %}
+                      <label style="color:#32a852;">attach below if any product datasheet</label>{{field}} 
+                    {% endif %}
+                    {% if field.label ==  'Status' %}
+                      <div class="form-check form-check-flat form-check-primary">
+                        <label class="form-check-label">{{ form1.Status }}unmark it if service is not in active</label>
+                      </div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                      <p style="color: red; margin-top: -20px">{{ error }}</p>
+                    {% endfor %}
+                  {% endfor %}
+                </div>
+                <div class="form-group">
+                  {% for field in form2 %}
+                    {% if field.label == 'Unit Price' %}
+                      <label for="{{ field.label }}">Services Estimated Cost{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                    {% else %}
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                    {% endif %}
+                    {% for error in field.errors %}
+                      <p style="color: red; margin-top: -20px">{{ error }}</p>
+                    {% endfor %}
+                  {% endfor %}
+                </div>
+              {% endif %}
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

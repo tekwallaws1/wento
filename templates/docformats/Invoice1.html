@@ -7,7 +7,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>SSE Proposals</title>
+    <title>GPR-ProMan</title>
     
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <link rel="stylesheet" href="{% static 'css/invoice1.css' %}">
+
 
   </head>
   <body>
@@ -67,11 +68,11 @@
     <br><br>
     <script>var hide1=1; var hide2=1; var hide3=1;</script>
 
-    <div id="invoicee" >
+    <div id="invoicee" class="print">
       <table style="width:100%">
         <tbody>
           <tr>
-            <td class="t2" style="background: white; text-align:left; width:15%"><img  class="invlogo" src="{% static 'img/sss-logo.png' %}"></td>
+            <td class="t2" style="background: white; text-align:left; width:15%"><img  class="invlogo" src="{% static 'img/logo-sss.png' %}"></td>
             <td  class="t1" style="">
               <span style="font-size:20px; color:yellow; ">{{inv.Billing_From.Company_Name}}</span>
               <a class="ahr1" ht="Change BillingFromAddress" data-toggle="modal" data-target="#editInvoiceModal" onclick="javascript:fnc('companyaddress')"><span style="font-style:italic; color: white;">
@@ -137,7 +138,7 @@
               {% if inv.Billing_To.Address_Line_1 %}<br>{{inv.Billing_To.Address_Line_1}},{% endif %}
               {% if inv.Billing_To.Address_Line_2 %}<br>{{inv.Billing_To.Address_Line_2}},{% endif %}
               {% if inv.Billing_To.GST_No %}<br><span class="sh1">GSTIN : </span>{{inv.Billing_To.GST_No}},{% endif %}
-              <br><span class="sh1">State &nbsp; : </span>{{inv.Billing_To.State}}{% if inv.Billing_To.State_Code %}, <span class="sh1">Code: </span>{{Billing_To.State_Code}}{% endif %} 
+              <br><span class="sh1">State &nbsp; : </span>{{inv.Billing_To.State}}{% if inv.Billing_To.State_Code %}, <span class="sh1">Code: </span>{{inv.Billing_To.State_Code}}{% endif %} 
             </a>
           </th>
           <th class="td1">
@@ -146,7 +147,7 @@
               {% if inv.Shipping_To.Address_Line_1 %}<br>{{inv.Shipping_To.Address_Line_1}},{% endif %}
               {% if inv.Shipping_To.Address_Line_2 %}<br>{{inv.Shipping_To.Address_Line_2}},{% endif %}
               {% if inv.Shipping_To.GST_No %}<br><span class="sh1">GSTIN : </span>{{inv.Shipping_To.GST_No}},{% endif %}
-              <br><span class="sh1">State &nbsp; : </span>{{inv.Shipping_To.State}}{% if inv.Shipping_To.State_Code %}, <span class="sh1">Code: </span>{{Shipping_To.State_Code}}{% endif %}
+              <br><span class="sh1">State &nbsp; : </span>{{inv.Shipping_To.State}}{% if inv.Shipping_To.State_Code %}, <span class="sh1">Code: </span>{{inv.Shipping_To.State_Code}}{% endif %}
             </a>
           </th>
         </tr>
@@ -526,7 +527,7 @@
   </div>
   <button type="button" style="display:none" data-toggle="modal" data-target="#addNewItemModal" data-backdrop='static' data-keyboard='false' id='itemidclick' class="btn btn-sm btn-primary mb-2">Update Item</button>
 
-  <!-- Add/Edit Items Form -->
+<!-- Add/Edit Items Form -->
   <div class="modal fade text-left" id="addNewItemModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" >
       <div class="modal-content" id="modal-reload">
@@ -627,10 +628,10 @@
 
       var element = document.getElementById('invoicee');
       html2pdf().from(element).set({
-      margin:       [5, 15, 5, 5],
+      margin:       [5, 15, 15, 5],
        // margin:       [t, l, b, r],
         // margin:       [10, 10, 20, 10],
-        filename: '{{inv.Billing_To.Short_Name}}'+'-'+'{{inv.Invoice_No}}',
+        filename: '{{inv.Invoice_No}}',
         html2canvas: { dpi: 192, letterRendering: true, scale:5},
         image: { type: 'jpeg', quality: 1.5},
        pageBreak: { mode: 'css', before:'#nextpage1'},

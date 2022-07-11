@@ -5,7 +5,7 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>SSE-ProMan</title>
+    <title>GPR-ProMan</title>
     <!-- plugins:css-->
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <!-- <link rel="stylesheet" href="{% static 'css/vendor.bundle.base.css' %}"> -->
@@ -54,7 +54,7 @@
           </div> --> 
 
           <ul class="navbar-nav navbar-nav-right">
-            <li><span style="font-size: 19px; color: #17b367; font-weight:bold">{{pdata.pj}}</span></li>
+            <li><span style="font-size: 19px; color: blue; font-weight:bold">{{pdata.pj}}</span></li>
             <li class="nav-item nav-profile dropdown">
               <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                 <div class="nav-profile-img">
@@ -168,24 +168,24 @@
               </a>
               <div class="collapse" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/salesdb/FY/">Sales and Payments</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/purchasesdb/FY/">Purchases <br>and Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/salesdb/All/">Sales</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/purchasesdb/All/">Purchases</a></li>
                 </ul>
               </div>
             </li>
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicorders" aria-expanded="false" aria-controls="ui-basicorders">
-                <span class="menu-title">Work Orders</span>
+                <span class="menu-title">Sales</span>
                 <i class="menu-arrow"></i>
                 <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
                 <i class="fas fa-lg fa-cart-flatbed-suitcase"></i>
               </a>
               <div class="collapse" id="ui-basicorders">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/orderslist/Inprogress/">Work Orders List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/ordersform/create/1/">Add New Received<br>Work Order</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/orderslist/Inprogress/">Sales List</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/invoiceslist/Issued/">Customer Invoices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentslist/Received/">Customer Payments</a></li>
                 </ul>
               </div>
             </li>
@@ -204,11 +204,10 @@
               </div>
             </li> -->
 
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicpay" aria-expanded="false" aria-controls="ui-basicpay">
                 <span class="menu-title">Customer Payments</span>
                 <i class="menu-arrow"></i>
-                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
                 <i class="fas fa-lg fa-money-check"></i>
               </a>
               <div class="collapse" id="ui-basicpay">
@@ -218,7 +217,7 @@
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentsform/create/1/">Add New Payment</a></li>
                 </ul>
               </div>
-            </li>
+            </li> -->
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicpurchase" aria-expanded="false" aria-controls="ui-basicpurchase">
@@ -245,24 +244,36 @@
               </a>
               <div class="collapse" id="ui-basicwork">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/worklist/Delivered/">Delivered Works</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/worklist/Inprogress/">Inprogress Works</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/worklist/Pending/">Not Started Works</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/worklist/Inprogress/">Work Orders Progress</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/purchaseslist/Total/">PO's Progress</a></li>
                 </ul>
               </div>
             </li>
 
             <li class="nav-item">
-              <a class="nav-link" data-toggle="collapse" href="#ui-basicsupport" aria-expanded="false" aria-controls="ui-basicsupport">
-                <span class="menu-title">Support</span> 
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicproducts" aria-expanded="false" aria-controls="ui-basicproducts">
+                <span class="menu-title">Products/Services</span> 
                 <i class="menu-arrow"></i>
-                <!-- <i class="fas fa-lg fa-headset"></i> -->
-                <i class="fas fa-lg fa-screwdriver-wrench"></i>
+                <i class="fas fa-lg fa-layer-group"></i>
               </a>
-              <div class="collapse" id="ui-basicsupport">
+              <div class="collapse" id="ui-basicproducts">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="#">Tickets</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="#">Raise a Ticket</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/productslist/Products/">Products</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/productslist/Services/">Services</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicinventory" aria-expanded="false" aria-controls="ui-basicinventory">
+                <span class="menu-title">Inventory</span> 
+                <i class="menu-arrow"></i>
+                <i class="fas fa-lg fa-warehouse"></i>
+              </a>
+              <div class="collapse" id="ui-basicinventory">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="#">Stock</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="#">Movement</a></li>
                 </ul>
               </div>
             </li>
@@ -277,23 +288,65 @@
               <div class="collapse" id="ui-basiccontact">
                 <ul class="nav flex-column sub-menu">
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/customerslist/">Customers List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/vendorslist/">Vendors List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/masterdatas/addcompany/">My Reg. Offices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/vendorslist/">Vendors List</a></li>                  
                 </ul>
               </div>
             </li>
+
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicempl" aria-expanded="false" aria-controls="ui-basicempl">
+                <span class="menu-title">Employes</span> 
+                <i class="menu-arrow"></i>
+                <i class="fas fa-lg fa-users"></i>
+              </a>
+              <div class="collapse" id="ui-basicempl">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employeslist/">List of Employes</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employesform/create/1/">Reg. New Employee</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <!-- <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicinventory" aria-expanded="false" aria-controls="ui-basicinventory">
+                <span class="menu-title">Inventory</span> 
+                <i class="menu-arrow"></i>
+                <i class="fas fa-lg fa-layer-group"></i>
+              </a>
+              <div class="collapse" id="ui-basicinventory">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/inventorylist/active/">Inventory</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/stockmovement/create/1/">Stock Movement Form</a></li>
+                </ul>
+              </div>
+            </li> -->
+
+            <!-- <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicsupport" aria-expanded="false" aria-controls="ui-basicsupport">
+                <span class="menu-title">Support</span> 
+                <i class="menu-arrow"></i>
+                <i class="fas fa-lg fa-headset"></i>
+              </a>
+              <div class="collapse" id="ui-basicsupport">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="#">Tickets</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="#">Raise a Ticket</a></li>
+                </ul>
+              </div>
+            </li> -->
+
+            
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicusers" aria-expanded="false" aria-controls="ui-basicusers">
-                <span class="menu-title">Users</span>
+                <span class="menu-title">Settings</span>
                 <i class="menu-arrow"></i>
                 <!-- <i class="mdi mdi mdi-account-multiple menu-icon"></i> -->
-                <i class="fas fa-lg fa-users"></i>
+                <i class="fas fa-lg fa-gears"></i>
               </a>
               <div class="collapse" id="ui-basicusers">
                 <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/companylist/">My Reg. Offices</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/userslist/">Manage Users</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'signup' %}">Signup New User</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="{% url 'logout' %}">Signin User</a></li>
                 </ul>
               </div>
             </li>

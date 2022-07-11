@@ -3,6 +3,8 @@ from .models import *
 from Projects.basedata import projectname
 from django.forms import Form, ModelForm, DateField, widgets
 from django.forms import DateTimeField, DateTimeInput
+from django.shortcuts import get_object_or_404
+
 
 class OrdersForm(forms.ModelForm):	
 	class Meta:
@@ -198,6 +200,51 @@ class InvoicesForm1(forms.ModelForm):
 	class Meta:
 		model = Invoices
 		fields = ['Order']
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })
+
+class ManualInvoicesForm(forms.ModelForm):	
+	class Meta:
+		model = Invoices
+		# exclude = ['user']
+		fields = ['Billing_From', 'Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Attach']
+		widgets = {'Invoice_Date': widgets.DateInput(attrs={'type': 'datetime-local'})}
+
+	def clean(self):
+	    cleaned_data = self.cleaned_data
+	    f1 = cleaned_data.get('Invoice_Date')
+	    if not f1:
+	        cleaned_data['Invoice_Date'] = datetime.now()
+	    return cleaned_data	
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })
+
+class ManualInvoicesForm1(forms.ModelForm):	
+	class Meta:
+		model = Invoices
+		# exclude = ['user']
+		fields = ['Billing_From', 'Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Attach']
+
+	def clean(self):
+	    cleaned_data = self.cleaned_data
+	    f1 = cleaned_data.get('Invoice_Date')
+	    if not f1:
+	        cleaned_data['Invoice_Date'] = datetime.now()
+	    return cleaned_data	
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

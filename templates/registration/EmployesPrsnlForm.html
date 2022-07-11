@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body"> 
+        <h4 class="card-title d-inline-block">Employee Personal Details Reg. Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+                <div class="form-group">
+                  {% for field in form %}
+                    {% if field.label != 'Upload Aadhaar' and field.label != 'Upload PAN' and field.label != 'Upload Resume' %}
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                    {% endif %}
+                    {% if field.label ==  'Upload Aadhaar' %}
+                      <label style="color:#32a852; margin-left: 10px !important;">attach aadhaar copy below</label>{{field}}
+                    {% endif %}
+                    {% if field.label ==  'Upload PAN' %}
+                      <label style="color:#32a852; margin-left: 10px !important;">attach PAN copy below</label>{{field}}
+                    {% endif %}
+                    {% if field.label ==  'Upload Resume' %}
+                      <label style="color:#32a852; margin-left: 10px !important;">attach resume copy below</label>{{field}}
+                    {% endif %}
+                    {% for error in field.errors %}
+                      <p style="color: red; margin-top: -20px">{{ error }}</p>
+                    {% endfor %}
+                  {% endfor %}  
+                </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

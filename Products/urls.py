@@ -8,6 +8,11 @@ urlpatterns = [
     
     path('<proj>/purchasesdb/<dur>/', views.Purchases_Dashboard, name='purchasesdb'),
 
+    path('<proj>/productslist/<status>/', views.Products_List, name='productslist'),
+    path('<proj>/productsform/<status>/<fnc>/<prid>/', views.Products_Form, name='productsform'),
+    path('<proj>/inventory/<status>/', views.Inventory_List, name='inventory'),
+    path('<proj>/stockmovementform/<fnc>/<pid>/', views.Stock_Movement_Form, name='stockmovementform'),
+
     path('<proj>/purchaseslist/<status>/', views.PO_List, name='polist'),
     path('<proj>/purchasesform/<fnc>/<poid>/', views.PO_Form, name='poform'),
     

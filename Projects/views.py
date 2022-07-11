@@ -219,4 +219,51 @@ def VendContDt_Form(request, proj, fnc, rid):
 			form = VendorContactForm()
 			return render(request, 'projects/VendContDtForm.html', {'form': form, 'pdata':pdata})
 
+@login_required
+def Company_Form(request, proj, fnc, rid):
+	pdata = projectname(request, proj)
+	if fnc != 'create' and fnc != 'delete' and fnc!='copy' : #update
+		if request.method ==  'POST':
+			getdata = get_object_or_404(CompanyDetails, id=rid)
+			form = CompanyForm(request.POST, request.FILES, instance=getdata)
+			if form.is_valid():
+				form.save()
+				messages.success(request, "Selected Company Details Has Been Updated")
+				return redirect('/%s/companylist/'%pdata['pj'])
+			else:
+				return render(request, 'projects/CompanyDetailsForm.html', {'form': form, 'pdata':pdata})
+		else:
+			getdata = get_object_or_404(CompanyDetails, id=rid)
+			form = CompanyForm(instance=getdata)
+			return render(request, 'projects/CompanyDetailsForm.html', {'form': form, 'pdata':pdata})
+
+	elif fnc == 'delete': #Delete
+		getdata = get_object_or_404(CompanyDetails, id=rid)
+		getdata.ds = 0
+		getdata.save()
+		messages.success(request, "Selected Company Details Has Been Send to Recyclebin")
+		return redirect('/%s/companylist/'%pdata['pj'])
+
+	if request.method ==  'POST': #Create
+		form = CompanyForm(request.POST, request.FILES)
+		if form.is_valid():
+			form.save()
+			messages.success(request, "Company Details Has Been Added")
+			return redirect('/%s/companylist/'%pdata['pj'])
+		else:
+			return render(request, 'projects/CompanyDetailsForm.html', {'form': form, 'pdata':pdata})
+	else:
+		if fnc == 'copy':
+			getdata = get_object_or_404(CompanyDetails, id=rid)
+			form = CompanyForm(instance=getdata)
+			return render(request, 'projects/CompanyDetailsForm.html', {'form': form, 'pdata':pdata})
+		else:
+			form = CompanyForm()
+			return render(request, 'projects/CompanyDetailsForm.html', {'form': form, 'pdata':pdata})
+
+@login_required
+def Companies_List(request, proj):
+	pdata = projectname(request, proj)
+	table = CompanyDetails.objects.filter(ds=1)
+	return render(request, 'projects/CompanyDetails.html', {'table':table, 'pdata':pdata})
 

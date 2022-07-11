@@ -294,18 +294,16 @@
   <div style="float:right">
     <h3 class="page-title">
       <div>
-        <button class="btn1 btn1-danger" onclick="location.href='/{{pdata.pj}}/salesdb/30/'">1M</button>
-        <button class="btn1 btn1-info" onclick="location.href='/{{pdata.pj}}/salesdb/90/'">3M</button>
-        <button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/salesdb/180/'">6M</button>
-        <button class="btn1 btn1-success" onclick="location.href='/{{pdata.pj}}/salesdb/All/'">ALL</button>
-        <button class="btn1 btn1-dark" onclick="location.href='/{{pdata.pj}}/salesdb/FY/'">Fin.Year</button>
+        <button class="btn1 btn1-danger" onclick="location.href='/{{pdata.pj}}/purchasesdb/30/'">1M</button>
+        <button class="btn1 btn1-info" onclick="location.href='/{{pdata.pj}}/purchasesdb/90/'">3M</button>
+        <button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/purchasesdb/180/'">6M</button>
+        <button class="btn1 btn1-dark" onclick="location.href='/{{pdata.pj}}/purchasesdb/FY/'">Fin.Year</button>
       
-        &emsp; <span style="color: #0854a6">
-        {% if dur == 'FY' %} During This Financial Year - 
+        &emsp; <span style="color: #0854a6;  font-size:17px;">
+        {% if dur == 'FY' %} Financial Year - 
         {% elif dur == '30' %} Latest One Month - 
         {% elif dur == '90' %} Latest 3 Months - 
         {% elif dur == '180' %} Latest 6 Months - 
-        {% elif dur == 'All' %} Entire Duration - 
         {% else %}{% endif %}</span>
         <span style="color:#0854a6">Purchase Orders and It's Payments</span> </div>
     </h3>
@@ -316,7 +314,7 @@
   <div class="row">
   <div class="col-md-4 stretch-card grid-margin">
     <div class="card bg-gradient-info card-img-holder text-white">
-      <div class="card-body1">
+      <a href="/{{pdata.pj}}/purchaseslist/Total/" ht="click to get total purchases list"><div class="card-body1">
         <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
         <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-handshake-angle"></i></div></div>
         <h4 class="mb-3 blk">Total Purchase Orders - {{count.toc}}
@@ -325,11 +323,11 @@
         <h5 class="mb-3 blk">Inprogress-{{count.ioc}}, ₹ {{val.iov|floatformat:0|intcomma}}</h5>
         {% if dur != '30' %}<h6 class="card-text blk">Recent Month Purchase Orders-{{count.toc_30}}, ₹ {{val.tov_30|floatformat:0|intcomma}}</h6>{% endif %}
       </div>
-    </div>
+    </div></a>
   </div>
   <div class="col-md-4 stretch-card grid-margin">
     <div class="card bg-gradient-success card-img-holder text-white">
-      <div class="card-body1">
+      <a href="/{{pdata.pj}}/vendorinvoiceslist/Issued/" ht="click to get vendor billing list"><div class="card-body1">
         <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
         <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-shopping-cart"></i></div></div>
         <h4 class="mb-3 blk">Total Billing - {{count.tbc}}</h4>
@@ -337,18 +335,18 @@
         <h5 class="mb-3 blk">Fully Closed Bills-{{count.cbc}}, ₹ {{val.cbv|floatformat:0|intcomma}}</h5>
         {% if dur != '30' %}<h6 class="card-text blk">Recent Month Billings-{{count.tbc_30}}, ₹ {{val.tbv_30|floatformat:0|intcomma}}</h6>{% endif %}
       </div>
-    </div>
+    </div></a>
   </div>
   <div class="col-md-4 stretch-card grid-margin">
     <div class="card bg-gradient-primary card-img-holder text-white">
-      <div class="card-body1">
+      <a href="/{{pdata.pj}}/vendorpaymentslist/Due/" ht="click to get vendor due payments list"><div class="card-body1">
         <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
         <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-bandage"></i></div></div>
         <h4 class="mb-3 blk">Due Payments</h4>
         <h2 class="mb-3 blk" style="color: red">₹ {{val.tdp|floatformat:0|intcomma}}</h2>
         <h5 class="mb-3 blk" style="color:yellow">Total Paid Payments  ₹ {{val.tpp|floatformat:0|intcomma}}</h5>
         {% if dur != '30' %}<h6 class="card-text blk">Recent Month Paid Payments  ₹ {{val.tpp_30|floatformat:0|intcomma}}</h6>{% endif %}
-      </div>
+      </div></a>
     </div>
   </div>
 </div>
@@ -357,15 +355,16 @@
   <div class="col-xl-12 col-lg-7">
     <div class="card shadow mb-4">
       <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h7 class="m-1 font-weight-bold ">Customer Wise Orders, Billing and Payment Statuses - <span style="color: #0854a6">
-        {% if dur == 'FY' %} During This Financial Year
-        {% elif dur == '30' %} Latest One Month
-        {% elif dur == '90' %} Latest 3 Months
-        {% elif dur == '180' %} Latest 6 Months
-        {% elif dur == 'All' %} Entire Duration
-        {% else %}{% endif %}</span></h7>
-        <div><button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/salesdb/FY/'">Fin.Year</button></div>
-      </div>                         
+        <h7 class="m-1 font-weight-bold ">Customer Wise Orders, Billing and Payment Statuses<span style="color: #0854a6">
+          {% if dur == '30' %} - Latest Month
+          {% elif dur == '90' %} - Latest 3 Months
+          {% elif dur == '180' %} - Latest 6 Months
+          {% elif dur == 'FY' %} - Financial Year
+          {% else %}{% endif %}</span></h7>
+          {% if dur != 'All' %}
+            <div><button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/purchasesdb/All/'">Reset</button></div>
+          {% endif %}
+        </div>                         
       <div class="card-body1">
         <div id="poandpaymentsdb"></div>   
       </div>
@@ -377,15 +376,16 @@
   <div class="col-xl-12 col-lg-7">
     <div class="card shadow mb-4">
       <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h7 class="m-1 font-weight-bold ">Purchase Orders Graph - <span style="color: #0854a6">
-        {% if dur == 'FY' %} During This Financial Year
-        {% elif dur == '30' %} Latest One Month
-        {% elif dur == '90' %} Latest 3 Months
-        {% elif dur == '180' %} Latest 6 Months
-        {% elif dur == 'All' %} Entire Duration
-        {% else %}{% endif %}</span></h7>
-        <div><button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/salesdb/FY/'">Fin.Year</button></div>
-      </div>                         
+        <h7 class="m-1 font-weight-bold "><a href="/{{pdata.pj}}/purchaseslist/Total/" ht="click to get sales orders list">Purchases</a><span style="color: #0854a6">
+          {% if dur == '30' %} - Latest Month
+          {% elif dur == '90' %} - Latest 3 Months
+          {% elif dur == '180' %} - Latest 6 Months
+          {% elif dur == 'FY' %} - Financial Year
+          {% else %}{% endif %}</span></h7>
+          {% if dur != 'All' %}
+            <div><button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/purchasesdb/All/'">Reset</button></div>
+          {% endif %}
+        </div>                         
       <div class="card-body1">
         <div id="purchases_db"></div>   
       </div>
@@ -398,15 +398,16 @@
   <div class="col-md-8 grid-margin stretch-card"> 
     <div class="card shadow mb-4">
       <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h7 class="m-1 font-weight-bold ">Paid Payments Progress - <span style="color: #0854a6">
-        {% if dur == 'FY' %} During This Financial Year
-        {% elif dur == '30' %} Latest One Month
-        {% elif dur == '90' %} Latest 3 Months
-        {% elif dur == '180' %} Latest 6 Months
-        {% elif dur == 'All' %} Entire Duration
-        {% else %}{% endif %}</span></h7>
-        <div><button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/salesdb/FY/'">Fin.Year</button></div>
-      </div>                         
+        <h7 class="m-1 font-weight-bold "><a href="/{{pdata.pj}}/vendorpaymentslist/Paid/" ht="click to get sales orders list">Paid Payments</a><span style="color: #0854a6">
+          {% if dur == '30' %} - Latest Month
+          {% elif dur == '90' %} - Latest 3 Months
+          {% elif dur == '180' %} - Latest 6 Months
+          {% elif dur == 'FY' %} - Financial Year
+          {% else %}{% endif %}</span></h7>
+          {% if dur != 'All' %}
+            <div><button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/purchasesdb/All/'">Reset</button></div>
+          {% endif %}
+        </div>                         
       <div class="card-body1">
         <div id="payments"></div>   
       </div>

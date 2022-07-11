@@ -32,7 +32,7 @@ class Orders(models.Model):
 	Attach				= models.FileField(upload_to='orders/', blank=True, null=True, help_text='attach PO copy if available')
 	ds					= models.BooleanField(default=True)
 
-	def duedays(self, *args, **kwargs): #if file updated it will delete old file and replace
+	def save(self, *args, **kwargs): #if file updated it will delete old file and replace
 	    try:
 	        this = Orders.objects.get(id=self.id)
 	        if this.Attach != self.Attach:
@@ -88,7 +88,7 @@ class OrderRefNo(models.Model):
 class BillRefNo(models.Model):
 	Bill_No_1 			= models.IntegerField(blank=True, null=True, unique=True)
 
-	def __str__(self):
+	def __str__(self): 
 		return str(self.Bill_No_1)
 
 class Invoices(models.Model): 
@@ -106,7 +106,7 @@ class Invoices(models.Model):
 	FY 					= models.CharField(max_length=10, blank=True, null=True, help_text='financial year such as 22-23, 23-24 etc..')
 	Invoice_Date 		= models.DateTimeField(blank=True, null=True, help_text='billed date')
 	Invoice_Amount		= models.FloatField(max_length=20, null=True, blank=True, help_text='including all taxes')
-	GST_Amount			= models.FloatField(max_length=10, blank=True, null=True, help_text='GST Amount')
+	GST_Amount			= models.FloatField(max_length=10, blank=True, null=True, help_text='only GST Amount')
 	CESS_Amount			= models.FloatField(max_length=10, blank=True, null=True, help_text='CESS Amount')	
 	GST_Reverse_Charges	= models.BooleanField(default=False, help_text='default nill, if applicable mark it')
 	Credit_Days			= models.IntegerField(default=0, null=True, blank=True, help_text='credit in days such as 0, 15, 30, 60 etc..')
@@ -120,7 +120,18 @@ class Invoices(models.Model):
 	Attach				= models.FileField(upload_to='bills/', blank=True, null=True, help_text='attach order copy if available')
 	Lock_Status			= models.BooleanField(default=False, help_text='mark if wnat to lock invoice to avoid editing')
 	Is_Proforma			= models.BooleanField(default=False, help_text='tick if it is proforma invoice')
+	Attach				= models.FileField(upload_to='customerinvoices/', blank=True, null=True, help_text='attach invoice copy if available')	
+	Is_Manual			= models.BooleanField(default=False, help_text='wether it is manual entry or online generation')
 	ds					= models.BooleanField(default=True)
+
+	def save(self, *args, **kwargs): #if file updated it will delete old file and replace
+	    try:
+	        this = Invoices.objects.get(id=self.id)
+	        if this.Attach != self.Attach:
+	        	this.Attach.delete(save=False)
+	    except:
+	    	pass  # when new file then we do nothing, normal case
+	    super().save(*args, **kwargs)
 
 	def __str__(self):
 		return str(self.Invoice_No)+'-'+str(self.Billing_To.Customer_Name)+'-'+str(self.Invoice_Amount)

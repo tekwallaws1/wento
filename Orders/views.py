@@ -13,13 +13,13 @@ from django.contrib.auth import logout
 from django.db.models import Q
 from django.utils.datastructures import MultiValueDictKeyError 
 from django.db.models import Sum, Avg, Count
-from Projects.fyear import get_financial_year, get_fy_date
+from Projects.fyear import get_financial_year, get_fy_date, get_fy_date_fy
 from Projects.basedata import projectname
-from .customfunctions import assign_paystatus_to_order, workstatus, updateduedays, get_invoice_number, inv_amoumt_update, inv_amount_exceed, adjust_payments_to_invoices, genOrderNo
+from .customfunctions import assign_paystatus_to_order, workstatus, updateduedays, get_invoice_number, inv_amoumt_update, inv_amount_exceed, adjust_payments_to_invoices, genOrderNo, postform
 from num2words import num2words
 from django.urls import reverse
  
-
+ 
 # Create your views here. 
 @login_required
 def Sales_Dashboard(request, proj, dur):
@@ -29,8 +29,8 @@ def Sales_Dashboard(request, proj, dur):
 	lookup2 = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
 
 	if dur == 'FY':
-		orders = Orders.objects.filter(**lookup, Order_Type='Confirmed', Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date(), ds=1).order_by('Order_Received_Date')
-		payments = Payment_Status.objects.filter(**lookup1,  Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
+		orders = Orders.objects.filter(**lookup, Order_Type='Confirmed', Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date_fy(), ds=1).order_by('Order_Received_Date')
+		payments = Payment_Status.objects.filter(**lookup1,  Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date_fy()).order_by('Payment_Date')
 	elif dur == 'All':
 		orders = Orders.objects.filter(**lookup, Order_Type='Confirmed', ds=1).order_by('Order_Received_Date')
 		payments = Payment_Status.objects.filter(**lookup1).order_by('Payment_Date')		
@@ -312,7 +312,7 @@ def Payments_Form(request, proj, fnc, rid):
 			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
 		else:
 			form = PaymentsEmptyForm()
-			form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=0))
+			form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=False))
 			form.fields["Invoice_No"].queryset = Invoices.objects.filter(**lookup1, Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
 			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
 
@@ -325,7 +325,7 @@ def Payments_List(request, proj, status):
 	total, estimate, received, due, overdue, advance= 0,0,0,0,0,0
 	
 	form = PaymentsEmptyForm()
-	form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=0))
+	form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=False))
 	form.fields["Invoice_No"].queryset = Invoices.objects.filter(**lookup1, Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
 	
 	lookup = {'Order_No__Related_Project__isnull':False} if proj == 'All' else {'Order_No__Related_Project':pdata['pj']}
@@ -578,7 +578,7 @@ def Work_Update_List(request, proj, status):
 @login_required
 def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 	pdata = projectname(request, proj)
-	last_invid = Invoices.objects.filter(Lock_Status=1, Is_Proforma=0).order_by('Invoice_No_1').last()
+	last_invid = Invoices.objects.filter(Lock_Status=1, Is_Proforma=0, Is_Manual=0).order_by('Invoice_No_1').last()
 	last_invid = last_invid.id if last_invid else None
 	
 	if request.method == 'POST' and fnc=='create':
@@ -588,6 +588,16 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 			rid = p.Order.id
 			invid = p.id
 
+	if fnc == 'create_manually':
+		k = postform(request, rid, 1, fnc)
+		if k == 'invlist':
+			return redirect('/%s/invoiceslist/Issued/'%pdata['pj'])
+		elif k == 'orderslist':
+			return redirect('/%s/orderslist/Inprogress/'%pdata['pj'])
+		else:
+			form = ManualInvoicesForm()
+			return render(request, 'orders/ManualInvoiceForm.html', {'form':form, 'pdata':pdata})
+		
 	order = Orders.objects.get(id=rid)
 	
 	if inv_amount_exceed(request, rid)==1 and fnc == 'create':
@@ -649,7 +659,6 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 	ss = {'final_gst':final_gst, 'final_without_tax_amount':final_without_tax_amount, 'final_with_tax_amount':final_with_tax_amount}
 
 	
-
 	form_invoice = InvoicesForm(instance=get_object_or_404(Invoices, id=inv.id))
 	
 	if Delivery_Note.objects.filter(Invoice_No=inv).last():
@@ -679,6 +688,14 @@ def Edit_Invoice_Form(request, proj, fnc, invid):
 	inv_order_id = Invoices.objects.get(id=invid).Order.id
 	msg='msg'
 	url = '/'+str(pdata['pj'])+'/invoice/edit/'+invid+'/'+str(inv_order_id)+'/itemid/'
+
+	if fnc == 'edit_manually':
+		k = postform(request, inv_order_id, invid, fnc)
+		if k != 'getform':
+			return redirect('/%s/invoiceslist/Issued/'%pdata['pj'])
+		else:
+			form = ManualInvoicesForm1(instance=get_object_or_404(Invoices, id=invid))
+			return render(request, 'orders/ManualInvoiceForm.html', {'form':form, 'pdata':pdata})
 	
 	if request.method == 'POST':
 		form = InvoicesForm(request.POST, request.FILES, instance=get_object_or_404(Invoices, id=invid))

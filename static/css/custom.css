@@ -1418,6 +1418,7 @@ input[type="button"].btn2-block {
 
 a:hover {
   cursor:pointer;
+  text-decoration: none !important;
  }
 
  .ahr:hover {

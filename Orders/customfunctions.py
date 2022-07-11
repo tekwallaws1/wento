@@ -1,9 +1,11 @@
 from datetime import date, datetime, timedelta 
 from django.db.models import Sum, Avg, Count
 from.models import *
+from .forms import *
 from django.http import HttpResponse, JsonResponse
 from Projects.fyear import get_financial_year, get_fy_date
 from Projects.basedata import projectname
+from django.contrib import messages
 
 def genOrderNo(request, order_id, last_order_id):
 	fd = Orders.objects.get(id=order_id)
@@ -184,141 +186,37 @@ def inv_amount_exceed(request, rid):
 		order.save()
 		return 0
 
+def inv_amount_exceed_manual(request, rid, invamount):
+	order = Orders.objects.filter(id=rid).last()
+	invs = Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0)
+	invs_sum=invs.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0 if invs != None else 0
+	invs_sum = invs_sum + (invamount or 0)
+	if invs_sum >= order.Order_Value+10 or invs_sum >= order.Order_Value-10:
+		# order.Can_Gen_Invoice=0
+		order.save()
+		return 1
+	else:
+		order.Can_Gen_Invoice=1
+		order.save()
+		return 0
 
-# def paystatus(request, p, rid, task):
-# 	fd = Payment_Status.objects.get(id=p.id)
-# 	order = Orders.objects.get(id=rid)
-# 	diff = fd.Received_Amount if task!='delete' else -1*fd.Received_Amount
-# 	fd.Order_No = order
-# 	fd.save()
-
-# 	if fd.Invoice_No:
-# 		inv = Invoices.objects.filter(Invoice_No=fd.Invoice_no.Invoice_No).last()
-# 		if inv.Due_Amount+10 >= diff or inv.Due_Amount-10 >= diff:
-# 			inv.Due_Amount = inv.Due_Amount - diff
-# 			inv.Final_Payment_Status = 0
-# 			inv.save()
-# 			if inv.Due_Amount > inv.Invoice_Amount: ###########if delete any payment########
-# 				diff = inv.Invoice_Amount - diff
-# 				inv.Due_Amount = inv.Invoice_Amount
-# 				inv.save()
-# 				breakloop = 0 
-# 				if diff<0:
-# 					inv = Invoices.objects.filter(Order=order, Lock_Status=1).order_by('Invoice_Date').reverse()
-# 					for x in inv:
-# 						if breakloop == 0:
-# 							if x.Due_Amount < x.Invoice_Amount:
-# 								if x.Due_Amount+10 >= diff or x.Due_Amount-10 >= diff:
-# 									x.Due_Amount = x.Due_Amount - diff
-# 									x.Final_Payment_Status = 0
-# 									x.save()
-# 									if x.Due_Amount > x.Invoice_Amount: ###########if delete any payment########
-# 										diff = x.Invoice_Amount - diff
-# 										x.Due_Amount = x.Invoice_Amount
-# 										x.save()
-# 									else:
-# 										breakloop == 1 
-# 								else:
-# 									breakloop == 1		 
-# 		else:
-# 			diff = diff - inv.Due_Amount
-# 			inv.Due_Amount = 0
-# 			inv.Final_Payment_Status = 1
-# 			inv.Payment_Cleared_Date = fd.Payment_Date
-# 			inv.save()
-# 			breakloop = 0 
-# 			if diff>0:
-# 				inv = Invoices.objects.filter(Order=order, Final_Payment_Status=0, Lock_Status=1).order_by('Invoice_Date')
-# 				for x in inv:
-# 					if breakloop == 0:
-# 						if x.Due_Amount+10 >= diff or x.Due_Amount-10 >= diff:
-# 							x.Due_Amount = x.Due_Amount - diff
-# 							x.Final_Payment_Status = 0
-# 							x.save()
-# 							if x.Due_Amount > x.Invoice_Amount: ###########if delete any payment########
-# 								diff = x.Invoice_Amount - diff
-# 								x.Due_Amount = x.Invoice_Amount
-# 								x.save()
-# 								breakloop1 = 0 
-# 								if diff<0:
-# 									inv = Invoices.objects.filter(Order=order, Lock_Status=1).order_by('Invoice_Date').reverse()
-# 									for y in inv:
-# 										if breakloop1 == 0:
-# 											if y.Due_Amount < y.Invoice_Amount:
-# 												if y.Due_Amount+10 >= diff or y.Due_Amount-10 >= diff:
-# 													y.Due_Amount = y.Due_Amount - diff
-# 													y.Final_Payment_Status = 0
-# 													y.save()
-# 													if y.Due_Amount > y.Invoice_Amount: ###########if delete any payment########
-# 														diff = y.Invoice_Amount - diff
-# 														y.Due_Amount = y.Invoice_Amount
-# 														y.save()
-# 													else:
-# 														breakloop1 == 1 
-# 												else:
-# 													breakloop1 == 1
-# 							else:	
-# 								breakloop = 1
-# 						else:
-# 							diff = diff - x.Due_Amount
-# 							x.Due_Amount = 0
-# 							x.Final_Payment_Status = 1
-# 							x.Payment_Cleared_Date = fd.Payment_Date
-# 							x.save()
-# 		fd.Payment_Type = 'Due'
-# 		fd.save()
-# 	else:
-# 		breakloop = 0
-# 		if task!='delete':
-# 			inv = Invoices.objects.filter(Order=order, Final_Payment_Status=0, Lock_Status=1).order_by('Invoice_Date')
-# 		else:
-# 			inv = Invoices.objects.filter(Order=order, Lock_Status=1).order_by('Invoice_Date').reverse()
-# 		if inv:
-# 			for x in inv:
-# 				if breakloop == 0:
-# 					if x.Due_Amount+10 >= diff or x.Due_Amount-10 >= diff:
-# 						x.Due_Amount = x.Due_Amount - diff
-# 						x.Final_Payment_Status = 0
-# 						x.save()
-# 						if x.Due_Amount > x.Invoice_Amount: ###########if delete any payment########
-# 							diff = x.Invoice_Amount - diff
-# 							x.Due_Amount = x.Invoice_Amount
-# 							x.save()
-# 							breakloop1 = 0 
-# 							if diff<0:
-# 								inv = Invoices.objects.filter(Order=order, Lock_Status=1).order_by('Invoice_Date').reverse()
-# 								for y in inv:
-# 									if breakloop1 == 0:
-# 										if y.Due_Amount < y.Invoice_Amount:
-# 											if y.Due_Amount+10 >= diff or y.Due_Amount-10 >= diff:
-# 												y.Due_Amount = y.Due_Amount - diff
-# 												y.Final_Payment_Status = 0
-# 												y.save()
-# 												if y.Due_Amount > y.Invoice_Amount: ###########if delete any payment########
-# 													diff = y.Invoice_Amount - diff
-# 													y.Due_Amount = y.Invoice_Amount
-# 													y.save()
-# 												else:
-# 													breakloop1 == 1 
-# 											else:
-# 												breakloop1 == 1
-# 						else:	
-# 							breakloop = 1
-# 					else:
-# 						diff = diff - x.Due_Amount
-# 						x.Due_Amount = 0
-# 						x.Final_Payment_Status = 1
-# 						x.Payment_Cleared_Date = fd.Payment_Date
-# 						x.save()
-# 			fd.Payment_Type = 'Due'
-# 			fd.save()
-# 		else:
-# 			fd.Payment_Type = 'Advance'
-# 			fd.save()
-
-
-# 	fd.user = Account.objects.get(user=request.user)
-# 	fd.Order_No = order
-# 	order.Payment_Status = fd
-# 	fd.save()
-# 	order.save()
+def postform(request, rid, invid, fnc):
+	if request.method == 'POST':
+		form = ManualInvoicesForm(request.POST, request.FILES) if fnc == 'create_manually' else ManualInvoicesForm(request.POST, request.FILES, instance=get_object_or_404(Invoices, id=invid))
+		if form.is_valid():
+			p = form.save(commit=False)
+			if inv_amount_exceed_manual(request, rid, p.Invoice_Amount)==1:
+				messages.error(request, 'Invoice generation not allowed due to all Invoices value under related received work order exceeding the order value')
+				return 'orderslist'				
+			else:
+				p.save()				
+				order = Orders.objects.get(id=rid)
+				order.Billing_Status, order.Is_Billed = p, 1
+				order.save()
+				p.Billing_To, p.Order, p.Lock_Status, p.Is_Manual = order.Customer_Name, order, 1, 1
+				p.save() 
+				updateduedays(request, p.id)
+				adjust_payments_to_invoices(request, order.id)
+				return 'invlist'
+	else:
+		return 'getform'

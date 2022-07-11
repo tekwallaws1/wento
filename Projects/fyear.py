@@ -20,4 +20,12 @@ def get_fy_date():
 	#initialize the current year
 	year_of_date=dt.year
 	financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()
+	# return financial_year_start_date
+	return '2000-01-01'
+
+def get_fy_date_fy():
+	dt = date.today()
+	#initialize the current year
+	year_of_date=dt.year
+	financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()
 	return financial_year_start_date

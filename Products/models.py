@@ -4,24 +4,23 @@ from Orders.models import *
 from UserAccounts.models import *
 # Create your models here.  
 
-uom = (('No','No'), ('Set', 'Set'), ('Kg', 'Kg'), ('Mtr', 'Mtr'), ('Ltr', 'Ltr'), ('Bag', 'Bag'))
+uom = (('No','Nos'), ('Set', 'Sets'), ('Kg', 'Kgs'), ('Mtr', 'Mtrs'), ('Ltr', 'Ltrs'), ('Bag', 'Bags'))
 
 class Products(models.Model):
-	Product_Name 		= models.TextField(max_length=1000, null=True, unique=True, help_text='product name')
+	Product_Name 		= models.TextField(max_length=1000, null=True, unique=True, help_text='product name and its description')
 	Product_Type		= models.CharField(max_length=30, null=True, blank=True, choices=(('Finished Goods', 'Finished Goods'), ('Services', 'Services'), ('Raw Material', 'Raw Material')))
-	Make 		 		= models.CharField(max_length=50, null=True, blank=True, help_text='product make')
-	Model_No 			= models.CharField(max_length=30, null=True, blank=True, help_text='Model No/Part No/Ref No')
-	Serial_No 			= models.CharField(max_length=30, null=True, unique=True, blank=True, help_text='product serial number if available')
-	BOM_No 				= models.CharField(max_length=15, null=True, unique=True, blank=True, help_text='BOM No for your internal reference')
-	UOM 				= models.CharField(max_length=15, null=True, choices=uom)
-	Date 				= models.DateTimeField(blank=True, null=True, help_text='product added/updated date')
+	Make 		 		= models.CharField(max_length=50, null=True, blank=True, help_text='product make - optional')
+	# Model_No 			= models.CharField(max_length=30, null=True, blank=True, help_text='Model No - optional')
+	# BOM_No 				= models.CharField(max_length=15, null=True, unique=True, blank=True, help_text='BOM No for your internal reference')
+	UOM 				= models.CharField(max_length=15, null=True, blank=True, choices=uom)
+	Active_From 		= models.DateField(blank=True, null=True, help_text='product active since')
 	Stock				= models.FloatField(max_length=10, null=True, blank=True, help_text='Present Stock')	
-	Related_Project		= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL, help_text='leave empty if product meant for many projects') 	
+	Related_Project		= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL, help_text='leave empty if product meant for many workareas/divisions') 	
 	Attach				= models.FileField(upload_to='productdatasheets/', blank=True, null=True, help_text='attach product datasheet if available')
-	Status				= models.BooleanField(default=True, help_text='product active status')
+	Status				= models.BooleanField(default=True, help_text='present product active status')
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL) 
 
-	def __str__(self):
+	def __str__(self): 
 		return str(self.Product_Name)+'-'+str(self.UOM)
 
 	def save(self, *args, **kwargs): #if file updated it will delete old file and replace
@@ -36,27 +35,26 @@ class Products(models.Model):
 class Product_Movement(models.Model):
 	Product_Name 		= models.ForeignKey(Products, null=True, blank=True, on_delete=models.CASCADE)
 	Quantity			= models.FloatField(max_length=10, null=True, help_text='quantity in nos/sets/kgs/ltrs/bags')
-	Movement 			= models.CharField(max_length=15, null=True, choices=(('Added', 'Added'), ('Deleted', 'Deleted')))	
-	Date 				= models.DateTimeField(blank=True, null=True, help_text='product added/updated date')
+	Movement_Type 		= models.CharField(max_length=15, null=True, choices=(('Added', 'Added'), ('Substracted', 'Substracted')))	
+	Date 				= models.DateField(blank=True, null=True, help_text='product added/updated date')
 	Stock				= models.FloatField(max_length=10, null=True, blank=True, help_text='Present Stock')
-	Related_Project		= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL)
-	Inward_Ref_PO		= models.ForeignKey('Purchases', null=True, blank=True, on_delete=models.SET_NULL)
-	Related_Order 		= models.ForeignKey('Orders.Orders', null=True, blank=True, on_delete=models.SET_NULL)
+	Related_PO			= models.ForeignKey('Purchases', null=True, blank=True, on_delete=models.SET_NULL)
+	# Related_Order 		= models.ForeignKey('Orders.Orders', null=True, blank=True, on_delete=models.SET_NULL)
+	Related_Bill 		= models.ForeignKey('Orders.Invoices', null=True, blank=True, on_delete=models.SET_NULL)
 	Other_Reason 		= models.CharField(max_length=15, null=True, blank=True, choices=(('Damaged', 'Damaged'), ('Scrap', 'Scrap'), ('Missing', 'Missing'), ('Expired', 'Expired')))	
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL) 
 
 	def __str__(self):
-		return str(self.Product_Name.Product_Name)+'-'+str(self.Date)+'-'+str(self.Quantity)+'-'+str(self.Movement)+'- Stock/'+str(self.Stock)
+		return str(self.Product_Name.Product_Name)+'-'+str(self.Date)+'-'+str(self.Quantity)+'-'+str(self.Movement_Type)+'- Stock/'+str(self.Stock)
 
 class Product_Price(models.Model):
 	Product_Name 		= models.ForeignKey(Products, null=True, blank=True, on_delete=models.CASCADE)
-	Unit_Price			= models.FloatField(max_length=15, blank=True, null=True, help_text='each unit price excluding all taxes')
+	Unit_Price			= models.FloatField(max_length=15, null=True, help_text='each unit price excluding all taxes')
 	GST					= models.FloatField(max_length=5, blank=True, null=True, help_text='GST in % such as 12, 18 etc')
 	HSN_Code			= models.IntegerField(blank=True, null=True, help_text='HSN/SAC Code for this product')
 	CESS				= models.FloatField(max_length=5, blank=True, null=True, help_text='CESS in % if applicable')	
 	Other_Taxes			= models.FloatField(max_length=5, blank=True, null=True, help_text='specify if any other taxes in % only')
 	TDS_Deductions		= models.FloatField(max_length=5, blank=True, null=True, help_text='specify if TDS deductions in % only')
-	HSN_Code			= models.FloatField(max_length=10, blank=True, null=True, help_text='HSN/SAC Code for this product')
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL) 
 
 	def __str__(self):
@@ -128,7 +126,7 @@ class Vendor_Payment_Status(models.Model):
 	def __str__(self):
 		return str(self.PO_No)+'-'+str(self.Paid_Amount)+'-'+str(self.Payment_Date)
 
-class Purchases(models.Model): 
+class Purchases(models.Model):  
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL)
 	Related_Project		= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL, help_text='leave empty if product meant for many projects') 		
 	Purchase_Details   	= models.TextField(max_length=1000, null=True, blank=True, help_text='overall PO short description')
@@ -144,10 +142,11 @@ class Purchases(models.Model):
 	FY 					= models.CharField(max_length=10, blank=True, null=True, help_text='financial year such as 22-23, 23-24 etc..')
 	PO_Date 			= models.DateTimeField(blank=True, null=True, help_text='billed date')
 	PO_Value			= models.FloatField(max_length=20, null=True, blank=True, help_text='including all taxes')
+	GST_Amount			= models.FloatField(max_length=10, blank=True, null=True, help_text='only GST Amount, if no GST enter 0')
 	Delivery_Date 		= models.DateField(blank=True, null=True, help_text='payment due date')
 	Billing_Status		= models.ForeignKey('Vendor_Invoices', null=True, blank=True, on_delete=models.SET_NULL) 	
 	Payment_Status		= models.ForeignKey(Vendor_Payment_Status, null=True, blank=True, on_delete=models.SET_NULL)
-	Delivery_Status		= models.ForeignKey('PO_Delivery_Status', null=True, blank=True, on_delete=models.SET_NULL)
+	Delivery_Update		= models.ForeignKey('PO_Delivery_Status', null=True, blank=True, on_delete=models.SET_NULL)
 	Due_Amount			= models.FloatField(max_length=20, null=True, blank=True, help_text='Due amount till date against billed')
 	Warranty_In 		= models.CharField(max_length=20, blank=True, null=True, choices=(('Month', 'Months'), ('Year', 'Years'), ('Day', 'Days')))
 	Warranty			= models.FloatField(max_length=10, blank=True, null=True, help_text='such as 1, 2, 3.. months/years/days')	
@@ -159,6 +158,8 @@ class Purchases(models.Model):
 	Is_Billed			= models.BooleanField(default=False) #backend	
 	Payment_Final_Status= models.BooleanField(default=False)
 	Final_Status		= models.BooleanField(default=False)
+	Is_Manual			= models.BooleanField(default=False, help_text='wether it is manual entry or online generation')
+	Attach				= models.FileField(upload_to='manualpos/', blank=True, null=True, help_text='attach po copies if available')
 	ds					= models.BooleanField(default=True)
 
 	def __str__(self):

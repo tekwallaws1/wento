@@ -3,7 +3,7 @@ from .forms import *
 from django.contrib import messages
 from datetime import date, datetime, timedelta 
 from django.http import HttpResponse, JsonResponse
-from django.views.generic import View
+from django.views.generic import View 
 from .filters import *
 from django.shortcuts import get_object_or_404, render
 from django.db import IntegrityError
@@ -13,7 +13,7 @@ from django.contrib.auth import logout
 from django.db.models import Q
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db.models import Sum, Avg, Count
-from Projects.fyear import get_financial_year, get_fy_date
+from Projects.fyear import get_financial_year, get_fy_date, get_fy_date_fy
 from Projects.basedata import projectname
 from .customfunctions import genPO_initial_dataload, update_po_amount, assign_paystatus_to_po, adjust_payments_to_invoices, update_vendor_invoice, updateduedays, update_delivery_status
 from num2words import num2words
@@ -27,8 +27,8 @@ def Purchases_Dashboard(request, proj, dur):
 	lookup1 = {'PO_No__Related_Project__isnull':False} if proj == 'All' else {'PO_No__Related_Project':pdata['pj']}
 
 	if dur == 'FY':
-		pos = Purchases.objects.filter(**lookup, Lock_Status=1, PO_Date__date__lte=date.today(), PO_Date__date__gte=get_fy_date(), ds=1).order_by('PO_Date')
-		payments = Vendor_Payment_Status.objects.filter(**lookup1,  Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
+		pos = Purchases.objects.filter(**lookup, Lock_Status=1, PO_Date__date__lte=date.today(), PO_Date__date__gte=get_fy_date_fy(), ds=1).order_by('PO_Date')
+		payments = Vendor_Payment_Status.objects.filter(**lookup1,  Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date_fy()).order_by('Payment_Date')
 	elif dur == 'All':
 		pos = Purchases.objects.filter(**lookup, Lock_Status=1, ds=1).order_by('PO_Date')
 		payments = Vendor_Payment_Status.objects.filter(**lookup1).order_by('Payment_Date')		
@@ -162,7 +162,7 @@ def PO_List(request, proj, status):
 		else:
 			po_paid.append(0)
 
-		if x.Delivery_Status:
+		if x.Delivery_Update:
 			dlv = PO_Delivery_Status.objects.filter(PO_No=x).order_by('Delivery_Date')
 			delivery.append(dlv)		
 		else:
@@ -189,7 +189,7 @@ def PO_List(request, proj, status):
 
 @login_required
 def PO_Form(request, proj, fnc, poid):
-	pdata = projectname(request, proj)
+	pdata = projectname(request, proj) 
 	if fnc == 'edit' : #update
 		if request.method ==  'POST':
 			getdata = get_object_or_404(Purchases, id=poid)
@@ -207,8 +207,18 @@ def PO_Form(request, proj, fnc, poid):
 			getdata = get_object_or_404(Purchases, id=poid)
 			form = POForm(instance=getdata)
 			return render(request, 'products/POForm.html', {'form': form, 'pdata':pdata})
-
-	return render(request, 'products/OrdersForm.html', {'form': form, 'pdata':pdata})
+	elif fnc == 'edit_manually':		
+		if request.method == 'POST':
+			form = ManualPurchasesForm1(request.POST, request.FILES, instance=get_object_or_404(Purchases, id=poid))
+			if form.is_valid():
+				p = form.save()
+				messages.success(request, 'PO Details Has Been Updated Successfully')
+				return redirect('/%s/purchaseslist/Inprogress/'%pdata['pj'])
+			else:
+				return redirect('/%s/purchaseslist/Inprogress/'%pdata['pj'])
+		else:
+			form = ManualPurchasesForm1(instance=get_object_or_404(Purchases, id=poid))
+			return render(request, 'products/POForm.html', {'form': form, 'pdata':pdata})
 
 @login_required
 def PO_Delivery_Form(request, proj, fnc, poid, did):
@@ -570,7 +580,7 @@ def Vendor_Payments_List(request, proj, status):
 @login_required
 def Gen_PO(request, proj, fnc, poid, itemid, msg):
 	pdata = projectname(request, proj)
-	last_poid = Purchases.objects.filter(Lock_Status=1).last()
+	last_poid = Purchases.objects.filter(Lock_Status=1, Is_Manual=0).last()
 	last_poid = last_poid.id if last_poid != None else None
 	if request.method == 'POST' and fnc=='create':
 		form = PurchasesForm(request.POST, request.FILES)
@@ -583,6 +593,19 @@ def Gen_PO(request, proj, fnc, poid, itemid, msg):
 			msg = 'Basic Purchase Order Generated Successfully. Add Items to Purchase and Other Details to Generate PO Completely'
 			url = '/'+str(pdata['pj'])+'/po/edit/'+str(p.id)+'/itemid/'+msg+'/'
 			return redirect(url)
+
+	if fnc == 'create_manually':		
+		if request.method == 'POST':
+			form = ManualPurchasesForm(request.POST, request.FILES)
+			if form.is_valid():
+				p = form.save()
+				p.Related_Project, p.Is_Manual, p.Lock_Status = pdata['pj'], 1, 1
+				p.save()
+				messages.success(request, 'PO Has Been Added Successfully')
+				return redirect('/%s/purchaseslist/Inprogress/'%pdata['pj'])
+		else:
+			form = ManualPurchasesForm()
+			return render(request, 'products/POForm.html', {'form': form, 'pdata':pdata})
 
 	po = Purchases.objects.get(id=poid)
 	form_po = PurchasesForm(instance=get_object_or_404(Purchases, id=po.id))
@@ -794,7 +817,126 @@ def PO_TC_Form(request, proj, fnc, poid):
 	else:
 		url = url+msg+'/'
 		if fnc == 'delete':
-			tc = p	=PO_Terms_Conditions.objects.get(id=po.Terms_and_Conditions.id)
+			tc = PO_Terms_Conditions.objects.get(id=po.Terms_and_Conditions.id)
 			tc.delete()
 			return redirect(url)
 		return redirect(url)
+
+@login_required
+def Products_Form(request, proj, fnc, status, prid):
+	pdata = projectname(request, proj)
+	if fnc != 'create':
+		pid = Product_Price.objects.get(id=prid).Product_Name.id
+
+	if fnc == 'edit':
+		if request.method == 'POST':
+			form1 = ProductsForm1(request.POST, request.FILES, instance=get_object_or_404(Products, id=pid), prefix='product')
+			form2 = ProductsPriceForm(request.POST, instance=get_object_or_404(Product_Price, id=prid), prefix='productprice')
+			if form1.is_valid() * form2.is_valid():
+				p1 = form1.save()
+				if status == 'Services':
+					p1.Product_Type = 'Services'
+					p1.save()
+				p2 = form2.save()
+				p2.Product_Name = p1
+				p2.save()
+				messages.success(request, "Product Details Has Been Updated")
+				url = '/'+str(pdata['pj'])+'/productslist/'+status+'/'
+				return redirect(url)
+			else:
+				url = '/'+str(pdata['pj'])+'/productslist/'+status+'/'
+				return redirect(url)
+		else:
+			form1 = ProductsForm1(instance=get_object_or_404(Products, id=pid), prefix='product')
+			form2 = ProductsPriceForm(instance=get_object_or_404(Product_Price, id=prid), prefix='productprice')
+			return render(request, 'products/ProductsForm.html', {'form1': form1, 'form2': form2, 'pdata':pdata, 'status':status})
+	elif fnc == 'delete':
+		product = Products.objects.get(id=pid)
+		productprice = Product_Price.objects.get(id=prid)
+		product.delete()
+		productprice.delete()
+		messages.success(request, "Product Has Been Deleted")
+		url = '/'+str(pdata['pj'])+'/productslist/'+status+'/'
+		return redirect(url)
+	else:
+		if request.method == 'POST':
+			form1 = ProductsForm(request.POST, request.FILES, prefix='product')
+			form2 = ProductsPriceForm(request.POST, prefix='productprice')
+			if form1.is_valid() * form2.is_valid():
+				p1 = form1.save()
+				if status == 'Services':
+					p1.Product_Type = 'Services'
+					p1.save()
+				p2 = form2.save()
+				p2.Product_Name = p1
+				p2.save()
+				messages.success(request, "Product Has Been Created")
+				url = '/'+str(pdata['pj'])+'/productslist/'+status+'/'
+				return redirect(url)
+			else:
+				url = '/'+str(pdata['pj'])+'/productslist/'+status+'/'
+				return redirect(url)
+		else:
+			if fnc == 'copy':
+				form1 = ProductsForm(instance=get_object_or_404(Products, id=pid), prefix='product')
+				form2 = ProductsPriceForm(instance=get_object_or_404(Product_Price, id=prid), prefix='productprice')
+				return render(request, 'products/ProductsForm.html', {'form1': form1, 'form2': form2, 'pdata':pdata, 'status':status})
+			else:
+				form1 = ProductsForm(prefix='product')
+				form2 = ProductsPriceForm(prefix='productprice')
+				return render(request, 'products/ProductsForm.html', {'form1': form1, 'form2': form2, 'pdata':pdata, 'status':status})
+
+@login_required
+def Products_List(request, proj, status):
+	pdata = projectname(request, proj)
+	table = Product_Price.objects.filter(Product_Name__Status=1)
+	filter_data = ProductsFilter(request.GET, queryset=table)
+	table = filter_data.qs
+	if status == 'Products':
+		table = table.filter(Q(Product_Name__Product_Type='Finished Goods')|Q(Product_Name__Product_Type='Raw Material'))
+	else:
+		table = table.filter(Product_Name__Product_Type='Services')
+	count = len(table)
+	return render(request, 'products/ProductsList.html', {'table':table, 'pdata':pdata, 'status':status, 'count':count})
+
+@login_required
+def Stock_Movement_Form(request, proj, fnc, pid):
+	pdata = projectname(request, proj)
+	if fnc == 'edit':
+		if request.method == 'POST':
+			form = StockMovementForm(request.POST, request.FILES, instance=get_object_or_404(Product_Movement, id=pid))
+			if form.is_valid():
+				p= form.save()
+				messages.success(request, "Stock Has Been Updated")
+				return redirect('/%s/inventory/active/'%pdata['pj'])
+			else:
+				return redirect('/%s/inventory/active/'%pdata['pj'])
+		else:
+			form = StockMovementForm(instance=get_object_or_404(Product_Movement, id=pid))
+			return render(request, 'products/StockMovementForm.html', {'form': form, 'pdata':pdata})
+	elif fnc == 'delete':
+		product = Product_Movement.objects.get(id=pid)
+		product.delete()
+		messages.success(request, "Stock Has Been Deleted")
+		return redirect('/%s/inventory/active/'%pdata['pj'])
+	else:
+		if request.method == 'POST':
+			form = StockMovementForm(request.POST, request.FILES)
+			if form.is_valid():
+				p= form.save()
+				messages.success(request, "Stock Has Been Updated")
+				return redirect('/%s/inventory/active/'%pdata['pj'])
+			else:
+				return redirect('/%s/inventory/active/'%pdata['pj'])
+		else:
+			if fnc == 'copy':
+				form = StockMovementForm(instance=get_object_or_404(Product_Movement, id=pid))
+				return render(request, 'products/StockMovementForm.html', {'form': form, 'pdata':pdata})
+			else:
+				form = StockMovementForm()
+				return render(request, 'products/StockMovementForm.html', {'form': form, 'pdata':pdata})
+
+@login_required
+def Inventory_List(request, proj, status):
+	pdata = projectname(request, proj)
+	return HttpResponse(pdata)

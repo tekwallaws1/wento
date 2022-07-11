@@ -22,13 +22,13 @@ def profiledata(request):
 			if account.Upload_Photo:
 				pic_url =  '/media/'+str(account.Upload_Photo)+'/'
 			else:
-				pic_url =  '/media/employeephotos/sss-logo.png/'
+				pic_url =  '/media/employes/sss-logo.png/'
 
 			return {'name':account.Name,'designation':account.Designation, 'profilepic_url':pic_url}
 		except Account.DoesNotExist:
-			return {'name':'Developer', 'designation':'Developer', 'profilepic_url':'/media/employeephotos/sss-logo.png/'}
+			return {'name':'Developer', 'designation':'Developer', 'profilepic_url':'/media/employes/sss-logo.png/'}
 	else:
-		return {'designation':'Unknown', 'profilepic_url':'/media/employeephotos/sss-logo.png/'}
+		return {'designation':'Unknown', 'profilepic_url':'/media/employes/sss-logo.png/'}
 
 
 		

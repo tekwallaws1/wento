@@ -307,7 +307,11 @@
 
             <td style="white-space:normal;">
                 {% for p in y %}
-                  <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
+                  {% if p.Is_Manual == 0 %}
+                    <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
+                  {% else %}
+                    <a class="ahr" ht="edit invoice" onclick="location.href='/{{pdata.pj}}/inv_edit/edit_manually/{{p.id}}/'">
+                  {% endif %}
                     <span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
                     <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} | {% if p.Invoice_Amount != p.Due_Amount %}<span class='hlt5'>Received Amount: </span>₹ {{p.Due_Amount|mul:-1|add:p.Invoice_Amount|floatformat:0|intcomma}}{% else %}<span class='hlt3'>No Payments Received</span>{% endif %}
                   {% if p.Due_Amount > 0  %}
@@ -316,7 +320,9 @@
                   {% else %}
                     <br><span class='hlt2'>Payment Done</span>
                   {% endif %}
-                  </a><br><br>
+                  </a>
+                  {% if p.Attach %}<a class="ahr" ht='click here to download copy' href="{{p.Attach.url}}" target="_blank"><br><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
+                  <br><br>
                 {% endfor %}
                 {% if due_date == 'True' %}<span class='hlt2 italic font-weight-bold'>**</span>Due Date Not Yet Came{% endif %}
             </td>

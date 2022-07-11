@@ -17,7 +17,7 @@ class PurchasesFilter(django_filters.FilterSet):
 
 	class Meta:
 		model 	= Purchases
-		fields = ['user', 'Vendor', 'Delivery_Status', 'Final_Status']
+		fields = ['user', 'Vendor', 'Delivery_Update', 'Final_Status']
 
 class VendorInvoicesFilter(django_filters.FilterSet):
 	def __init__(self, *args, **kwargs):
@@ -49,4 +49,19 @@ class VendorPaymentsFilter(django_filters.FilterSet):
 
 	class Meta:
 		model 	= Vendor_Payment_Status
+		fields = ['user']
+
+
+class ProductsFilter(django_filters.FilterSet):
+	def __init__(self, *args, **kwargs):
+  		super().__init__(*args, **kwargs)
+  		for field in self.form.fields:
+  			self.form.fields[field].widget.attrs.update({'class': 'form-control'})
+	# from_date 	= DateFilter(field_name='Payment_Date', lookup_expr='gte')
+	# to_date 	= DateFilter(field_name='Payment_Date', lookup_expr='lte')
+	# from_value 	= NumberFilter(field_name='Paid_Amount', lookup_expr='gte')
+	# to_value 	= NumberFilter(field_name='Paid_Amount', lookup_expr='lte')
+
+	class Meta:
+		model 	= Product_Price
 		fields = ['user']

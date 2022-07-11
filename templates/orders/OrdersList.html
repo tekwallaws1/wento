@@ -29,11 +29,19 @@
   function rid(tid, can_gen_invoice, billed, ordervalue) {getid = tid;
     if (can_gen_invoice=='False' | ordervalue <= billed){
       document.getElementById('hidebillbutton').style.display='none';
-      document.getElementById('showbillbutton').style.display='block';}
+      document.getElementById('showbillbutton').style.display='block';
+      document.getElementById('hidebillbutton1').style.display='none';
+      document.getElementById('showbillbutton1').style.display='block';
+
+    }
     else {
       document.getElementById('hidebillbutton').style.display='block';
-      document.getElementById('showbillbutton').style.display='none';}
+      document.getElementById('showbillbutton').style.display='none';
+      document.getElementById('hidebillbutton1').style.display='block';
+      document.getElementById('showbillbutton1').style.display='none';
+    }
   };
+
 
   function alertpopup(){
     // document.getElementById('exampleModal11').style.display = 'none';
@@ -319,7 +327,7 @@
           </thead>
           <tbody>
             {% for x, y, z, c in tableset %}
-              {% if x.Order_Type == 'Confirmed' %}
+              {% if x.Order_Type == 'Confirmed' %} 
                {% if x.Final_Status == 1 %}
                 <tr class="customtr1" >
                   <!-- <tr> -->
@@ -330,8 +338,19 @@
                 <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}<a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
 
                 <td style="white-space:normal;">
-                  {{x.Customer_Name.Customer_Name}}
-                  <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Customer_Name.Phone_Number_1}}</a>
+                  {{x.Customer_Name.Customer_Name}}                    
+                  {% if x.Order_Reference_Person %}
+                    <br><br><span class="hlt5">Order Reference Person</span>
+                    <br>{{x.Order_Reference_Person.Contact_Person}}
+                    <br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Order_Reference_Person.Phone_Number_1}}'>{{x.Order_Reference_Person.Phone_Number_1}}</a>
+                    {% if x.Order_Reference_Person.Email %}
+                      <br>{{x.Order_Reference_Person.Email}}
+                    {% endif %}
+                  {% else %}
+                    {% if x.Customer_Name.Phone_Number_1 %}
+                      <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Customer_Name.Phone_Number_1}}</a>
+                    {% endif %}
+                  {% endif %}
                 </td>
 
                 <td style="white-space:normal;">
@@ -348,7 +367,7 @@
                     <br></span>{{x.Order_No}}
                   {% endif %}
                   <br><span class='hlt5'>Order/PO Date: </span>{{x.Order_Received_Date|date:'d M Y'}}
-                  <br><span class='hlt5'>Order Through: </span>{{x.Order_Through}}{% if x.Attach %}, Copy <span class='hlt5'>Order Copy</span> - Yes <a class="ahr" class="mdi mdi-attachment bs-tooltip" ht='order document/copy' href="{{x.Attach.url}}" target="_blank"></a>{% endif %}
+                  <br><span class='hlt5'>Order Through: </span>{{x.Order_Through}}{% if x.Attach %}<a class="ahr" ht='click here to download copy' href="{{x.Attach.url}}" target="_blank"><br><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
                   {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}
                 </td>
@@ -433,9 +452,20 @@
                   <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}<a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
 
                   <td style="white-space:normal;">
-                    {{x.Customer_Name.Customer_Name}}
-                    <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Customer_Name.Phone_Number_1}}</a>
-                  </td>
+                  {{x.Customer_Name.Customer_Name}}                    
+                  {% if x.Order_Reference_Person %}
+                    <br><br><span class="hlt5">Order Reference Person</span>
+                    <br>{{x.Order_Reference_Person.Contact_Person}}
+                    <br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Order_Reference_Person.Phone_Number_1}}'>{{x.Order_Reference_Person.Phone_Number_1}}</a>
+                    {% if x.Order_Reference_Person.Email %}
+                      <br>{{x.Order_Reference_Person.Email}}
+                    {% endif %}
+                  {% else %}
+                    {% if x.Customer_Name.Phone_Number_1 %}
+                      <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Customer_Name.Phone_Number_1}}</a>
+                    {% endif %}
+                  {% endif %}
+                </td>
 
                   <td style="white-space:normal;">
                     {% if x.Order_Details %}{{x.Order_Details}}{% endif %}
@@ -461,7 +491,7 @@
         </div>
       </div>
     </div>
-  {% endif %}
+{% endif %}
 
   <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" style="width:250px;%">
@@ -480,8 +510,12 @@
             {% if status != 'Pipeline' %}
               <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-info">Update Work Status</button>
               <button type="button"  onclick="location.href='/{{pdata.pj}}/orderspaymentsform/'+getid+'/'" class="btn btn-sm btn-success">Update Payment Status</button>
-              <br><button type="button" id='hidebillbutton' target='_blank' style="display:none"  onclick="location.href='/{{pdata.pj}}/invoice/create/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-dark">Generate Invoice</button>
-            <button type="button" id='showbillbutton' style="display:none"  onclick="javascript:alertpopup()" class="btn btn-sm btn-dark">Generate Invoice</button>  
+              
+              <br><button type="button" id='hidebillbutton' target='_blank' style="display:none"  onclick="location.href='/{{pdata.pj}}/invoice/create/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-dark">Gen Online Invoice</button>
+              <button type="button" id='showbillbutton' style="display:none"  onclick="javascript:alertpopup()" class="btn btn-sm btn-dark">Generate Invoice</button>
+
+              <button type="button" id='hidebillbutton1' style="display:none"  onclick="location.href='/{{pdata.pj}}/invoice/create_manually/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-primary">Add Invoice Manually</button>           
+              <button type="button" id='showbillbutton1' style="display:none"  onclick="alertpopup()"  class="btn btn-sm btn-primary">Add Invoice Manually</button>  
             {% endif %}       
           </div>
         </div>
@@ -489,7 +523,8 @@
     </div>
   </div>
 
-  <div class="modal fade text-left" id="exampleModal12" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+
+<div class="modal fade text-left" id="exampleModal12" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">

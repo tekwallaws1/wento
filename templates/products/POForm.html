@@ -5,39 +5,50 @@
 <div class="row justify-content-center">
   <div class="col-md-6 grid-margin stretch-card">
     <div class="card">
-      <div class="card-body">
-        <h4 class="card-title d-inline-block">Edit Purchase Details and Its Status</h4>
-        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+      <div class="card-body"> 
+        <h4 class="card-title d-inline-block">{% if fnc == 'edit' %}Edit PO Final Status{% else %}Add/Edit PO Details{% endif %}</h4>
+        <!-- <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div> -->
         <br>
           <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
             <div class="form-group mb-4">
               {% csrf_token %}
-              <div class="form-group">
-                {% for field in form %}
-                  {% if field.label != 'Final Status' and field.label != 'Attach' and field.label != 'Order' %}
-                    <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
-                  {% endif %}
-                  {% if field.label == 'Order' %}
-                    <label for="{{ field.label }}">select work order if this PO related to any particular received work order{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
-                  {% endif %}
-                  {% for error in field.errors %}
-                    <p style="color: red; margin-top: -20px">{{ error }}</p>
-                  {% endfor %}
-                {% endfor %}  
-              </div>
-              <div class="form-group">
-                {% for field in form %}
-                  {% if field.label ==  'Attach' %}
-                    <label style="color:#32a852;">attach below if any oder copy</label>{{field}} 
-                  {% endif %}
-                {% endfor %}
-              </div>
-              <div class="form-check form-check-flat form-check-primary">
-                <label class="form-check-label">{{ form.Final_Status }}mark it if all material delivered and all payments done against po</label>
-              </div>
-              <!-- <div class="form-check form-check-flat form-check-primary">
-                <label class="form-check-label" style="color:#32a852;">{{ form.Status }}mark it if this order delivered</label>
-              </div> -->
+              {% if fnc == 'edit' %}
+                <div class="form-group">
+                  {% for field in form %}
+                    {% if field.label != 'Final Status' and field.label != 'Attach' and field.label != 'Order' %}
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                    {% endif %}
+                    {% if field.label == 'Order' %}
+                      <label for="{{ field.label }}">select work order if this PO related to any particular received work order{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                    {% endif %}
+                    {% for error in field.errors %}
+                      <p style="color: red; margin-top: -20px">{{ error }}</p>
+                    {% endfor %}
+                  {% endfor %}  
+                </div>
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label">{{ form.Final_Status }}mark it if all material delivered and all payments done against po</label>
+                </div>
+              {% else %}
+
+                <div class="form-group">
+                  {% for field in form %}
+                    {% if field.label != 'Final Status' and field.label != 'Attach' %}
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                    {% endif %}
+                    {% if field.label ==  'Attach' %}
+                      <label style="color:#32a852;">attach below if any PO copy</label>{{field}} 
+                    {% endif %}
+                    {% for error in field.errors %}
+                      <p style="color: red; margin-top: -20px">{{ error }}</p>
+                    {% endfor %}
+                  {% endfor %}  
+                </div>
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label">{{ form.Final_Status }}mark it if all material delivered and all payments done against po</label>
+                </div>
+              {% endif %}
+
             </div>
           <button type="submit" class="btn btn-primary">Submit</button>
         </form>

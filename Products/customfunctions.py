@@ -166,5 +166,5 @@ def update_delivery_status(request, poid, did):
 	dl.PO_No = po
 	dl.user = Account.objects.get(user=request.user)
 	dl.save()
-	po.Delivery_Status = dl
+	po.Delivery_Update = dl
 	po.save()

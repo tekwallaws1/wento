@@ -73,7 +73,7 @@ DJANGO_STATIC_URL = '{{ STATIC_URL }}';
                 columns: [
                   {
                     alignment: 'left',
-                    text: ['Sree Sai Electronics']
+                    text: ['GPR Electrical & Automation Pvt. Ltd.']
                   },
                   {
                     alignment: 'right', italics: true,

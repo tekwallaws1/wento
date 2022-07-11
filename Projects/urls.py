@@ -15,6 +15,9 @@ urlpatterns = [
     path('<proj>/vendorform/<fnc>/<rid>/', views.VendDt_Form, name='vendform'),
     path('<proj>/vendorcontactform/<fnc>/<rid>/', views.VendContDt_Form, name='vendcontform'),
     path('<proj>/vendorslist/', views.VendDt_List, name='vendlist'),
+
+    path('<proj>/companyform/<fnc>/<rid>/', views.Company_Form, name='companyform'),
+    path('<proj>/companylist/', views.Companies_List, name='companylist'),
  
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
 

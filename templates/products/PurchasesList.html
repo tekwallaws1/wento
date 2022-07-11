@@ -26,10 +26,16 @@
 
 <script type="text/javascript">
 
-  function editpo(po_id) {
+  function editpo(po_id, is_manual) {
     poid = po_id;
-
+    
+    if(is_manual == 'True') {editurl = '/{{pdata.pj}}/purchasesform/edit_manually/'+poid+'/'; }
+    else { editurl = '/{{pdata.pj}}/po/edit/'+poid+'/itemid/msg/'; }
   };
+
+  function edit() {
+    location.href= editurl
+  }
 
 
   function rid(tid, can_gen_invoice, billed, ordervalue) {poid = tid;
@@ -323,7 +329,7 @@
                 <tr>
                {% endif %}
               
-                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}&nbsp;<a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
+                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}&nbsp;<a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}', '{{x.Is_Manual}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
 
                 <td style="white-space:normal;">
                   {{x.Vendor.Supplier_Name}}
@@ -331,13 +337,12 @@
                 </td>
 
                 <td style="white-space:normal;">
-                  {% if x.Purchase_Details %}{{x.Purchase_Details}}{% endif %}
-                  <a class="ahr" ht='open/edit/delete PO Copy' target="_blank" onclick="location.href='/{{pdata.pj}}/po/edit/{{x.id}}/itemid/msg/'">
+                  {% if x.Purchase_Details %}{{x.Purchase_Details}}{% endif %}                  
                   <br><br><span class="hlt2">PO Value: ₹ {{x.PO_Value|floatformat:0|intcomma}}</span>
                   <br><span class='hlt5'>PO No: </span>{{x.PO_No}}
                   <br><span class='hlt5'>PO Date: </span>{{x.PO_Date|date:'d M Y'}}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
-                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}</a>
+                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}
                 </td>
 
                 <td style="white-space:normal;">                  
@@ -423,7 +428,7 @@
             {% for x, y, z, c, delivery in tableset %}
               <tr>
           
-                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}&nbsp;<a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
+                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}&nbsp;<a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}', '{{x.Is_Manual}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
 
                 <td style="white-space:normal;">
                   {{x.Vendor.Supplier_Name}}
@@ -432,7 +437,6 @@
 
                 <td style="white-space:normal;">
                   {% if x.Purchase_Details %}{{x.Purchase_Details}}{% endif %}
-                  <a class="ahr" ht='open/edit/delete PO Copy' target="_blank" onclick="location.href='/{{pdata.pj}}/po/edit/{{x.id}}/itemid/msg/'">
                   <br><br><span class="hlt2">PO Value: ₹ {{x.PO_Value|floatformat:0|intcomma}}</span>
                   <br><span class='hlt5'>PO No: </span>{{x.PO_No}}
                   <br><span class='hlt5'>PO Date: </span>{{x.PO_Date|date:'d M Y'}}
@@ -530,12 +534,11 @@
 
                 <td style="white-space:normal;">
                   {% if x.Purchase_Details %}{{x.Purchase_Details}}{% endif %}
-                  <a class="ahr" ht='open/edit/delete PO Copy' target="_blank" onclick="location.href='/{{pdata.pj}}/po/edit/{{x.id}}/itemid/msg/'">
                   <br><br><span class="hlt2">PO Value: ₹ {{x.PO_Value|floatformat:0|intcomma}}</span>
                   <br><span class='hlt5'>PO No: </span>{{x.PO_No}}
                   <br><span class='hlt5'>PO Date: </span>{{x.PO_Date|date:'d M Y'}}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
-                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}</a>
+                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}
                 </td>
 
                 <td style="white-space:normal;">                  
@@ -619,10 +622,10 @@
             </tr>
           </thead>
           <tbody>
-            {% for x, y, z, c in tableset %}
+            {% for x, y, z, c, delivery in tableset %}
                <tr>
               
-                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}&nbsp;<a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
+                <td >{{forloop.counter}}</td>
 
                 <td style="white-space:normal;">
                   {{x.Vendor.Supplier_Name}}
@@ -694,7 +697,8 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  data-toggle="modal" data-target="#selectVendorModal" class="btn btn-sm btn-primary" ht="generate new PO" onclick="hidedomore()">Generate New PO</button>
+            <button type="button"  data-toggle="modal" data-target="#selectVendorModal" class="btn btn-sm btn-danger" ht="generate new PO" onclick="hidedomore()">Generate Online PO</button>
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/po/create_manually/1/itemid/msg/'" class="btn btn-sm btn-primary" ht="add PO manually" onclick="hidedomore()">Add Manual PO</button>
 
             <button type="button"  onclick="location.href='/{{pdata.pj}}/purchaseslist/Inprogress/'" class="btn btn-sm btn-info" ht="inprogress PO's maens PO not delivered/vendor payment not paid fully or both">Inprogress PO's</button>
             
@@ -797,7 +801,9 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button" targt="_blank" onclick="location.href='/{{pdata.pj}}/purchasesform/edit/'+poid+'/'" class="btn btn-sm btn-primary">Edit PO Description</button>
+            <button type="button" targt="_blank" onclick="location.href='/{{pdata.pj}}/purchasesform/edit/'+poid+'/'" class="btn btn-sm btn-danger">Update PO Status</button>
+
+            <button type="button" targt="_blank" onclick="edit()" class="btn btn-sm btn-primary">Edit PO</button>
             <!-- <button type="button"  data-toggle="modal" data-target="#deletePOModal" class="btn btn-sm btn-warning">Delete PO</button> -->
 
             <button type="button" onclick="hidepoedit()" data-toggle="modal" data-target="#addPaymentModal" class="btn btn-sm btn-info">Add Payment</button>

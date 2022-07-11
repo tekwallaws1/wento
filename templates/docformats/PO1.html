@@ -7,7 +7,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"> 
-    <title>SSE Proposals</title>
+    <title>GPR-PRoMan</title>
     
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.css">
@@ -533,7 +533,7 @@
 
       var element = document.getElementById('po');
       html2pdf().from(element).set({
-      margin:       [5, 15, 5, 5],
+      margin:       [5, 15, 15, 5],
        // margin:       [t, l, b, r],
         // margin:       [10, 10, 20, 10],
         filename: '{{po.Vendor.Supplier_Name}}'+'-'+'{{po.PO_No}}',

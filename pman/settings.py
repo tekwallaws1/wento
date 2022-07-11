@@ -26,8 +26,8 @@ SECRET_KEY = 'c_t1jqgyw#$o2a8)yk*lqoj7zlp1)#hvk_$^(0d@3&@29zvcn^'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
-#ALLOWED_HOSTS = ['sseproman.com', 'www.sseproman.com', '165.232.183.104']
+#ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*', 'gpreprojects.com', 'www.gpreprojects.com', '139.59.78.229']
 
 
 # Application definition
@@ -103,27 +103,26 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'pman.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': str(BASE_DIR / 'db1.sqlite3'),
-#     }
-#  }
-
 DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-         'NAME': 'gprdb',
-         'USER': 'gprdbuser',
-         'PASSWORD': 'Tekwall1@3',
-         'HOST': 'localhost',
-         'PORT': '',
-     }
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': str(BASE_DIR / 'db1.sqlite3'),
+    }
  }
+
+# DATABASES = {
+#      'default': {
+#          'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#          'NAME': 'gpr_postgres',
+#          'USER': 'gpr',
+#          'PASSWORD': 'Tekwall1@3',
+#          'HOST': 'localhost',
+#          'PORT': '',
+#      }
+#  }
 
 
 # Password validation

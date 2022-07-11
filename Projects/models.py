@@ -13,9 +13,9 @@ states = (("Andhra Pradesh","Andhra Pradesh"),("Telangana","Telangana"),("Tamil 
 
 
 class CompanyDetails(models.Model):
-	Company_Name 			= models.CharField(max_length=40, null=True)
-	Address_Line_1			= models.CharField(max_length=40, blank=True, null=True, help_text='Address Line 1')
-	Address_Line_2			= models.CharField(max_length=35, blank=True, null=True, help_text='Address Line 2')
+	Company_Name 			= models.CharField(max_length=50, null=True)
+	Address_Line_1			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 1')
+	Address_Line_2			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 2')
 	State 					= models.CharField(max_length=50, null=True, choices=states)
 	GST_No 					= models.CharField(max_length=15, blank=True, null=True, help_text='Provide If Company under GST')
 	State_Code 				= models.IntegerField(null=True, blank=True, help_text='State Code Ex. 36, 37')
@@ -45,8 +45,8 @@ class Projects(models.Model):
 class CustDt(models.Model):
 	Customer_Name 			= models.CharField(max_length=50, null=True, help_text='Customer/Company Name')
 	Short_Name 				= models.CharField(max_length=15, null=True, help_text='Give Short Name for Customer, Max 15 Characters')
-	Address_Line_1			= models.CharField(max_length=40, blank=True, null=True, help_text='Address Line 1')
-	Address_Line_2			= models.CharField(max_length=35, blank=True, null=True, help_text='Address Line 2')
+	Address_Line_1			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 1')
+	Address_Line_2			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 2')
 	State 					= models.CharField(max_length=50, null=True, choices=states)
 	GST_No 					= models.CharField(max_length=15, blank=True, null=True, help_text='Provide If Company under GST')
 	State_Code 				= models.IntegerField(null=True, blank=True, help_text='State Code Ex. 36, 37')
@@ -76,8 +76,8 @@ class CustDt(models.Model):
 class VendDt(models.Model):
 	Supplier_Name 			= models.CharField(max_length=50, null=True, help_text='Vendor/Supplier Name')
 	Short_Name 				= models.CharField(max_length=15, null=True, help_text='Give Short Name for Supplier, Max 15 Characters')
-	Address_Line_1			= models.CharField(max_length=40, blank=True, null=True, help_text='Address Line 1')
-	Address_Line_2			= models.CharField(max_length=35, blank=True, null=True, help_text='Address Line 2')
+	Address_Line_1			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 1')
+	Address_Line_2			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 2')
 	State 					= models.CharField(max_length=50, null=True, choices=states)
 	GST_No 					= models.CharField(max_length=15, blank=True, null=True, help_text='Provide If Company under GST')
 	State_Code 				= models.IntegerField(null=True, blank=True, help_text='State Code Ex. 36, 37')
@@ -136,7 +136,7 @@ class VendContDt(models.Model):
 
 class Bank_Accounts(models.Model):
 	Related_Company 		= models.ForeignKey(CompanyDetails, null=True, on_delete=models.SET_NULL)
-	Account_No 				= models.IntegerField(null=True, help_text='Bank Account Number')
+	Account_No 				= models.CharField(max_length=40, null=True, help_text='Bank Account Number')
 	Bank_Name 				= models.CharField(max_length=30, null=True, help_text='Bank Name')
 	Branch 					= models.CharField(max_length=40, null=True, blank=True, help_text='bank branch details')
 	IFSC_Code 				= models.CharField(max_length=11, null=True, blank=True, help_text='bank IFSC code')
