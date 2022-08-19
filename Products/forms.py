@@ -8,14 +8,14 @@ from django.forms import DateTimeField, DateTimeInput
 class PurchasesForm(forms.ModelForm):
 	class Meta:
 		model = Purchases
-		fields = ['Order', 'PO_From', 'Vendor', 'Purchase_Details', 'Shipping_To', 'PO_No', 'PO_Date', 'Payment_Term_1', 'Payment_Term_2',
-		'Packing_and_Forwarding', 'Delivery_Date', 'Warranty','Warranty_In', 'Lock_Status', 'PO_No_Format']
+		fields = ['Order', 'PO_From', 'Vendor', 'Vendor_Contact', 'Purchase_Details', 'Shipping_To', 'PO_No', 'PO_Date', 'Payment_Term_1', 'Payment_Term_2',
+		'Packing_and_Forwarding', 'Delivery_Date', 'Warranty','Warranty_In', 'Lock_Status', 'Contact']
 	
 		# widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'})}
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
-		for _, value in self.fields.items():
+		for _, value in self.fields.items(): 
 			value.widget.attrs['placeholder'] = value.help_text
 		for field in self.fields:
 			self.fields[field].widget.attrs.update({
@@ -249,7 +249,7 @@ class CopyPOItemsForm(forms.ModelForm):
 class VendorInvoicesForm(forms.ModelForm):	
 	class Meta:
 		model = Vendor_Invoices
-		fields = ['PO_No', 'Invoice_No', 'Invoice_Date', 'Invoice_Amount', 'GST_Amount', 'Credit_Days', 'Attach']
+		fields = ['Against', 'PO_No', 'Vendor', 'Invoice_Description', 'Invoice_No', 'Invoice_Date', 'Invoice_Amount', 'GST_Amount', 'Credit_Days', 'Attach']
 		widgets = {'Invoice_Date': widgets.DateInput(attrs={'type': 'datetime-local'})}
 
 	def __init__(self, *args, **kwargs):
@@ -259,12 +259,19 @@ class VendorInvoicesForm(forms.ModelForm):
 		for field in self.fields:
 			self.fields[field].widget.attrs.update({
 	            'class': 'form-control mb-4'
-	        })	
+	        })
+
+	def clean(self):
+	    cleaned_data = self.cleaned_data
+	    f1 = cleaned_data.get('Last_Update')
+	    if not f1:
+	        cleaned_data['Last_Update'] = date.today()
+	    return cleaned_data
 
 class VendorInvoicesForm1(forms.ModelForm):	
 	class Meta:
 		model = Vendor_Invoices
-		fields = ['PO_No', 'Invoice_No', 'Invoice_Date', 'Invoice_Amount', 'GST_Amount', 'Credit_Days', 'Attach']
+		fields = ['Against','PO_No','Vendor','Invoice_Description', 'Invoice_No', 'Invoice_Date', 'Invoice_Amount', 'GST_Amount', 'Credit_Days', 'Attach']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -274,6 +281,12 @@ class VendorInvoicesForm1(forms.ModelForm):
 			self.fields[field].widget.attrs.update({
 	            'class': 'form-control mb-4'
 	        })
+	def clean(self):
+	    cleaned_data = self.cleaned_data
+	    f1 = cleaned_data.get('Last_Update')
+	    if not f1:
+	        cleaned_data['Last_Update'] = date.today()
+	    return cleaned_data
 
 class ProductsForm(forms.ModelForm):
 	class Meta:
@@ -347,3 +360,67 @@ class StockMovementForm(forms.ModelForm):
 	    if not f1:
 	    	cleaned_data['Date'] = date.today()
 	    return cleaned_data
+
+class QuotationForm(forms.ModelForm):
+	class Meta:
+		model = Quotes
+		fields = ['Quote_To', 'Firm_Name', 'Reference_Person', 'Phone_Number', 'Email', 'Location']
+	
+		# widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'})}
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items(): 
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })		
+
+class QuoteTCForm(forms.ModelForm):
+	class Meta:
+		model = Quotes
+		fields = ['Quote_No']
+	
+		# widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'})}
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items(): 
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })
+
+class QuoteItemsForm(forms.ModelForm):
+	class Meta:
+		model = Quote_Items
+		fields = ['Quote_No']
+	
+		# widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'})}
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items(): 
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })
+
+class CopyQuoteItemsForm(forms.ModelForm):
+	class Meta:
+		model = Quote_Items
+		fields = ['Quote_No']
+	
+		# widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'})}
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items(): 
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })

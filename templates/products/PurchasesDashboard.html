@@ -240,7 +240,7 @@
       gradient: {
         shade: 'light' }},
       // colors: ['#1b55e2', '#888ea8', '#acb0c3', '#d3d3d3'],
-      series: [{{val.tpp|safe}}, {{val.tdp|safe}}],
+      series: [{{val.tpp|floatformat:0|safe}}, {{val.tdp|floatformat:0|safe}}],
       labels: ['Paid Payments', 'Due Payments'],
       plotOptions: {
       pie: {
@@ -297,7 +297,8 @@
         <button class="btn1 btn1-danger" onclick="location.href='/{{pdata.pj}}/purchasesdb/30/'">1M</button>
         <button class="btn1 btn1-info" onclick="location.href='/{{pdata.pj}}/purchasesdb/90/'">3M</button>
         <button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/purchasesdb/180/'">6M</button>
-        <button class="btn1 btn1-dark" onclick="location.href='/{{pdata.pj}}/purchasesdb/FY/'">Fin.Year</button>
+        <button class="btn1 btn1-success" onclick="location.href='/{{pdata.pj}}/purchasesdb/FY/'">Fin.Year</button>
+        <button class="btn1 btn1-dark" onclick="location.href='/{{pdata.pj}}/purchasesdb/All/'">All</button>
       
         &emsp; <span style="color: #0854a6;  font-size:17px;">
         {% if dur == 'FY' %} Financial Year - 

@@ -16,11 +16,11 @@
   <script src="{% static 'charts/apexcharts.min.js' %}"></script>
 
 <!-- Charts -->
-<!-- Sales Orders and Its Progress Charts -->
+<!-- Received Orders and Its Progress Charts -->
   <script>
     var options5 = {
       series: [{
-        name: 'Sales Orders ₹' + {{t_orders|safe}}.reduce((pv, cv) => pv + cv, 0) ,
+        name: 'Received Orders ₹' + {{t_orders|safe}}.reduce((pv, cv) => pv + cv, 0) ,
         type: 'column',
         data: {{t_orders|safe}}}, 
         {
@@ -114,10 +114,10 @@
   </script>
 
   <script>
-    // Sales Orders Chart
+    // Received Orders Chart
     var options ={
             series: [{
-            name: 'Total Sales Orders Value ₹'+{{order_val|safe}}.reduce((pv, cv) => pv + cv, 0),
+            name: 'Total Received Orders Value ₹'+{{order_val|safe}}.reduce((pv, cv) => pv + cv, 0),
             data: {{order_val|safe}},}],
             chart: {
             height: 350,
@@ -240,7 +240,7 @@
       gradient: {
         shade: 'light' }},
       // colors: ['#1b55e2', '#888ea8', '#acb0c3', '#d3d3d3'],
-      series: [{{val.trp|safe}}, {{val.tdp|safe}}],
+      series: [{{val.trp|floatformat:'0'|safe}}, {{val.tdp|floatformat:'0'|safe}}],
       labels: ['Recieved Payments', 'Due Payments'],
       plotOptions: {
       pie: {
@@ -267,11 +267,19 @@
     var chart = new ApexCharts(document.querySelector("#Rec-Due"), donutChart);
     chart.render();
   </script>
-
+  <script type="text/javascript">
+    document.getElementById("popup").click();
+      function unauth(){
+      $('.widget-content .message', function () {
+          swal({title: 'Un Authorisation Alert !',text: 'Sorry! You Can Not Access This Page. Need Authorisation To Access This Page',padding: '2em'})}) }
+  </script>
 
 {% endblock %}
 
 {% block content %}
+
+{% if request.user.username == 'praveen' %}
+<!-- ######### -->
     
 <div>
   <!-- <div class="page-header">
@@ -298,6 +306,7 @@
         <button class="btn1 btn1-info" onclick="location.href='/{{pdata.pj}}/salesdb/90/'">3M</button>
         <button class="btn1 btn1-primary" onclick="location.href='/{{pdata.pj}}/salesdb/180/'">6M</button>
         <button class="btn1 btn1-success" onclick="location.href='/{{pdata.pj}}/salesdb/FY/'">Fin.Year</button>
+        <button class="btn1 btn1-dark" onclick="location.href='/{{pdata.pj}}/salesdb/All/'">All</button>
       
         &emsp; <span style="color: #0854a6;  font-size:17px;">
         {% if dur == 'FY' %} Financial Year - 
@@ -314,10 +323,10 @@
   <div class="row">
   <div class="col-md-4 stretch-card grid-margin">
     <div class="card bg-gradient-info card-img-holder text-white">
-      <a href="/{{pdata.pj}}/orderslist/Total/" ht="click to get total sales orders list"><div class="card-body1">
+      <a href="/{{pdata.pj}}/orderslist/Total/" ht="click to get total Received Orders list"><div class="card-body1">
         <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
         <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-handshake-angle"></i></div></div>
-        <h4 class="mb-3 blk">Total Sales Orders - {{count.toc}}
+        <h4 class="mb-3 blk">Total Received Orders - {{count.toc}}
         </h4>
         <h2 class="mb-3 blk" style="color:yellow">₹ {{val.tov|floatformat:0|intcomma}}</h2>
         <h5 class="mb-3 blk">Inprogress-{{count.ioc}}, ₹ {{val.iov|floatformat:0|intcomma}}</h5>
@@ -376,7 +385,7 @@
   <div class="col-xl-12 col-lg-7">
     <div class="card shadow mb-4">
       <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h7 class="m-1 font-weight-bold "><a href="/{{pdata.pj}}/orderslist/Total/" ht="click to get sales orders list">Sales Orders</a><span style="color: #0854a6">
+        <h7 class="m-1 font-weight-bold "><a href="/{{pdata.pj}}/orderslist/Total/" ht="click to get Received Orders list">Received Orders</a><span style="color: #0854a6">
           {% if dur == '30' %} - Latest Month
           {% elif dur == '90' %} - Latest 3 Months
           {% elif dur == '180' %} - Latest 6 Months
@@ -425,5 +434,11 @@
   </div>
 </div>
 </div>
+
+{% else %}
+<!-- ######### -->
+<button type="button" id="popup" style="display:none" onclick="unauth()"></button>
+  
+{% endif %}
 
 {% endblock %}

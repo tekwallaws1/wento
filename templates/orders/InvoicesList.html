@@ -77,7 +77,7 @@
   var wdths = ['4%', '25%', '25%', '46%'];
   var ort = 'portrait'; //landscape
   
-   if ('{{status}}' == 'Issued' ) { var msgTop = 'Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} \n Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}}  |  Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}}';}
+   if ('{{status}}' == 'Issued' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} \n Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}}  |  Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}}';}
     else { var msgTop = ''};
     var title = '{{pdata.pj}} - {{status}} Invoices List';
     var filename = '{{pdata.pj}}-{{status}}InvoicesList_{{table.first.Invoice_Date|date:'dMy'}}to{{table.last.Invoice_Date|date:'dMy'}}'
@@ -118,7 +118,7 @@
 
 {% block content %}
 <div class="page-header">
-  <h3 class="page-title">{{pdata.pj.Short_Name}} - Sales Orders Billing Details - {{status}} Invoices</h3>
+  <h3 class="page-title">{{pdata.pj.Short_Name}} - Orders Billing Details - {{status}} Invoices</h3>
 </div>
 
 <div>
@@ -134,6 +134,9 @@
       &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm btn-success mb-4" ht="confirmed/issued invoices">Issued Invoices</button>
       &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/invoiceslist/Proforma/'" class="btn btn-sm  btn-info mb-4" ht="proforma invoices list">Proforma Invoices</button>
     {% endif %}
+
+    &emsp;&emsp;
+    <button type="button" data-toggle='modal', data-target="#MorePagesModal" class="btn btn-sm btn-danger mb-4" >More Pages</button>
   </div>
 
   <div style="float:right">
@@ -187,6 +190,10 @@
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Customer Name</label>
                         {{ filter_data.form.Billing_To}}
                       </div>
+
+                     {% if request.user.username == 'praveen' %}
+                      <!-- ######### --> 
+
                       <div class="col-md-6 col-sm-6 col-12 mt-4">
                         <label style="font-weight: 200; color: black; font-size: 13px;">Only Due Invoices</label>
                           <select class="form-control" name="duestatus">
@@ -201,6 +208,9 @@
                             <option value="0">Yes</option>
                           </select>
                       </div>
+
+                      <!-- ######### -->
+                      {% endif %}
                      
                       <div style="float:left; margin-left: 10px; margin-top:20px;" style="">
                         <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
@@ -215,6 +225,10 @@
       </div>
     </div>
   </div>
+
+{% if request.user.username == 'praveen' %}
+<!-- ######### -->
+                
 {% if status == 'Issued' %}
   <div class="row">
     <div class="col-xl-3 col-md-6 mb-4">
@@ -268,6 +282,8 @@
   </div>
 {% endif %}
 
+<!-- ######### -->
+{% endif %}
 <!-- Invoices List -->
 <!-- Locked Invoices -->
 {% if status == 'Issued' %}
@@ -305,6 +321,9 @@
               {% if x.user.Nick_Name %}<br>Followup By: {{x.user.Nick_Name}}{% endif %}
             </td>
 
+            {% if request.user.username == 'praveen' %}
+            <!-- ######### -->
+
             <td style="white-space:normal;">
                 {% for p in y %}
                   {% if p.Is_Manual == 0 %}
@@ -326,6 +345,24 @@
                 {% endfor %}
                 {% if due_date == 'True' %}<span class='hlt2 italic font-weight-bold'>**</span>Due Date Not Yet Came{% endif %}
             </td>
+
+            <!-- ######### -->
+            {% else %}
+              <td style="white-space:normal;">
+                {% for p in y %}
+                  {% if p.Is_Manual == 0 %}
+                    <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
+                  {% else %}
+                    <a class="ahr" ht="edit invoice" onclick="location.href='/{{pdata.pj}}/inv_edit/edit_manually/{{p.id}}/'">
+                  {% endif %}
+                    <span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
+                    <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} 
+                  {% if p.Attach %}<a class="ahr" ht='click here to download copy' href="{{p.Attach.url}}" target="_blank"><br><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
+                  <br><br>
+                {% endfor %}
+            </td>            
+            {% endif %}
+          
           </tr>
           {% endfor %} 
         </tbody>
@@ -493,5 +530,25 @@
     </div>
   </div>
 <!-- End -->
+
+<!-- more pages -->
+  <div class="modal fade text-left" id="MorePagesModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button   onclick="location.href='/{{pdata.pj}}/paymentslist/Received/'" type="button" class="btn btn-sm btn-info">Customer Payments</button>
+            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>          
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}
  

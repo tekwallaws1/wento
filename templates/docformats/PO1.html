@@ -29,9 +29,8 @@
       <button type="button" ht='by click this confirm po and lock edit options' data-toggle="modal" data-target="#editPOModal" onclick="javascript:fnc('lockpo')" class="btn2 btn2-danger">Confirm PO</button>
       
       <button type="button" ht='Delete this Draft po' data-toggle="modal" data-target="#deletepoModal" class="btn2 btn2-dark">Delete</button>
+      <button style="float: right;border:none; background:none; color: blue; font-size:16px; font-weight:600;">Draft Copy</h5></button>
       
-      <div><h5 style="float:right; color:blue;">Draft Copy</h5></div>
-
       <div class="modal fade text-left" id="deletepoModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content" id="modal-reload">
@@ -58,72 +57,59 @@
     <br><br>
     <script>var hide1=1; var hide2=1; var hide3=1;</script>
 
-    <div id="po" >
-      <table style="width:100%">
-        <tbody>
-          <tr>
-            <td class="t2" style="background: white; text-align:left; width:15%"><img  class="invlogo" src="{% static 'img/logo-sss1.png' %}"></td>
-            <td  class="t1" style="background: #106923;">
-              <a class="ahr1" ht="Change PO-From-Address" data-toggle="modal" data-target="#editPOModal" onclick="javascript:fnc('companyaddress')">
-                <span style="font-size:20px; color:yellow; ">{{po.PO_From.Company_Name}}</span>
-                <span style="font-style:italic; color: white;">
-                {% if po.PO_From.Address_Line_1 %}<br>{{po.PO_From.Address_Line_1}},{% endif %}
-                {% if po.PO_From.Address_Line_2 %}<br>{{po.PO_From.Address_Line_2}},{% endif %} {{po.PO_From.State}}.
-                </span>
-              </a>
-            </td>
-            <td class="t2" style="font-size:20px; background: #106923;">
-            {% if po.Lock_Status == 0 %}PO Draft Copy&nbsp;{% else %}Purchase Order&nbsp;{% endif %}</td>
-          </tr> 
-        </tbody>
-      </table>
+    <div id="po" class="print">
+      <img  class="invlogo" style="position: absolute; width:100px; height: 100px; margin-left: 25px;" src="{% static 'img/logo-mini.png' %}">
+      <div class="row d-flex justify-content-center text-center" style="font-size:13px; font-weight: 600; color:black;">
+        <a class="ahr" ht="Change PO-From-Address" data-toggle="modal" data-target="#editPOModal" onclick="javascript:fnc('companyaddress')">
+        <span style="font-size:25px; font-weight: 600; color: #db1309">{{po.PO_From.Company_Name}}</span>
+        
+        <div style="margin-top:-18px;">{% if po.PO_From.Address_Line_1 %}<br>{{po.PO_From.Address_Line_1}},{% endif %}</div>
+        
+        <div style="margin-top:-18px;">{% if po.PO_From.Address_Line_2 %}<br>{{po.PO_From.Address_Line_2}},{% endif %}{% if po.PO_From.Pin_Code %}-{{po.PO_From.Pin_Code}}{% endif %}</div>
+        
+         <div style="margin-top:0px;">{% if po.PO_From.GST_No %}GSTIN: {{po.PO_From.GST_No}}{% endif %}{% if po.PO_From.CIN_No %}, CIN: {{po.PO_From.CIN_No}}, {% endif %}</div>
+
+        <div style="margin-top:0px;">State: {{po.PO_From.State}}, State Code: {{po.PO_From.State_Code}}</div>
+
+
+        <div style="margin-top:0px;">Phone: {{po.PO_From.Phone_Number_1}} {% if po.PO_From.Email %}, Email: {{po.PO_From.Email}}{% endif %}</div> 
+
+        <div style="font-size:18px; font-weight: 600; color:black">{% if po.Lock_Status == 0 %}PO Draft Copy&nbsp;{% else %}Purchase Order&nbsp;{% endif %}</div></a>
+    </div>
       
-      <div style="margin-top:5px"></div>
+      <div style="margin-top:10px"></div>
+
       <table class="t3">
         <tr>
-          <th class="th1">PO Issued Billing Details</th>
-          <th class="th1">PO No and Details</th>
+          <!-- <th class="th1">PO Issued Billing Details</th> -->
+          <th class="th1">Purchse Order Details</th>
         </tr>
         <tr>
           <th class="td1">
-            <a class="ahr" ht="Change Billing-To Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:fnc('companyaddress')">
-              <span class="sh1">M/s. {{po.PO_From.Company_Name}}</span>
-              {% if po.PO_From.Address_Line_1 %}<br>{{po.PO_From.Address_Line_1}},{% endif %}
-              {% if po.PO_From.Address_Line_2 %}<br>{{po.PO_From.Address_Line_2}},{% endif %}
-              <br><span class="sh1">State&emsp;&nbsp;&thinsp; </span>{{po.PO_From.State}}{% if po.PO_From.State_Code %}, <span class="sh1">Code: </span>{{po.PO_From.State_Code}}{% endif %}
-
-              <br><span class="sh1">    Phone&emsp; </span>{{po.PO_From.Phone_Number_1}}{% if po.PO_From.Phone_Number_2 %}, {{po.PO_From.Phone_Number_2}}{% endif %}
-              <br><span class="sh1">Mail&emsp;&emsp; </span>{{po.PO_From.Email}}
-              {% if po.PO_From.GST_No %}<br><span class="sh1">GSTIN &nbsp;&nbsp; </span>{{po.PO_From.GST_No}}{% endif %}
-              
-            </a>
-          </th>
-          <th class="td1">
             <a class="ahr" ht="Edit PO Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:fnc('po_details')">
-                <span class="sh1">PO No & Date:</span> {{po.PO_No}}, {{po.PO_Date|date:'d M Y'}}
-                <br><span class="sh1">Delivery Date: </span>{{po.Delivery_Date}}
-                <!-- , <span class="sh1">Due Amount: </span>{% if po.Due_Amount > 0 %}₹ {{po.Due_Amount|floatformat:0|intcomma}}{% else %}0{% endif %} -->
+                <span class="sh1">PO No: </span>{{po.PO_No}}, <span class="sh1">PO Date: </span>{{po.PO_Date|date:'d M Y'}}
+                {% if po.Delivery_Date %}<span class="sh1">, Delivery Date: </span>{{po.Delivery_Date}}{% endif %}
+                {% if po.Packing_and_Forwarding %}<span class="sh1">, Packing & Forwarding: </span>{{po.Packing_and_Forwarding}}{% endif %}
+                {% if po.Warranty and po.Warranty_In %}
+                  <span class="sh1">, Waaranty: </span>{{po.Warranty}} {{po.Warranty_In}}{% if po.Warranty > 1 %}s{% endif %}
+                {% endif %}
                 
                 {% if po.Payment_Term_1 or po.Payment_Term_2 %}
-                  <br><span class="sh1">Payment Terms</span>
-                  {% if po.Payment_Term_1 %}<br>{{po.Payment_Term_1}}{% endif %}
-                  {% if po.Payment_Term_2 %}<br>{{po.Payment_Term_2}}{% endif %}
+                  <br><span class="sh1">Payment Terms: </span>
+                  {% if po.Payment_Term_1 %}{{po.Payment_Term_1}}{% endif %}
+                  {% if po.Payment_Term_2 %}, {{po.Payment_Term_2}}{% endif %}
                 {% endif %}
-
-                {% if po.Warranty and po.Warranty_In %}
-                  <br><span class="sh1">Waaranty: </span>{{po.Warranty}} {{po.Warranty_In}}{% if po.Warranty > 1 %}s{% endif %}
-                {% endif %}
-
-                {% if po.Packing_and_Forwarding %}<br><span class="sh1">Packing&Forwarding: </span>{{po.Packing_and_Forwarding}}{% endif %}
               </a>
           </th>
         </tr>
       </table>
-      <div style="margin-top:5px"></div>
+
+      <div style="margin-top:10px"></div>
+
       <table class="t3">
         <tr>
           <th class="th1">Vendor Details</th>
-          <th class="th1">Delivery Address</th>
+          <th class="th1">Bill To & Shipping Address</th>
         </tr>
         <tr>
           <th class="td1">
@@ -132,6 +118,11 @@
               {% if po.Vendor.Address_Line_1 %}<br>{{po.Vendor.Address_Line_1}},{% endif %}
               {% if po.Vendor.Address_Line_2 %}<br>{{po.Vendor.Address_Line_2}},{% endif %}
               <br><span class="sh1">State &nbsp; : </span>{{po.Vendor.State}}{% if po.Vendor.State_Code %}, <span class="sh1">Code: </span>{{po.Vendor.State_Code}}{% endif %}{% if po.Vendor.GST_No %}<br><span class="sh1">GSTIN : </span>{{po.Vendor.GST_No}}{% endif %}
+              {% if po.Vendor_Contact %}
+                <br><span class="sh1">Contact Person: </span>{{po.Vendor_Contact.Contact_Person}}
+                <span class="sh1">, Cell: </span>{{po.Vendor_Contact.Phone_Number_1}}
+                <!-- {% if po.Vendor_Contact.Email %}<span class="sh1">, Email: </span>{{po.Contact.Email}}.{% endif %} -->
+              {% endif %}
             </a>
           </th>
           <th class="td1">
@@ -141,15 +132,22 @@
               {% if po.Shipping_To.Address_Line_2 %}<br>{{po.Shipping_To.Address_Line_2}},{% endif %}
               <br><span class="sh1">State &nbsp; : </span>{{po.Shipping_To.State}}{% if po.Shipping_To.State_Code %}, <span class="sh1">Code: </span>{{po.Shipping_To.State_Code}}{% endif %}
               {% if po.Shipping_To.GST_No %}<br><span class="sh1">GSTIN : </span>{{po.Shipping_To.GST_No}}{% endif %}
+              {% if po.Contact %}
+                <br><span class="sh1">Contact Person: </span>{{po.Contact.Nick_Name}}
+                <span class="sh1">, Cell: </span>{{po.Contact.Phone_Number}}
+                <!-- {% if po.Contact.Email %}<span class="sh1">, Email: </span>{{po.Contact.Email}}.{% endif %} -->
+              {% endif %}
             </a>
           </th>
         </tr>
       </table>
+
       <div style="margin-top:10px"></div>
+
       {% if itm %}
         <table class="t3" style="font-size:11px">
           <tr>
-            <th class="th2" style="width:4%">#</th>
+            <th class="th2" style="width:5%">SNo</th>
             <th class="th2" >Description of Goods</th>
             <th class="th2" style="width:7%">HSN</th>
             <th class="th2" style="width:7.5%">Quantity</th>
@@ -165,11 +163,11 @@
           </tr>
           {% for x, a, b, c in itm %}
             <tr>
-              <th class="td2">{{forloop.counter}}</th>
-              <th class="td2" style="font-weight:bold"><a class="ahr" ht="Edit/Delete Item Details" data-toggle="modal" data-target="#itemEditButtons" onclick="javascript:edititem({{x.id}})">{{x.Item_Description}}</a></th>
+              <th class="td2" {%  if forloop.last %}id="gp1" style="height:0px;"{% endif %}>{{forloop.counter}}</th>
+              <th class="td2" style="font-weight:600"><a class="ahr" ht="Edit/Delete Item Details" data-toggle="modal" data-target="#itemEditButtons" onclick="javascript:edititem({{x.id}})">{{x.Item_Description}}</a></th>
               <th class="td2">{{x.HSN_Code}}</th>
               <th class="td2">{% if x.UOM == 'Kg' or x.UOM == 'Mtr' or x.UOM == 'Ltr' %}{{x.Quantity|floatformat:2}}{% else %}{{x.Quantity|floatformat:0}}{% endif %}
-                <br><span style="font-weight:bold; font-style:italic;">{{x.UOM}}{% if x.Quantity > 1 %}s{% endif %}</span></th>
+                <br><span style="font-weight:600; font-style:italic;">{{x.UOM}}{% if x.Quantity > 1 %}s{% endif %}</span></th>
               <th class="td2">{{x.Unit_Price|floatformat:'0'}}</th>
               <th class="td2">{{a|floatformat:'0'}}</th>
               {% if po.Billing_To.State == po.Billing_From.State %}
@@ -183,15 +181,15 @@
           {% endfor %}
         </table>
         {% if po.Lock_Status == 0 %}
-          <button type="button" id='hideitembutton' data-toggle="modal" data-target="#addNewItemModal" onclick="javascript:fnc('addnewitem')" class="btn2 btn2-sm btn2-primary">+Add New Item</button>
+          <button style="margin-top:5px" type="button" id='hideitembutton' data-toggle="modal" data-target="#addNewItemModal" onclick="javascript:fnc('addnewitem')" class="btn2 btn2-sm btn2-primary">+Add New Item</button>
           <script> var hide4=1;</script>
         {% endif %}
-        
+      {% endif %}  
 
-        <table class="t3" style="float:right; width: 41%; font-size: 11px;">
+        <table class="t3" style="float:right; width: 37.1%; font-size: 11px;">
           <tr>
             <th class="th1" style="text-align: right;">Total Amount Before Tax</th>
-            <th class="td2" style="width:40%; text-align: right; font-weight: bold; ">{{ss.final_without_tax_amount|floatformat:'2'|intcomma}}</th>
+            <th class="td2" style="width:32.5%; text-align: right; font-weight: bold; ">{{ss.final_without_tax_amount|floatformat:'2'|intcomma}}</th>
           </tr>
           {% if po.Billing_To.State == po.Billing_From.State %}
             <tr>
@@ -216,39 +214,40 @@
             <th class="th1" style="text-align: right; ">Total Amount After Tax</th>
             <th class="td2" style="width:30%; text-align: right; font-weight: bold;font-size: 12px;">₹ {{ss.final_with_tax_amount|floatformat:'0'|intcomma}}</th>
           </tr>
-          <tr>
+          <!-- <tr>
             <th colspan="2" class="td1" style="border:none; padding-top: 5px; font-style: italic; font-size:12.5px; width: 38%; font-weight: bold; text-align: right;">
               For M/s {{po.PO_From.Company_Name}}
               <br><div style="margin-top:70px; font-size:11.5px">Authorised Signatory</div>
+            </th>
+          </tr> -->
+          <tr>
+            <th colspan="2" class="td1" style="border:none; padding-top: 5px; font-style: italic; font-size:12.5px; width: 38%; font-weight: bold; text-align: right;">
+              <div style="margin-top:10px; font-size:12.5px">**This is Computer Generated PO<br>Authorised Signaturory Do Not Required</div>
             </th>
           </tr>
           <tr>
         </table>
 
-        {% if len_words > 60 %}
-          <div style="text-transform: capitalize; margin-top: 10px; margin-bottom: 18px; color:black; font-size:12px; font-style: italic; font-weight:normal"><span style="font-weight:bold; font-style: normal;">Total PO Amount in Words: </span>{{amount_in_words}} Rupees Only</div>
-        {% else %}
         <div style="text-transform: capitalize; margin-top: 10px; margin-bottom: 18px; color:black; font-size:12px; font-style: italic; font-weight:normal"><span style="font-weight:bold; font-style: normal;">Total PO Amount in Words<br></span>{{amount_in_words}} Rupees Only</div>
-        {% endif %}
         
         
 
         {% if tc %}
-          <table class="t3" style="width:59%; float:right; margin-bottom: 5px;">
+          <table class="t3" style="width:59%; float:left; margin-bottom: 5px;">
             <tr>
               <th class="th1">General Terms and Conditions</th>
             </tr>
             <tr>
               <th class="td1">
                 <a class="ahr" ht="Edit Terms and Conditions" data-toggle="modal" data-target="#editTCModal" onclick="javascript:edittc({{tc.id}})">
-                  {% if tc.Terms_and_Condition1 %}{{tc.Terms_and_Condition1}}{% endif %}
-                  {% if tc.Terms_and_Condition2 %}<br>{{tc.Terms_and_Condition2}}{% endif %}
-                  {% if tc.Terms_and_Condition3 %}<br>{{tc.Terms_and_Condition3}}{% endif %}
-                  {% if tc.Terms_and_Condition4 %}<br>{{tc.Terms_and_Condition4}}{% endif %}
-                  {% if tc.Terms_and_Condition5 %}{{tc.Terms_and_Condition5}}{% endif %}
-                  {% if tc.Terms_and_Condition6 %}<br>{{tc.Terms_and_Condition6}}{% endif %}
-                  {% if tc.Terms_and_Condition7 %}<br>{{tc.Terms_and_Condition7}}{% endif %}
-                  {% if tc.Terms_and_Condition8 %}<br>{{tc.Terms_and_Condition8}}{% endif %}
+                  {% if tc.Terms_and_Condition1 %}1. {{tc.Terms_and_Condition1}}{% endif %}
+                  {% if tc.Terms_and_Condition2 %}<br>2. {{tc.Terms_and_Condition2}}{% endif %}
+                  {% if tc.Terms_and_Condition3 %}<br>3. {{tc.Terms_and_Condition3}}{% endif %}
+                  {% if tc.Terms_and_Condition4 %}<br>4. {{tc.Terms_and_Condition4}}{% endif %}
+                  {% if tc.Terms_and_Condition5 %}<br>5. {{tc.Terms_and_Condition5}}{% endif %}
+                  {% if tc.Terms_and_Condition6 %}<br>6. {tc.Terms_and_Condition6}}{% endif %}
+                  {% if tc.Terms_and_Condition7 %}<br>7. {{tc.Terms_and_Condition7}}{% endif %}
+                  {% if tc.Terms_and_Condition8 %}<br>8. {{tc.Terms_and_Condition8}}{% endif %}
                 </a>
               </th>
             </tr>
@@ -258,11 +257,7 @@
           {% if po.Lock_Status == 0 %}<button type="button" id='hideaddtcbutton' data-toggle="modal" data-target="#TCModal" onclick="javascript:fnc('addtc')" class="btn1 btn1-sm btn1-info">+Add Terms and Conditions</button> {% endif %}
         {% endif %}
 
-        <!-- <div style="margin-top: 10px; margin-bottom: 3px; color:black; font-size:12px; font-style: italic; font-weight:normal"><span style="font-weight:bold; font-style: normal;">Decleration: </span> We declare that this PO shows the actual price of the goods described and that all particulars are true and correct</div> -->
-        <!-- {% if tc.Additional_Note %}
-        <a class="ahr" ht="Edit Terms and Conditions" data-toggle="modal" data-target="#exampleModal13" onclick="javascript:fnc('tc')"><div style="margin-top: 10px; margin-bottom: 6px; color:black; font-size:12px; font-style: italic; font-weight:normal"><span style="font-weight:bold; font-style: normal;">Note: </span>{{tc.Additional_Note}}</div></a>
-        {% endif %} -->
-      {% endif %}
+      
       
 
       <div id="nextpage1"></div>
@@ -293,8 +288,9 @@
 
                 <div style="display:none;" id="podetails">
                   <label for="{{ field.label }}">{{ form_po.PO_No.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.PO_No }}
-                  <label for="{{ field.label }}">choose PO No format ff want to change default format as above{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.PO_No_Format }}
+                  <!-- <label for="{{ field.label }}">choose PO No format ff want to change default format as above{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.PO_No_Format }} -->
                    <label for="{{ field.label }}">{{ form_po.PO_Date.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.PO_Date }}
+                   <!-- <label>Ref Contact Person</label>{{ form_po.Contact }} -->
                    <label for="{{ field.label }}">{{ form_po.Delivery_Date.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.Delivery_Date }}
                    <label for="{{ field.label }}">{{ form_po.Warranty_In.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.Warranty_In }}
                    <label for="{{ field.label }}">{{ form_po.Warranty.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.Warranty }}
@@ -305,9 +301,15 @@
                    <label for="{{ field.label }}">specify if PO related to any specifc received work order{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.Order }}
                 </div>
 
-                <div style="display:none;" id='shippingto'><label for="{{ field.label }}">Material Delivery Address{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.Shipping_To }}</div>
+                <div style="display:none;" id='shippingto'>
+                  <label for="{{ field.label }}">Material Delivery Address{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.Shipping_To }}
+                  <label>Ref Contact Person</label>{{ form_po.Contact }}
+                </div>
 
-                <div style="display:none;" id='vendor_address'><label for="{{ field.label }}">Vendor Details{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.Vendor }}</div>
+                <div style="display:none;" id='vendor_address'>
+                  <label for="{{ field.label }}">Vendor Details{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.Vendor }}
+                  <label for="{{ field.label }}">Vendor Conatct Details{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_po.Vendor_Contact}}
+                </div>
 
                 <div class="form-check"  style="display:none; " id='lock_po'>
                   <label class="form-check-label">{{ form_po.Lock_Status }}</label><br><span style="font-size:17px;">Are You Sure !<br>Once You Lock It You Can't Modify/Edit PO Without Unlock Password<br>Tick Above Box and Submit to Lock the PO</span>
@@ -533,12 +535,12 @@
 
       var element = document.getElementById('po');
       html2pdf().from(element).set({
-      margin:       [5, 15, 15, 5],
+      margin:       [10, 15, 15, 5],
        // margin:       [t, l, b, r],
         // margin:       [10, 10, 20, 10],
-        filename: '{{po.Vendor.Supplier_Name}}'+'-'+'{{po.PO_No}}',
-        html2canvas: { dpi: 192, letterRendering: true, scale:5},
-        image: { type: 'jpeg', quality: 1.5},
+        filename: '{{po.PO_No}}',
+        html2canvas: { dpi: 0, letterRendering: true, scale:5},
+        image: { type: 'jpeg', quality: 0.25},
        pageBreak: { mode: 'css', before:'#nextpage1'},
         jsPDF: {unit: 'mm', format: [275, 210]}
       }).toPdf().get('pdf').then(function (pdf) {
@@ -561,6 +563,11 @@
 
   <script type="text/javascript">
     window.onload = function () {
+
+      var ph = $("#po").height();
+        if (ph<760){var nht = 760-ph;
+      $('#gp1').css('height',nht);
+    }
       
       if ('{{msg}}' != 'msg' ) {
       $('.widget-content .message', function () {

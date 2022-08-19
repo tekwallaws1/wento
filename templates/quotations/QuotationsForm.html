@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts %}
+ <script type="text/javascript">
+
+</script>
+{% endblock %} <!-- For Scripts -->
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Quotation Form</h4>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                {% for field in form %}
+                  {% if field.label == 'Quote To' %}
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
+                      <a title="add new customer" target="_blank" href="/{{pdata.pj}}/customerform/create/1/"><i class="fas fa-square-plus " style="color:purple; padding-bottom:-20px;"></i></a>
+                    {{ field}}
+                    {% endif %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}
+              </div>
+
+              <button  onclick="$('#hiddenSpan').toggle();" type="button" class="btn1 btn1-info col text-center">If Customer Not Yet Registered, Click Here To Add Manually</button>
+
+              <br><br>
+              <div class="form-group" id='hiddenSpan' style="display:none">
+                {% for field in form %}
+                  {% if field.label != 'Quote To' %}
+                  <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                  {% endif %}
+                {% endfor %}  
+              </div>
+           </div>
+          <button type="submit" class="btn btn-primary">Submit</button>    
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

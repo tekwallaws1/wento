@@ -9,7 +9,7 @@
     <!-- plugins:css-->
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <!-- <link rel="stylesheet" href="{% static 'css/vendor.bundle.base.css' %}"> -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}"> 
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom-modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
@@ -134,11 +134,13 @@
           </button>
         </div>
       </nav>
+      
       <!-- partial -->
       <div class="container-fluid page-body-wrapper">
         <!-- partial:partials/_sidebar.html -->
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
           <ul class="nav">
+          {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
             <li class="nav-item nav-profile">
               <a href="#" class="nav-link">
                 <div class="nav-profile-image">
@@ -168,7 +170,7 @@
               </a>
               <div class="collapse" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/salesdb/All/">Sales</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/salesdb/All/">Received Orders</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/purchasesdb/All/">Purchases</a></li>
                 </ul>
               </div>
@@ -176,16 +178,17 @@
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicorders" aria-expanded="false" aria-controls="ui-basicorders">
-                <span class="menu-title">Sales</span>
+                <span class="menu-title">Received Orders</span>
                 <i class="menu-arrow"></i>
                 <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
                 <i class="fas fa-lg fa-cart-flatbed-suitcase"></i>
               </a>
               <div class="collapse" id="ui-basicorders">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/orderslist/Inprogress/">Sales List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/orderslist/Inprogress/">Received Orders<br>List</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/invoiceslist/Issued/">Customer Invoices</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentslist/Received/">Customer Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/quotationslist/all/">Quotations</a></li>
                 </ul>
               </div>
             </li>
@@ -236,6 +239,38 @@
             </li>
 
             <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicexpenses" aria-expanded="false" aria-controls="ui-basicexpenses">
+                <span class="menu-title">Expenses</span>
+                <i class="menu-arrow"></i>
+                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
+                <i class="fas fa-lg fa-coins"></i>
+              </a>
+              <div class="collapse" id="ui-basicexpenses">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expenseslist/apr/expid/">List of Expenses</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expensesform/create/1/">Claim Form</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expenseslist/approvalreq/expid/">Approve Requests</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/debitlist/">Debit Vouchers</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicgst" aria-expanded="false" aria-controls="ui-basicgst">
+                <span class="menu-title">GST Ruturns</span>
+                <i class="menu-arrow"></i>
+                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
+                <i class="fas fa-lg fa-percent"></i>
+              </a>
+              <div class="collapse" id="ui-basicgst">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/gst/Input/month/">Input GST</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/gst/Output/month/">Output GST</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicwork" aria-expanded="false" aria-controls="ui-basicwork">
                 <span class="menu-title">Work Progress</span>
                 <i class="menu-arrow"></i>
@@ -279,6 +314,22 @@
             </li>
 
             <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicattendance" aria-expanded="false" aria-controls="ui-basicattendance">
+                <span class="menu-title">Attendance</span> 
+                <i class="menu-arrow"></i>
+                <i class="fas fa-lg fa-user-clock"></i>
+              </a>
+              <div class="collapse" id="ui-basicattendance">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/attendanceform/create/1/daywise/">Attendance Form</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/daywiseattendancelist/day/">Daily Attendance</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/monthwiseattendancelist/month/">Monthly Attendance</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/holidayslist/year/">Holidays List</a></li>
+                </ul>
+              </div>
+            </li> 
+
+            <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basiccontact" aria-expanded="false" aria-controls="ui-basiccontact">
                 <span class="menu-title">Contact Management</span>
                 <i class="menu-arrow"></i>
@@ -302,7 +353,9 @@
               <div class="collapse" id="ui-basicempl">
                 <ul class="nav flex-column sub-menu">
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employeslist/">List of Employes</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employesform/create/1/">Reg. New Employee</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employsalarieslist/">Employ Salaries</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employeslist/">Salary Revisions</a></li>
+                  <!-- <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employesform/create/1/">Reg. New Employee</a></li> -->
                 </ul>
               </div>
             </li>
@@ -351,9 +404,32 @@
               </div>
             </li>
 
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicexpenses" aria-expanded="false" aria-controls="ui-basicexpenses">
+                <span class="menu-title">List</span>
+                <i class="menu-arrow"></i>
+                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
+                <i class="fas fa-lg fa-coins"></i>
+              </a>
+              <div class="collapse" id="ui-basicexpenses">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expenseslist/apr/expid/">List of Expenses</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expensesform/create/1/">Claim Form</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/attendanceform/create/1/">Attendance Form</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/daywiseattendancelist/day/">Daily Attendance</a></li>
+
+                </ul>
+              </div>
+            </li>
+          {% endif %}
+
           </ul> 
         </nav>
         <!-- partial -->
+
+
+
         <div class="main-panel">
           <div class="content-wrapper">
 
@@ -422,8 +498,7 @@
   {% endfor %}
 {% endif %} 
           <!-- MAIN CONTENT BEGIN -->
-                    <h5>{{pj}}</h5>
-
+          <div style="margin-top:-20px;"></div>
           {% block content %}
           {% endblock %}
           <!-- MAIN CONTENT BEGIN -->

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+{% load static %}
+{% load humanize %}
+{% load mathfilters %}
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>GPR-ProMan</title>
+    
+    <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'css/custom-modal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/invoice1.css' %}">
+    <style type="text/css">
+      .th11 {color: #0d65e0; padding: 5px;}
+      .td11 {font-weight:bold; color:green}
+      .th22 {color: black; padding: 5px;}
+      .td22 {color:black;}
+      .cl1 {color: black; font-weight: 600;}
+    </style>
+
+  </head>
+  <body>
+    <!-- <button onclick="Convert_HTML_To_PDF();">Convert HTML to PDF</button> -->
+    <br><br>
+    {% if apr != 'approvalreq' %}
+      <button type="button"  onclick="location.href='/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn2 btn2-info">Expenses List</button>
+        <button type="button"  id="btnTest" onclick="href='javascript:generatePDF()'" class="btn2 btn2-primary">Download</button>
+      {% if exp.Lock_Status == 1 %}
+        {% if exp.Approval_Status == 0 %}
+          <button type="button" ht='unlock it for edit/change the expenses claim form' id='hidelockbutton' onclick="location.href='/{{pdata.pj}}/expensesform/unlock/'+{{exp.id}}+'/'" class="btn2 btn2-danger">Unlock Form</button>
+        {% endif %}
+      {% else %}
+        <button type="button" id='hidelockbutton' ht='by click this confirm button Expenses claim form will be confirmed and send for approval as per your requsted . If want to edit this again, use unlock button to edit' class="btn2 btn2-success" onclick="location.href='/{{pdata.pj}}/expensesform/lock/'+{{exp.id}}+'/'">Confirm</button>
+        <button type="button" ht='delete this expenses claim form' onclick="location.href='/{{pdata.pj}}/expensesform/delete/'+{{exp.id}}+'/'" class="btn2 btn2-danger">Delete</button>    
+        <h5 style="float:right; color:blue;">Draft Copy</h5>
+      {% endif %}
+    {% else %}
+      <button type="button"  onclick="location.href='/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn2 btn2-info">Approval Requests</button>
+      <button type="button"  id="btnTest" onclick="href='javascript:generatePDF()'" class="btn2 btn2-success">Download</button>      
+      {% if exp.Approval_Status == 0 %}
+        <button type="button" id='hidelockbutton' ht='click here to approve this requested claim' class="btn2 btn2-primary float-right" onclick="location.href='/{{pdata.pj}}/expensesform/approvalreq1/'+{{exp.id}}+'/'">Approve Claim</button>
+      {% else %}
+        {% if exp.Balance_Amount == exp.Total_Amount %}
+          <button type="button" id='hidelockbutton' ht='click here to take your decision back from approve to disapprove' class="btn2 btn2-primary float-right" onclick="location.href='/{{pdata.pj}}/expensesform/approvalreq0/'+{{exp.id}}+'/'">Click Here to Back Your Decision to Disapprove</button>
+        {% endif %}
+        
+      {% endif %}  
+    {% endif %}
+
+    
+    <br><br>
+    <script>var hide1=1;</script>
+
+    <div id="invoicee" class="print">
+      <div>
+        <div style="float:left">
+          <img  class="invlogo" style="position: absolute; width:55px; height: 55px;" src="{% static 'img/logo-mini.png' %}">
+
+          <div style="margin-left:65px;">
+            <span style="font-size:20px; font-weight: 600; color: #db1309">{{exp.Related_Company.Company_Name}}</span>
+            <div style="margin-top:-5px;"></div>
+            <span style="font-size:12px; font-weight: 600">{{exp.Related_Company.Address_Line_1}}</span>
+            <div style="margin-top:-5px;"></div>
+            <span style="font-size:12px; font-weight: 600">{{exp.Related_Company.Address_Line_2}}, {{exp.Related_Company.State}}</span><br>
+          </div>
+        </div>
+
+        <div style="float:right">
+          <br>
+          <table style="font-size:18px;">
+            <tr>
+              <th class="th1 th11" style=" width: 97%;font-weight: 600; padding-top:2.5px;">Expenses Claim Form</th>
+            </tr>     
+          </table>
+        </div>
+        <div style="clear:both"></div>
+      </div>
+
+      <div style="margin-top:7px"></div>
+      <a class="ahr" title="click to edit" data-toggle="modal" data-target="#editExpenseModal" onclick="expedit('expenses')">
+        <table style="width:65%; float: left; font-size:12px;">
+          <tr>
+            <th class="th1 th11" style="width:50%;">Name</th>
+            <th class="th1 th11" style="width:20%;">Employee ID</th>
+            <th class="th1 th11" style="width:30%;">Department</th>
+          </tr>
+          <tr>
+            <td class="td1 td11">{{exp.Submitted_By.Name}}</td>
+            <td class="td1 td11">{% if exp.Submitted_By.Employee_Id %}{{exp.Submitted_By.Employee_Id}}{% endif %}</td>
+            <td class="td1 td11">{% if exp.Submitted_By.Department %}{{exp.Submitted_By.Department}}{% endif %}</td>
+          </tr>
+        </table>
+      </a>
+      <table style="width:26.5%; float: right;  font-size:12px;">
+        <tr>
+          <th class="th1 th11" style="text-align: left; padding: 5px;">Reference No</th>
+          <th class="th1 th11" style="text-align: right; padding: 5px;">Status</th>
+        </tr>
+        <tr>
+          <td class="td1 td11" style="text-align: left;">{{exp.Reference_No}}</td>
+          <td class="td1 td11" style="text-align: right;">
+            {% if exp.Balance_Amount != None %}
+              {% if exp.Balance_Amount > 0 %}<span class="hlt3">Due ₹ {{exp.Balance_Amount|floatformat:'0'|intcomma}}</span>{% else %}<span style="color:green">Amount Paid</span>{% endif %}
+            {% endif %}            
+          </td>
+        </tr>
+      </table>
+      <div style="margin-top:70px;"></div>
+      <a class="ahr" title="click to edit" data-toggle="modal" data-target="#editExpenseModal" onclick="expedit('expenses')">
+        <table style="width:100%; float: right;  font-size:12px;">
+          <tr>
+            <th class="th1 th11" style="width: 15%; text-align: left; padding: 5px;">Purpose</th>
+            <th class="td1" style="text-align: left; padding: 5px;">{{exp.Purpose}}</th>
+          </tr>
+        </table>
+      </a>
+
+      <div style="float: left; margin-top:15px; margin-bottom:10px; font-size: 16px; font-weight: 500; font-style: italic; color:#0d65e0;">Itemized Expenses</div>
+
+      <a class="ahr" title="click to edit" data-toggle="modal" data-target="#editExpenseModal" onclick="expedit('expenses')">
+        <table style="width:38%; float: right;  font-size:13px; margin-top:15px;">
+          <tr>
+            <th class="th1 th11" style="width: 52.5%; text-align: left; padding: 5px; font-weight: 500; font-style:italic;">Expenses Towards</th>
+            <th class="td1 td11" style="text-align: left; padding: 5px; font-weight: 500; font-style:italic;">
+              {% if exp.Sales_Order and exp.Related_To == 'Sales' %}PO {{exp.Sales_Order.PO_No }}{% else %}{{exp.Related_To}}{% endif %}
+            </th>
+          </tr>
+        </table>
+      </a>
+
+      <table style="width:100%; font-size:12px; color: black;">
+        <tr>
+          <th class="th1 th22" style="width:3%;">#</th>
+          <th class="th1 th22" style="width:12%;">Date</th>
+          <th class="th1 th22" style="width:47%;">Expense Description</th>
+          <th class="th1 th22" style="width:20%;">Category</th>
+          <th class="th1 th22" style="width:10%;">Receipt</th>
+          <th class="th1 th22" style="width:10%; text-align: right;">Amount</th>
+        </tr>
+        {% for x in items %}
+          <tr>
+            <td class="td1"><span class="cl1">{{forloop.counter}}</span></td>
+            <td class="td1"><a class="ahr" title="click to edit" data-toggle="modal" data-target="#editItemModal" onclick="edititem('{{x.id}}')">
+              {% if x.From_Date and x.To_Date %}
+                {% if x.From_Date != x.To_Date %}
+                  <span class="cl1">{{x.From_Date|date:'d M Y'}}</span>
+                  <br>&emsp;&emsp;to
+                  <br><span class="cl1">{{x.To_Date|date:'d M Y'}}</span>
+                {% else %}
+                  <span class="cl1">{{x.From_Date|date:'d M Y'}}</span>
+                {% endif %}
+              {% else %}
+                <span class="cl1">{{x.From_Date|date:'d M Y'}}</span>
+              {% endif %}</a>      
+            </td>
+            <td class="td1"><a class="ahr1 td22" title="click to edit" data-toggle="modal" data-target="#editItemModal" onclick="edititem('{{x.id}}')">
+              <span class="cl1">{{x.Description}}</span></a>
+            </td>
+            <td class="td1 td22"><a class="ahr" title="click to edit" data-toggle="modal" data-target="#editItemModal" onclick="edititem('{{x.id}}')">
+              <span class="cl1">{{x.Category}}</span></a>
+            </td>
+            <td class="td1 td22">
+              {% if x.Attach %}<a class="ahr" title='click here to download receipt/bill' href="{{x.Attach.url}}" target="_blank"><span class='cl1'>Yes <i class="mdi mdi-download"></i>{% else %}<span class='cl1'>No</span>{% endif %}</span></a>
+            </td>
+            <td class="td1 td22" style="text-align: right;"><a class="ahr" title="click to edit" data-toggle="modal" data-target="#editItemModal" onclick="edititem('{{x.id}}')">
+              <span class="cl1">{{x.Amount|floatformat:'0'|intcomma}}</span></a>
+            </td>
+          </tr>
+        {% endfor %}
+      </table>
+
+      {% if exp.Lock_Status == 0 %}
+        <button type="button" id='hideitembutton' data-toggle="modal" data-target="#addNewItemModal" onclick="additem('addnewitem')" class="btn2 btn2-sm btn2-primary">+Add New Expense</button>
+        <script> var hide1=1;</script>
+      {% endif %}
+
+      <table class="t3" style="float:right; width: 30%; font-size: 11px;">
+        <tr>
+          <th class="th1 th11" style="text-align: right;">Sub Total</th>
+          <th class="td2 td22" style="width:35%; text-align: right; font-weight: bold; ">{{exp.Total_Amount|floatformat:'0'|intcomma}}</th>
+        </tr>
+        <tr>
+          <th class="th1 th11" style="text-align: right;">Cash Advances</th>
+          <th class="td2 td22" style="width:35%; text-align: right; font-weight: bold;">
+            {% if exp.Balance_Amount < 0 %}
+              {{exp.Balance_Amount|intcomma}}
+            {% else %}
+              0
+            {% endif %}
+          </th>
+        </tr>
+        <tr>
+          <th class="th1 th11" style="text-align: right; ">Total Reimbursament</th>
+          <th class="td2 td22" style="width:30%; text-align: right; font-weight: bold;font-size: 12px;">
+            {% if exp.Balance_Amount == 0 %}₹ 0
+            {% else %}
+              ₹{{exp.Balance_Amount|floatformat:'0'|intcomma}}
+            {% endif %} 
+          </th>
+        </tr>
+        <tr>
+          <th colspan="2" class="td1" style="border:none; font-size:11px; padding-top: 1px; font-style: italic; text-align: left;">
+              don't forget attach bills/receipts if have
+            </th>
+        </tr>
+      </table>
+          {% if amount_in_words %}
+          <div style="text-transform: capitalize; margin-top: 10px; margin-bottom: 18px; color:black; font-size:12px; font-style: italic; font-weight:normal"><span style="font-weight:bold; ">
+            Amount in words: </span><span style="font-weight:600; ">{{amount_in_words}} Rupees Only</span>
+            <br><span style="font-style:italic; font-size: 11.5px;">claim submitted on {{exp.Submitted_Date|date:'d M Y'}}</span>
+          </div>
+
+          {% else %}
+          <br><br>
+          {% endif %}
+
+        
+        <br><br>
+        <table style="width:70%; font-size:12px; color: black;">
+        <tr>
+          <th  style="width:33%; font-style: italic;">Submitted By<br><span style="font-weight:normal">({{exp.Submitted_By.Nick_Name}})</span></th>
+          <th  style="width:33%; font-style: italic;">Approved By<br><span style="font-weight:normal">({{exp.Approval_Request_To.Nick_Name}})</span></th>
+        </tr>
+      </table>
+        
+      <div id="nextpage1"></div>
+    </div>
+
+    {% if exp.Lock_Status == 1 %}
+      <style type="text/css">a:hover {cursor:pointer; pointer-events: none; }</style>
+    {% endif %}
+
+  
+<!-- Invoice Addresses and Details Update Popups - Buttons and Forms -->
+  <div class="modal fade text-left" id="editExpenseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" >
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Invoice Details Update Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">   
+          <form class="forms-sample" action="" id='exp_edit_action' method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+                <div class="form-group">
+                  {% for field in form_exp %}
+                    {% if field.label != 'Related To' and field.label != 'Sales Order' and field.label != 'Lock Status' %}
+                      <label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                    {% endif %}
+                    {% if field.label == 'Related To' %}
+                      <label for="id_Related_To" name="Related_To">Expenses Towards{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label><div onchange="changeFunc1()">{{field}}</div>
+                    {% endif %}
+                    {% if field.label == 'Sales Order' %}
+                      <div style="display:none" id="selectorder"><label for="id_Sales_Order">Sales/Work Order Details</label>{{field}}</div> 
+                    {% endif %}
+                    {% for error in field.errors %}
+                      <p style="color: red; margin-top: -20px">{{ error }}</p>
+                    {% endfor %}
+                  {% endfor %}  
+                </div>
+              <button type="submit" class="btn btn-primary">Submit</button>    
+            </div>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- End -->
+  
+<!-- Items Add, Update or Delete Popups - Buttons and Forms -->
+  <!-- when click this modal on item description, it will open below two buttons. when you click update item, it will take this id, and return same page with id instaed of 'itemid'. below itemclick button auto activate modal01(item form with edit data) when load page  -->
+  <div class="modal fade text-left" id="editItemModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button type="button" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/'+getid+'/'" class="btn btn-sm btn-primary mb-2">Update Item</button>
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/expensesitemsform/delete/'+{{exp.id}}+'/'+getid+'/'" class="btn btn-sm btn-danger mb-2">Delete Item</button>            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button type="button" style="display:none" data-toggle="modal" data-target="#addNewItemModal" data-backdrop='static' data-keyboard='false' id='itemidclick' class="btn btn-sm btn-primary mb-2">Update Item</button>
+
+<!-- Add/Edit Items Form -->
+  <div class="modal fade text-left" id="addNewItemModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" >
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Expense Update Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/itemid/'">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">   
+          <form class="forms-sample" action="" id='itemaction' method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                {% for field in form %}
+                  {% if field.label != 'Attach' and field.label != 'From Date' and field.label != 'To Date' %}
+                    <label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                  {% endif %}
+                  {% if field.label == 'From Date' %}
+                    <div class="form-group start-date">
+                      <label>{% if field.field.required %} <span style="color: red">**</span> {% endif %}Date of Expense or Start Date</label>
+                      {% if fnc == 'edit' %}
+                        {{field}}
+                      {% else %}
+                        <input type="date" name="From_Date" class="form-control">
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                  {% if field.label == 'To Date' %}
+                    <div class="form-group start-date">
+                      <label>{% if field.field.required %} <span style="color: red">**</span> {% endif %}End Date (leave blank if only one date for add expense)</label>
+                      {% if fnc == 'edit' %}
+                        {{field}}
+                      {% else %}
+                        <input type="date" name="To_Date" class="form-control">
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                  {% if field.label == 'Attach' %}
+                    <label style="color:#32a852;">attach if any bill/receipt against expenses</label>{{field}}
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}  
+              </div>
+           </div>
+          <button type="submit" class="btn btn-primary" >Submit</button>    
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- End -->
+
+<script type="text/javascript">
+  function additem(tag){
+    if ( tag == 'addnewitem' ) {document.getElementById("itemaction").action = '/{{pdata.pj}}/expensesitemsform/create/'+{{exp.id}}+'/itemid/';} };
+
+  function edititem(tag){getid=tag;}
+
+  function changeFunc1() {
+    var selectBoxs = document.getElementById("id_Related_To");    
+    var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+    if (sv == 'Sales'){
+      document.getElementById('selectorder').style.display='block'}
+    else{ document.getElementById('selectorder').style.display='none' }   }
+
+  function expedit(tag){document.getElementById("exp_edit_action").action = '/{{pdata.pj}}/expensesform/edit/'+{{exp.id}}+'/';}
+</script>
+  
+<script>
+  function test() {
+    if ('{{exp.Lock_Status}}' == 'False') {
+    if(hide1!=0){document.getElementById("hideitembutton").style.display = 'none';}
+  };
+
+    var element = document.getElementById('invoicee');
+    html2pdf().from(element).set({
+    margin:       [5, 15, 15, 5],
+     // margin:       [t, l, b, r],
+      // margin:       [10, 10, 20, 10],
+      filename: '{{exp.Reference_No}}',
+      html2canvas: { dpi: 192, letterRendering: true, scale:5},
+      image: { type: 'jpeg', quality: 1.5},
+     pageBreak: { mode: 'css', before:'#nextpage1'},
+      jsPDF: {unit: 'mm', format: [275, 210]}
+    }).toPdf().get('pdf').then(function (pdf) {
+      var totalPages = pdf.internal.getNumberOfPages();
+
+      for (i = 1; i <= totalPages; i++) {
+       pdf.setPage(i);
+        pdf.setFontSize(9);
+        pdf.setTextColor(150);
+        if ( totalPages > 1){
+        pdf.text(i + ' of ' + totalPages, (pdf.internal.pageSize.getWidth()/1.07), (pdf.internal.pageSize.getHeight()-5));}
+
+        }}).save();
+      
+      setTimeout(func, 1000);
+      function func() {location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/itemid/'}
+  }
+  document.getElementById('btnTest').onclick = test;
+</script>
+
+  <script type="text/javascript">
+    window.onload = function () {
+      
+  //     if ('{{msg}}' != 'msg' ) {
+  //     $('.widget-content .message', function () {
+  //       swal({
+  //           title: 'Return Message !',
+  //           text: '{{msg}}',
+  //           padding: '2em',
+  //           allowOutsideClick: false,
+  //           // type:'warning',
+  //           confirmButtonText: 'OK',
+  //         }).then((result) => {
+  // if (result.value) {location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/itemid/';}})
+  //     }) };
+
+     if ('{{item_id}}' != 'itemid') {
+      document.getElementById('itemidclick').click(); 
+      document.getElementById("itemaction").action = '/{{pdata.pj}}/expensesitemsform/edit/'+{{exp.id}}+'/'+{{item_id}}+'/';}
+
+      var selectBoxs = document.getElementById("id_Sales_Order");    
+      var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+      if (sv != '---------'){
+        document.getElementById('selectorder').style.display='block'}
+      else{ document.getElementById('selectorder').style.display='none' }
+    }
+  </script>
+
+  <script type="text/javascript">
+    window.history.forward();
+    function noBack()
+    {
+        window.history.forward();
+    }
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.debug.js" ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" ></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+  
+  <script src="{% static 'js/vendor.bundle.base.js' %}"></script>
+  <script src="{% static 'js/misc.js' %}"></script>
+  <script src="{% static 'js/off-canvas.js' %}"></script>
+  <script src="{% static 'js/hoverable-collapse.js' %}"></script>
+  <script src="{% static 'js/sweetalert2.min.js' %}"></script>
+
+  <script type="text/javascript">
+   
+  </script>
+
+  </body>
+</html>

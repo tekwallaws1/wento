@@ -15,7 +15,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.db.models import Sum, Avg, Count
 from Projects.fyear import get_financial_year, get_fy_date, get_fy_date_fy
 from Projects.basedata import projectname
-from .customfunctions import assign_paystatus_to_order, workstatus, updateduedays, get_invoice_number, inv_amoumt_update, inv_amount_exceed, adjust_payments_to_invoices, genOrderNo, postform
+from .customfunctions import assign_paystatus_to_order, workstatus, updateduedays, get_invoice_number, inv_amoumt_update, inv_amount_exceed, adjust_payments_to_invoices, genOrderNo, postform, adj_pay_to_all_inv
 from num2words import num2words
 from django.urls import reverse
  
@@ -103,6 +103,76 @@ def Sales_Dashboard(request, proj, dur):
 		't_billed':t_billed, 't_rec_pay':t_rec_pay, 't_due_pay':t_due_pay, 't_unbilled':t_unbilled, 'order_date':order_date, 'order_val':order_val, 
 		'cust_list':cust_list, 'dur':dur, 'pay_val':pay_val, 'pay_date':pay_date, 'pay_cust':pay_cust, 'count':count, 'val':val})
 
+# @login_required
+# def Orders_List(request, proj, status):
+# 	pdata = projectname(request, proj)
+# 	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+# 	# lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+# 	if status == 'Inprogress':
+# 		table = Orders.objects.filter(**lookup, Final_Status=0, ds=1).order_by('-Order_Received_Date', 'Final_Status')
+# 		table_fy = Orders.objects.filter(**lookup, Final_Status=0, Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date(), ds=1).order_by('-Order_Received_Date', 'Final_Status')
+# 	else:
+# 		table = Orders.objects.filter(**lookup, ds=1).order_by('-Order_Received_Date', 'Final_Status')
+# 		table_fy = Orders.objects.filter(**lookup, Order_Received_Date__date__lte=date.today(), Order_Received_Date__date__gte=get_fy_date(), ds=1).order_by('-Order_Received_Date', 'Final_Status')
+
+# 	# initiall it will take financial year table_fy data **when no filter applies
+# 	# if any filter apply ut should take noram table
+# 	filter_data = OrdersFilter(request.GET, queryset=table_fy)
+# 	table_fy = filter_data.qs
+# 	table_data = table_fy
+# 	has_filter = any(field in request.GET for field in set(filter_data.get_fields()))
+	
+# 	if has_filter: #update filter data queyset
+# 		filter_data = OrdersFilter(request.GET, queryset=table)
+# 		table = filter_data.qs
+# 		table_data = table
+	
+# 	if status == 'Pipeline':
+# 		table_data = table_data.filter(Order_Type='Pipeline')
+# 	else:
+# 		table_data = table_data.filter(Order_Type='Confirmed')
+
+# 	total, closed, inprogress, pipeline, tc, cc, ic, pc = 0,0,0,0,0,0,0,0
+# 	billed, received, bills_count, t_received, t_billed, t_bills_count = 0, 0, 0, [], [], []
+# 	for x in table_data:
+# 		if x.Billing_Status:
+# 			bills = Invoices.objects.filter(Order=x, Is_Proforma=False, Lock_Status=1)
+# 			for y in bills:
+# 				billed = billed + y.Invoice_Amount
+# 				bills_count = bills_count + 1
+# 			t_billed.append(int(billed))
+# 			t_bills_count.append(bills_count)
+# 			billed=0
+# 			bills_count = 0
+# 		else:
+# 			t_billed.append(int(billed))
+# 			t_bills_count.append(bills_count)
+		
+# 		if x.Payment_Status:
+# 			pays = Payment_Status.objects.filter(Order_No=x)
+# 			for z in pays:
+# 				received = received + z.Received_Amount
+# 			t_received.append(int(received))
+# 			received=0
+# 		else:
+# 			t_received.append(int(received))
+
+# 	for x in table_data:
+# 		if x.Order_Type == 'Confirmed':
+# 			total, tc = int(total + x.Order_Value), tc+1
+# 		if x.Order_Type == 'Pipeline':
+# 			pipeline, pc = int(pipeline + x.Order_Value), pc+1
+# 		elif x.Final_Status == 1:
+# 			closed, cc = int(closed + x.Order_Value), cc+1
+# 		else:
+# 			inprogress, ic = int(inprogress + x.Order_Value), ic+1	
+# 	orders = {'total':total, 'closed':closed, 'inprogress':inprogress, 'pipeline':pipeline}
+# 	count = {'tc':tc, 'cc':cc, 'ic':ic, 'pc':pc}
+
+# 	tableset = zip(table_data, t_billed, t_received, t_bills_count)
+# 	return render(request, 'orders/OrdersList.html', {'tableset':tableset, 'table':table_data, 'filter_data':filter_data, 'pdata':pdata, 'status':status, 
+# 		'orders':orders, 'count':count})
+
 @login_required
 def Orders_List(request, proj, status):
 	pdata = projectname(request, proj)
@@ -132,30 +202,35 @@ def Orders_List(request, proj, status):
 	else:
 		table_data = table_data.filter(Order_Type='Confirmed')
 
-	total, closed, inprogress, pipeline, tc, cc, ic, pc = 0,0,0,0,0,0,0,0
+	total, closed, inprogress, pipeline, tc, cc, ic, pc, paid = 0,0,0,0,0,0,0,0,0
 	billed, received, bills_count, t_received, t_billed, t_bills_count = 0, 0, 0, [], [], []
 	for x in table_data:
 		if x.Billing_Status:
 			bills = Invoices.objects.filter(Order=x, Is_Proforma=False, Lock_Status=1)
 			for y in bills:
 				billed = billed + y.Invoice_Amount
+				paid = paid + (y.Invoice_Amount - y.Due_Amount)
 				bills_count = bills_count + 1
 			t_billed.append(int(billed))
 			t_bills_count.append(bills_count)
+			t_received.append(paid)
 			billed=0
-			bills_count = 0
+			paid = 0
+			bills_count = 0	
 		else:
 			t_billed.append(int(billed))
 			t_bills_count.append(bills_count)
+			t_received.append(paid)
 		
-		if x.Payment_Status:
-			pays = Payment_Status.objects.filter(Order_No=x)
-			for z in pays:
-				received = received + z.Received_Amount
-			t_received.append(int(received))
-			received=0
-		else:
-			t_received.append(int(received))
+		# if x.Payment_Status:
+		# 	pays = Payment_Status.objects.filter(Order_No=x)
+		# 	for z in pays:
+		# 		received = received + z.Received_Amount
+		# 	t_received.append(int(received))
+		# 	received=0
+		# else:
+		# 	t_received.append(int(received))
+
 
 	for x in table_data:
 		if x.Order_Type == 'Confirmed':
@@ -239,6 +314,7 @@ def Orders_Payments_Form(request, proj, rid):
 			p = form.save()
 			assign_paystatus_to_order(request, p.id, order.id)
 			adjust_payments_to_invoices(request, order.id)
+			adj_pay_to_all_inv(request, order.Customer_Name)
 			messages.success(request, "Payment Has Been Added")
 			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
 		else:
@@ -264,6 +340,7 @@ def Payments_Form(request, proj, fnc, rid):
 				order = Orders.objects.get(id=p.Order_No.id)
 				assign_paystatus_to_order(request, p.id, order.id)
 				adjust_payments_to_invoices(request, order.id)
+				adj_pay_to_all_inv(request, p.Order_No.Customer_Name)
 				messages.success(request, "Selected Payment Details Has Been Updated")
 				return redirect('/%s/paymentslist/Received/'%pdata['pj'])
 			else:
@@ -279,6 +356,7 @@ def Payments_Form(request, proj, fnc, rid):
 		getdata.delete()
 		order = Orders.objects.get(id=order.id)
 		adjust_payments_to_invoices(request, order.id)
+		adj_pay_to_all_inv(request, order.Customer_Name)
 		if not order.Payment_Status:
 			order.Payment_Status = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date').last()
 			order.save()
@@ -301,6 +379,7 @@ def Payments_Form(request, proj, fnc, rid):
 				assign_paystatus_to_order(request, p.id, p.Order_No.id)
 			order = Orders.objects.get(id=p.Order_No.id)
 			adjust_payments_to_invoices(request, order.id)
+			adj_pay_to_all_inv(request, p.Order_No.Customer_Name)
 			messages.success(request, "Payment Has Been Added")
 			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
 		else:
@@ -614,7 +693,7 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 				else:
 					inv = Invoices.objects.create(user=Account.objects.get(user=request.user), Order=order, Billing_From=CompanyDetails.objects.all().last(), 
 					Billing_To=order.Customer_Name, Shipping_To=order.Customer_Name, Bank_Details=Bank_Accounts.objects.all().last(), 
-					Invoice_Date=datetime.now(), Payment_Due_Date=date.today())
+					Invoice_Date=datetime.now(), Payment_Due_Date=date.today(), Payment_Terms = '50% Advance, Balance Against Dispatch')
 
 				get_invoice_number(request, last_invid, inv.id)
 				inv = Invoices.objects.get(id=inv.id)
@@ -625,11 +704,11 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 					for x in order_items:
 						itm = Billed_Items.objects.create(user=Account.objects.get(user=request.user), Invoice_No=inv, 
 							Add_Item=FG_Price.objects.get(Product_Name=order_items.Add_Item, Quantity=order_items.Quantity))
-						copy_itm = Copy_Billed_Items.objects.create(Invoice_No=inv, Item_Description=p.Add_Item.Product_Name.Product_Name, Quantity=itm.Quantity, UOM=order.Add_Item.Product_Name.UOM,
+						copy_itm = Copy_Billed_Items.objects.create(Invoice_No=inv, Item_Description=p.Add_Item.Product_Name.Product_Name, Item_Code=p.Add_Item.Product_Name.Item_Code, Quantity=itm.Quantity, UOM=order.Add_Item.Product_Name.UOM,
 							Unit_Price=order.Add_Item.Unit_Price, HSN_Code=order.Add_Item.HSN_Code, GST=order.Add_Item.GST, 
 							CESS=order.Add_Item.CESS, Other_Taxes=order.Add_Item.Other_Taxes, Item_From_Product=itm)
 				else:
-					order_items = None
+					order_items = None 
 				dtc = Sales_TC.objects.all().last()
 				if dtc:
 					tc = Terms_Conditions.objects.create(Invoice_No=inv, Terms_and_Condition1=dtc.Terms_and_Condition1 or None, Terms_and_Condition2=dtc.Terms_and_Condition2 or None, 
@@ -647,7 +726,7 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 	else:
 		tc = None
 	
-	items = Copy_Billed_Items.objects.filter(Invoice_No = inv)
+	items = Copy_Billed_Items.objects.filter(Invoice_No = inv).order_by('id')
 	amount, total_gst, total_amount, final_gst, final_without_tax_amount, final_with_tax_amount = [],[],[],[],[],[] 
 	for x in items:
 		amount.append(x.Quantity*x.Unit_Price)
@@ -661,10 +740,14 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 	
 	form_invoice = InvoicesForm(instance=get_object_or_404(Invoices, id=inv.id))
 	
+
 	if Delivery_Note.objects.filter(Invoice_No=inv).last():
 		form_deliverynote = DeliveryNoteForm(instance=get_object_or_404(Delivery_Note, Invoice_No=inv))
 	else:
-		form_deliverynote = DeliveryNoteForm()
+		lut_no = inv.Billing_From.LUT_No if inv.Billing_From.LUT_No != None else 0
+		# delivery_dtls = Delivery_Note.objects.create(Invoice_No=inv, LUT_No = lut_no)
+		form_deliverynote = DeliveryNoteForm(initial={'LUT_No': lut_no})
+		# form_deliverynote = DeliveryNoteForm(instance=get_object_or_404(Delivery_Note, Invoice_No=inv))
 
 	if Terms_Conditions.objects.filter(Invoice_No=inv).last():
 		form_tc = InvoiceTCForm(instance=get_object_or_404(Terms_Conditions, Invoice_No=inv))
@@ -676,11 +759,21 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 	else:
 		form_item = BilledItemsForm()
 
-	amount_in_words =  num2words(int(inv.Invoice_Amount), to='cardinal', lang='en_IN') if inv.Invoice_Amount else None 
-	len_words = len(amount_in_words) if inv.Invoice_Amount else 0
+	amount_in_words =  num2words(int(inv.Invoice_Amount), to='cardinal', lang='en_IN').replace(',', '').replace('-', ' ') if inv.Invoice_Amount else None 
+	tax_words = num2words(int(inv.GST_Amount), to='cardinal', lang='en_IN').replace(',', '').replace('-', ' ') if inv.Invoice_Amount else None
+
+	roundoff = inv.Invoice_Amount - int(inv.Invoice_Amount)
+	
+	copy_items = Copy_Billed_Items.objects.filter(Invoice_No=inv)
+	same_gst_perc = []
+	for x in copy_items: same_gst_perc.append(x.GST)
+	same_gst_perc = list(dict.fromkeys(same_gst_perc))
+	same_gst_perc = same_gst_perc[0] if len(same_gst_perc) == 1 else None
+	print(same_gst_perc)
+
 	return render(request, 'docformats/Invoice1.html', {'pdata':pdata, 'inv':inv, 'itm':itm, 'ss':ss, 'tc':tc, 'form_invoice':form_invoice,
-		'form_deliverynote':form_deliverynote, 'form_tc':form_tc, 'amount_in_words':amount_in_words, 'len_words':len_words, 
-		'item_id':itemid, 'form_item':form_item, 'fnc':fnc, 'msg':msg})
+		'form_deliverynote':form_deliverynote, 'form_tc':form_tc, 'amount_in_words':amount_in_words, 'tax_words':tax_words, 
+		'item_id':itemid, 'form_item':form_item, 'fnc':fnc, 'msg':msg, 'roundoff':roundoff, 'samegst':same_gst_perc})
 	
 @login_required
 def Edit_Invoice_Form(request, proj, fnc, invid):
@@ -731,6 +824,9 @@ def Edit_Invoice_Form(request, proj, fnc, invid):
 				msg = "Invoice Has Been Locked and Generated Successfully"
 			else:
 				msg = "Requested Details Has Been Updated Successfully"
+
+			# if p.Set_For_Returns == 0:
+			# 	msg = "Invoice Has Been Removed From GST Returns for this time Successfully"
 
 			url = url+msg+'/'	
 			return redirect(url)
@@ -808,7 +904,7 @@ def Invoice_Delivery_Note_Form(request, proj, fnc, invid, rid):
 	url = '/'+str(pdata['pj'])+'/invoice/edit/'+invid+'/'+str(inv_order_id)+'/itemid/'
 	if request.method == 'POST':
 		if fnc == 'edit':
-			form = DeliveryNoteForm(request.POST, request.FILES, instance=get_object_or_404(Delivery_Note, id=rid))
+			form = DeliveryNoteForm(request.POST, instance=get_object_or_404(Delivery_Note, id=rid))
 			if form.is_valid():
 				p= form.save()
 				msg = "Delivery Note Details Has Been Updated Successfully"
@@ -818,7 +914,7 @@ def Invoice_Delivery_Note_Form(request, proj, fnc, invid, rid):
 				url = url+msg+'/'
 				return redirect(url)
 		else:
-			form = DeliveryNoteForm(request.POST, request.FILES)
+			form = DeliveryNoteForm(request.POST)
 			if form.is_valid():
 				p= form.save()
 				p.Invoice_No = Invoices.objects.get(id=invid)
@@ -830,6 +926,7 @@ def Invoice_Delivery_Note_Form(request, proj, fnc, invid, rid):
 				url = url+msg+'/'
 				return redirect(url)
 			else:
+				return HttpResponse(form.errors)
 				url = url+msg+'/'
 				return redirect(url)
 	else:
@@ -890,6 +987,15 @@ def Invoices_List(request, proj, status):
 	form.fields["Order"].queryset = Orders.objects.filter(**lookup, Can_Gen_Invoice=1)
 	
 	lookup = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
+
+	# update invoices due dates
+	invoiceslist = Invoices.objects.filter(**lookup, Last_Update__lt=date.today(), Due_Amount__gt=0, Lock_Status=1, Is_Proforma=0)
+	if invoiceslist:
+		for x in invoiceslist:			
+			x.Last_Update = date.today()
+			x.save()
+			updateduedays(request, x.id)
+
 	table_inv = Invoices.objects.filter(**lookup).order_by('-Invoice_Date')
 	table_fy_inv = Invoices.objects.filter(**lookup, Invoice_Date__date__lte=date.today(), Invoice_Date__date__gte=get_fy_date()).order_by('-Invoice_Date')
 	
@@ -935,17 +1041,19 @@ def Invoices_List(request, proj, status):
 		tbc = tbc + len(inv)
 
 		for a in inv:
-			if a.Due_Amount == a.Invoice_Amount:
-				full_due_inv = full_due_inv + a.Invoice_Amount
-				fdc = fdc + 1
-			elif a.Due_Amount == 0:
-				full_clear_inv = full_clear_inv + a.Invoice_Amount
-				fcc = fcc + 1
-			elif a.Due_Amount > 0 and a.Due_Amount != a.Invoice_Amount:
-				part_due_inv = part_due_inv + a.Due_Amount
-				pdc = pdc + 1
-			else:
-				pass
+			if a.Due_Amount:
+				if a.Due_Amount == a.Invoice_Amount:
+					full_due_inv = full_due_inv + a.Invoice_Amount
+					fdc = fdc + 1
+				elif a.Due_Amount == 0:
+					full_clear_inv = full_clear_inv + a.Invoice_Amount
+					fcc = fcc + 1
+				elif a.Due_Amount > 0 and a.Due_Amount != a.Invoice_Amount:
+					part_due_inv = part_due_inv + a.Due_Amount
+					pdc = pdc + 1
+				else:
+					pass
+
 	count = {'fdc':fdc, 'pdc':pdc, 'fcc':fcc, 'tbc':tbc}
 	heads = {'full_due_inv':full_due_inv, 'part_due_inv':part_due_inv, 'full_clear_inv':full_clear_inv, 'total_billing':total_billing}
 	table_items  = zip(orders_list, invoices_list)	

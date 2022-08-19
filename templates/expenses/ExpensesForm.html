@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts %}
+ <script type="text/javascript">
+
+  window.onload = function () {
+    if ('{{fnc}}'=='edit') {
+        var selectBoxs = document.getElementById("id_Sales_Order");    
+        var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+        if (sv != '---------'){
+          document.getElementById('selectorder').style.display='block'}
+        else{ document.getElementById('selectorder').style.display='none' }
+    } }
+  
+  function changeFunc1() {
+    var selectBoxs = document.getElementById("id_Related_To");    
+    var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+    if (sv == 'Services'){
+      document.getElementById('selectorder').style.display='block'}
+    else{ document.getElementById('selectorder').style.display='none' }   
+    }
+</script>
+{% endblock %} <!-- For Scripts -->
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Expenses Claim Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                {% for field in form %}
+                  {% if field.label != 'Related To' and field.label != 'Sales Order' and field.label != 'Lock Status' %}
+                    <label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                  {% endif %}
+                  {% if field.label == 'Related To' %}
+                    <label for="id_Related_To" name="Related_To">Related Business{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label><div onchange="changeFunc1()">{{field}}</div>
+                  {% endif %}
+                  {% if field.label == 'Sales Order' %}
+                    <div style="display:none" id="selectorder"><label for="id_Sales_Order">Service Order Details</label>{{field}}</div> 
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}  
+              </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

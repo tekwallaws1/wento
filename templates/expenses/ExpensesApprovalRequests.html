@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %} 
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
+{% endblock %}  
+
+{% block scripts %} 
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS --> 
+  
+
+<script type="text/javascript">
+  function editexp(exp_id) {expid = exp_id;}
+
+  function alertpopup(){
+    // document.getElementById('exampleModal11').style.display = 'none';
+    $('.widget-content .message', function () {
+        swal({
+            title: 'Error Alert !',
+            text: 'Invoice generation not allowed due to all Invoices value under this order exceeding the order value',
+            padding: '2em'
+          })
+      }) 
+  }
+
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/{{pdata.pj}}/purchasesform/delete/'+poid+'/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+</script>
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+<div class="page-header">
+  <h3 class="page-title">{{pdata.pj.Short_Name}} - Expenses Cliams Requests</h3>
+</div>
+
+<div>
+  <div style="float:left">
+    <button type="button"  onclick="location.href='/{{pdata.pj}}/expensesform/create/1/'" class="btn btn-sm btn-danger" ht="claim expenses" >Claim Form</button>
+  </div>
+
+  <div style="float:right">
+    <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+    <button type="button" onclick="location.href='/{{pdata.pj}}/expenseslist/expid/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+  </div>
+  <div style="clear:both"></div>
+</div>
+
+<!--Filter/Serch History Form-->
+  <div id="addEventsModal" class="modal animated fadeIn"> 
+    <div class="modal-dialog modal-dialog-centered">                            
+      <!-- Modal content -->
+      <div class="card modal-content">
+        <div class="modal-body">
+          <span id="discard" data-dismiss="modal" class="close">&times;</span>
+          <div class="add-edit-event-box">
+            <div class="add-edit-event-content">
+              <div class="add-event-title edit-event-title"></div>
+                <h5 class="modal-title">Search Data by Applying Filter</h5>
+                  <form class="">
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Claimed By</label>
+                        {{ filter_data.form.Expenses__Submitted_By}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Related_Business</label>
+                        {{ filter_data.form.Expenses__Related_To}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Towards/Category</label>
+                        {{ filter_data.form.Category}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Sales PO</label>
+                        {{ filter_data.form.Expenses__Sales_Order}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Approved Expenses</label>
+                        {{ filter_data.form.Expenses__Approval_Status}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Approval Request To</label>
+                        {{ filter_data.form.Expenses__Approval_Request_To}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Amount Issued By</label>
+                        {{ filter_data.form.Expenses__Issued_By}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Clearing Status</label>
+                        {{ filter_data.form.Expenses__Clearing_Status}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                          <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
+                          <input type="date" name="from_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 ">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
+                          <input type="date" name="to_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="margin-top: -10px; font-weight: 200; color: black; font-size: 13px;">Expenses Amount From</label>
+                          <input style="margin-top: -10px;" name="from_value" class="form-control">
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="margin-top: -10px; font-weight: 200; color: black; font-size: 13px;">Expenses Amount To</label>
+                          <input style="margin-top: -10px;" name="to_value" class="form-control">
+                        </div>
+                      </div>
+                                     
+                      <div style="float:left; margin-left: 10px; " style="">
+                        <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                        <!-- <button id="add-e" class="btn">Add Task</button> -->
+                        <button id="edit-event" class="btn"></button>
+                      </div>
+                    </div>   
+                  </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="total requests towards you" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Claims</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{req.total}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <a ht="approved requests by you" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Claims - Category Wise</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">
+                <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{req.approved}}</div>
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="pending requests" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Claims - Status (Issued or Due)</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">
+                <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{req.pending}}</div>
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+  </div>
+
+<!-- Expenses List -->
+<div class="card">
+  <div class="card-body2">
+    <div class="table-responsive mb-4 mt-4">
+    <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Reference No</th>
+          <th>Submitted By</th>
+          <th>Purpose</th>
+          <th>Amount</th>
+          <th>Related Business</th>
+          <th>Claim Status</th>
+          <th>Authorisation</th> 
+        </tr>
+      </thead>
+      <tbody>
+        {% for x, y in data %}
+          <tr>
+        
+            <td >{{forloop.counter}}{% if x.Balance_Amount == 0 %}#{% endif %}</td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="open expenses claim form" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {{x.Reference_No}}
+                  {% if x.From_Date == x.To_Date or x.To_Date == None %}
+                    <br><span style="color:#0d65e0">{{x.From_Date|date:'d M Y'}}</span>
+                  {% else %}
+                    <br>from <span style="color:#0d65e0">{{x.From_Date|date:'d M y'}}</span>
+                    <br>to <span style="color:#0d65e0">&emsp;&nbsp;{{x.To_Date|date:'d M y'}}</span>
+                  {% endif %}
+                </a>
+              </td>
+
+              <td style="white-space:normal; width: 19%;">
+                <a class="ahr" ht="open expenses claim form" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {{x.Submitted_By.Name}}
+                  {% if x.Submitted_By.Employee_Id %}<br>{{x.Submitted_By.Employee_Id}}{% endif %}
+                </a>
+              </td>
+
+              <td style="white-space:normal; width: 19%;">
+                <a class="ahr" ht="open expenses claim form" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {{x.Purpose}}
+                </a>
+              </td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="open expenses claim form" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">                                  
+                  {% if x.Total_Amount %}₹ {{x.Total_Amount|floatformat:0|intcomma}}{% endif %}
+                </a>                  
+              </td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="open expenses claim form" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {% if x.Related_To == 'Sales' %}
+                    <span style="color:#0d65e0">Sales</span>
+                    <br>{{x.Sales_Order.PO_No}}
+                    <br>{% for p in y %}{% if forloop.counter == 1 %}{% else %}, {% endif %}{{p}}{% endfor %}
+                  {% else %}                                  
+                    <span style="color:#0d65e0">{{x.Related_To}}</span>
+                    <br>{% for p in y %}{% if forloop.counter == 1 %}{% else %}, {% endif %}{{p}}{% endfor %}
+                  {% endif %}
+                </a>                  
+              </td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="open expenses claim form" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {% if x.Approval_Status == 1 %}
+                    {% if x.Balance_Amount == 0 %}
+                      <span class="hlt2">Amount Settled</span>
+                    {% elif x.Balance_Amount > 0 and x.Balance_Amount != x.Total_Amount %}
+                      <span class="hlt3">Due Amount: </span> ₹ {{x.Balance_Amount|floatformat:0|intcomma}}
+                      <span class="hlt3">Over Due Days: </span>{{x.Over_Due_Days}}
+                    {% elif x.Balance_Amount < 0 %}
+                      <span class="hlt2">Current Amount Settled</span>
+                      <span class="hlt5">Advance in Hand: </span> ₹ {{x.Balance_Amount|floatformat:0|intcomma}}
+                    {% else %}
+                    {% endif %}
+                  {% else %}
+                    <span class="hlt3">Approval Pending</span>
+                  {% endif %}
+                </a>
+              </td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="open expenses claim form" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {% if x.Approval_Status == 1 %}
+                    <span class="hlt5">Approved By: </span>{{x.Approval_Request_To.Nick_Name}}
+                  {% else %}
+                    <span class="hlt3">Approval Pending</span>
+                  {% endif %}
+                  {% if x.Issued_Status == 1 %}
+                    <span class="hlt5">Issued By: </span>{{x.Issued_By.Nick_Name}}
+                  {% endif %}
+                </a>
+              </td>
+          </tr>
+      {% endfor %} 
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+ 

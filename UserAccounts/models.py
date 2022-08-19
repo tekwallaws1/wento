@@ -6,6 +6,7 @@ from django.conf import settings
 class Account(models.Model):
 	Name					= models.CharField(max_length=30, null=True, help_text='full name of the employee including sir name')
 	Nick_Name				= models.CharField(max_length=10, null=True, help_text='short calling name or nick name')
+	Gender                  = models.CharField(max_length=10, null=True, blank=True, choices=(('Male', 'Male'),('Female','Female')))
 	Phone_Number 			= models.CharField(max_length=10, null=True, help_text='contact number')
 	Designation 			= models.CharField(max_length=100, null=True, blank=True, help_text='leave as blank if not available')
 	Department 				= models.CharField(max_length=100, null=True, blank=True, help_text='leave as blank if not available')
@@ -18,6 +19,10 @@ class Account(models.Model):
 	user 					= models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL)
 	Status					= models.BooleanField(default=True, help_text='unmark if he is not active/leave organisation')
 	ds						= models.BooleanField(default=True)
+	Sr_No					= models.IntegerField(blank=True, unique=True, null=True, help_text='employee id only serial number')
+
+	class Meta:
+		ordering = ['Sr_No']
 
 	def save(self, *args, **kwargs):
 	    try:
@@ -29,7 +34,7 @@ class Account(models.Model):
 	    super().save(*args, **kwargs)
 
 	def __str__(self):
-		return str(self.Employee_Id)+'-'+str(self.Name)
+		return str(self.Name)+'-'+str(self.Employee_Id)
 
 class EMP_More_Dtls(models.Model):
 	Employee 			= models.ForeignKey(Account, null=True, on_delete=models.CASCADE)
@@ -92,6 +97,47 @@ class Permissions(models.Model):
 	Create					= models.BooleanField(default=False, help_text='Create Permissions for Selected Dashboards')
 	Edit					= models.BooleanField(default=False, help_text='Edit Permissions for Selected Dashboards')
 	Delete					= models.BooleanField(default=False, help_text='Delete Permissions for Selected Dashboards')
+	# Only_Expenses			= models.BooleanField(default=False, help_text='Give perrmission to only expenses entry and see')
 
 	def __str__(self):
 		return str(self.user.username)+'-'+str(self.Admin)
+
+class Empl_Salaries(models.Model):
+	Employ_Name 			= models.ForeignKey(Account, null=True, unique=True, on_delete=models.SET_NULL)
+	Gross_Salary 			= models.IntegerField( null=True, help_text='gross salary or CTC')
+	Basic		 			= models.IntegerField( null=True, help_text='basic salary as per govt norms')
+	HRA						= models.FloatField(max_length=10, null=True, blank=True, help_text='house rent allowance, 40% of basic')
+	Other_Allowances 		= models.FloatField(max_length=10, null=True, blank=True, help_text='other allowances')
+	Net_Salary 				= models.IntegerField(null=True, blank=True, help_text='you can give it or we will calculate')
+	PF_Amount 				= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='total 4% of gross, 0.75% employee, 3.25% employer')
+	ESI_Amount 				= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='total 24% of basic, 12% employee, 12% employer')
+	Professional_Tax 		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PT deductions if eligible, <15K 0, 15-20K 150, >15K 200 of gross')
+	UAN_Number				= models.CharField(max_length=12, null=True, blank=True, help_text='PF/UAN number if eligible')
+	ESI_Number				= models.CharField(max_length=10, null=True, blank=True, help_text='ESI number if eligible')
+	PAN_Number				= models.CharField(max_length=10, null=True, blank=True, help_text='PAN card number')
+	Aadhaar_Number			= models.CharField(max_length=12, null=True, blank=True, help_text='PAN card number')
+	PF_Eligibility			= models.BooleanField(default=True)
+	Is_Providing_PF_Employer_Share	= models.BooleanField(default=True)
+	ESI_Eligibility			= models.BooleanField(default=True)
+	OT_Eligibility			= models.BooleanField(default=False)
+	Effective_From 			= models.DateField(null=True, blank=True, help_text='salary effective from')
+	Next_Revision_Date 		= models.DateField(null=True, blank=True, help_text='salary next revision date, if leave it as blank, it will take a year after date')
+	Revision_Status			= models.BooleanField(default=False, help_text='mark if revised salary in his employement history')
+	Status					= models.BooleanField(default=True)
+
+	def __str__(self):
+		return str(self.Employ_Name)+'-'+str(self.Gross_Salary)
+
+class Empl_Salary_Revisions(models.Model):
+	Employ_Name 			= models.ForeignKey(Account, null=True, on_delete=models.SET_NULL)
+	Previous_Date 			= models.DateField(null=True, blank=True, help_text='salary revision date')
+	Effective_From 			= models.DateField(null=True, help_text='salary revision effective from')
+	Previous_Gross			= models.IntegerField(null=True, blank=True, help_text='revised gross salary or CTC')
+	Revised_Gross 			= models.IntegerField(null=True, help_text='revised gross salary or CTC')
+	Previous_Basic			= models.IntegerField(null=True, blank=True, help_text='revised basic salary if revised, otherwise it will take previous basic')
+	Revised_Basic			= models.IntegerField(null=True, blank=True, help_text='revised basic salary if revised, otherwise it will take previous basic')
+	Next_Revision_Date 		= models.DateField(null=True, blank=True, help_text='salary next revision date, if leave it as blank, it will take a year after date')
+	Status					= models.BooleanField(default=True, help_text='active status')
+
+	def __str__(self):
+		return str(self.Employ_Name)+'-'+str(self.Effective_From)+'-'+str(self.Revised_Gross)

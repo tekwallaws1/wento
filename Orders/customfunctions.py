@@ -106,6 +106,32 @@ def adjust_payments_to_invoices(request, orderid):
 				# Breaking for and while loops
 		return 4
 
+def adj_pay_to_all_inv(request, customer):
+	pays = Payment_Status.objects.filter(Order_No__Customer_Name=customer).order_by('Payment_Date')
+	pays_total = sum(pays.values_list('Received_Amount', flat=True))
+
+	invs = Invoices.objects.filter(Order__Customer_Name=customer).order_by('Invoice_Date')
+	for x in invs:
+		if pays_total >= x.Invoice_Amount:
+			pays_total = pays_total - x.Invoice_Amount
+			x.Due_Amount = 0
+			x.Final_Payment_Status = 1
+			# x.Payment_Cleared_Date = pays.last().Payment_Date
+			# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
+			# x.Payment_Status = pays.last()
+			x.save()
+		else:
+			if pays_total > 0:
+				x.Due_Amount = x.Invoice_Amount - pays_total
+				# x.Payment_Status = pays.last()
+				# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
+				pays_total = 0
+				x.save()
+			else:
+				x.Due_Amount = x.Invoice_Amount
+				x.save()
+
+
 def workstatus(request, workid, orderid):
 	fd = Work_Status.objects.get(id=workid)
 	fd.user = Account.objects.get(user=request.user)
@@ -146,8 +172,9 @@ def get_invoice_number(request, last_invid, invid):
 	else:
 		invno1 = fd.Invoice_No_1
 	
-	fd.Invoice_No_Format = No_Formats.objects.filter(No_Format_Related_To='Invoice').last()
-	fd.Invoice_No = str(fd.Invoice_No_Format.No_Format)+str(fd.FY)+'/'+str(invno1)
+	# fd.Invoice_No_Format = No_Formats.objects.filter(No_Format_Related_To='Invoice').last()
+	# fd.Invoice_No = str(fd.Invoice_No_Format.No_Format)+str(fd.FY)+'/'+str(invno1)
+	fd.Invoice_No = str(fd.FY)+'/'+str(invno1)
 	fd.save()
 
 def inv_amoumt_update(request, invid):
@@ -177,7 +204,7 @@ def inv_amount_exceed(request, rid):
 	invs = Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0)
 	invs_sum=invs.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0 if invs != None else 0
 	invs_sum = invs_sum
-	if invs_sum >= order.Order_Value+10 or invs_sum >= order.Order_Value-10:
+	if invs_sum >= order.Order_Value+10:
 		# order.Can_Gen_Invoice=0
 		order.save()
 		return 1
@@ -200,7 +227,7 @@ def inv_amount_exceed_manual(request, rid, invamount):
 		order.save()
 		return 0
 
-def postform(request, rid, invid, fnc):
+def postform(request, rid, invid, fnc): 
 	if request.method == 'POST':
 		form = ManualInvoicesForm(request.POST, request.FILES) if fnc == 'create_manually' else ManualInvoicesForm(request.POST, request.FILES, instance=get_object_or_404(Invoices, id=invid))
 		if form.is_valid():

@@ -18,6 +18,8 @@ urlpatterns = [
 
     path('<proj>/companyform/<fnc>/<rid>/', views.Company_Form, name='companyform'),
     path('<proj>/companylist/', views.Companies_List, name='companylist'),
+
+    path('<proj>/gst/<cat>/<months>/', views.GST_Returns, name='gst'),
  
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
 

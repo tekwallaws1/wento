@@ -49,7 +49,21 @@ class VendorPaymentsFilter(django_filters.FilterSet):
 
 	class Meta:
 		model 	= Vendor_Payment_Status
-		fields = ['user']
+		fields = ['user', 'Invoice_No__Vendor']
+
+class VendorPaymentsFilter1(django_filters.FilterSet):
+	def __init__(self, *args, **kwargs):
+  		super().__init__(*args, **kwargs)
+  		for field in self.form.fields:
+  			self.form.fields[field].widget.attrs.update({'class': 'form-control'})
+	from_date 	= DateFilter(field_name='Payment_Date', lookup_expr='gte')
+	to_date 	= DateFilter(field_name='Payment_Date', lookup_expr='lte')
+	from_value 	= NumberFilter(field_name='Paid_Amount', lookup_expr='gte')
+	to_value 	= NumberFilter(field_name='Paid_Amount', lookup_expr='lte')
+
+	class Meta:
+		model 	= Vendor_Payment_Status
+		fields = ['user', 'PO_No__Vendor']
 
 
 class ProductsFilter(django_filters.FilterSet):

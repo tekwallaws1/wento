@@ -31,5 +31,12 @@ urlpatterns = [
 
     path('<proj>/podeliveryform/<fnc>/<poid>/<did>/', views.PO_Delivery_Form, name='podeliveryform'),
 
+    path('<proj>/quotationslist/<status>/', views.Quotation_List, name='quotationslist'),
+    path('<proj>/quotationsform/<fnc>/<qid>/', views.Quotation_Form, name='quotesform'),
+    path('<proj>/genquote/<fnc>/<qid>/<itemid>/<msg>/', views.Gen_Quotation, name='genquote'),
+    path('<proj>/quote_edit/<fnc>/<qid>/', views.Edit_Quotation_Form, name='quote_edit'),
+    path('<proj>/<fnc>/quoteitem/<qid>/<itemid>/', views.Add_Quotation_Item_Form, name='quoteitem'),
+    path('<proj>/<fnc>/quote_tc/<qid>/', views.Quotation_TC_Form, name='quote_tc'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
  

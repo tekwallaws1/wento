@@ -59,7 +59,7 @@ class PermissionsForm(forms.ModelForm):
 class EmployesForm(forms.ModelForm):
     class Meta:
         model = Account
-        exclude = ['user','Support','ds', 'Status']    
+        exclude = ['user','Support','ds', 'Status', 'Sr_No']    
         widgets = {'Joining_Date': widgets.DateInput(attrs={'type': 'date'})}
 
     def __init__(self, *args, **kwargs):
@@ -73,7 +73,7 @@ class EmployesForm(forms.ModelForm):
 class EmployesForm1(forms.ModelForm):
     class Meta:
         model = Account
-        exclude = ['user','Support','ds', 'Status']    
+        exclude = ['user','Support','ds', 'Sr_No']    
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -130,6 +130,34 @@ class EmployesPrsnlForm1(forms.ModelForm):
     class Meta:
         model = EMP_More_Dtls
         exclude = ['Employee']    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for _, value in self.fields.items():
+            value.widget.attrs['placeholder'] = value.help_text
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control mb-4'
+            })
+
+class EmploySalariesForm(forms.ModelForm):
+    class Meta:
+        model = Empl_Salaries
+        exclude = ['HRA','Other_Allowances','Status', 'PF_Amount','ESI_Amount','Professional_Tax','Revision_Status','Net_Salary']    
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for _, value in self.fields.items():
+            value.widget.attrs['placeholder'] = value.help_text
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control mb-4'
+            })
+
+class EmplSalRevisionsForm(forms.ModelForm):
+    class Meta:
+        model = Empl_Salary_Revisions
+        exclude = ['Previous_Date','Previous_Gross','Previous_Basic', 'Status']   
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

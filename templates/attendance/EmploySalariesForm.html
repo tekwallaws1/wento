@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts %}
+ <script type="text/javascript">
+
+  window.onload = function () {
+    if ('{{fnc}}'=='edit') {
+        var sv1 = $("#id_Revision_Date").val();
+        if (sv1 == None ){
+          document.getElementById('nextdate').style.display='block';}
+        else{ document.getElementById('nextdate').style.display='none';}        
+      } 
+  }
+</script>
+{% endblock %} <!-- For Scripts -->
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Employ Salary Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                {% for field in form %}
+                  {% if field.label != 'PF Eligibility' and field.label != 'ESI Eligibility' and field.label != 'OT Eligibility' and field.label != 'Next Revision Date' and field.label != 'Is Providing PF Employer Share' and field.label != 'Effective From' %}
+                    <label>{{ field.label }}{% if field.field.required %}<span style="color: red">**</span> {% endif %}</label>{{ field}}
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}
+                <div class="form-group start-date">
+                  <label>Effective From (if leave blank it will take today date)</label>
+                  {% if fnc == 'edit' %}
+                    {{form.Effective_From}}
+                  {% else %}
+                    <input type="date" name="Effective_From" class="form-control">
+                  {% endif %}
+                </div>
+                <div class="form-group start-date" style="display:block" id="nextdate">
+                  <label>Next Revision Date (if leave as blank it will take one year from date of joining)</label>
+                  {% if fnc == 'edit' %}
+                    {{form.Next_Revision_Date}}
+                  {% else %}
+                    <input type="date" name="Next_Revision_Date" class="form-control">
+                  {% endif %}
+                </div>
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label">{{ form.PF_Eligibility }}unmark if employ not eligible for PF</label>
+                </div>
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label">{{ form.Is_Providing_PF_Employer_Share }}unmark if employer not providing PF share</label>
+                </div> 
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label">{{ form.ESI_Eligibility }}unmark if employ not eligible for ESI</label>
+                </div>
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label">{{ form.OT_Eligibility }}mark if employ eligible for OT</label>
+                </div> 
+              </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

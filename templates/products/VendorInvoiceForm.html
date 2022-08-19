@@ -3,22 +3,45 @@
 
 {% block css %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
 {% endblock %} 
 
 {% block scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    
-    
-    <script>
-    // This code activates flatpickr on fields with the 'datetimefield' class when the document has loaded
-    window.addEventListener("DOMContentLoaded", function () {
-        flatpickr(".datetimefield", {
-            enableTime: true,
-            enableSeconds: true,
-            dateFormat: "Y-m-d H:i:S",
-        });
-    });
+ <script type="text/javascript">
+
+  window.onload = function () {
+    if ('{{fnc}}'=='edit') {
+        var selectBoxs = document.getElementById("id_PO_No");    
+        var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+        if (sv != '---------'){document.getElementById('selectpo').style.display='block'}
+        else { document.getElementById('selectpo').style.display='none'};
+      
+        var selectBoxs1 = document.getElementById("id_Vendor");    
+        var sv1 = selectBoxs1.options[selectBoxs1.selectedIndex].text;
+        if (sv1 != '---------'){document.getElementById('invdetails').style.display='block';document.getElementById('vendor').style.display='block';document.getElementById('selectpo').style.display='none'}
+        else{document.getElementById('invdetails').style.display='none';document.getElementById('vendor').style.display='none';};   
+      } 
+    }
+  
+  function changeFunc1() {
+    var selectBoxs = document.getElementById("id_Against");    
+    var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+    if (sv == 'Against Issued PO'){
+      document.getElementById('selectpo').style.display='block';
+      document.getElementById('invdetails').style.display='none';
+      document.getElementById('vendor').style.display='none';
+    }
+    else{ document.getElementById('selectpo').style.display='none' }
+
+    var selectBoxs1 = document.getElementById("id_Against"); 
+    var sv1 = selectBoxs1.options[selectBoxs1.selectedIndex].text;
+    if (sv1 == 'No PO'){
+      document.getElementById('invdetails').style.display='block';
+      document.getElementById('vendor').style.display='block';
+      document.getElementById('selectpo').style.display='none';
+    }
+      else {document.getElementById('invdetails').style.display='none'};   
+    }
+
 </script>
 {% endblock %} <!-- For Scripts -->
 
@@ -35,8 +58,24 @@
               {% csrf_token %}
               <div class="form-group">
                 {% for field in form %}
-                  {% if field.label != 'Attach' %}
+                  {% if field.label != 'Attach' and field.label != 'Against' and field.label != 'PO No' and field.label != 'Invoice Description' and field.label != 'Vendor' %}
                     <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                  {% endif %}
+                  {% if field.label == 'Against' %}
+                    <label for="id_Against" name="Against">Invoice Against{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label><div onchange="changeFunc1()">{{field}}</div>
+                  {% endif %}
+                  {% if field.label == 'PO No' %}
+                    <div style="display:none" id="selectpo"><label for="id_PO_No">PO Details</label>{{field}}</div>
+                  {% endif %}
+                  {% if field.label == 'Vendor' %}
+                    <div style="display:none" id="vendor">
+                     <label for="id_Vendor" name='Vendor'>Vendor</label>{{field}} 
+                    </div>
+                  {% endif %}
+                  {% if field.label == 'Invoice Description' %}
+                    <div style="display:none" id="invdetails">
+                     <label for="id_Invoice_Description" name='Invoice_Description'>Invoice Description</label>{{field}} 
+                    </div>
                   {% endif %}
                   {% if field.label ==  'Attach' %}
                     <label style="color:#32a852;">attach below if any invoice copy</label>{{field}} 

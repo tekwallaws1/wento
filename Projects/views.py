@@ -10,6 +10,8 @@ from datetime import date, datetime, timedelta
 from django.db.models import Sum, Avg, Count
 from django.contrib.auth.decorators import login_required
 from UserAccounts.models import *
+from Orders.models import *
+from Products.models import *
 from .basedata import projectname
 
 
@@ -266,4 +268,46 @@ def Companies_List(request, proj):
 	pdata = projectname(request, proj)
 	table = CompanyDetails.objects.filter(ds=1)
 	return render(request, 'projects/CompanyDetails.html', {'table':table, 'pdata':pdata})
+
+
+@login_required
+def GST_Returns(request, proj, cat, months):
+	pdata = projectname(request, proj)
+	mnth = date.today() if months == 'month' else (datetime.strptime(months, '%Y-%m'))
+	months = mnth
+	mnth = months.month
+
+	inputgst  = Vendor_Invoices.objects.filter(Invoice_Date__month=mnth, GST_Amount__isnull=False)
+	outputgst = Invoices.objects.filter(Invoice_Date__month=mnth, Lock_Status=1, Set_For_Returns=1, GST_Amount__isnull=False)
+
+	Ival, Oval, Igst, Ogst, Ocgst, Osgst, Oigst = [],[],[],[],[],[],[]
+	ic, oc, It_gst, Ot_gst, Ot_cgst, Ot_sgst, Ot_igst = 0,0,0,0,0,0,0
+
+	ic, oc = len(inputgst) or 0, len(outputgst) or 0
+	# It_gst, Ot_gst = sum(inputgst.values_list('GST_Amount', flat=True)) or 0, sum(outputgst.values_list('GST_Amount', flat=True)) or 0
+	
+	for x in inputgst:
+		Igst.append(x.GST_Amount)
+		Ival.append(x.Invoice_Amount-x.GST_Amount)
+	for x in outputgst:
+		Oval.append(x.Invoice_Amount-x.GST_Amount)
+		if x.Billing_To.State == x.Billing_From.State:
+			Ogst.append(x.GST_Amount)
+			Ocgst.append(x.GST_Amount/2)
+			Osgst.append(x.GST_Amount/2)
+			Oigst.append(0)
+		else:
+			Ogst.append(x.GST_Amount)
+			Ocgst.append(0)
+			Osgst.append(0)
+			Oigst.append(x.GST_Amount)
+
+	It_gst, Ot_gst, Ot_cgst, Ot_sgst, Ot_igst = sum(Igst), sum(Ogst), sum(Ocgst), sum(Osgst), sum(Oigst)
+	input_gst = zip(inputgst, Ival, Igst)
+	output_gst = zip(outputgst, Oval, Ogst, Ocgst, Osgst, Oigst)
+	gstcredit = sum(Vendor_Invoices.objects.filter(Invoice_Date__month__lte=mnth, GST_Amount__isnull=False).values_list('GST_Amount', flat=True)) - sum(Invoices.objects.filter(Lock_Status=1, Set_For_Returns=1, Invoice_Date__month__lte=mnth, GST_Amount__isnull=False).values_list('GST_Amount', flat=True))
+	gstcredit = 0 if gstcredit < 0 else gstcredit
+	gst = {'ic':ic, 'oc':oc, 'It_gst':It_gst, 'Ot_gst':Ot_gst, 'Ot_cgst':Ot_cgst, 'Ot_sgst':Ot_sgst, 'Ot_igst':Ot_igst, 'gstcredit':gstcredit}
+
+	return render(request, 'projects/gst.html', {'pdata':pdata, 'input_gst':input_gst, 'output_gst':output_gst, 'gst':gst, 'cat':cat, 'month':months})
 

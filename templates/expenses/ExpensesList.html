@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %} 
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+{% endblock %}  
+
+{% block scripts %} 
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS --> 
+  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
+  <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
+  <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script>
+
+<script type="text/javascript">
+  function editexp(exp_id) {expid = exp_id;}
+
+  function alertpopup(){
+    // document.getElementById('exampleModal11').style.display = 'none';
+    $('.widget-content .message', function () {
+        swal({
+            title: 'Error Alert !',
+            text: 'Invoice generation not allowed due to all Invoices value under this order exceeding the order value',
+            padding: '2em'
+          })
+      }) 
+  }
+
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/{{pdata.pj}}/purchasesform/delete/'+poid+'/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+</script>
+
+<!-- Data Tables Export Script -->
+<script src="{% static 'js/datatablesexport.js' %}"></script>
+<script type="text/javascript">
+  // Datatables Excel Formating Before Export//
+  var customexcel = function( xlsx ) {
+    var sheet = xlsx.xl.worksheets['sheet1.xml'];
+    var style = xlsx.xl['styles.xml'];
+    var tagName = style.getElementsByTagName('sz');
+    for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+    $('row:first c', sheet).attr('s', '2')
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );$('row c[r^="F"]', sheet).attr( 's', '55' );  $('row c[r^="H"]', sheet).attr( 's', '55' ); $('row c[r^="H"]', sheet).attr( 's', '55' );//wrap text
+    var col = $('col', sheet);
+    // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
+    $(col[1]).attr('width', 15); $(col[2]).attr('width', 25); $(col[3]).attr('width', 35); $(col[4]).attr('width', 15); $(col[5]).attr('width', 20); $(col[6]).attr('width', 15); $(col[7]).attr('width', 20);}; 
+  //--End--//
+
+            
+  var cl = [0,  1, 2, 3, 4, 5, 6, 7]
+  var wdths = ['4%', '10%', '17%', '23%', '8%', '14%', '10%', '14%'];
+  
+   var msgTop = 'Total Claims {{claims.total|floatformat:0|intcomma}}, Towards: {% for x in claims.against %}{% if forloop.counter != 1 %} | {% endif %}{{x}}  {{y|floatformat:0|intcomma}}{% endfor %}, Paid Claims {{claims.paid|floatformat:0|intcomma}}, Due Claims {{claims.due|floatformat:0|intcomma}}'
+    var title = 'Expenses Claims List-{{pdata.pj}}';
+    var filename = 'ExpensesClaims-{{pdata.pj}}'
+    var ort = 'landscape'
+
+  // Datatables Customise PDF Before Export//
+  var pdf_custom = function ( doc ) {
+    doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+    doc.pageMargins = [40,60,20,30];
+    // doc.content[1].margin = [ 0, 50, 0, 50 ]
+    doc['footer']= footer1;
+    doc['header']= header1;
+    var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+    objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+    objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+    objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+    // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+  doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+  {text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+  };
+
+  //--End--//
+</script>
+
+<!-- Data Tables Export Script -->
+<script type="text/javascript">
+  $('#html5-extension').DataTable( {
+  autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 100,
+  buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
+      
+    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
+
+    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
+
+    {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
+</script>
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+<div class="page-header">
+  {% if apr != 'approvalreq' %}
+    <h3 class="page-title">{{pdata.pj.Short_Name}} - Expenses Cliams</h3>
+  {% endif %}
+</div>
+
+
+<div>
+  <div style="float:left">
+    {% if apr != 'approvalreq' %}
+      <button type="button"  onclick="location.href='/{{pdata.pj}}/expensesform/create/1/'" class="btn btn-sm btn-danger" ht="claim expenses" >Claim Form</button>
+    {% else %}
+      <h3 class="page-title">{{pdata.pj.Short_Name}} - Expenses Approval Requests to {{request.user.first_name}}</h3>
+    {% endif %}
+  </div>
+
+  <div style="float:right">
+    <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+    <button type="button" onclick="location.href='/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+  </div>
+  <div style="clear:both"></div>
+</div>
+
+{% if apr != 'approvalreq' %}
+<!--Filter/Serch History Form-->
+  <div id="addEventsModal" class="modal animated fadeIn"> 
+    <div class="modal-dialog modal-dialog-centered">                            
+      <!-- Modal content -->
+      <div class="card modal-content">
+        <div class="modal-body">
+          <span id="discard" data-dismiss="modal" class="close">&times;</span>
+          <div class="add-edit-event-box">
+            <div class="add-edit-event-content">
+              <div class="add-event-title edit-event-title"></div>
+                <h5 class="modal-title">Search Data by Applying Filter</h5>
+                  <form class="">
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Claimed By</label>
+                        {{ filter_data.form.Expenses__Submitted_By}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Related_Business</label>
+                        {{ filter_data.form.Expenses__Related_To}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Towards/Category</label>
+                        {{ filter_data.form.Category}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Sales PO</label>
+                        {{ filter_data.form.Expenses__Sales_Order}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Approved Expenses</label>
+                        {{ filter_data.form.Expenses__Approval_Status}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Approval Request To</label>
+                        {{ filter_data.form.Expenses__Approval_Request_To}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Amount Issued By</label>
+                        {{ filter_data.form.Expenses__Issued_By}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mb-2">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Clearing Status</label>
+                        {{ filter_data.form.Expenses__Clearing_Status}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                          <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
+                          <input type="date" name="from_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 ">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
+                          <input type="date" name="to_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="margin-top: -10px; font-weight: 200; color: black; font-size: 13px;">Expenses Amount From</label>
+                          <input style="margin-top: -10px;" name="from_value" class="form-control">
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="margin-top: -10px; font-weight: 200; color: black; font-size: 13px;">Expenses Amount To</label>
+                          <input style="margin-top: -10px;" name="to_value" class="form-control">
+                        </div>
+                      </div>
+                                     
+                      <div style="float:left; margin-left: 10px; " style="">
+                        <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                        <!-- <button id="add-e" class="btn">Add Task</button> -->
+                        <button id="edit-event" class="btn"></button>
+                      </div>
+                    </div>   
+                  </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}
+
+{% if apr != 'approvalreq' %}
+  <div class="row">
+    <div class="col-xl-2 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="all claims - cleared and due" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Claims</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{claims.total|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-7 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <a ht="claims towards or category wise" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Claims - Category Wise</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">
+                {% for x, y in claims.against %}
+                  {% if forloop.counter != 1 %} <span style="color:blue; font-weight:bold">|</span> {% endif %}
+                  {{x}}  ₹ {{y|floatformat:0|intcomma}}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="cleared and due claims individually" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Claims - Status (Issued or Due)</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">
+                Issued ₹ {{claims.paid|floatformat:0|intcomma}}
+                 <span style="color:blue; font-weight:bold">|</span> Due  ₹ {{claims.due|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div class="row">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="total requests" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Requests - {{req.t_req}}</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{claims.total|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <a ht="approved requests by you" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Approved Requests - {{req.apr_req}}</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">
+                <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{req.apr_req_val|floatformat:0|intcomma}}</div>
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="pending requests" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Pending Requests - {{req.p_req}}</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{req.p_req_val|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+  </div>
+{% endif %} 
+
+<!-- Expenses List -->
+<div class="card">
+  <div class="card-body2">
+    <div class="table-responsive mb-4 mt-4">
+    <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Reference No</th>
+          <th>Submitted By</th>
+          <th>Purpose</th>
+          <th>Amount</th>
+          <th>Related Business</th>
+          <th>Claim Status</th>
+          <th>Authorisation</th> 
+        </tr>
+      </thead>
+      <tbody>
+        {% for x, y in data %}
+          <tr>
+        
+            <td >{{forloop.counter}}{% if x.Total_Amount and x.Balance_Amount == 0 %}#{% endif %}</td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="{% if apr != 'approvalreq' %}open expenses claim form{% else %}approve claim here by click and approve{% endif %}" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {{x.Reference_No}}
+                  {% if x.From_Date == x.To_Date or x.To_Date == None %}
+                    <br><span style="color:#0d65e0">{{x.From_Date|date:'d M Y'}}</span>
+                  {% else %}
+                    <br>from <span style="color:#0d65e0">{{x.From_Date|date:'d M y'}}</span>
+                    <br>to <span style="color:#0d65e0">&emsp;&nbsp;{{x.To_Date|date:'d M y'}}</span>
+                  {% endif %}
+                </a>
+              </td>
+
+              <td style="white-space:normal; width: 19%;">
+                <a class="ahr" ht="{% if apr != 'approvalreq' %}open expenses claim form{% else %}approve claim here by click and approve{% endif %}" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {{x.Submitted_By.Name}}
+                  {% if x.Submitted_By.Employee_Id %}<br>{{x.Submitted_By.Employee_Id}}{% endif %}
+                </a>
+                <br>Submitted On
+                <br>{{x.Submitted_Date|date:'d-M-Y'}}
+              </td>
+
+              <td style="white-space:normal; width: 19%;">
+                <a class="ahr" ht="{% if apr != 'approvalreq' %}open expenses claim form{% else %}approve claim here by click and approve{% endif %}" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {{x.Purpose}}
+                </a>
+              </td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="{% if apr != 'approvalreq' %}open expenses claim form{% else %}approve claim here by click and approve{% endif %}" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">                                  
+                  {% if x.Total_Amount %}
+                    ₹ {{x.Total_Amount|floatformat:0|intcomma}}
+                  {% else %}
+                    <span class="hlt3">No Expenses Added. Add Expenses or Delete this..</span>
+                  {% endif %}
+                </a>                  
+              </td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="{% if apr != 'approvalreq' %}open expenses claim form{% else %}approve claim here by click and approve{% endif %}" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {% if x.Related_To == 'Sales' %}
+                    <span style="color:#0d65e0">Service Order</span>
+                    <br>{{x.Sales_Order.PO_No}}
+                    <br>{% for p in y %}{% if forloop.counter == 1 %}{% else %}, {% endif %}{{p}}{% endfor %}
+                  {% else %}                                  
+                    <span style="color:#0d65e0">{{x.Related_To}}</span>
+                    <br>{% for p in y %}{% if forloop.counter == 1 %}{% else %}, {% endif %}{{p}}{% endfor %}
+                  {% endif %}
+                </a>                  
+              </td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="{% if apr != 'approvalreq' %}open expenses claim form{% else %}approve claim here by click and approve{% endif %}" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {% if x.Approval_Status == 1 %}
+                    {% if x.Balance_Amount == 0 %}
+                      <span class="hlt2">Amount Settled</span>
+                    {% elif x.Balance_Amount > 0 %}
+                      <span class="hlt3">Due </span> ₹ {{x.Balance_Amount|floatformat:0|intcomma}}
+                      <span class="hlt3"><br>Due Days </span>{{x.Over_Due_Days}}
+                    {% else %}
+                    {% endif %}
+                  {% else %}
+                    {% if x.Lock_Status == 0 %}
+                      <span class="hlt3">Confirm form, to get approval</span>
+                    {% else %}
+                      {% if apr == 'apr' %}
+                        <span class="hlt3">Approval Pending</span>
+                      {% else %}
+                        <button type="button"  onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+'{{x.id}}'+'/itemid/'" class="btn btn-sm btn-primary" ht="click here to approve" >Approve</button>
+                      {% endif %}
+                    {% endif %}
+                  {% endif %}
+                </a>
+              </td>
+
+              <td style="white-space:normal;">
+                <a class="ahr" ht="{% if apr != 'approvalreq' %}open expenses claim form{% else %}approve claim here by click and approve{% endif %}" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
+                  {% if x.Approval_Status == 1 %}
+                    <span class="hlt5">Approved By</span>
+                    <br>{{x.Approval_Request_To.Nick_Name}}
+                  {% else %}
+                    {% if x.Lock_Status == 0 %}
+                      <span class="hlt3">Confirm form, to get approval</span>
+                    {% else %}
+                      {% if apr == 'apr' %}
+                        <span class="hlt3">Approval Pending</span>
+                        <br>(by {{x.Approval_Request_To.Nick_Name}})
+                      {% endif %}
+                    {% endif %}                   
+                  {% endif %}
+                  {% if x.Issued_By %}
+                    <span class="hlt5"><br>Issued By</span>
+                    <br>{{x.Issued_By.Nick_Name}}
+                  {% endif %}
+                </a>
+              </td>
+          </tr>
+      {% endfor %} 
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+ 

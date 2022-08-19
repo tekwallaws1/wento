@@ -26,10 +26,10 @@
 
 <script type="text/javascript">
 
-  function editpo(po_id, is_manual) {
+  function editpo(po_id, is_manual, is_nopo) {
     poid = po_id;
     
-    if(is_manual == 'True') {editurl = '/{{pdata.pj}}/purchasesform/edit_manually/'+poid+'/'; }
+    if(is_manual == 'True' || is_nopo == 'True') {editurl = '/{{pdata.pj}}/purchasesform/edit_manually/'+poid+'/'; }
     else { editurl = '/{{pdata.pj}}/po/edit/'+poid+'/itemid/msg/'; }
   };
 
@@ -144,6 +144,9 @@
   <div style="float:left">
     <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-primary mb-4" ht="select category">Do More</button>
   </div>
+
+    &emsp;&emsp;
+    <button type="button" data-toggle='modal', data-target="#MorePagesModal" class="btn btn-sm btn-danger mb-4" >More Pages</button>
 
   <div style="float:right">
     {% if status == 'Total'%}
@@ -329,7 +332,7 @@
                 <tr>
                {% endif %}
               
-                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}&nbsp;<a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}', '{{x.Is_Manual}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
+                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}&nbsp;<a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}', '{{x.Is_Manual}}', '{{x.Is_No_PO}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
 
                 <td style="white-space:normal;">
                   {{x.Vendor.Supplier_Name}}
@@ -341,6 +344,7 @@
                   <br><br><span class="hlt2">PO Value: ₹ {{x.PO_Value|floatformat:0|intcomma}}</span>
                   <br><span class='hlt5'>PO No: </span>{{x.PO_No}}
                   <br><span class='hlt5'>PO Date: </span>{{x.PO_Date|date:'d M Y'}}
+                  {% if x.Attach %}<a class="ahr" ht='click here to download copy' href="{{x.Attach.url}}" target="_blank"><br><span class='hlt5'>Download PO: </span><i class="fas fa fa-download"></i></a>{% endif %}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
                   {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}
                 </td>
@@ -428,7 +432,7 @@
             {% for x, y, z, c, delivery in tableset %}
               <tr>
           
-                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}&nbsp;<a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}', '{{x.Is_Manual}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
+                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}&nbsp;<a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}', '{{x.Is_Manual}}', '{{x.Is_No_PO}}')">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
 
                 <td style="white-space:normal;">
                   {{x.Vendor.Supplier_Name}}
@@ -808,6 +812,26 @@
 
             <button type="button" onclick="hidepoedit()" data-toggle="modal" data-target="#addPaymentModal" class="btn btn-sm btn-info">Add Payment</button>
             <button type="button"  onclick="location.href='/{{pdata.pj}}/podeliveryform/create/'+poid+'/1/'" class="btn btn-sm btn-success">Add Delivery Details</button>     
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- more pages -->
+  <div class="modal fade text-left" id="MorePagesModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button   onclick="location.href='/{{pdata.pj}}/vendorinvoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Vendor Invoices</button>
+            <button   onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Paid/'" type="button" class="btn btn-sm btn-success">Vendor Payments</button>          
           </div>
         </div>
       </div>

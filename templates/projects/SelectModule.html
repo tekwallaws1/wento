@@ -14,6 +14,7 @@
 {% endblock %}
  
 {% block content %}
+{% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
 <div class="col-md-10 mx-auto">
     <div>
       <div style="float:left">
@@ -31,8 +32,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-chart-column"></i></div>
                     <div >
                         <div class="mbt">Dashboards</div>
-                        <a href="/{{pdata.pj}}/salesdb/FY/"><div class="mb">Sales Orders</div></a>
-                        <a href="/{{pdata.pj}}/purchasesdb/FY/"><div class="mb">Purchases</div></a>
+                        <a href="/{{pdata.pj}}/salesdb/All/"><div class="mb">Received Orders</div></a>
+                        <a href="/{{pdata.pj}}/purchasesdb/All/"><div class="mb">Purchases</div></a>
                     </div>
                 </div>
             </div>
@@ -61,7 +62,7 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-shopping-cart"></i></div>
                     <div >
                         <div class="mbt">Orders</div>
-                        <a href="/{{pdata.pj}}/orderslist/Inprogress/"><div class="mb">Sales Orders</div></a>
+                        <a href="/{{pdata.pj}}/orderslist/Inprogress/"><div class="mb">Received Orders</div></a>
                         <a href="/{{pdata.pj}}/purchaseslist/Total/"><div class="mb">Purchases</div></a>
                     </div>
                 </div>
@@ -74,7 +75,7 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-file-invoice"></i></div>
                     <div >
                         <div class="mbt">Billing</div>
-                        <a href="/{{pdata.pj}}/invoiceslist/Issued/"><div class="mb">Sales Orders Billing</div></a>
+                        <a href="/{{pdata.pj}}/invoiceslist/Issued/"><div class="mb">Received Orders Billing</div></a>
                         <a href="/{{pdata.pj}}/vendorinvoiceslist/Issued/"><div class="mb">Vendor Billing</div></a>
                     </div>
                 </div>
@@ -102,8 +103,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-coins"></i></div>
                     <div >
                         <div class="mbt">Expenses</div>
-                        <a href="#"><div class="mb">Company Wise Expenses</div></a>
-                        <a href="#"><div class="mb">PO Wise Expenses</div></a>
+                        <a href="/{{pdata.pj}}/expenseslist/apr/expid/"><div class="mb">Expenses List</div></a>
+                        <a href="/{{pdata.pj}}/expensesform/create/1/"><div class="mb">Claim Form</div></a>
                     </div>
                 </div>
             </div>
@@ -114,8 +115,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-cash-register"></i></div>
                     <div >
                         <div class="mbt">Payroll</div>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Attendance</div></a>
-                        <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="mb">Salaries</div></a>
+                        <a href="/{{pdata.pj}}/daywiseattendancelist/day/"><div class="mb">Attendance</div></a>
+                        <a href="/{{pdata.pj}}/employsalarieslist/"><div class="mb">Employ Salaries</div></a>
                     </div>
                 </div>
             </div>
@@ -126,7 +127,7 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-laptop-file"></i></div>
                     <div >
                         <div class="mbt">Work Progress</div>
-                        <a href="/{{pdata.pj}}/worklist/Inprogress/"><div class="mb">Sales Orders Progress</div></a>
+                        <a href="/{{pdata.pj}}/worklist/Inprogress/"><div class="mb">Received Orders Progress</div></a>
                         <a href="/{{pdata.pj}}/purchaseslist/Total/"><div class="mb">PO's Progress</div></a>
                     </div>
                 </div>
@@ -197,7 +198,45 @@
             </div></a>
         </div>         
     </div>
-
+</div>
+{% else %}
+<div class="col-md-10 mx-auto">
+    <div>
+      <div style="float:left">
+        <h4 class="card-title mb-0">{{pdata.pj.Project_Name}}</h4>
+      </div>
+      <div style="float:right">
+        <button type="button" onclick="location.href='/'"  class="btn btn-sm  btn-primary mb-4" >Change Work Area/Division</button>     
+      </div>
+      <div style="clear:both"></div>
     </div>
+    <div class="row ">
+        <div class="col-xl-3 col-lg-6">
+            <div class="card l-bg-cherry">
+                <div class="card-statistic-3 p-4">
+                    <div class="card-icon card-icon-large" ><i class="fas fa-coins"></i></div>
+                    <div >
+                        <div class="mbt">Expenses</div>
+                        <a href="/{{pdata.pj}}/expenseslist/apr/expid/"><div class="mb">Expenses List</div></a>
+                        <a href="/{{pdata.pj}}/expensesform/create/1/"><div class="mb">Claim Form</div></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-lg-6">
+            <div class="card l-bg-blue-dark">
+                <div class="card-statistic-3 p-4">
+                    <div class="card-icon card-icon-large" ><i class="fas fa-cash-register"></i></div>
+                    <div >
+                        <div class="mbt">Attendance</div>
+                        <a href="/{{pdata.pj}}/daywiseattendancelist/day/"><div class="mb">Day Wise Attendance</div></a>
+                        <a href="/{{pdata.pj}}/monthwiseattendancelist/day/"><div class="mb">Month Wise Attendance</div></a>
+                    </div>
+                </div>
+            </div>
+        </div>   
+    </div>
+</div>
+{% endif %}
 {% endblock %}
 

@@ -185,7 +185,7 @@ class InvoicesForm(forms.ModelForm):
 		model = Invoices
 		# exclude = ['user']
 		fields = ['Billing_From', 'Billing_To', 'Shipping_To', 'Bank_Details', 'Invoice_No', 'Invoice_Date', 
-		'Credit_Days', 'GST_Reverse_Charges', 'Lock_Status', 'Is_Proforma', 'Invoice_No_Format']
+		'Credit_Days', 'GST_Reverse_Charges', 'Lock_Status', 'Is_Proforma', 'Invoice_No_Format', 'Set_For_Returns', 'Payment_Terms']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -195,6 +195,12 @@ class InvoicesForm(forms.ModelForm):
 			self.fields[field].widget.attrs.update({
 	            'class': 'form-control mb-4'
 	        })
+	def clean(self):
+	    cleaned_data = self.cleaned_data
+	    f1 = cleaned_data.get('Last_Update')
+	    if not f1:
+	        cleaned_data['Last_Update'] = date.today()
+	    return cleaned_data
 
 class InvoicesForm1(forms.ModelForm):	
 	class Meta:
@@ -209,8 +215,15 @@ class InvoicesForm1(forms.ModelForm):
 			self.fields[field].widget.attrs.update({
 	            'class': 'form-control mb-4'
 	        })
+	def clean(self):
+	    cleaned_data = self.cleaned_data
+	    f1 = cleaned_data.get('Last_Update')
+	    if not f1:
+	        cleaned_data['Last_Update'] = date.today()
+	    return cleaned_data	
 
-class ManualInvoicesForm(forms.ModelForm):	
+class ManualInvoicesForm(forms.ModelForm):
+	GST_Amount	= forms.FloatField(required=True, help_text='only GST Amount')	
 	class Meta:
 		model = Invoices
 		# exclude = ['user']
@@ -220,8 +233,11 @@ class ManualInvoicesForm(forms.ModelForm):
 	def clean(self):
 	    cleaned_data = self.cleaned_data
 	    f1 = cleaned_data.get('Invoice_Date')
+	    f2 = cleaned_data.get('Last_Update')
 	    if not f1:
 	        cleaned_data['Invoice_Date'] = datetime.now()
+	    if not f2:
+	    	cleaned_data['Last_Update'] = date.today()
 	    return cleaned_data	
 
 	def __init__(self, *args, **kwargs):
@@ -233,7 +249,8 @@ class ManualInvoicesForm(forms.ModelForm):
 	            'class': 'form-control mb-4'
 	        })
 
-class ManualInvoicesForm1(forms.ModelForm):	
+class ManualInvoicesForm1(forms.ModelForm):
+	GST_Amount	= forms.FloatField(required=True, help_text='only GST Amount')	
 	class Meta:
 		model = Invoices
 		# exclude = ['user']
@@ -242,8 +259,11 @@ class ManualInvoicesForm1(forms.ModelForm):
 	def clean(self):
 	    cleaned_data = self.cleaned_data
 	    f1 = cleaned_data.get('Invoice_Date')
+	    f2 = cleaned_data.get('Last_Update')
 	    if not f1:
 	        cleaned_data['Invoice_Date'] = datetime.now()
+	    if not f2:
+	    	cleaned_data['Last_Update'] = date.today()
 	    return cleaned_data	
 
 	def __init__(self, *args, **kwargs):
@@ -287,6 +307,7 @@ class DeliveryNoteForm(forms.ModelForm):
 	class Meta:
 		model = Delivery_Note
 		exclude = ['Invoice_No']
+		widgets = {'Date': widgets.DateInput(attrs={'type': 'date'})}
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

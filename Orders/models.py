@@ -42,7 +42,7 @@ class Orders(models.Model):
 	    super().save(*args, **kwargs)
 
 	def __str__(self):
-		return str(self.Order_No)+'-'+str(self.Customer_Name.Customer_Name)+'-'+str(self.Order_Value)
+		return str(self.PO_No)+'-'+str(self.Customer_Name.Customer_Name)+'-'+str(self.Order_Value)
 
 class Order_Items(models.Model): 
 	Order_No 		    = models.ForeignKey(Orders, null=True, blank=True, on_delete=models.CASCADE)
@@ -100,16 +100,17 @@ class Invoices(models.Model):
 	Bank_Details 		= models.ForeignKey(Bank_Accounts, null=True, blank=True, on_delete=models.SET_NULL)	
 	Delivery_Note 		= models.ForeignKey('Delivery_Note', null=True, blank=True, on_delete=models.SET_NULL)
 	Terms_and_Conditions= models.ForeignKey('Terms_Conditions', null=True, blank=True, on_delete=models.SET_NULL)		
-	Invoice_No 			= models.CharField(max_length=30, blank=True, null=True, unique=True, help_text='invoice/bill no')
+	Invoice_No 			= models.CharField(max_length=30, blank=True, null=True, help_text='invoice/bill no')
 	Invoice_No_1		= models.IntegerField(default=0, null=True, blank=True) #backend
 	Invoice_No_Format 	= models.ForeignKey(No_Formats, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to=models.Q(No_Format_Related_To__in = ['Invoice', 'Proforma Invoice']))
 	FY 					= models.CharField(max_length=10, blank=True, null=True, help_text='financial year such as 22-23, 23-24 etc..')
 	Invoice_Date 		= models.DateTimeField(blank=True, null=True, help_text='billed date')
-	Invoice_Amount		= models.FloatField(max_length=20, null=True, blank=True, help_text='including all taxes')
+	Invoice_Amount		= models.FloatField(max_length=20, default=0, null=True, blank=True, help_text='including all taxes')
 	GST_Amount			= models.FloatField(max_length=10, blank=True, null=True, help_text='only GST Amount')
 	CESS_Amount			= models.FloatField(max_length=10, blank=True, null=True, help_text='CESS Amount')	
 	GST_Reverse_Charges	= models.BooleanField(default=False, help_text='default nill, if applicable mark it')
 	Credit_Days			= models.IntegerField(default=0, null=True, blank=True, help_text='credit in days such as 0, 15, 30, 60 etc..')
+	Payment_Terms 		= models.CharField(max_length=100, blank=True, null=True,  help_text='payment terms')
 	Payment_Over_Due_Days= models.IntegerField(null=True, blank=True, help_text='overdue in days such as 0, 30 etc..')
 	Payment_Due_Date 	= models.DateField(blank=True, null=True, help_text='payment due date')
 	Payment_Status		= models.ForeignKey('Payment_Status', null=True, blank=True, on_delete=models.SET_NULL)
@@ -122,7 +123,9 @@ class Invoices(models.Model):
 	Is_Proforma			= models.BooleanField(default=False, help_text='tick if it is proforma invoice')
 	Attach				= models.FileField(upload_to='customerinvoices/', blank=True, null=True, help_text='attach invoice copy if available')	
 	Is_Manual			= models.BooleanField(default=False, help_text='wether it is manual entry or online generation')
+	Set_For_Returns		= models.BooleanField(default=True)
 	ds					= models.BooleanField(default=True)
+	Last_Update 		= models.DateField(blank=True, null=True)
 
 	def save(self, *args, **kwargs): #if file updated it will delete old file and replace
 	    try:
@@ -149,6 +152,7 @@ class Copy_Billed_Items(models.Model):
 	Invoice_No 		    = models.ForeignKey(Invoices, null=True, blank=True, on_delete=models.CASCADE)
 	Item_From_Product   = models.ForeignKey(Billed_Items, null=True, blank=True, on_delete=models.SET_NULL)
 	Item_Description 	= models.TextField(max_length=1000, null=True, blank=True, help_text='Item description')
+	Item_Code 			= models.CharField(max_length=15, null=True, blank=True, help_text='Item Code')
 	HSN_Code			= models.IntegerField(blank=True, null=True, help_text='HSN/SAC Code for this product')
 	Quantity			= models.FloatField(max_length=10, null=True, help_text='quantity')
 	UOM 				= models.CharField(max_length=15, null=True, choices=uom)
@@ -162,7 +166,9 @@ class Copy_Billed_Items(models.Model):
 
 class Delivery_Note(models.Model): 
 	Invoice_No 		    = models.ForeignKey(Invoices, null=True, blank=True, on_delete=models.CASCADE)
+	Date 				= models.DateField(blank=True, null=True, help_text='date of dispatch')
 	Transport_Mode   	= models.CharField(max_length=20, null=True, blank=True, choices=(('By Road', 'By Road'), ('By Air', 'By Air')))
+	LUT_No   			= models.CharField(max_length=30, null=True, blank=True, help_text='lut no')
 	Vehicle_No   		= models.CharField(max_length=20, null=True, blank=True, help_text='vehicle number')
 	Vehicle_Type   		= models.CharField(max_length=20, null=True, blank=True, help_text='truck, bus, train, car etc..')
 	Place_Of_Supply   	= models.CharField(max_length=30, null=True, blank=True, help_text='place of supply')

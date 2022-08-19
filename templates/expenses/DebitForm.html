@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts %}
+ <script type="text/javascript">
+
+  window.onload = function () {
+    if ('{{fnc}}'=='edit') {
+
+        var selectBoxs = document.getElementById("id_Related_To");
+        var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+        if (sv != '---------'){
+          document.getElementById('cat').style.display='block'}
+        else{document.getElementById('cat').style.display='none'}
+
+        var selectBoxs3 = document.getElementById("id_Issued_To");
+        var sv3 = selectBoxs3.options[selectBoxs3.selectedIndex].text;
+        if (sv3 != '---------'){
+          document.getElementById('staff').style.display='block'}
+        else{document.getElementById('staff').style.display='none'}
+
+        var selectBoxs2 = document.getElementById("id_Expenses")
+        var sv2 = selectBoxs2.options[selectBoxs2.selectedIndex].text
+        if (sv2 != '---------'){
+          document.getElementById('exp').style.display='block'}
+        else{ document.getElementById('exp').style.display='none'}
+
+        var sv1 = $("#id_Party_Name").val();
+        if (sv1 != '' ){
+          document.getElementById('outside').style.display='block';document.getElementById('attach').style.display='block'}
+        else{ document.getElementById('outside').style.display='none';document.getElementById('attach').style.display='none'}  
+      
+      } 
+  }
+  
+  function changeFunc1() {
+    var selectBoxs = document.getElementById("id_Paid_To");    
+    var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+    
+    if (sv == 'Against Expenses'){document.getElementById('exp').style.display='block';document.getElementById('cat').style.display='none';}
+    else{ document.getElementById('exp').style.display='none';}
+
+    if (sv == 'As Advance to Staff'){document.getElementById('staff').style.display='block';document.getElementById('cat').style.display='block';}
+    else{document.getElementById('staff').style.display='none';} 
+
+    if (sv == 'Outside Party'){document.getElementById('outside').style.display='block';document.getElementById('attach').style.display='block';
+    document.getElementById('cat').style.display='block';}
+    else{ document.getElementById('outside').style.display='none';document.getElementById('attach').style.display='none';}  
+    }
+
+  function changeFunc2() {
+    var selectBoxs = document.getElementById("id_Payment_Mode");    
+    var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+    if (sv == 'Cheque'){
+      document.getElementById('cheq').style.display='block';
+    }
+    else{ document.getElementById('cheq').style.display='none' }   
+    }
+</script>
+{% endblock %} <!-- For Scripts -->
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Debit Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+
+                <label for="id_Paid_To">Paid To{% if form.Paid_To.field.required %} <span style="color: red">**</span> {% endif %}</label><div onchange="changeFunc1()">{{form.Paid_To}}</div>
+
+                <div id="exp" style="display:none">
+                  <label for="id_Expenses">Expenses Claim Details{% if field.field.required %}<span style="color: red">**</span>{% endif %}</label>{{form.Expenses}}
+                </div>
+
+                <div id="staff" style="display:none">
+                  <label for="id_Issued_To">Employ/Staff Name</label>{{form.Issued_To}}
+                </div>
+
+                <div id="outside" style="display:none">
+                  <label for="id_Party_Name">Supplier/Person Name</label>{{form.Party_Name}}
+                  <label>Amount To Be Pay or Billed Amount</label>{{form.Amount_to_be_Pay}}
+                </div>
+
+                <div id="cat" style="display:none">
+                  <label for="id_Related_To">Related To</label>{{form.Related_To}}
+                  <label>Towards</label>{{form.Against}}
+                  <label>Purpose</label>{{form.Purpose}}
+                  <label>Approved By</label>{{form.Approved_By}}                  
+                </div>
+
+                <label>Issued Amount{% if form.Issued_Amount.field.required %}<span style="color: red">**</span>{% endif %}</label>{{form.Issued_Amount}}
+                <div class="form-group start-date">
+                  <label>Issued Date</label>
+                  {% if fnc == 'edit' %}
+                    {{form.Issued_Date}}
+                  {% else %}
+                    <input type="date" name="Issued_Date" class="form-control">
+                  {% endif %}
+                </div>                
+                
+                <label for="id_Payment_Mode">Payment Type{% if form.Payment_Mode.field.required %} <span style="color: red">**</span> {% endif %}</label><div onchange="changeFunc2()">{{form.Payment_Mode}}</div>
+                <div id="cheq" style="display:none">
+                  <label>Cheque Details</label>{{form.Cheque_Details}}
+                </div>
+    
+                <label>Issued By{% if form.Issued_By.field.required %}<span style="color: red">**</span>{% endif %}</label>{{form.Issued_By}}
+
+                <div id="attach" style="display:none">
+                  <label style="color:#32a852;">attach if any receipt/bill copy available</label>{{form.Attach}}                  
+                </div>
+
+                {% for field in form %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}  
+              </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

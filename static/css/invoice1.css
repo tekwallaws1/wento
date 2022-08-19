@@ -34,14 +34,14 @@ table {
 
 .t3 {
   table-layout: fixed; 
-  width: 100%; border-collapse: separate; 
+  width: 100%; ; 
   border-spacing: 2px;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .th1, .th2 {
-  border-width: 1px; padding: 3px; position: relative; text-align: left; border-radius: 0.25em; border-style: solid;
-  background: #EEE; border-color: #BBB; color: green;
+  border: 0.1px black solid; padding: 0.25em; position: relative; text-align: left; border-radius: 0em; border-style: solid;
+    color: black;
 }
 
 .th2 {
@@ -49,13 +49,36 @@ table {
 }
 
 .td1 {
-  border-width: 1px; padding: 0.5em; position: relative; text-align: left; border-radius: 0.25em; border-style: solid;
-  border-color: #DDD; color: black; vertical-align: top; font-weight: normal; word-wrap: break-word;
+  border: 0.1px black solid; padding: 0.25em; position: relative; text-align: left; border-radius: 0em; 
+  color: black; vertical-align: top; font-weight: normal; word-wrap: break-word;
+}
+
+.td123 {
+  border: 0.1px black solid; border-right: none; padding: 0.25em; position: relative; text-align: left; border-radius: 0em; 
+  color: black; vertical-align: top; font-weight: normal; word-wrap: break-word;
+}
+.td124 {
+  border: 0.1px black solid; border-left: none; padding: 0.25em; position: relative; text-align: left; border-radius: 0em; 
+  color: black; vertical-align: top; font-weight: normal; word-wrap: break-word;
+}
+
+.td11 {
+  border: 0.1px black solid; padding: 0.25em; position: relative; text-align: center; border-radius: 0em; 
+  color: black; vertical-align: top; font-weight: normal; word-wrap: break-word;
+}
+
+.td33 {
+  border: 0.1px black solid; border-bottom: none; border-top: none; padding: 0.25em; position: relative; text-align: center; border-radius: 0em; 
+  color: black; vertical-align: top; font-weight: normal; word-wrap: break-word;
+}
+
+tr:last-child td {
+    border-bottom: 0.1px black solid;
 }
 
 .td2 {
-  border-width: 1px; padding: 0.5em; position: relative; text-align: left; border-radius: 0.25em; border-style: solid;
-  border-color: #DDD; color: black; vertical-align: top; font-weight: normal; word-wrap: break-word;
+  border-width: 0.1px; padding: 0.25em; position: relative; text-align: left; border-radius: 0em; border-style: solid;
+  border-color: black; color: black; vertical-align: top; font-weight: normal; word-wrap: break-word;
 }
 
 .sh1 {font-weight: bold;}

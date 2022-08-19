@@ -80,11 +80,13 @@
   var cl = [0,  1, 2, 3, 4, 5]
   var wdths = ['4%', '*', '*', '*', '*', '*'];
   
-   if ('{{status}}' == 'Inprogress' ) { var msgTop = 'Total Inprogress Sales Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}';}
-   else if ('{{status}}' == 'Pipeline' ) { var msgTop = 'Pipeline Sales Orders {{count.pc}}, Value {{orders.pipeline|floatformat:0|intcomma}}';}
-    else { var msgTop = 'Total Orders {{count.tc}}, Value {{orders.total|floatformat:0|intcomma}}  |  Closed Orders {{count.cc}}, Value {{orders.closed|floatformat:0|intcomma}}{% if count.ic != 0 %}  |  Inprogress Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}{% endif %}';};
-    var title = '{{pdata.pj}} - {{status}} Sales Orders List';
-    var filename = '{{pdata.pj}}-SalesOrders_{{table.first.Order_Received_Date|date:'dMy'}}to{{table.last.Order_Received_Date|date:'dMy'}}'
+   if ('{{status}}' == 'Inprogress' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Total Inprogress Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}';}
+   else if ('{{status}}' == 'Total' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Total Orders {{count.tc}}, Value {{orders.total|floatformat:0|intcomma}}  |  Closed Orders {{count.cc}}, Value {{orders.closed|floatformat:0|intcomma}}{% if count.ic != 0 %}  |  Inprogress Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}{% endif %}';}
+    else if ('{{status}}' == 'Pipeline'  ) { var msgTop = 'Pipeline Orders {{count.pc}}, Value {{orders.pipeline|floatformat:0|intcomma}}';}
+    else { var msgTop = ''}
+    
+    var title = '{{pdata.pj}} - {{status}} Orders List';
+    var filename = '{{pdata.pj}}-Orders_{{table.first.Order_Received_Date|date:'dMy'}}to{{table.last.Order_Received_Date|date:'dMy'}}'
 
   // Datatables Customise PDF Before Export//
   var pdf_custom = function ( doc ) {
@@ -123,7 +125,7 @@
 
 {% block content %}
 <div class="page-header">
-  <h3 class="page-title">{{pdata.pj.Short_Name}} - {{status}} Sales Orders List</h3>
+  <h3 class="page-title">{{pdata.pj.Short_Name}} - {{status}} Orders List</h3>
 </div>
 
 <div>
@@ -139,6 +141,9 @@
       &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
       &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-info mb-4">All Orders</button>
     {% endif %}
+
+    &emsp;&emsp;
+    <button type="button" data-toggle='modal', data-target="#MorePagesModal" class="btn btn-sm btn-danger mb-4" >More Pages</button>
   </div>
 
   <div style="float:right">
@@ -213,7 +218,7 @@
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Billing Status</label>
                         {{ filter_data.form.Is_Billed}}
                       </div>
-                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                      <div class="col-md-6 col-sm-6 col-12 mt-4" {% if request.user.username != 'praveen' %}style="pointer-events: none;"{% endif %}>
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Closed Orders</label>
                         {{ filter_data.form.Final_Status}}
                       </div>
@@ -231,6 +236,10 @@
       </div>
     </div>
   </div>
+
+{% if request.user.username == 'praveen' %}
+<!-- ######### -->
+
 {% if status == 'Total' %}
   <div class="row">
     <div class="col-xl-4 col-md-6 mb-4">
@@ -308,6 +317,9 @@
   </div>
 {% endif %}
 
+<!-- ######### -->
+{% endif %}
+
 <!-- Orders List -->
 <!-- Confirmed or Pipeline -->
 {% if status != 'Pipeline' %}
@@ -372,7 +384,11 @@
                   {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}
                 </td>
 
-                <td style="white-space:normal;">                  
+                <td style="white-space:normal;">
+                {% if request.user.username == 'praveen' %}
+
+
+                  <!-- ######### -->
                   {% if c %}
                     <span class='hlt5'>No of Bills: </span>{{c}}
                     <span class='hlt5'><br>Billing Amount: </span>₹ {{y|floatformat:0|intcomma}}
@@ -402,6 +418,16 @@
                       <span class="hlt3"><br><br>No Payments/Advances Recieved</span>
                     {% endif %}
                   {% endif %}
+                  <!-- ######### -->
+                
+                {% else %}
+                  {% if c %}
+                    <span class='hlt5'>No of Bills: </span>{{c}}
+                    <span class='hlt5'><br>Billing Amount: </span>₹ {{y|floatformat:0|intcomma}}
+                  {% else %}
+                    <span class="hlt3">No Bills Generted</span>
+                  {% endif %}
+                {% endif %}
                 </td>
 
                 <td style="white-space:normal;">
@@ -546,7 +572,25 @@
     </div>
   </div>
 
-  
+ <!-- more pages -->
+  <div class="modal fade text-left" id="MorePagesModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button   onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
+            <button   onclick="location.href='/{{pdata.pj}}/paymentslist/Received/'" type="button" class="btn btn-sm btn-success">Customer Payments</button>          
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> 
 
 {% endblock %}
  

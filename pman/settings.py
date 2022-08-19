@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'Projects',
     'Orders',
     'Products',
+    'Debits',
     # 'rooftop',
     'import_export',
     'mathfilters',

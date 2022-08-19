@@ -6,7 +6,7 @@
   <div class="col-md-6 grid-margin stretch-card">
     <div class="card">
       <div class="card-body"> 
-        <h4 class="card-title d-inline-block">Employee Registration Form</h4>
+        <h4 class="card-title d-inline-block">Employ Registration Form</h4>
         <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
         <br>
           <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
@@ -25,9 +25,11 @@
                     {% endfor %}
                   {% endfor %}  
                 </div>
-                <!-- <div class="form-check form-check-flat form-check-primary">
-                  <label class="form-check-label">{{ form.Final_Status }}unmark it if employee not in active</label>
-                </div> -->
+                {% if fnc == 'edit' %}
+                  <div class="form-check form-check-flat form-check-primary">
+                    <label class="form-check-label">{{ form.Status }} unmark if employ left company</label>
+                  </div>
+                  {% endif %}
             </div>
           <button type="submit" class="btn btn-primary">Submit</button>
         </form>

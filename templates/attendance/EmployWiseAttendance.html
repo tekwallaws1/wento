@@ -1,0 +1,305 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %} 
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+{% endblock %}  
+
+{% block scripts %} 
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS --> 
+  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
+  <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
+  <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script>
+
+<script type="text/javascript">
+  function edit(e_id) {getid = e_id;}
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/{{pdata.pj}}/attendanceform/delete/'+getid+'/employwise/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+  
+  function fnchide(){$("#editModal .close").click()}
+
+  function actionurl() {
+      document.getElementById('employaction').action = '/{{pdata.pj}}/employwiseattendance/month/employ/';
+    } 
+    
+    function getdt(){
+      var dt = $("#getdate").val();
+      if ( dt == '' ){dt = 'month'} 
+      document.getElementById('formaction').action='/{{pdata.pj}}/employwiseattendance/'+dt+'/{{employ.Name}}/'}
+
+</script>
+
+<!-- Data Tables Export Script -->
+<script src="{% static 'js/datatablesexport.js' %}"></script>
+<script type="text/javascript">
+  // Datatables Excel Formating Before Export//
+  var customexcel = function( xlsx ) {
+    var sheet = xlsx.xl.worksheets['sheet1.xml'];
+    var style = xlsx.xl['styles.xml'];
+    var tagName = style.getElementsByTagName('sz');
+    for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+    $('row:first c', sheet).attr('s', '2')
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );$('row c[r^="F"]', sheet).attr( 's', '55' );//wrap text
+    var col = $('col', sheet);
+    // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
+    $(col[1]).attr('width', 20); $(col[2]).attr('width', 20); $(col[3]).attr('width', 20); $(col[4]).attr('width', 15); $(col[5]).attr('width', 15); $(col[5]).attr('width', 15); }; 
+  //--End--//
+
+            
+  var cl = [0,  1, 2, 3, 4, 5]
+  var wdths = ['4%', '20%', '24%', '20%', '16%', '16%'];
+  
+   var msgTop = "Name: {{employ.Name}}{% if employ.Employ_Id %} | Employ ID: {{employ.}}{% endif %}{% if employ.Designation %} | Designation: {{employ.Designation}}{% endif %} | Report Duration: {% if dates == None %}{{month|date:'M-Y'}}{% else %}{{dates.start|date:'d-M-y'}} to {{dates.end|date:'d-M-y'}}{% endif %} \n Presents: {{df.presents|floatformat:1}}/{{df.workingdays|floatformat:1}} | Leaves: {{df.leaves|floatformat:1}}{% if df.absents %} | Absents {{df.absents|floatformat:1}}{% endif %}"
+    var title = 'Employee Attendance Report';
+    var filename = '{{employ.Nick_Name}}_Attendance_Report'
+    var ort = 'portrait'
+
+  // Datatables Customise PDF Before Export//
+  var pdf_custom = function ( doc ) {
+    doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+    doc.pageMargins = [40,60,20,30];
+    // doc.content[1].margin = [ 0, 50, 0, 50 ]
+    doc['footer']= footer1;
+    doc['header']= header1;
+    var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+    objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+    objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+    objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+    // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+  doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+  {text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+  };
+
+  //--End--//
+</script>
+
+<!-- Data Tables Export Script -->
+<script type="text/javascript">
+  $('#html5-extension').DataTable( {
+  autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
+  buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
+      
+    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
+
+    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
+
+    {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
+</script>
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+  <div class="page-header">
+    <h3 class="page-title">{{employ.Name}} Attendance Report&emsp;
+      <span style="color:blue;">
+        {% if dates == None %}
+          {{month|date:'M-Y'}}
+        {% else %}
+          {{dates.start|date:'d-M-y'}} to {{dates.end|date:'d-M-y'}}
+        {% endif %}
+      </span>
+    </h3>
+    <button class="btn1 btn1-primary" type="submit" data-toggle="modal" data-target="#selectEmployModal" onclick="actionurl()">Change Employ</button>
+    <div>
+
+    <form class="forms-sample" action="" id='formaction' method="POST" >
+      {% csrf_token %}
+      <input type="month" name='dates' id='getdate'  style="width: 135px; font-size: 14px; margin-bottom:10px;" >
+      <button class="btn1 btn1-success" type="submit" onclick="getdt()">Change Month</button>
+    </form>
+    </div>
+  </div>
+
+<div class="row">
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-info shadow h-100 py-2">
+      <a ht="total presents" ><div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Presents</div>
+            <div class="h6 mb-0 font-weight-800 text-black-700">{{df.presents|floatformat:1}}/{{df.workingdays|floatformat:1}}</div>
+          </div>
+        </div>
+      </div></a>
+    </div>
+  </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <a ht="employes on leave" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Leaves/Absents</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">
+                <div class="h6 mb-0 font-weight-800 text-black-700">{{df.leaves|floatformat:1}}{% if df.absents %} | Absents {{df.absents|floatformat:1}}{% endif %}</div>
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Timings</th>
+            <th>Day Status</th>
+            <th>Work Hours</th>
+            <th>Extra Work Hours</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x in table%}
+
+          {% if x.Day_Status == 'Leave' or x.Day_Status == 'Absent' %}
+            <tr class="customtr1" >
+          {% else %}
+            <tr>
+          {%endif %}
+
+            <td style="white-space:normal;">
+              {{forloop.counter}}
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="edit or update" data-toggle="modal" data-target="#editModal" onclick="edit('{{x.id}}')">
+                {{x.Date|date:'d-M-Y'}}
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="edit or update" data-toggle="modal" data-target="#editModal" onclick="edit('{{x.id}}')">
+                {% if x.Start_Time == None and x.Start_Time == None %}
+                  <span class="hlt3">{{x.Day_Status}}</span>
+                {% else %}
+                  {% if x.Start_Time %}<span class="hlt5">Start Time </span>{{x.Start_Time|date:'g: i a'}}{% endif %}
+                  {% if x.End_Time %}<br><span class="hlt5">End Time &nbsp;&nbsp;</span>{{x.End_Time|date:'g: i a'}}{% endif %}
+                {% endif %}
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="edit or update" data-toggle="modal" data-target="#editModal" onclick="edit('{{x.id}}')">
+                {% if x.Day_Status %}{{x.Day_Status}}{% endif %}
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="edit or update" data-toggle="modal" data-target="#editModal" onclick="edit('{{x.id}}')">
+                {% if x.Total_Hours %}{{x.Total_Hours|floatformat:1}} Hours{% endif %}
+                {% if x.Sales_Order %}<span class="hlt5"><br>Work Order</span><br>{{x.Sales_Order.PO_No}}{% endif %}
+              </a>
+            </td>
+
+            <td style="white-space:normal; width: 20%;">
+              <a class="ahr" ht="edit or update" data-toggle="modal" data-target="#editModal" onclick="edit('{{x.id}}')">
+                {% if x.Total_Hours > 9.5 %} {{x.Total_Hours|sub:9|floatformat:1}} Hours{% else %}0{% endif %}
+              </a>
+            </td>
+          
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+    </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Data</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form class="forms-sample">
+            <div class="form-group">
+              <label for="exampleInputPassword1">Password</label>
+              <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+              <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
+            </div> 
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/attendanceform/edit/'+getid+'/employwise/'" class="btn btn-sm btn-primary ">Edit</button>
+            <button type="button"  data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-danger" onclick="fnchide()">Delete</button>  
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit attendance Form -->
+  <div class="modal fade text-left" id="selectEmployModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" >
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Select Employ</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">   
+          <form class="forms-sample" id='employaction' action='' method="POST">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                  <label style="color:green; font-size: 14px;">Choose Employ to Get Report</label>
+                  <select id='sel' name="employ" class="form-select form-control">
+                  <!-- <option selected>-------------</option> -->
+                  <option value="">----------</option>
+                    {% for x in employes %}
+                      <option >{{ x.Name }}</option>
+                    {% endfor %}
+                </select>
+              </div>            
+            </div>
+          <button type="submit" id="sbmt" class="btn btn-primary" >Submit</button>     
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- End -->
+
+{% endblock %}
+ 

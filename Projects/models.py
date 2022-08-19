@@ -6,18 +6,27 @@ from datetime import date, datetime, timedelta
 
 states = (("Andhra Pradesh","Andhra Pradesh"),("Telangana","Telangana"),("Tamil Nadu","Tamil Nadu"),("Karnataka","Karnataka"),("Maharashtra","Maharashtra"),("Kerala","Kerala"),
 	("Chhattisgarh","Chhattisgarh"),("Delhi","Delhi"),("Goa","Goa"),("Gujarat","Gujarat"),("Punjab","Punjab"),("Rajasthan","Rajasthan"),("Haryana","Haryana"),("West Bengal","West Bengal"),("Himachal Pradesh","Himachal Pradesh"),
-	("Jammu and Kashmir ","Jammu and Kashmir "),("Jharkhand","Jharkhand"),("Arunachal Pradesh ","Arunachal Pradesh "),("Assam","Assam"),("Bihar","Bihar"),
-	("Madhya Pradesh","Madhya Pradesh"),("Manipur","Manipur"),("Meghalaya","Meghalaya"),("Mizoram","Mizoram"),("Nagaland","Nagaland"),("Odisha","Odisha"),
-	("Sikkim","Sikkim"),("Tripura","Tripura"),("Uttar Pradesh","Uttar Pradesh"),("Uttarakhand","Uttarakhand"),("Andaman and Nicobar Islands","Andaman and Nicobar Islands"),
-	("Chandigarh","Chandigarh"),("Dadra and Nagar Haveli","Dadra and Nagar Haveli"),("Daman and Diu","Daman and Diu"),("Lakshadweep","Lakshadweep"),("Puducherry","Puducherry"))
+	("Jammu & Kashmir ","Jammu & Kashmir "),("Jharkhand","Jharkhand"),("Arunachal Pradesh ","Arunachal Pradesh "),("Assam","Assam"),("Bihar","Bihar"),
+	("Madhya Pradesh","Madhya Pradesh"),("Manipur","Manipur"),("Meghalaya","Meghalaya"),("Mizoram","Mizoram"),("Nagaland","Nagaland"),("Orissa","Orissa"),
+	("Sikkim","Sikkim"),("Tripura","Tripura"),("Uttar Pradesh","Uttar Pradesh"),("Uttarakhand","Uttarakhand"),("Andaman & Nicobar Islands","Andaman & Nicobar Islands"),
+	("Chandigarh","Chandigarh"),("Dadra & Nagar Haveli","Dadra & Nagar Haveli"),("Daman & Diu","Daman & Diu"),("Lakshadweep","Lakshadweep"),("Puducherry","Puducherry"))
 
+codes = (("37","Andhra Pradesh"),("36","Telangana"),("33","Tamil Nadu"),("29","Karnataka"),("27","Maharashtra"),("32","Kerala"),
+	("22","Chhattisgarh"),("07","Delhi"),("30","Goa"),("24","Gujarat"),("03","Punjab"),("08","Rajasthan"),("06","Haryana"),("19","West Bengal"),("02","Himachal Pradesh"),
+	("01 ","Jammu & Kashmir "),("20","Jharkhand"),("12 ","Arunachal Pradesh "),("18","Assam"),("10","Bihar"),
+	("23","Madhya Pradesh"),("14","Manipur"),("17","Meghalaya"),("15","Mizoram"),("13","Nagaland"),("21","Orissa"),
+	("11","Sikkim"),("16","Tripura"),("09","Uttar Pradesh"),("05","Uttarakhand"),("35","Andaman & Nicobar Islands"),
+	("04","Chandigarh"),("26","Dadra & Nagar Haveli"),("25","Daman & Diu"),("31","Lakshadweep"),("34","Puducherry"))
 
 class CompanyDetails(models.Model):
 	Company_Name 			= models.CharField(max_length=50, null=True)
-	Address_Line_1			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 1')
-	Address_Line_2			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 2')
+	Address_Line_1			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 1')
+	Address_Line_2			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 2')
+	Pin_Code				= models.CharField(max_length=6, blank=True, null=True, help_text='pin code')
 	State 					= models.CharField(max_length=50, null=True, choices=states)
 	GST_No 					= models.CharField(max_length=15, blank=True, null=True, help_text='Provide If Company under GST')
+	CIN_No 					= models.CharField(max_length=30, blank=True, null=True, help_text='CIN No if available')
+	LUT_No 					= models.CharField(max_length=25, blank=True, null=True, help_text='LUT No if available')
 	State_Code 				= models.IntegerField(null=True, blank=True, help_text='State Code Ex. 36, 37')
 	Phone_Number_1 			= models.CharField(max_length=20, null=True, help_text='Main Phone Number')
 	Phone_Number_2 			= models.CharField(max_length=10, null=True, blank=True, help_text='Optional Phone Number')
@@ -45,8 +54,9 @@ class Projects(models.Model):
 class CustDt(models.Model):
 	Customer_Name 			= models.CharField(max_length=50, null=True, help_text='Customer/Company Name')
 	Short_Name 				= models.CharField(max_length=15, null=True, help_text='Give Short Name for Customer, Max 15 Characters')
-	Address_Line_1			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 1')
-	Address_Line_2			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 2')
+	Address_Line_1			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 1')
+	Address_Line_2			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 2')
+	Pin_Code				= models.CharField(max_length=6, blank=True, null=True, help_text='pin code')
 	State 					= models.CharField(max_length=50, null=True, choices=states)
 	GST_No 					= models.CharField(max_length=15, blank=True, null=True, help_text='Provide If Company under GST')
 	State_Code 				= models.IntegerField(null=True, blank=True, help_text='State Code Ex. 36, 37')
@@ -76,8 +86,9 @@ class CustDt(models.Model):
 class VendDt(models.Model):
 	Supplier_Name 			= models.CharField(max_length=50, null=True, help_text='Vendor/Supplier Name')
 	Short_Name 				= models.CharField(max_length=15, null=True, help_text='Give Short Name for Supplier, Max 15 Characters')
-	Address_Line_1			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 1')
-	Address_Line_2			= models.CharField(max_length=50, blank=True, null=True, help_text='Address Line 2')
+	Address_Line_1			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 1')
+	Address_Line_2			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 2')
+	Pin_Code				= models.CharField(max_length=6, blank=True, null=True, help_text='pin code')
 	State 					= models.CharField(max_length=50, null=True, choices=states)
 	GST_No 					= models.CharField(max_length=15, blank=True, null=True, help_text='Provide If Company under GST')
 	State_Code 				= models.IntegerField(null=True, blank=True, help_text='State Code Ex. 36, 37')

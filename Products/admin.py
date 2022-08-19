@@ -12,6 +12,12 @@ from .models import *
 @admin.register(PO_Terms_Conditions)
 @admin.register(Vendor_Payment_Status)
 @admin.register(Vendor_Invoices)
+@admin.register(Quotes)
+@admin.register(Quote_TC)
+@admin.register(Quote_Items)
+@admin.register(Copy_Quote_Items)
+@admin.register(Quote_TC_Default)
+
 
 
  
