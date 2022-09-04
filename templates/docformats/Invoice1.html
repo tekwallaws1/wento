@@ -21,7 +21,7 @@
   <body>
     <!-- <button onclick="Convert_HTML_To_PDF();">Convert HTML to PDF</button> -->
     <br><br>
-    <!-- <button onclick="htt()">height</h5></button> -->
+    <button onclick="htt()">height</h5></button>
       <button type="button"  onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" class="btn2 btn2-info">Invoice List</button>
       <button type="button"  id="btnTest" onclick="href='javascript:generatePDF()'" class="btn2 btn2-primary">Download</button>
     {% if inv.Lock_Status == 1 %}
@@ -376,7 +376,134 @@
         </tr>
       </table>
 
+      <div id='next' style="display:none">
+        <img  class="invlogo" style="position: absolute; width:100px; height: 100px; margin-left: 25px;" src="{% static 'img/logo-mini.png' %}">
+      <div class="row d-flex justify-content-center text-center">
+        <a class="ahr" ht="Change BillingFrom Details" data-toggle="modal" data-target="#editInvoiceModal" onclick="javascript:fnc('companyaddress')">
+          <span style="font-size:25px; font-weight: 600; color: #db1309">{{inv.Billing_From.Company_Name}}</span>
+          
+          <div style="margin-top:-2px;"></div>
+          <span style="font-size:12px; font-weight: 600; color:black;">{{inv.Billing_From.Address_Line_1}}</span>
+          
+          <div style="margin-top:-2px;"></div>
+          <span style="font-size:12px; font-weight: 600; color:black">{{inv.Billing_From.Address_Line_2}}{% if inv.Billing_From.Pin_Code %}-{{inv.Billing_From.Pin_Code}}{% endif %}</span>
+          
+          <div style="margin-top:-2px;"></div>
+          <span style="font-size:12px; font-weight: 600; color:black">
+           {% if inv.Billing_From.GST_No %}GSTIN: {{inv.Billing_From.GST_No}}{% endif %}{% if inv.Billing_From.CIN_No %}, CIN: {{inv.Billing_From.CIN_No}}, {% endif %}
+          </span>
+
+          <div style="margin-top:-2px;"></div>
+          <span style="font-size:12px; font-weight: 600; color:black">State: {{inv.Billing_From.State}}, State Code: {{inv.Billing_From.State_Code}}</span>
+
+
+          <div style="margin-top:-2px;"></div>
+          <span style="font-size:12px; font-weight: 600; color:black">
+           Phone: {{inv.Billing_From.Phone_Number_1}} {% if inv.Billing_From.Email %}, Email: {{inv.Billing_From.Email}}{% endif %}
+          </span> 
+
+          <div style="margin-top:0px;"></div>
+          <span style="font-size:18px; font-weight: 600; color:black">{% if inv.Lock_Status == 0 %}Invoice Draft Copy&nbsp;
+          {% elif inv.Is_Proforma == 1 %}PROFORMA INVOICE&nbsp;{% else %}INVOICE&nbsp;{% endif %}</span>
+        </div></a>
       
+        <div style="margin-top:5px; ">
+          <span style="font-size:11px; font-weight: 500; color:black; position: absolute; margin-top:-65px; margin-left:597px;">
+            Original for Receipient
+          </span>  
+          <span style="font-size:11px; font-weight: 500; color:black; position: absolute; margin-top:-45px; margin-left:585px;">
+            Duplicate for Transporter
+          </span> 
+          <span style="font-size:11px; font-weight: 500; color:black; position: absolute; margin-top:-25px; margin-left:604px;">
+          Triplicate for Supplier
+          </span> 
+        </div>
+
+      <!-- <div style="margin-top:5px"></div> -->
+
+      
+      <table class="t3">
+        <tr>
+          <th class="td1 font-weight-bold" colspan="10">Invoice Details & Payment Terms</th>
+          <th class="td123 font-weight-bold" colspan="6">Delivery Details</th>
+          <th class="td124 font-weight-bold" colspan="4"></th>
+        </tr>
+        <tr>
+          <td class="td1" colspan="10">
+              <a class="ahr" ht="Edit Invoice Details" data-toggle="modal" data-target="#editInvoiceModal" onclick="javascript:fnc('invoicedetails')">
+              {% if inv.Is_Proforma == 0 %}
+                <span class="sh1">Invoice No & Date:</span> {{inv.Invoice_No}}, {{inv.Invoice_Date|date:'d M Y'}}
+              {% else %}
+                <br><span class="sh1">PI No & Date:</span> {{inv.Invoice_No}}, {{inv.Invoice_Date|date:'d M Y'}}
+              {% endif %}
+              {% if inv.Order.PO_No %}<br><span class="sh1">PO No & Date:</span> {{inv.Order.PO_No}}, {{inv.Order.Order_Received_Date|date:'d M Y'}}{% endif %}
+              {% if inv.Payment_Terms %}
+                <br><span class="sh1">Payment Terms: </span>{{inv.Payment_Terms}}
+              {% endif %}
+            </a>
+              
+          </td>
+          
+          <td class="td123" colspan="6">         
+            <a class="ahr" ht="Edit Delivery Note Details" data-toggle="modal" data-target="#editDeliveryNoteModal" onclick="javascript:editdeliverynote({{inv.Delivery_Note.id}})">
+              
+              <span class="sh1">Vehicle No: </span>{% if inv.Delivery_Note.Vehicle_No %}{{inv.Delivery_Note.Vehicle_No}}{% endif %}
+              <br>
+              <span class="sh1">Place of Supply: </span>{% if inv.Delivery_Note.Place_Of_Supply %}{{inv.Delivery_Note.Place_Of_Supply}}{% endif %}
+              <br>
+              <span class="sh1">LUT No: </span>ARN AD3604220049853
+
+              <!-- {% if inv.Delivery_Note.Place_Of_Supply %}<span class="sh1">Place of Supply: </span>{{inv.Delivery_Note.Place_Of_Supply}}&nbsp; {% endif %}
+              {% if inv.Delivery_Note.Date %}<span class="sh1">Date: </span>{{inv.Delivery_Note.Date|date:'d M Y'}}{% endif %}
+              {% if inv.Delivery_Note.LUT_No %}<br><span class="sh1">LUT No: </span>{{inv.Delivery_Note.LUT_No}}&nbsp; {% endif %}{% if inv.Delivery_Note.Vehicle_No %}<span class="sh1">Vehicle No: </span>{{inv.Delivery_Note.Vehicle_No}}{% endif %}
+
+              {% if inv.Delivery_Note.Transport_Mode %}<br><span class="sh1">Dispatch Through: </span>{{inv.Delivery_Note.Transport_Mode}}&nbsp; {% endif %}{% if inv.Delivery_Note.LRR_No %}<span class="sh1">E-Waybill No: </span>{{inv.Delivery_Note.LRR_No}}<br>{% endif %} -->
+            </a>
+            <script>var hide1=0;</script> 
+          </td>
+          <td class="td124" colspan="4">
+            <span class="sh1">Date: </span>{% if inv.Delivery_Note.Date %}{{inv.Delivery_Note.Date}}{% endif %}
+            <br><span class="sh1">E-Waybill No: </span>{% if inv.Delivery_Note.LRR_No %}{{inv.Delivery_Note.LRR_No}}{% endif %}
+            <br><span class="sh1">Date: </span>13-Apr-2022
+          </td>
+
+          {% if inv.Delivery_Note == None %}
+            {% if inv.Lock_Status == 0  %}<button style="margin-bottom:5px; float: right;" type="button" id='hideadddeliverynotebutton' data-toggle="modal" data-target="#DeliveryNoteModal" onclick="javascript:fnc('adddeliverynote')" class="btn1 btn1-sm btn1-primary">+Add Delivery Details</button>{% endif %}
+          {% endif %}
+        </tr>
+      </table>
+
+      <div  style="margin-top:5px"></div>
+
+      <table class="t3">
+        <tr>
+          <th class="td1 font-weight-bold">Buyer (Bill To)</th>
+          <th class="td1 font-weight-bold">Consignee (Ship To)</th>
+        </tr>
+        <tr>
+          <th class="td1">
+            <a class="ahr" ht="Change Billing Address" data-toggle="modal" data-target="#editInvoiceModal" onclick="javascript:fnc('billingaddress')">
+              <span class="sh1">M/s. {{inv.Billing_To.Customer_Name}}</span>
+              {% if inv.Billing_To.Address_Line_1 %}<br>{{inv.Billing_To.Address_Line_1}},{% endif %}
+              {% if inv.Billing_To.Address_Line_2 %}<br>{{inv.Billing_To.Address_Line_2}}{% if inv.Billing_To.Pin_Code %}-{{inv.Billing_To.Pin_Code}}{% endif %},{% endif %}
+              {% if inv.Billing_To.GST_No %}<br><span class="sh1">GSTIN : </span>{{inv.Billing_To.GST_No}},{% endif %}
+              <br><span class="sh1">State &nbsp; : </span>{{inv.Billing_To.State}}{% if inv.Billing_To.State_Code %}, <span class="sh1">Code: </span>{{inv.Billing_To.State_Code}}{% endif %} 
+            </a>
+          </th>
+          <th class="td1">
+            <a class="ahr" ht="Change Shipping Address" data-toggle="modal" data-target="#editInvoiceModal" onclick="javascript:fnc('shippingaddress')">
+              <span class="sh1">M/s. {{inv.Shipping_To.Customer_Name}}</span>
+              {% if inv.Shipping_To.Address_Line_1 %}<br>{{inv.Shipping_To.Address_Line_1}},{% endif %}
+              {% if inv.Shipping_To.Address_Line_2 %}<br>{{inv.Shipping_To.Address_Line_2}}{% if inv.Shipping_To.Pin_Code %}-{{inv.Shipping_To.Pin_Code}}{% endif %},{% endif %}
+              {% if inv.Shipping_To.GST_No %}<br><span class="sh1">GSTIN : </span>{{inv.Shipping_To.GST_No}},{% endif %}
+              <br><span class="sh1">State &nbsp; : </span>{{inv.Shipping_To.State}}{% if inv.Shipping_To.State_Code %}, <span class="sh1">Code: </span>{{inv.Shipping_To.State_Code}}{% endif %}
+            </a>
+          </th>
+        </tr>
+      </table>
+
+      <div style="margin-top:5px"></div>
+      </div>
 
       <div id="nextpage1"></div>
     </div>
@@ -843,7 +970,10 @@
     }
     document.getElementById('btnTest').onclick = test;
   
-    function htt() {var ph1 = $("#invoicee").height();alert(ph1)}
+    function htt() {
+      var ph1 = $("#invoicee").height();alert(ph1)
+      if (ph1>800){document.getElementById('next').style.display='block'}
+    }
     
   </script>
 
@@ -852,7 +982,7 @@
     
     // content auto adjust to full page 
     var ph = $("#invoicee").height();
-        if (ph<800){var nht = 800-ph;
+        if (ph<800){var nht = 800-ph; 
       $('#gp1').css('height',nht);
       if ((nht-35)>0){$('#gp2').css('margin-top',nht-35); $('#gp3').css('margin-top',nht-35);}
     }

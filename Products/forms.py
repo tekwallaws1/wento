@@ -375,12 +375,29 @@ class QuotationForm(forms.ModelForm):
 		for field in self.fields:
 			self.fields[field].widget.attrs.update({
 	            'class': 'form-control mb-4'
+	        })
+
+class QuotationEditForm(forms.ModelForm):
+	class Meta:
+		model = Quotes
+		fields = ['Quote_From', 'Quote_No', 'Date', 'Subject', 'Valid_Days', 'Comments', 'Thanks_Note', 
+		'Lock_Status', 'Quote_To', 'Firm_Name', 'Reference_Person', 'Phone_Number', 'Email', 'Location']
+	
+		# widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'})}
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items(): 
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
 	        })		
 
 class QuoteTCForm(forms.ModelForm):
 	class Meta:
-		model = Quotes
-		fields = ['Quote_No']
+		model = Quote_TC
+		exclude = ['Quote_No']
 	
 		# widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'})}
 
@@ -396,7 +413,7 @@ class QuoteTCForm(forms.ModelForm):
 class QuoteItemsForm(forms.ModelForm):
 	class Meta:
 		model = Quote_Items
-		fields = ['Quote_No']
+		exclude = ['user', 'Quote_No']
 	
 		# widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'})}
 
@@ -411,8 +428,8 @@ class QuoteItemsForm(forms.ModelForm):
 
 class CopyQuoteItemsForm(forms.ModelForm):
 	class Meta:
-		model = Quote_Items
-		fields = ['Quote_No']
+		model = Copy_Quote_Items
+		exclude = ['user', 'Quote_No', 'Item_From_Product']
 	
 		# widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'})}
 

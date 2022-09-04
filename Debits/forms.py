@@ -94,4 +94,15 @@ class DeclareDayAsForm(forms.ModelForm):
 		for _, value in self.fields.items():
 			value.widget.attrs['placeholder'] = value.help_text
 		for field in self.fields:
-			self.fields[field].widget.attrs.update({'class': 'form-control mb-4'})        
+			self.fields[field].widget.attrs.update({'class': 'form-control mb-4'})
+
+class EmployMonthlySalaryForm(forms.ModelForm):	
+	class Meta:
+		model = Monthly_Salaries
+		fields = ['Issued_Salary', 'LOP', 'OT_Amount', 'PF', 'ESI', 'TDS', 'Other_Deductions', 'Salary_Advance']
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({'class': 'form-control mb-4'})       

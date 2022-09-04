@@ -17,7 +17,7 @@
   <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
   <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
   <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
-  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script> 
   <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
   <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
   <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
@@ -70,7 +70,7 @@
   var cl = [0,  1, 2, 3, 4, 5, 6, 7, 8]
   var wdths = ['3%', '12%', '19%', '13%', '6%', '10%', '12%', '10%', '14%'];
   
-   var msgTop = "{% if cat == 'Output' %}Output GST: {{gst.Ot_gst|floatformat:0|intcomma}} | Braekup CGST: {{gst.Ot_cgst|floatformat:0|intcomma}}, SGST: {{gst.Ot_sgst|floatformat:0|intcomma}}, IGST: {{gst.Ot_igst|floatformat:0|intcomma}} | Payable GST: {{gst.It_gst|mul:-1|add:gst.Ot_gst|floatformat:0|intcomma}}{% else %}Input GST: {{gst.It_gst|floatformat:0|intcomma}} | Previous Available Credit: {{gst.gstcredit|floatformat:0|intcomma}}{% endif %}"
+   var msgTop = "{% if cat == 'Output' %}Total Billing: {{cust_bil|floatformat:0|intcomma}} | Output GST: {{gst.Ot_gst|floatformat:0|intcomma}} | Braekup CGST: {{gst.Ot_cgst|floatformat:0|intcomma}}, SGST: {{gst.Ot_sgst|floatformat:0|intcomma}}, IGST: {{gst.Ot_igst|floatformat:0|intcomma}} | Payable GST: {{gst.It_gst|mul:-1|add:gst.Ot_gst|floatformat:0|intcomma}}{% else %}Input GST: {{gst.It_gst|floatformat:0|intcomma}} | Previous Available Credit: {{gst.gstcredit|floatformat:0|intcomma}}{% endif %}"
     var title = '{{cat}} GST - {{month|date:'M-Y'}}';
     var filename = '{{cat}}GST-{{month|date:'M-y'}}'
     var ort = 'landscape'
@@ -222,9 +222,9 @@
         <a ht="total output gst" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Output GST ( Billings-{{gst.oc}} )</div>
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Output GST ( Billing-{{cust_bil|floatformat:0|intcomma}} )</div>
               <div class="h6 mb-0 font-weight-800 text-black-700">
-                Total : ₹ {{gst.Ot_gst|floatformat:0|intcomma}}
+                Total Output GST: ₹ {{gst.Ot_gst|floatformat:0|intcomma}}
                 <br>CGST: ₹ {{gst.Ot_cgst|floatformat:0|intcomma}} | SGST: ₹ {{gst.Ot_sgst|floatformat:0|intcomma}} | IGST: ₹ {{gst.Ot_igst|floatformat:0|intcomma}}
               </div>
             </div>
@@ -237,7 +237,7 @@
         <a ht="input gst or credi available" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Input GST ( Biilings {{gst.ic}} )</div>
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Input GST ( Billing-{{vend_bil|floatformat:0|intcomma}} )</div>
               <div class="h6 mb-0 font-weight-800 text-black-700">
                 <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{gst.It_gst|floatformat:0|intcomma}}
                 <br>Previous Credit: ₹ {{gst.gstcredit|floatformat:0|intcomma}}</div>
@@ -279,8 +279,8 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>GST No</th>
             <th>Receiver Name</th>
+            <th>GST No</th>
             <th>Invoice No</th>
             <th>Date&emsp;</th>
             <th>Taxable<br>Value</th>
@@ -296,11 +296,11 @@
               <td >{{forloop.counter}}{% if x.Balance_Amount == 0 %}#{% endif %}</td>
 
                 <td style="white-space:normal;">
-                  {{x.Billing_To.GST_No}}
+                  {{x.Billing_To.Customer_Name}}
                 </td>
 
                 <td style="white-space:normal;">
-                  {{x.Billing_To.Customer_Name}}
+                  {{x.Billing_To.GST_No}}
                 </td>
 
                 <td style="white-space:normal;">
@@ -317,7 +317,7 @@
 
                 <td style="white-space:normal;">
                   {{gst|floatformat:2|intcomma}}
-                  {% if igst == 0 %}
+                  {% if x.Billing_From.State == x.Billing_To.State %}
                     <br>CGS: {{cgst|floatformat:2|intcomma}}
                     <br>SGST: {{sgst|floatformat:2|intcomma}}
                   {% else %}
@@ -347,8 +347,8 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>GST No</th>
             <th>Vendor Name</th>
+            <th>GST No</th>
             <th>Invoice No</th>
             <th>Date&emsp;</th>
             <th>Taxable<br>Value</th>
@@ -365,17 +365,17 @@
 
                 <td style="white-space:normal;">
                   {% if x.PO_No %}
-                    {{x.PO_No.Vendor.GST_No}}
+                    {{x.PO_No.Vendor.Supplier_Name}}
                   {% else %}
-                    {{x.Vendor.GST_No}}
+                    {{x.Vendor.Supplier_Name}}
                   {% endif %}
                 </td>
 
                 <td style="white-space:normal;">
                   {% if x.PO_No %}
-                    {{x.PO_No.Vendor.Supplier_Name}}
+                    {{x.PO_No.Vendor.GST_No}}
                   {% else %}
-                    {{x.Vendor.Supplier_Name}}
+                    {{x.Vendor.GST_No}}
                   {% endif %}
                 </td>
 

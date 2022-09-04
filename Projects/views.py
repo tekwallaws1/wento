@@ -282,7 +282,8 @@ def GST_Returns(request, proj, cat, months):
 
 	Ival, Oval, Igst, Ogst, Ocgst, Osgst, Oigst = [],[],[],[],[],[],[]
 	ic, oc, It_gst, Ot_gst, Ot_cgst, Ot_sgst, Ot_igst = 0,0,0,0,0,0,0
-
+	cust_bil = sum(outputgst.values_list('Invoice_Amount',flat=True)) if outputgst != None else 0
+	vend_bil = sum(inputgst.values_list('Invoice_Amount',flat=True)) if inputgst != None else 0
 	ic, oc = len(inputgst) or 0, len(outputgst) or 0
 	# It_gst, Ot_gst = sum(inputgst.values_list('GST_Amount', flat=True)) or 0, sum(outputgst.values_list('GST_Amount', flat=True)) or 0
 	
@@ -309,5 +310,5 @@ def GST_Returns(request, proj, cat, months):
 	gstcredit = 0 if gstcredit < 0 else gstcredit
 	gst = {'ic':ic, 'oc':oc, 'It_gst':It_gst, 'Ot_gst':Ot_gst, 'Ot_cgst':Ot_cgst, 'Ot_sgst':Ot_sgst, 'Ot_igst':Ot_igst, 'gstcredit':gstcredit}
 
-	return render(request, 'projects/gst.html', {'pdata':pdata, 'input_gst':input_gst, 'output_gst':output_gst, 'gst':gst, 'cat':cat, 'month':months})
+	return render(request, 'projects/gst.html', {'pdata':pdata, 'input_gst':input_gst, 'output_gst':output_gst, 'gst':gst, 'cat':cat, 'month':months, 'cust_bil':cust_bil, 'vend_bil':vend_bil})
 

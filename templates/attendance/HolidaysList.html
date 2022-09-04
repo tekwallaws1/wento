@@ -113,6 +113,7 @@
       <span style="color:blue;">{{year}}</span>
     </h3>
     <button type="button"  onclick="location.href='/{{pdata.pj}}/holidaysform/create/1/'" class="btn btn-sm btn-primary ">Add Holiday/Work Day</button>
+    <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger" ht="select category">Do More</button>
     <div>
     <form class="forms-sample" action="" id='formaction' method="POST" >
       {% csrf_token %}
@@ -204,6 +205,32 @@
           <div class="template-demo">
             <button type="button"  onclick="location.href='/{{pdata.pj}}/holidaysform/edit/'+getid+'/'" class="btn btn-sm btn-primary ">Edit</button>
             <button type="button"  data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-danger" onclick="fnchide()">Delete</button>  
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- more pages -->
+  <div class="modal fade text-left" id="doMoreModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button class="btn btn-sm btn-primary" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
+            <button class="btn btn-sm btn-info" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
+            {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
+              <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/employeslist/'">Employes List</button>
+              <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
+              <button class="btn btn-sm btn-danger" onclick="location.href='/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
+              <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+            {% endif %}
           </div>
         </div>
       </div>

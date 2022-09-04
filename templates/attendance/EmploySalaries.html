@@ -104,7 +104,7 @@
 <div>
   <div style="float:left">
     <button type="button" onclick="location.href='/{{pdata.pj}}/employsalariesform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="add/register employ salary">Add Employ Salary</button>
-    <button type="button" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'" class="btn btn-sm btn-info mb-4" ht="employ wise salary revisions">Salary Revisions</button>
+    <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger mb-4" ht="select category">Do More</button>
   </div>
   <div style="float:right">
     <!-- <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
@@ -287,6 +287,30 @@
               <input type="button" class="btn btn-sm btn-primary" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
             </div> 
           </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- more pages -->
+  <div class="modal fade text-left" id="doMoreModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button class="btn btn-sm btn-primary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+            <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
+            <button class="btn btn-sm btn-info" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
+            <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
+            <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employeslist/'">Employes List</button>
+            <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+          </div>
         </div>
       </div>
     </div>

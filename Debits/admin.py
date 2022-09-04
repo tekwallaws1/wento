@@ -9,7 +9,8 @@ from .models import *
 @admin.register(Attendance)
 @admin.register(Monthatnd)
 @admin.register(Working_Days)
-@admin.register(DeclareDayAs) 
+@admin.register(DeclareDayAs)
+@admin.register(Monthly_Salaries) 
 
 
 class ExpensesAdmin(ImportExportModelAdmin):

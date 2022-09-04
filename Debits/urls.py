@@ -23,5 +23,9 @@ urlpatterns = [
     path('<proj>/holidaysform/<fnc>/<hid>/', views.Holidays_Form, name='holidaysform'),
     path('<proj>/holidayslist/<year>/', views.Holidays_List, name='holidayslist'),
 
+    path('<proj>/monthlysalariesedit/<month>/<eid>/', views.Monthly_Salaries_Edit, name='monthlysalariesedit'),
+    path('<proj>/monthlysalaries/<month>/<mode>/', views.Gen_Monthly_Salaries, name='monthlysalaries'),
+    path('<proj>/orderwisesalaries/<month>/<mode>/', views.Get_Order_Wise_Salaries, name='orderwisesalaries'),
+
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
- 

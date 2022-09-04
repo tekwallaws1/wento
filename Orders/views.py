@@ -1,13 +1,13 @@
 from django.shortcuts import render, redirect
 from .forms import *
 from django.contrib import messages
-from datetime import date, datetime, timedelta 
+from datetime import date, datetime, timedelta  
 from django.http import HttpResponse, JsonResponse
 from django.views.generic import View
 from .filters import *
 from django.shortcuts import get_object_or_404, render
 from django.db import IntegrityError 
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required 
 from django.utils.decorators import method_decorator
 from django.contrib.auth import logout
 from django.db.models import Q
@@ -15,9 +15,9 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.db.models import Sum, Avg, Count
 from Projects.fyear import get_financial_year, get_fy_date, get_fy_date_fy
 from Projects.basedata import projectname
-from .customfunctions import assign_paystatus_to_order, workstatus, updateduedays, get_invoice_number, inv_amoumt_update, inv_amount_exceed, adjust_payments_to_invoices, genOrderNo, postform, adj_pay_to_all_inv
+from .customfunctions import assign_paystatus_to_order, workstatus, updateduedays, get_invoice_number, inv_amoumt_update, inv_amount_exceed, adjust_payments_to_invoices, genOrderNo, postform, adj_pay_to_all_inv, paymentdelete
 from num2words import num2words
-from django.urls import reverse
+from django.urls import reverse 
  
  
 # Create your views here. 
@@ -312,9 +312,7 @@ def Orders_Payments_Form(request, proj, rid):
 		form = OrdersPaymentsForm(request.POST, request.FILES)
 		if form.is_valid():
 			p = form.save()
-			assign_paystatus_to_order(request, p.id, order.id)
-			adjust_payments_to_invoices(request, order.id)
-			adj_pay_to_all_inv(request, order.Customer_Name)
+			assign_paystatus_to_order(request, p.id)
 			messages.success(request, "Payment Has Been Added")
 			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
 		else:
@@ -338,9 +336,7 @@ def Payments_Form(request, proj, fnc, rid):
 				p = form.save(commit=False)
 				p= form.save()
 				order = Orders.objects.get(id=p.Order_No.id)
-				assign_paystatus_to_order(request, p.id, order.id)
-				adjust_payments_to_invoices(request, order.id)
-				adj_pay_to_all_inv(request, p.Order_No.Customer_Name)
+				assign_paystatus_to_order(request, p.id)
 				messages.success(request, "Selected Payment Details Has Been Updated")
 				return redirect('/%s/paymentslist/Received/'%pdata['pj'])
 			else:
@@ -353,15 +349,38 @@ def Payments_Form(request, proj, fnc, rid):
 	elif fnc == 'delete': #Delete
 		getdata = get_object_or_404(Payment_Status, id=rid)
 		order = getdata.Order_No
+		inv = getdata.Invoice_No
+		dlt_amount = getdata.Received_Amount
 		getdata.delete()
+
 		order = Orders.objects.get(id=order.id)
-		adjust_payments_to_invoices(request, order.id)
-		adj_pay_to_all_inv(request, order.Customer_Name)
-		if not order.Payment_Status:
-			order.Payment_Status = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date').last()
+		ag_ord = Payment_Status.objects.filter(Order_No=order).order_by('-Payment_Date')
+		ag_cust = Payment_Status.objects.filter(Order_No__Customer_Name=order.Customer_Name).order_by('-Payment_Date')
+
+		if ag_ord == None and ag_cust == None:
+			messages.success(request, "Selected Payment Details Has Been Deleted")
+			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+		else:
+			if ag_ord:
+				last_pay = ag_ord.last()
+			else:
+				last_pay = ag_cust.last()
+			order.Payment_Status = last_pay
 			order.save()
-		messages.success(request, "Selected Payment Details Has Deleted")
-		return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+			order = Purchases.objects.get(id=order.id)
+			paymentdelete(request, order.id, inv.id, dlt_amount)
+			messages.success(request, "Selected Payment Details Has Deleted")
+			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+
+		# getdata.delete()
+		# order = Orders.objects.get(id=order.id)
+		# adjust_payments_to_invoices(request, order.id)
+		# adj_pay_to_all_inv(request, order.Customer_Name)
+		# if not order.Payment_Status:
+		# 	order.Payment_Status = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date').last()
+		# 	order.save()
+		# messages.success(request, "Selected Payment Details Has Deleted")
+		# return redirect('/%s/paymentslist/Received/'%pdata['pj'])
 
 	if request.method ==  'POST': #Create
 		form = PaymentsForm(request.POST, request.FILES)
@@ -374,12 +393,9 @@ def Payments_Form(request, proj, fnc, rid):
 			if not p.Order_No: # when paymentbthrough invoice number
 				p.Order_No = p.Invoice_No.Order
 				p.save()
-				assign_paystatus_to_order(request, p.id, p.Order_No.id)
+				assign_paystatus_to_order(request, p.id)
 			else:
-				assign_paystatus_to_order(request, p.id, p.Order_No.id)
-			order = Orders.objects.get(id=p.Order_No.id)
-			adjust_payments_to_invoices(request, order.id)
-			adj_pay_to_all_inv(request, p.Order_No.Customer_Name)
+				assign_paystatus_to_order(request, p.id)
 			messages.success(request, "Payment Has Been Added")
 			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
 		else:
@@ -395,123 +411,177 @@ def Payments_Form(request, proj, fnc, rid):
 			form.fields["Invoice_No"].queryset = Invoices.objects.filter(**lookup1, Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
 			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
 
-# Create your views here. 
+# @login_required
+# def Payments_List(request, proj, status):
+# 	pdata = projectname(request, proj)
+# 	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+# 	lookup1 = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
+# 	total, estimate, received, due, overdue, advance= 0,0,0,0,0,0
+	
+# 	form = PaymentsEmptyForm()
+# 	form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=False))
+# 	form.fields["Invoice_No"].queryset = Invoices.objects.filter(**lookup1, Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
+	
+# 	lookup = {'Order_No__Related_Project__isnull':False} if proj == 'All' else {'Order_No__Related_Project':pdata['pj']}
+# 	table_pays = Payment_Status.objects.filter(**lookup).order_by('Payment_Date')
+# 	table_fy_pays = Payment_Status.objects.filter(**lookup, Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
+	
+
+# 	filter_data = PaymentsFilter(request.GET, queryset=table_fy_pays)
+# 	table_fy_pays = filter_data.qs
+# 	table_data = table_fy_pays
+# 	has_filter_pays = any(field in request.GET for field in set(filter_data.get_fields()))
+	
+# 	if has_filter_pays: #update filter data queyset
+# 		filter_data = PaymentsFilter(request.GET, queryset=table_pays)
+# 		table_pays = filter_data.qs
+# 		table_data = table_pays
+
+# 	pays_list, bills_list, t_rec, t_due, adv, t_billed, due_date, isallbill_clear, t_adv, advances, = [], [], [], [], [], [], [], [], 0, 0
+# 	t_due_all, t_due_overdue, t_due_unbilled, t_due_coming, total_billed, total_balance_as_advance = 0,0,0,0,0, 0
+
+# 	orders_table_data = []
+# 	for x in table_data:
+# 		orders_table_data.append(Orders.objects.get(id=x.Order_No.id))
+
+# 	orders_table_data = list(dict.fromkeys(orders_table_data))
+# 	# table_data = orders_table_data
+	
+# 	for x in orders_table_data:
+# 		pays 	 = Payment_Status.objects.filter(Order_No=x).order_by('Payment_Date')
+# 		bills    = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=0).order_by('Invoice_Date')
+# 		for p in pays:
+# 			if p.Payment_Type=='Advance':
+# 				t_adv = t_adv + p.Received_Amount
+# 		if pays:
+# 			pays_list.append(pays)
+# 			rec = pays.aggregate(sum=Sum('Received_Amount')).get('sum') or 0
+# 			t_rec.append(rec)
+# 			for k in pays:
+# 				ad = 'True' if k.Payment_Type=='Advance' else 'False'
+# 				if ad == 'True':
+# 					break 
+# 			adv.append(ad)
+# 		else:
+# 			pays_list.append(None)
+# 			t_rec.append(0)
+# 			rec = 0
+
+# 		if bills:
+# 			billtotal = bills.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0
+# 			bills_list.append(bills)
+# 			t_due.append(bills.aggregate(sum=Sum('Due_Amount')).get('sum') or 0)
+# 			t_billed.append(billtotal)
+			
+# 			for j in bills: #if all bills clear no need to show note text as coming due date etc..
+# 				dt = 'False' if j.Due_Amount==0 else 'True'
+# 				if dt == 'True':
+# 					break
+# 			if dt=='True': #means all bills not clear
+# 				for j in bills:
+# 					dt = 'True' if j.Payment_Over_Due_Days==0 else 'False'
+# 					if dt == 'True':
+# 						break
+			
+# 			for n in bills:
+# 				clr = 'False' if n.Due_Amount!=0 else 'True'
+# 				if clr == 'False':
+# 					break
+
+# 			due_date.append(dt)
+# 			isallbill_clear.append(clr)
+# 		else:
+# 			bills_list.append(None)
+# 			t_due.append(None)
+# 			due_date.append(None)
+# 			t_billed.append(None)
+# 			isallbill_clear.append(None)
+# 			billtotal = 0
+
+# 		advances = advances + t_adv
+# 		t_adv=0
+
+# 		due_overdue = 0
+# 		due_coming = 0
+# 		for d in bills:
+# 			if d.Payment_Over_Due_Days and  d.Payment_Over_Due_Days > 0:
+# 				due_overdue = due_overdue+d.Due_Amount
+# 			else:
+# 				due_coming = due_coming+d.Due_Amount
+
+
+# 		t_due_overdue = t_due_overdue + due_overdue
+# 		t_due_coming = t_due_coming + due_coming
+# 		total_billed = total_billed + billtotal
+
+# 		if billtotal < rec:
+# 			total_balance_as_advance = total_balance_as_advance + rec - billtotal
+
+# 	# t_due_unbilled = t_orders_value - total_billed - total_balance_as_advance
+# 	t_due_all = t_due_overdue + t_due_coming
+# 	pc = {'t_due_all':t_due_all, 't_due_overdue':t_due_overdue, 't_due_coming':t_due_coming,'total_balance_as_advance':total_balance_as_advance}
+
+# 	data = zip(orders_table_data, pays_list, bills_list, t_rec, t_due, adv, t_billed, due_date, isallbill_clear)
+# 	total_rec = sum(t_rec) or 0
+# 	billed_rec = total_rec - total_balance_as_advance
+	
+# 	return render(request, 'orders/PaymentsList.html', {'table':table_data, 'data':data, 'filter_data':filter_data, 
+# 		'pdata':pdata, 'status':status, 'pc':pc, 'total_rec':total_rec, 'billed_rec':billed_rec, 'advances':advances, 'form_payments':form})
+
 @login_required
 def Payments_List(request, proj, status):
-	pdata = projectname(request, proj)
-	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
-	lookup1 = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
-	total, estimate, received, due, overdue, advance= 0,0,0,0,0,0
+  pdata = projectname(request, proj)
+  lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+  lookup1 = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
+
+  form = PaymentsEmptyForm()
+  form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=False))
+  form.fields["Invoice_No"].queryset = Invoices.objects.filter(**lookup1, Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
+
+  lookup2 = {'Order_No__Related_Project__isnull':False} if proj == 'All' else {'Order_No__Related_Project':pdata['pj']}
+
+  table_data = Payment_Status.objects.filter(**lookup2).order_by('Payment_Date')
+  # table_fy_pays = Vendor_Payment_Status.objects.filter(**lookup1, Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
+  
+  # ins = Invoices.objects.all()
+  # for v in ins:
+  # 	v.Payment_Status = None
+  # 	v.Due_Amount = v.Invoice_Amount
+  # 	v.Payment_Cleared_Date = None
+  # 	v.Final_Payment_Status = 0
+  # 	v.save()
+
+  # for x in Payment_Status.objects.all():
+  # 	assign_paystatus_to_order(request, x.id)
+  # return HttpResponse('payments update')
+
+
+  filter_data = PaymentsFilter1(request.GET, queryset=table_data)
+  table_data = filter_data.qs
+  has_filter_pays = any(field in request.GET for field in set(filter_data.get_fields()))
+ 
+  total_billed, total_received, total_due, advance, customers = 0,0,0,0,[]
+  
+  if has_filter_pays: #update filter data queyset
+  	for x in table_data: customers.append(x.Order_No.Customer_Name)
+  	customers = list(dict.fromkeys(customers))
+  else:
+    for x in Orders.objects.filter(**lookup, Order_Type='Confirmed'): customers.append(x.Customer_Name)
+    customers = list(dict.fromkeys(customers))
+  
+  for x in customers:
+			inv_list = Invoices.objects.filter(**lookup1, Order__Customer_Name=x, Lock_Status=1)
+			pay_list = Payment_Status.objects.filter(**lookup2, Order_No__Customer_Name=x)
+			if inv_list:
+				total_billed = total_billed + sum(inv_list.values_list('Invoice_Amount', flat=True))
+				total_due = total_due + sum(inv_list.values_list('Due_Amount', flat=True))
+			if pay_list:
+				total_received = total_received + sum(pay_list.values_list('Received_Amount', flat=True))
 	
-	form = PaymentsEmptyForm()
-	form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=False))
-	form.fields["Invoice_No"].queryset = Invoices.objects.filter(**lookup1, Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
-	
-	lookup = {'Order_No__Related_Project__isnull':False} if proj == 'All' else {'Order_No__Related_Project':pdata['pj']}
-	table_pays = Payment_Status.objects.filter(**lookup).order_by('Payment_Date')
-	table_fy_pays = Payment_Status.objects.filter(**lookup, Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
-	
+  advance = total_due - (total_billed - total_received)
+  return render(request, 'orders/PaymentsList.html', {'table':table_data, 'filter_data':filter_data, 
+    'pdata':pdata, 'status':status, 'total_billed':total_billed, 'total_received':total_received, 'total_due':total_due, 'advance':advance, 'form_payments':form})
 
-	filter_data = PaymentsFilter(request.GET, queryset=table_fy_pays)
-	table_fy_pays = filter_data.qs
-	table_data = table_fy_pays
-	has_filter_pays = any(field in request.GET for field in set(filter_data.get_fields()))
-	
-	if has_filter_pays: #update filter data queyset
-		filter_data = PaymentsFilter(request.GET, queryset=table_pays)
-		table_pays = filter_data.qs
-		table_data = table_pays
-
-	pays_list, bills_list, t_rec, t_due, adv, t_billed, due_date, isallbill_clear, t_adv, advances, = [], [], [], [], [], [], [], [], 0, 0
-	t_due_all, t_due_overdue, t_due_unbilled, t_due_coming, total_billed, total_balance_as_advance = 0,0,0,0,0, 0
-
-	orders_table_data = []
-	for x in table_data:
-		orders_table_data.append(Orders.objects.get(id=x.Order_No.id))
-
-	orders_table_data = list(dict.fromkeys(orders_table_data))
-	# table_data = orders_table_data
-	
-	for x in orders_table_data:
-		pays 	 = Payment_Status.objects.filter(Order_No=x).order_by('Payment_Date')
-		bills    = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=0).order_by('Invoice_Date')
-		for p in pays:
-			if p.Payment_Type=='Advance':
-				t_adv = t_adv + p.Received_Amount
-		if pays:
-			pays_list.append(pays)
-			rec = pays.aggregate(sum=Sum('Received_Amount')).get('sum') or 0
-			t_rec.append(rec)
-			for k in pays:
-				ad = 'True' if k.Payment_Type=='Advance' else 'False'
-				if ad == 'True':
-					break 
-			adv.append(ad)
-		else:
-			pays_list.append(None)
-			t_rec.append(0)
-			rec = 0
-
-		if bills:
-			billtotal = bills.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0
-			bills_list.append(bills)
-			t_due.append(bills.aggregate(sum=Sum('Due_Amount')).get('sum') or 0)
-			t_billed.append(billtotal)
-			
-			for j in bills: #if all bills clear no need to show note text as coming due date etc..
-				dt = 'False' if j.Due_Amount==0 else 'True'
-				if dt == 'True':
-					break
-			if dt=='True': #means all bills not clear
-				for j in bills:
-					dt = 'True' if j.Payment_Over_Due_Days==0 else 'False'
-					if dt == 'True':
-						break
-			
-			for n in bills:
-				clr = 'False' if n.Due_Amount!=0 else 'True'
-				if clr == 'False':
-					break
-
-			due_date.append(dt)
-			isallbill_clear.append(clr)
-		else:
-			bills_list.append(None)
-			t_due.append(None)
-			due_date.append(None)
-			t_billed.append(None)
-			isallbill_clear.append(None)
-			billtotal = 0
-
-		advances = advances + t_adv
-		t_adv=0
-
-		due_overdue = 0
-		due_coming = 0
-		for d in bills:
-			if d.Payment_Over_Due_Days > 0:
-				due_overdue = due_overdue+d.Due_Amount
-			else:
-				due_coming = due_coming+d.Due_Amount
-
-
-		t_due_overdue = t_due_overdue + due_overdue
-		t_due_coming = t_due_coming + due_coming
-		total_billed = total_billed + billtotal
-
-		if billtotal < rec:
-			total_balance_as_advance = total_balance_as_advance + rec - billtotal
-
-	# t_due_unbilled = t_orders_value - total_billed - total_balance_as_advance
-	t_due_all = t_due_overdue + t_due_coming
-	pc = {'t_due_all':t_due_all, 't_due_overdue':t_due_overdue, 't_due_coming':t_due_coming,'total_balance_as_advance':total_balance_as_advance}
-
-	data = zip(orders_table_data, pays_list, bills_list, t_rec, t_due, adv, t_billed, due_date, isallbill_clear)
-	total_rec = sum(t_rec) or 0
-	billed_rec = total_rec - total_balance_as_advance
-	
-	return render(request, 'orders/PaymentsList.html', {'table':table_data, 'data':data, 'filter_data':filter_data, 
-		'pdata':pdata, 'status':status, 'pc':pc, 'total_rec':total_rec, 'billed_rec':billed_rec, 'advances':advances, 'form_payments':form})
 
 #create work from orderlsit, only create
 @login_required
@@ -782,6 +852,13 @@ def Edit_Invoice_Form(request, proj, fnc, invid):
 	msg='msg'
 	url = '/'+str(pdata['pj'])+'/invoice/edit/'+invid+'/'+str(inv_order_id)+'/itemid/'
 
+	if p.Set_For_Returns == 1:
+		if p.Amended_GST_Returns_Date == None:
+			p.Amended_GST_Returns_Date = p.Invoice_Date
+	else:
+		p.Amended_GST_Returns_Date == None
+	p.save()
+
 	if fnc == 'edit_manually':
 		k = postform(request, inv_order_id, invid, fnc)
 		if k != 'getform':
@@ -810,7 +887,7 @@ def Edit_Invoice_Form(request, proj, fnc, invid):
 			order = Orders.objects.get(id=p.Order.id)
 			if p.Lock_Status==1 and p.Is_Proforma==0:
 				order.Billing_Status = p
-				k = adjust_payments_to_invoices(request, order.id)
+				k = adjust_payments_to_invoices(request, order.id, p.id)
 			else:
 				# last order billing status opdate
 				inv = Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0).last()
@@ -821,6 +898,7 @@ def Edit_Invoice_Form(request, proj, fnc, invid):
 			order.save()
 			
 			if p.Lock_Status == 1:
+				p.save()
 				msg = "Invoice Has Been Locked and Generated Successfully"
 			else:
 				msg = "Requested Details Has Been Updated Successfully"
@@ -981,6 +1059,8 @@ def Invoice_TC_Form(request, proj, fnc, invid, rid):
 @login_required
 def Invoices_List(request, proj, status):
 	pdata = projectname(request, proj)
+
+	# print('ggg', Invoices.objects.values('Invoice_No').annotate(Count('id')).order_by().filter(id__count__gt=1))
 	
 	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
 	form = InvoicesForm1()
@@ -1009,7 +1089,7 @@ def Invoices_List(request, proj, status):
 		table_inv = filter_data.qs
 		table_data = table_inv
 
-	full_due_inv, part_due_inv, full_clear_inv, total_billing = 0, 0, 0, 0
+	full_due_inv, part_due_inv, full_clear_inv, total_billing, total_rec = 0, 0, 0, 0, 0
 	fdc, pdc, fcc, tbc = 0, 0, 0, 0 #count
 	orders_list, invoices_list  = [], []
 
@@ -1020,27 +1100,9 @@ def Invoices_List(request, proj, status):
 	else:
 		table_data = table_data.filter(Lock_Status=0, Is_Proforma=0)
 
-
-	for x in table_data:
-		orders_list.append(x.Order)
-	orders_list = list(dict.fromkeys(orders_list))
-
-	for x in orders_list:
-		if status == 'Issued':
-			inv = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=0)
-		elif status == 'Proforma':
-			inv = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=1)
-		else:
-			inv = Invoices.objects.filter(Order=x, Lock_Status=0, Is_Proforma=0)
-
-		invoices_list.append(inv)
-		inv = inv.filter(Invoice_Amount__isnull=False)
-		inv_total 	 = sum(inv.values_list('Invoice_Amount', flat=True)) or 0
-		
-		total_billing = total_billing + inv_total
-		tbc = tbc + len(inv)
-
-		for a in inv:
+	
+	if table_data:
+		for a in table_data:
 			if a.Due_Amount:
 				if a.Due_Amount == a.Invoice_Amount:
 					full_due_inv = full_due_inv + a.Invoice_Amount
@@ -1053,10 +1115,59 @@ def Invoices_List(request, proj, status):
 					pdc = pdc + 1
 				else:
 					pass
+		total_billing = sum(table_data.values_list('Invoice_Amount', flat=True)) or 0
+		tbc = len(table_data)
+
+
+		for x in table_data:
+			orders_list.append(x.Order)
+		orders_list = list(dict.fromkeys(orders_list))
+
+		for x in orders_list:
+			pay = Payment_Status.objects.filter(Order_No=x).order_by('Payment_Date')
+			if pay:
+				total_rec = total_rec + sum(pay.values_list('Received_Amount', flat=True))
+			inv = table_data.filter(Order=x)
+			invoices_list.append(inv)
+
+
+
+	# for x in table_data:
+	# 	orders_list.append(x.Order)
+	# orders_list = list(dict.fromkeys(orders_list))
+
+	# for x in orders_list:
+	# 	if status == 'Issued':
+	# 		inv = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=0)
+	# 	elif status == 'Proforma':
+	# 		inv = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=1)
+	# 	else:
+	# 		inv = Invoices.objects.filter(Order=x, Lock_Status=0, Is_Proforma=0)
+
+	# 	invoices_list.append(inv)
+	# 	inv = inv.filter(Invoice_Amount__isnull=False)
+	# 	inv_total 	 = sum(inv.values_list('Invoice_Amount', flat=True)) or 0
+		
+	# 	total_billing = total_billing + inv_total
+	# 	tbc = tbc + len(inv)
+
+	# 	for a in inv:
+	# 		if a.Due_Amount:
+	# 			if a.Due_Amount == a.Invoice_Amount:
+	# 				full_due_inv = full_due_inv + a.Invoice_Amount
+	# 				fdc = fdc + 1
+	# 			elif a.Due_Amount == 0:
+	# 				full_clear_inv = full_clear_inv + a.Invoice_Amount
+	# 				fcc = fcc + 1
+	# 			elif a.Due_Amount > 0 and a.Due_Amount != a.Invoice_Amount:
+	# 				part_due_inv = part_due_inv + a.Due_Amount
+	# 				pdc = pdc + 1
+	# 			else:
+	# 				pass
 
 	count = {'fdc':fdc, 'pdc':pdc, 'fcc':fcc, 'tbc':tbc}
 	heads = {'full_due_inv':full_due_inv, 'part_due_inv':part_due_inv, 'full_clear_inv':full_clear_inv, 'total_billing':total_billing}
-	table_items  = zip(orders_list, invoices_list)	
-	
+	table_items  = zip(orders_list, invoices_list)
+
 	return render(request, 'orders/InvoicesList.html', {'table':table_data, 'table_items':table_items, 'count':count, 'heads':heads, 
-		'filter_data':filter_data, 'pdata':pdata, 'status':status, 'form':form})
+		'filter_data':filter_data, 'pdata':pdata, 'status':status, 'form':form, 'total_rec':total_rec})

@@ -2,6 +2,9 @@ from UserAccounts.models import Account
 from django.contrib.auth.models import User
 from .models import Projects
 
+def call_i(request):
+	pass
+
 def projectname(request, var):
 	if var != None:
 		pj = Projects.objects.filter(Short_Name = var, Status='Active', ds=True).last()
@@ -16,7 +19,7 @@ def projectname(request, var):
 	return {'pj':pj}
 
 def profiledata(request):
-	if request.user.username: 
+	if request.user.username:  
 		try:
 			account = Account.objects.get(user__username = request.user.username, user__is_active = True)
 			if account.Upload_Photo:

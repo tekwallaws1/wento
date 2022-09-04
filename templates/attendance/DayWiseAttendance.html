@@ -32,13 +32,18 @@
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
     
-    function actionurl() {
-      document.getElementById('employaction').action = '/{{pdata.pj}}/employwiseattendance/month/employ/';
-    }
+    function getemploy(){
+      var dt = $("#getmonth").val();
+      var name = $("#getname").val();
+      if ( dt == '' ){dt = 'month'};
+      if ( name == '' ){dt = 'noemploy'};
+      location.href='/{{pdata.pj}}/employwiseattendance/'+dt+'/'+name+'/'}
     
     function getdt(){
       var dt = $("#getdate").val(); 
       document.getElementById('formaction').action='/{{pdata.pj}}/daywiseattendancelist/'+dt+'/'}
+
+    function fnchide(){$("#doMoreModal .close").click()}
 
 </script>
 
@@ -104,15 +109,68 @@
 
 {% block content %}
   <div class="page-header">
-    <h3 class="page-title">Day Wise Attendance Report&emsp;<span style="color:green; font-style:italic">{{table.first.Date|date:'d M Y'}}</span></h3>
-    <button class="btn1 btn1-primary" type="submit" onclick="location.href='/{{pdata.pj}}/attendanceform/create/1/daywise/'">Register Attendance</button>
-    <button class="btn1 btn1-info" type="submit" data-toggle="modal" data-target="#selectEmployModal" onclick="actionurl()">Employ Day Wise Report</button>
+    <h3 class="page-title">Day Wise Attendance Report&emsp;<span style="color:green; font-style:italic">{{table.first.Date|date:'d M Y'}}</span></h3>   
+  </div>
+
+<div>
+  <div style="float:left">
+    <button   onclick="location.href='/{{pdata.pj}}/attendanceform/create/1/daywise/'" type="button" class="btn btn-sm btn-primary">Register Attendance</button>
+    <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger" ht="select category">Do More</button>  
+  </div>
+
+  <div style="float:right">
+    <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+    <button type="button" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     <div>
       <form class="forms-sample" action="" id='formaction' method="POST" >
         {% csrf_token %}
         <input type="date" name='dates' id='getdate' style="width: 135px; font-size: 14px; margin-bottom:10px;">
         <button class="btn1 btn1-success" type="submit" onclick="getdt()">Change Date</button>
       </form>
+    </div>
+  </div>
+  <div style="clear:both"></div>
+</div>
+
+<!--Filter/Serch History Form-->
+  <div id="addEventsModal" class="modal animated fadeIn"> 
+    <div class="modal-dialog modal-dialog-centered">                            
+      <!-- Modal content -->
+      <div class="card modal-content">
+        <div class="modal-body">
+          <span id="discard" data-dismiss="modal" class="close">&times;</span>
+          <div class="add-edit-event-box">
+            <div class="add-edit-event-content">
+              <div class="add-event-title edit-event-title"></div>
+                <h5 class="modal-title">Search Data by Applying Filter</h5>
+                  <form class="">
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Day Status</label>
+                        {{ filter_data.form.Day_Status}}
+                      </div>
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Service Order</label>
+                          <input  name="Sales_Order" class="form-control">
+                        </div>
+                      </div> -->
+                       <div class="col-md-6 col-sm-6 col-12">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Service Order</label>
+                        {{ filter_data.form.Sales_Order}}
+                      </div>
+                     
+                      <div style="float:left; margin-left: 10px; margin-top:20px;" style="">
+                        <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                        <!-- <button id="add-e" class="btn">Add Task</button> -->
+                        <button id="edit-event" class="btn"></button>
+                      </div>
+                    </div>   
+                  </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -282,7 +340,7 @@
     </div>
   </div>
 
-<!-- Add/Edit attendance Form -->
+<!-- Employ and Month Selection -->
   <div class="modal fade text-left" id="selectEmployModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" >
       <div class="modal-content" id="modal-reload">
@@ -293,27 +351,56 @@
           </button>
         </div>
         <div class="modal-body">   
-          <form class="forms-sample" id='employaction' action='' method="POST">
             <div class="form-group mb-4">
               {% csrf_token %}
               <div class="form-group">
-                  <label style="color:green; font-size: 14px;">Choose Employ to Get Report</label>
-                  <select id='sel' name="employ" class="form-select form-control">
+                  <label style="color:green; font-size: 14px;">Choose Employ</label>
+                  <select id='getname' name="employ" class="form-select form-control">
                   <!-- <option selected>-------------</option> -->
                   <option value="">----------</option>
                     {% for x in employes %}
                       <option >{{ x.Name }}</option>
                     {% endfor %}
                 </select>
+              </div>
+              <div>
+                <label style="color:green; font-size: 14px;">Choose Month</label><br>
+                <input type="month" name='dates' id='getmonth' style="width: 135px; font-size: 14px; margin-bottom:10px;">
               </div>            
             </div>
-          <button type="submit" id="sbmt" class="btn btn-primary" >Submit</button>     
-        </form>
+          <button  class="btn btn-primary" onclick="getemploy()" >Submit</button>     
         </div>
       </div>
     </div>
   </div>
 <!-- End -->
+
+<!-- more pages -->
+  <div class="modal fade text-left" id="doMoreModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button class="btn btn-sm btn-primary" data-toggle="modal" data-target="#selectEmployModal" onclick="fnchide()">Employ Wise Attendance</button>
+            <button class="btn btn-sm btn-info" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
+            <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+            {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
+              <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/employeslist/'">Employes List</button>
+              <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
+              <button class="btn btn-sm btn-danger" onclick="location.href='/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
+              <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 {% endblock %}
  

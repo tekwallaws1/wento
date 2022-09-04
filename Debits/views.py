@@ -1,7 +1,8 @@
 from django.contrib.auth import login, authenticate
 from django.shortcuts import render, redirect
 from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
-from datetime import date, datetime, timedelta 
+from datetime import date, datetime, timedelta
+# from dateutil.relativedelta import relativedelta 
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -57,7 +58,11 @@ def update_expense_items(request, expid, itemid):
 def get_expenses_ref_no(request, expid):
 	fd = Expenses.objects.get(id=expid)
 	fd.FY = get_financial_year(str(date.today()))
-	last_expid =  Expenses.objects.all().order_by('-id')[1]
+
+	if len(Expenses.objects.all()) > 1:
+		last_expid =  Expenses.objects.all().order_by('-id')[1]
+	else:
+		last_expid = None
 
 	last_expno = Expenses.objects.get(id=last_expid.id) if last_expid != None else None
 
@@ -116,6 +121,23 @@ def exp_apr_update(request, expid):
 				exp.save()
 				empl_adv.Advance = 0
 				empl_adv.save()
+	else:
+		exp.Balance_Amount = exp.Total_Amount
+		exp.save()
+def exp_update(request, expid):
+	exp = Expenses.objects.get(id=expid)
+	empl_adv = Staff_Advances.objects.filter(Employ=exp.Submitted_By).last()
+	adv = empl_adv.Advance if empl_adv else None
+	if adv != None:
+		if adv != 0:
+			exp.Balance_Advance = adv
+			exp.save()
+			if adv >= exp.Total_Amount:
+				exp.Balance_Amount = 0
+				exp.save()
+			else:
+				exp.Balance_Amount = exp.Total_Amount - adv
+				exp.save()
 	else:
 		exp.Balance_Amount = exp.Total_Amount
 		exp.save()
@@ -367,6 +389,7 @@ def Expenses_Items_Form(request, proj, fnc, expid, itemid):
 			if form.is_valid():
 				p= form.save()
 				update_expense_items(request, expid, p.id)
+				exp_update(request, expid)
 				# messages.success(request, "Expense Has Been Updated successfully")
 				url = '/'+str(pdata['pj'])+'/expensesclaimreceipt/apr/edit/'+expid+'/itemid/'
 				return redirect(url)
@@ -383,6 +406,7 @@ def Expenses_Items_Form(request, proj, fnc, expid, itemid):
 		item = Exp_Items.objects.filter(Expenses=expid).last()
 		itemid = item.id if item != None else None
 		update_expense_items(request, expid, itemid)
+		exp_update(request, expid)
 		# messages.success(request, "Expense Has Been Deleted")
 		url = '/'+str(pdata['pj'])+'/expensesclaimreceipt/apr/edit/'+expid+'/itemid/'
 		return redirect(url)
@@ -393,6 +417,7 @@ def Expenses_Items_Form(request, proj, fnc, expid, itemid):
 				p= form.save()
 				p.save()
 				update_expense_items(request, expid, p.id)
+				exp_update(request, expid)
 				# messages.success(request, "Expense Has Been Added Successfully")
 				url = '/'+str(pdata['pj'])+'/expensesclaimreceipt/apr/edit/'+str(expid)+'/itemid/'
 				return redirect(url)
@@ -407,25 +432,85 @@ def Expenses_List(request, proj, apr, expid):
 	pdata = projectname(request, proj)
 	lookup = {'Expenses__Related_Project__isnull':False} if proj == 'All' else {'Expenses__Related_Project':pdata['pj']}
 	lookup1 = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	
 	if apr != 'approvalreq':
 		table = Exp_Items.objects.filter(**lookup).order_by('Expenses__Submitted_Date')
 	else:
 		account = Account.objects.get(user=request.user)
 		table = Exp_Items.objects.filter(**lookup, Expenses__Approval_Request_To=account, Expenses__Lock_Status=1).order_by('Expenses__Submitted_Date')	
 
+	# if apr != 'approvalreq':
+	# 	table = Expenses.objects.filter(**lookup).order_by('Submitted_Date')
+	# else:
+	# 	account = Account.objects.get(user=request.user)
+	# 	table = Expenses.objects.filter(**lookup, Approval_Request_To=account, Lock_Status=1).order_by('Submitted_Date')	
+
 	filter_data = ExpensesItemsFilter(request.GET, queryset=table)
 	has_filter = any(field in request.GET for field in set(filter_data.get_fields()))
+
+	# filter_data = ExpensesFilter(request.GET, queryset=table)
+	# has_filter = any(field in request.GET for field in set(filter_data.get_fields()))
 	
 	table = filter_data.qs
 	exp_no = []
 
-	if has_filter: #update filter data queyset
-		for x in table:
-			exp_no.append(Expenses.objects.get(Reference_No=x.Expenses.Reference_No))
-		exp = list(dict.fromkeys(exp_no))
-	else:
-		exp = []
-		for x in Expenses.objects.filter(**lookup1).order_by('Submitted_Date'): exp.append(x)
+	# acnt = Account.objects.all()
+	# for a in acnt:
+	# 	exp = Expenses.objects.filter(Submitted_By=a, Approval_Status=1, Lock_Status=1).order_by('Submitted_Date')
+	# 	for k in exp:
+	# 		k.Balance_Amount = k.Total_Amount
+	# 		k.Clearing_Status = 0
+	# 		Balance_Advance = 0
+	# 		k.save()
+	# 	deb = Debit_Amounts.objects.filter(Q(Employ=a)|Q(Issued_To=a)).order_by('Issued_Date')
+	# 	deb.update(As_Advance=0)
+	# 	if exp:
+	# 		if deb:				
+	# 			diff = sum(deb.values_list('Issued_Amount', flat=True)) or 0
+	# 			expp = sum(exp.values_list('Total_Amount', flat=True)) or 0
+	# 			if diff >= expp:
+	# 				exp.update(Balance_Amount=0, Clearing_Status=1, Balance_Advance = 0)
+	# 				bal = diff - expp
+	# 				if bal > 0:
+	# 					st = Expenses.objects.filter(Submitted_By=a, Approval_Status=1, Lock_Status=1).order_by('Submitted_Date').last()
+	# 					st.Balance_Advance = bal
+	# 					st.save()
+	# 					stdb = Debit_Amounts.objects.filter(Q(Employ=a)|Q(Issued_To=a)).order_by('Issued_Date').last()
+	# 					stdb.As_Advance = bal
+	# 					stdb.save()
+	# 					adv = Staff_Advances.objects.filter(Employ=a).last()
+	# 					if adv:
+	# 						adv.Advance = bal
+	# 						adv.Issued_Date = date.today() if adv.Issued_Date != None else adv.Issued_Date
+	# 						adv.save()
+	# 					else:
+	# 						Staff_Advances.objects.create(Employ=a, Advance=bal, Issued_Date=date.today())
+	# 			else:
+	# 				for e in exp:
+	# 					if diff >= e.Total_Amount:
+	# 						diff = diff - e.Total_Amount
+	# 						e.Balance_Amount = 0
+	# 						e.Clearing_Status = 1
+	# 						e.Balance_Advance = 0
+	# 						e.save()
+	# 					else:
+	# 						if diff > 0:
+	# 							e.Balance_Amount = e.Total_Amount - diff
+	# 							e.save()
+	# 							diff = 0
+	# return HttpResponse('gg')
+	
+	for x in table:
+		exp_no.append(Expenses.objects.get(Reference_No=x.Expenses.Reference_No))
+	exp = list(dict.fromkeys(exp_no))
+	
+	# if has_filter: #update filter data queyset
+	# 	for x in table:
+	# 		exp_no.append(Expenses.objects.get(Reference_No=x.Expenses.Reference_No))
+	# 	exp = list(dict.fromkeys(exp_no))
+	# else:
+	# 	exp = []
+	# 	for x in Expenses.objects.filter(**lookup1).order_by('Submitted_Date'): exp.append(x)
 	
 	cat_list = []
 	for x in exp:
@@ -587,6 +672,10 @@ def Debit_List(request, proj):
 	filter_data = DebitFilter(request.GET, queryset=table)
 	table = filter_data.qs
 
+	# for x in Debit_Amounts.objects.all():
+	# 	update_debits(request, x.id, 'create')
+	# return HttpResponse('kk')
+
 	total, staff, outside, advances = 0,0,0,0
 	if table:
 		total = sum(table.values_list('Issued_Amount', flat=True)) or o
@@ -690,7 +779,7 @@ def Attendance_Form(request, proj, fnc, eid, returnpage):
 				return render(request, 'attendance/AttendanceForm.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
 			else:
 				form = AttendanceForm(initial={'Date':date.today(), 'Start_Time':datetime.now().time().strftime("%H:%M")})
-				form.fields["Sales_Order"].queryset = Orders.objects.filter(Final_Status=0) 
+				form.fields["Sales_Order"].queryset = Orders.objects.filter(Final_Status=0, Related_Project__Short_Name='Services') 
 				return render(request, 'attendance/AttendanceForm.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
 
 @login_required
@@ -731,27 +820,31 @@ def Holidays_Form(request, proj, fnc, hid):
 				form = DeclareDayAsForm()
 				return render(request, 'attendance/HolidaysForm.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
 
-@login_required
-def DayWise_Attendance(request, proj, day):
-	pdata = projectname(request, proj)
-	dt = date.today() if day == 'day' else day
-	table = Attendance.objects.filter(Date=dt).order_by('id')
-	presents, leaves, absents, od = 0,0,0,0
-	presents = len(table.filter(Day_Status = 'Present'))
-	absents = len(table.filter(Day_Status = 'Absent'))
-	leaves = len(table.filter(Day_Status = 'Leave'))
-	od = len(table.filter(Q(Day_Status = 'On Duty')|Q(Day_Status = 'Tour')))
-	ot = []
-	for x in table:
-		if x.Total_Hours and x.Total_Hours > 9.5:
-			ot.append(x.Total_Hours-9)
-		else:
-			ot.append(None)
-	data = zip(table, ot)
-	df = {'presents':presents, 'absents':absents, 'leaves':leaves, 'od':od}
-	if not table:
-		messages.error(request, 'Attendance Not Registered/Available for Requested Date/Employ')
-	return render(request, 'attendance/DayWiseAttendance.html', {'day': day, 'pdata':pdata, 'table':table, 'df':df, 'data':data})
+# @login_required
+# def DayWise_Attendance(request, proj, day):
+# 	pdata = projectname(request, proj)
+# 	dt = date.today() if day == 'day' else day
+# 	table = Attendance.objects.filter(Date=dt).order_by('id')
+
+# 	filter_data = AttendanceFilter(request.GET, queryset=table)
+# 	table = filter_data.qs
+	
+# 	presents, leaves, absents, od = 0,0,0,0
+# 	presents = len(table.filter(Day_Status = 'Present'))
+# 	absents = len(table.filter(Day_Status = 'Absent'))
+# 	leaves = len(table.filter(Day_Status = 'Leave'))
+# 	od = len(table.filter(Q(Day_Status = 'On Duty')|Q(Day_Status = 'Tour')))
+# 	ot = []
+# 	for x in table:
+# 		if x.Total_Hours and x.Total_Hours > 9.5:
+# 			ot.append(x.Total_Hours-9)
+# 		else:
+# 			ot.append(None)
+# 	data = zip(table, ot)
+# 	df = {'presents':presents, 'absents':absents, 'leaves':leaves, 'od':od}
+# 	if not table:
+# 		messages.error(request, 'Attendance Not Registered/Available for Requested Date/Employ')
+# 	return render(request, 'attendance/DayWiseAttendance.html', {'day': day, 'pdata':pdata, 'table':table, 'filter_data':filter_data, 'df':df, 'data':data})
 
 @login_required
 def MonthWise_Attendance(request, proj, month):
@@ -759,16 +852,18 @@ def MonthWise_Attendance(request, proj, month):
 	dt = date.today() 
 	month = date.today()  if month == 'month' else (datetime.strptime(month, '%Y-%m'))
 
+	employes = Account.objects.filter(Status=1, ds=1).order_by('Employee_Id')
+
 	if month.month == date.today().month:
 		month = date.today()
 
 	if month.month > date.today().month and month.year >= date.today().year:
 		messages.error(request, "Please Choose Less Than or Equal to Current Month for Monthly Attendance")
-		return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'pdata':pdata})
+		return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'pdata':pdata, 'employes':employes})
 	
 	if not Attendance.objects.filter(Date__month=month.month):
 		messages.error(request, "Daily Attendance Not Available for Selected Month to Generate Monthly Attendance Report")
-		return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'pdata':pdata})
+		return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'pdata':pdata, 'employes':employes})
 	
 	k = working_days(request, month)
 
@@ -778,13 +873,16 @@ def MonthWise_Attendance(request, proj, month):
 	else: 
 		month = None
 		dates = {'start':date(date.today().year, date.today().month, 1), 'end':date.today()}
+	
+	return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'dates':dates, 'pdata':pdata, 'table':table, 'workdays':k, 'workhours1':(k*9)+(k*9*0.05), 'workhours2':(k*9)-(k*9*0.05), 'employes':employes})
 
-	return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'dates':dates, 'pdata':pdata, 'table':table, 'workdays':k, 'workhours1':(k*9)+(k*9*0.05), 'workhours2':(k*9)-(k*9*0.05)})
 @login_required
 def DayWise_Attendance(request, proj, day):
 	pdata = projectname(request, proj)
 	dt = date.today() if day == 'day' else day
 	table = Attendance.objects.filter(Date=dt).order_by('id')
+	filter_data = AttendanceFilter(request.GET, queryset=table)
+	table = filter_data.qs
 	presents, leaves, absents, od = 0,0,0,0
 	presents = len(table.filter(Day_Status = 'Present'))
 	absents = len(table.filter(Day_Status = 'Absent'))
@@ -801,7 +899,7 @@ def DayWise_Attendance(request, proj, day):
 	if not table:
 		messages.error(request, 'Attendance Not Registered/Available for Requested Date/Employ')
 	employes = Account.objects.filter(Status=1, ds=1).order_by('Employee_Id')
-	return render(request, 'attendance/DayWiseAttendance.html', {'day': day, 'pdata':pdata, 'table':table, 'df':df, 'data':data, 'employes':employes})
+	return render(request, 'attendance/DayWiseAttendance.html', {'day': day, 'pdata':pdata, 'table':table, 'filter_data':filter_data, 'df':df, 'data':data, 'employes':employes, 'month':dt})
 
 @login_required
 def Employ_Wise_Attendance(request, proj, month, empl):
@@ -809,26 +907,21 @@ def Employ_Wise_Attendance(request, proj, month, empl):
 	initail_month = month
 	month = date.today()  if month == 'month' else (datetime.strptime(month, '%Y-%m'))
 
-	if request.method == 'POST' and initail_month == 'month':
-		empl = request.POST['employ']
-		if not empl:
-			messages.error(request, 'Please Choose Correct Employ Details')
-			return redirect('/%s/daywiseattendancelist/day/'%pdata['pj'])
+	if empl == 'noemploy':
+		messages.error(request, 'Please Choose Correct Employ Details')
+		return redirect('/%s/daywiseattendancelist/day/'%pdata['pj'])
 	
-	atnd = Attendance.objects.filter(Date__month=month.month, Name__Name=empl).order_by('Date')
+	atnd = Attendance.objects.filter(Date__month=month.month, Date__year=month.year, Name__Name=empl).order_by('Date')
+	employ = Account.objects.filter(Name=empl).last()
+	employes = Account.objects.filter(Status=1, ds=1).order_by('Employee_Id')
 
-	if not atnd:
-		if initail_month == 'month':
-			messages.error(request, 'Attendance Not Available for Selected Employ')
-			return redirect('/%s/daywiseattendancelist/day/'%pdata['pj'])
-		else:
-			messages.error(request, 'Attendance Not Available for Selected Duration')
-			url = '/'+str(pdata['pj'])+'/employwiseattendance/month/'+empl+'/'
-			return redirect(url)
-	
 	if month.month > date.today().month and month.year >= date.today().year:
 		messages.error(request, "Please Choose Less Than or Equal to Current Month")
 		return redirect('/%s/daywiseattendancelist/day/'%pdata['pj'])
+
+	if not atnd:
+		messages.error(request, 'No Attendance Available for Selected Month for Selected Employ')
+		return render(request, 'attendance/EmployWiseAttendance.html', {'month': month, 'pdata':pdata, 'table':atnd, 'employ':employ, 'employes':employes})
 	
 	k = working_days(request, month)
 	workingdays = Working_Days.objects.filter(Month__month=month.month).last()
@@ -847,18 +940,7 @@ def Employ_Wise_Attendance(request, proj, month, empl):
 		month = None
 		dates = {'start':date(date.today().year, date.today().month, 1), 'end':date.today()}
 	
-	employ = Account.objects.filter(Name=empl).last()
-
-	employes = Account.objects.filter(Status=1, ds=1).order_by('Employee_Id')
-
-	if request.method == 'POST':
-		if initail_month == 'month':
-			url = '/'+str(pdata['pj'])+'/employwiseattendance/month/'+empl+'/'
-			return redirect(url)
-		else:
-			return render(request, 'attendance/EmployWiseAttendance.html', {'month': month, 'dates':dates, 'pdata':pdata, 'table':atnd, 'employ':employ, 'df':df, 'employes':employes})
-	else:
-		return render(request, 'attendance/EmployWiseAttendance.html', {'month': month, 'dates':dates, 'pdata':pdata, 'table':atnd, 'employ':employ, 'df':df, 'employes':employes})
+	return render(request, 'attendance/EmployWiseAttendance.html', {'month': month, 'dates':dates, 'pdata':pdata, 'table':atnd, 'employ':employ, 'df':df, 'employes':employes})
 
 @login_required
 def Holidays_List(request, proj, year):
@@ -933,3 +1015,217 @@ def Gen_Auto_Attendance(request, proj, month):
 		
 	url = '/'+str(pdata['pj'])+'/monthwiseattendancelist/'+month.strftime('%Y-%m')+'/'
 	return redirect(url)
+
+def call_extra_work_days_sal(request, month, a):
+	atnd = Attendance.objects.filter(Q(Name=a, Date__month=month.month, Date__year=month.year)|Q(Day_Status='Half Day'))
+	e_sal = Empl_Salaries.objects.filter(Employ_Name=a).last()
+	presents = []
+	hrs = 0
+	for d in atnd:
+		presents.append(d.Date)
+		if (d.Date).strftime('%a') == 'Sun':
+			if d.Total_Hours:
+				if d.Total_Hours > 7.5:
+					d.Total_Hours = d.Total_Hours - 1
+				hrs = hrs + (d.Total_Hours * 1.5) if d.Total_Hours > 4.5 else (hrs + d.Total_Hours)
+
+				
+	hds = []
+	hd = DeclareDayAs.objects.filter(Date__month=month.month, Date__year=month.year, Declare_Day_As='Holiday')
+	if hd:
+		for x in hd:
+			hds.append(x.Date)
+	for dt in hds:
+		if dt in presents:
+			d = Attendance.objects.filter(Name=a, Date=dt).last()
+			if d.Total_Hours:
+				if d.Total_Hours > 7.5:
+					d.Total_Hours = d.Total_Hours - 1
+				hrs = hrs + (d.Total_Hours * 1.5) if d.Total_Hours > 4.5 else (hrs + d.Total_Hours)
+	print(hrs)
+	return hrs
+
+	# d1 = date(month.year, month.month, 1)
+	# d2 = date(month.year, month.month, calendar.monthrange(month.year, month.month)[1])
+	# delta = d2 - d1
+	# for i in range(calendar.monthrange(month.year, month.month)[1]):
+	#     if (d1 + timedelta(days=i)).strftime('%a') == 'Sun':
+	#     	hds.append(d1 + timedelta(days=i))
+	
+
+@login_required
+def Gen_Monthly_Salaries(request, proj, month, mode):
+	pdata = projectname(request, proj)
+	dt = date.today()
+	sal = None
+
+	url = '/'+str(pdata['pj'])+'/monthlysalaries/month/select/'
+
+	if month != 'month':
+		try:
+			month = datetime.strptime(month, '%Y-%m')
+			mnth = datetime.strftime(month, '%Y-%m')
+			m = month.month
+		except:
+			messages.error(request, 'Please Select Proper Month Format')
+			return render(request, 'expenses/MonthlySalaries.html', {'month': 'month', 'pdata':pdata, 'table':sal, 'mode':'select'})
+
+		if month.year > dt.year or (month.year == dt.year and month.month > dt.month ) :
+	 		messages.error(request, 'Current Month Not Completed to Generate Salaries')
+	 		return render(request, 'expenses/MonthlySalaries.html', {'month': 'month', 'pdata':pdata, 'table':sal, 'mode':'select'})
+
+	if mode == 'select':
+		return render(request, 'expenses/MonthlySalaries.html', {'month': 'month', 'pdata':pdata, 'table':sal, 'mode':'select'})
+	
+	if month == 'month' and mode == 'get':
+		messages.error(request, 'Please Select Month To Get Salaries')
+		return render(request, 'expenses/MonthlySalaries.html', {'month': 'month', 'pdata':pdata, 'table':sal, 'mode':'select'})
+
+	m_atnd = Monthatnd.objects.filter(Month__month=m, Month__year=month.year)
+
+	if not m_atnd:
+		messages.error(request, 'Kindly Generate Attendance for the Requested Month Before Generate/Get Salaries')
+		return render(request, 'expenses/MonthlySalaries.html', {'month': 'month', 'pdata':pdata, 'table':sal, 'mode':'select'})
+
+	sal = Monthly_Salaries.objects.filter(Month__month=m, Month__year=month.year)
+	empls = Account.objects.filter(Status=1, ds=1).order_by('Sr_No')
+	k = calendar.monthrange(month.year, month.month)[1]
+	k = k - sum(1 for week in calendar.monthcalendar(month.year,month.month) if week[-1])
+
+	if mode == 'regen':
+		if sal:
+			sal.delete()
+			sal = Monthly_Salaries.objects.filter(Month__month=m, Month__year=month.year)
+
+	if sal and mode == 'gen':
+		messages.error(request, 'Selected Month Salaries Already Generated')
+		return render(request, 'expenses/MonthlySalaries.html', {'month': mnth, 'month1':month, 'pdata':pdata, 'table':sal, 'wd':k, 'mode':mode})
+
+	if mode == 'delete':
+		if sal:
+			sal.delete()
+			messages.success(request, 'Selected Month Salaries Has Been Deleted')
+			return render(request, 'expenses/MonthlySalaries.html', {'month': 'month', 'pdata':pdata, 'table':sal, 'mode':'select'})
+
+	if sal:
+		if mode == 'get':
+			return render(request, 'expenses/MonthlySalaries.html', {'month': mnth, 'month1':month, 'pdata':pdata, 'table':sal, 'wd':k, 'mode':'get'}) 
+	else:
+		if mode == 'gen' or mode == 'regen':
+			if m == dt.month:
+			 	if dt.day < 25:
+			 		messages.error(request, 'Current Month Not Completed to Generate Salaries')
+			 		return render(request, 'expenses/MonthlySalaries.html', {'month': mnth, 'month1':month, 'pdata':pdata, 'table':sal, 'wd':k, 'mode':mode})
+
+			for a in empls:
+				atnd = Monthatnd.objects.filter(Name=a, Month__month=m, Month__year=month.year).last()
+				e_sal = Empl_Salaries.objects.filter(Employ_Name=a).last()
+				if atnd:
+					if e_sal:
+						i_wd = atnd.Presents + atnd.Leaves
+						i_wd = k if i_wd > k else i_wd
+						hrs = call_extra_work_days_sal(request, month, a) if e_sal.OT_Eligibility == 1 else 0
+						i_sal = e_sal.Gross_Salary*i_wd/k
+						i_esi, i_pf = e_sal.ESI_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.ESI_Eligibility == 1 else 0 , e_sal.PF_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.PF_Eligibility == 1 else 0
+						i_net = i_sal - i_esi - i_pf - (e_sal.Professional_Tax if e_sal.Professional_Tax != None else 0)
+						i_lop = e_sal.Net_Salary - i_net
+						i_lop = i_lop if i_lop >= 0 else 0
+						i_ot = (((e_sal.Gross_Salary/k/8)*((atnd.Total_OT+hrs) if atnd.Total_OT != None else 0)) if e_sal.OT_Eligibility == 1 else 0) 
+						i_net = i_net + i_ot 
+						gen_sal = Monthly_Salaries.objects.create(Name=a, Month=date(month.year, m, 1), Issued_Salary=int(i_net),
+						PF=int(i_pf), ESI=int(i_esi), OT_Amount=int(i_ot), Professional_Tax=e_sal.Professional_Tax, LOP=int(i_lop))
+
+	if mode == 'gen':
+		messages.success(request, 'Requested Month Salaries Has Been Generated')
+	if mode == 'regen':
+		messages.success(request, 'Requested Month Salaries Has Been Re-Generated Again')
+
+	sal = Monthly_Salaries.objects.filter(Month__month=m, Month__year=month.year)
+
+	return render(request, 'expenses/MonthlySalaries.html', {'month': mnth, 'month1':month, 'pdata':pdata, 'table':sal, 'wd':k, 'mode':'get'})
+
+
+@login_required
+def Monthly_Salaries_Edit(request, proj, month, eid):
+	pdata = projectname(request, proj)
+	url = '/'+str(pdata['pj'])+'/monthlysalaries/'+month+'/get/'
+	if request.method == 'POST':
+		form = EmployMonthlySalaryForm(request.POST, instance=get_object_or_404(Monthly_Salaries, id=eid))
+		if form.is_valid():
+			p= form.save()
+			messages.success(request, "Details Has Been Updated Successfully")
+			return redirect(url)
+		else:
+			messages.error(request, get_errors(request, form.errors))
+			return redirect(url)
+	else:
+		form = EmployMonthlySalaryForm(instance=get_object_or_404(Monthly_Salaries, id=eid))
+		return render(request, 'expenses/EditEmployMonthlySalaryForm.html', {'form': form, 'pdata':pdata})
+
+@login_required
+def Get_Order_Wise_Salaries(request, proj, month, mode):
+	pdata = projectname(request, proj)
+	dt = date.today()
+	sal = None
+
+	url = '/'+str(pdata['pj'])+'/monthlysalaries/month/select/'
+
+	if month != 'month':
+		try:
+			month = datetime.strptime(month, '%Y-%m')
+			mnth = datetime.strftime(month, '%Y-%m')
+			m = month.month
+		except:
+			messages.error(request, 'Please Select Proper Month Format')
+			return render(request, 'expenses/OrderWiseSalaries.html', {'month': 'month', 'pdata':pdata, 'mode':'select'})
+
+		if month.year > dt.year or (month.year == dt.year and month.month > dt.month ) :
+	 		messages.error(request, 'Current Month Not Completed to Generate Order Wise Salaries')
+	 		return render(request, 'expenses/OrderWiseSalaries.html', {'month': 'month', 'pdata':pdata, 'mode':'select'})
+
+	if mode == 'select':
+		return render(request, 'expenses/OrderWiseSalaries.html', {'month': 'month', 'pdata':pdata, 'mode':'select'})
+	
+	m_atnd = Monthatnd.objects.filter(Month__month=m, Month__year=month.year)
+	sal = Monthly_Salaries.objects.filter(Month__month=m, Month__year=month.year)
+	empls = Account.objects.filter(Status=1, ds=1).order_by('Sr_No')
+	k = working_days(request, month)
+	if month.year == dt.year and m == dt.month:
+		mnth = m
+		n, num = 0, 0
+		while mnth == m:
+			n = n + 1
+			ndt = dt + timedelta(days=n)
+			if date.today().strftime('%a') != 'Sun':
+				num = num + 1
+			mnth = ndt.month
+		k = k + num
+
+	if not sal and mode == 'get':
+		messages.error(request, 'Salaries Not Yet Generated for the Selected Month')
+		return render(request, 'expenses/OrderWiseSalaries.html', {'month': 'month', 'pdata':pdata, 'mode':'select'})
+
+	orders_list = []
+	sal_list = []
+	if sal:
+		atnd = Attendance.objects.filter(Date__month=m, Date__year=month.year, Sales_Order__isnull=False)
+		if atnd:
+			for x in atnd:
+				orders_list.append(x.Sales_Order)
+			orders_list = list(dict.fromkeys(orders_list))
+		for order in orders_list:
+			t_sal = 0
+			for e in empls:
+				a1 = atnd.filter(Q(Name=e, Sales_Order=order, Day_Status='Present')|Q(Day_Status='On Duty')|Q(Day_Status='Tour'))
+				a2 = atnd.filter(Name=e, Sales_Order=order, Day_Status='Half Day')
+				t_presents = len(a1) + (len(a2)/2)
+				sal = Empl_Salaries.objects.filter(Employ_Name=e).last()	
+				if sal:
+					d_sal = sal.Gross_Salary/k
+					t_sal = t_sal + t_presents*d_sal
+			sal_list.append(t_sal)
+	data = zip(orders_list, sal_list)
+
+	total = sum(sal_list) or 0
+
+	return render(request, 'expenses/OrderWiseSalaries.html', {'month': mnth, 'month1':month, 'pdata':pdata, 'data':data,  'mode':'get', 'total':total})

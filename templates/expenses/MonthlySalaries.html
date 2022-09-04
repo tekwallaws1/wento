@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %} 
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+{% endblock %}  
+
+{% block scripts %} 
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS --> 
+  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
+  <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
+  <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script>
+
+<script type="text/javascript">
+
+  window.onload = function () {if ('{{mode}}' == 'select'){$('#selectMonth').modal('show')}}
+
+  function edit(e_id) {getid = e_id;}
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/{{pdata.pj}}/monthlysalaries/{{month|date:'Y-m'}}/delete/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
+  function validate2(p) {
+    if(   document.getElementById("activitypswd2").value == "sse123" ){
+        url = '/{{pdata.pj}}/monthlysalaries/{{month}}/regen/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+    
+    
+    function getdt(){
+      var dt = $("#getdate").val();
+      if ( dt == '' ){dt = 'month'} 
+      document.getElementById('formaction').action='/{{pdata.pj}}/monthlysalaries/'+dt+'/get/'}
+
+    function autosalmonth(){
+      var dt = $("#getmonth").val();
+      if ( dt == '' ){dt = 'month'} 
+      document.getElementById('gensalaction').action='/{{pdata.pj}}/monthlysalaries/'+dt+'/gen/'}
+
+  function select(){
+      var dt = $("#selectmonth").val();
+      if ( dt == '' ){dt = 'month'} 
+      document.getElementById('getsalaction').action='/{{pdata.pj}}/monthlysalaries/'+dt+'/get/'}
+
+     function fnchide() {$("#doMoreModal .close").click()}
+
+</script>
+
+<!-- Data Tables Export Script -->
+<script src="{% static 'js/datatablesexport.js' %}"></script>
+<script type="text/javascript">
+  // Datatables Excel Formating Before Export//
+  var customexcel = function( xlsx ) {
+    var sheet = xlsx.xl.worksheets['sheet1.xml'];
+    var style = xlsx.xl['styles.xml'];
+    var tagName = style.getElementsByTagName('sz');
+    for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+    $('row:first c', sheet).attr('s', '2')
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );$('row c[r^="F"]', sheet).attr( 's', '55' );  $('row c[r^="H"]', sheet).attr( 's', '55' ); $('row c[r^="H"]', sheet).attr( 's', '55' );//wrap text
+    var col = $('col', sheet);
+    // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
+    $(col[1]).attr('width', 35); $(col[2]).attr('width', 25); $(col[3]).attr('width', 15); $(col[4]).attr('width', 15); $(col[5]).attr('width', 15); $(col[5]).attr('width', 15); }; 
+  //--End--//
+
+            
+  var cl = [0,  1, 2, 3, 4, 5, 6]
+  var wdths = ['4%', '27%', '21%', '12%', '16%', '11%', '9%'];
+  
+   var msgTop = "{% if dates == None %}{{month|date:'M-Y'}}{% else %}{{dates.start|date:'d-M-y'}} to {{dates.end|date:'d-M-y'}}{% endif %}"
+    var title = 'Month Wise Attendance Report';
+    var filename = 'monthattendance'
+    var ort = 'portrait'
+
+  // Datatables Customise PDF Before Export//
+  var pdf_custom = function ( doc ) {
+    doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+    doc.pageMargins = [40,60,20,30];
+    // doc.content[1].margin = [ 0, 50, 0, 50 ]
+    doc['footer']= footer1;
+    doc['header']= header1;
+    var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+    objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+    objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+    objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+    // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+  doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+  {text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+  };
+
+  //--End--//
+</script>
+
+<!-- Data Tables Export Script -->
+<script type="text/javascript">
+  $('#html5-extension').DataTable( {
+  autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
+  buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
+      
+    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
+
+    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
+
+    {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
+</script>
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+  <div class="page-header">
+    <h3 class="page-title">Salaries {% if month1 != 'month' %}<span style="color:blue;">{{month1|date:'M-Y'}}</span> Working Days: {{wd}}{% endif %}
+    </h3>
+    <!-- <button type="button" data-toggle="modal" data-target="#autoAttendanceModal" class="btn btn-sm btn-primary" ht="by clicking this it will generate auto attendance for selected month excluding attendance entries by manually, it will generate all employes attendance as present and default start and end time, later you can edit employ wise if require">Generate Auto Attendance</button> -->
+    <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger" ht="select category">Do More</button>
+    <div>
+    <form class="forms-sample" action="" id='formaction' method="POST" >
+      {% csrf_token %}
+      <input type="month" name='dates' id='getdate' style="width: 135px; font-size: 14px; margin-bottom:10px;">
+      <button class="btn1 btn1-success" type="submit" onclick="getdt()">Change Month</button>
+    </form>
+    </div>
+  </div>
+
+<!-- Employes List -->
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="employes">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Employ Name</th>
+            <!-- <th>Attendance</th> -->
+            <th>Net Payable</th>
+            <!-- <th>LOP</th> -->
+            <th>PF</th>
+            <th>ESI</th>
+            <th>OT</th>
+            <th>Salary Advance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x in table %}
+          <tr>
+
+            <td>{{forloop.counter}}</td>
+            
+            <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+                {{x.Name.Name}}
+                {% if x.Name.Employee_Id %}<br><span class="hlt5">Employee ID: </span>{{  x.Name.Employee_Id }}{% endif %}
+              </a>
+            </td>
+
+            <!-- <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+               NA
+              </a>
+            </td> -->
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+                {{x.Issued_Salary|floatformat:0|intcomma}}
+              </a>
+            </td>
+
+            <!-- <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+                {{x.LOP|floatformat:0|intcomma}}
+              </a>
+            </td> -->
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+                {{x.PF|floatformat:0|intcomma}}
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+                {{x.ESI|floatformat:0|intcomma}}
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+                {{x.OT_Amount|floatformat:0|intcomma}}
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+                {{x.Salary_Advance|floatformat:0|intcomma}} 
+              </a>
+            </td>
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Data</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form class="forms-sample">
+            <div class="form-group">
+              <label for="exampleInputPassword1">Password</label>
+              <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+              <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
+            </div> 
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="reGenModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; color: red; font-size: 13px;">You are requested for regenation of generated salaries. It will delete previous generated/customised salaries and regenerate freshly. If you still want to regenerate enter password and regenerate</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form class="forms-sample">
+            <div class="form-group">
+              <label for="exampleInputPassword1">Password</label>
+              <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd2"><br/>
+              <input type="button" class="btn btn-danger" value="Regenerate"  onclick="javascript:validate2('{{x.id}}')" />
+            </div> 
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auto Attendance Claculation Month Selection Form -->
+  <div class="modal fade text-left" id="autoMonthModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" >
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Select Month</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">   
+          <form class="forms-sample" action="" id='gensalaction' method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                <label>Select Month</label>
+                <input type="month" name='selected_month' id='getmonth'>
+              </div>
+           </div>
+          <button type="submit" class="btn btn-primary" onclick="autosalmonth()">Generate Salaries</button>    
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- End -->
+
+<!-- Auto Attendance Claculation Month Selection Form -->
+  <div class="modal fade text-left" id="selectMonth" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" >
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Select Month</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">   
+          <form class="forms-sample" action="" id='getsalaction' method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                <label>Select Month</label>
+                <input type="month" name='select_month' id='selectmonth'>
+              </div>
+           </div>
+          <button type="submit" class="btn btn-primary" onclick="select()">Get Salaries</button>    
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- End -->
+
+ <!-- more pages -->
+  <div class="modal fade text-left" id="doMoreModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button type="button" data-toggle="modal" data-target="#autoMonthModal" class="btn btn-sm btn-primary" ht="by clicking this it will generate auto salaries for selected month if not yet generated" onclick="fnchide()">Generate Salaries</button>
+            <button type="button" data-toggle="modal" data-target="#reGenModal" class="btn btn-sm btn-danger" ht="by clicking current salaries will be deleted and generated again" onclick="fnchide()">Regenerate Salaries</button>
+            <button type="button" data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-warning" ht="by clicking this it will delete all salaries for selected month" onclick="fnchide()">Delete Salaries</button>
+
+            <button class="btn btn-sm btn-primary" onclick="location.href='/{{pdata.pj}}/orderwisesalaries/{{month}}/get/'">Order Wise Salaries</button>
+            <button class="btn btn-sm btn-info" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
+            <button class="btn btn-sm btn-danger" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
+            <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/employeslist/'">Employes List</button>
+            <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
+            <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+            <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

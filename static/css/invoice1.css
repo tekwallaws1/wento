@@ -72,6 +72,12 @@ table {
   color: black; vertical-align: top; font-weight: normal; word-wrap: break-word;
 }
 
+.tb0  {
+  border: none;padding: 0.25em; position: relative; text-align: left; border-radius: 0em; 
+  color: black; vertical-align: top; font-weight: bold; word-wrap: break-word; font-size: 12px;
+}
+
+
 tr:last-child td {
     border-bottom: 0.1px black solid;
 }

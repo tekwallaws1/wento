@@ -1,16 +1,30 @@
 import django_filters
 from django import forms
 from django.db import models
-from django_filters import DateFilter, NumberFilter, CharFilter, BooleanFilter
+from django_filters import DateFilter, NumberFilter, CharFilter, BooleanFilter, ModelChoiceFilter
 from .models import *
 
-class ExpensesItemsFilter(django_filters.FilterSet):
+class AttendanceFilter(django_filters.FilterSet):
 	def __init__(self, *args, **kwargs):
   		super().__init__(*args, **kwargs)
   		for field in self.form.fields:
   			self.form.fields[field].widget.attrs.update({'class': 'form-control'})
-	from_date 	= DateFilter(field_name='From_Date', lookup_expr='gte')
-	to_date 	= DateFilter(field_name='To_Date', lookup_expr='lte')
+	# order 	= CharFilter(field_name='Sales_Order__Related_Project__Short_Name', lookup_expr='icontains', label='Services')
+	Sales_Order = django_filters.ModelChoiceFilter(
+    queryset=Orders.objects.filter(Related_Project__Short_Name='Services').distinct()
+)
+
+	class Meta:
+		model 	= Attendance
+		fields = ['Sales_Order','Day_Status']
+
+class ExpensesItemsFilter(django_filters.FilterSet):
+	def __init__(self, *args, **kwargs): 
+  		super().__init__(*args, **kwargs)
+  		for field in self.form.fields:
+  			self.form.fields[field].widget.attrs.update({'class': 'form-control'})
+	from_date 	= DateFilter(field_name='Expenses__From_Date', lookup_expr='gte')
+	to_date 	= DateFilter(field_name='Expenses__From_Date', lookup_expr='lte')
 	from_value 	= NumberFilter(field_name='Expenses__Total_Amount', lookup_expr='gte')
 	to_value 	= NumberFilter(field_name='Expenses__Total_Amount', lookup_expr='lte')
 

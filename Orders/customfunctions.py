@@ -1,7 +1,7 @@
 from datetime import date, datetime, timedelta 
 from django.db.models import Sum, Avg, Count
 from.models import *
-from .forms import *
+from .forms import * 
 from django.http import HttpResponse, JsonResponse
 from Projects.fyear import get_financial_year, get_fy_date
 from Projects.basedata import projectname
@@ -32,104 +32,278 @@ def genOrderNo(request, order_id, last_order_id):
 	fd.save()
 
 
-def assign_paystatus_to_order(request, pay_id, order_id):
-	order = Orders.objects.get(id=order_id)
-	payment = Payment_Status.objects.get(id=pay_id)
-	order.Payment_Status = payment
-	order.save()
+# def assign_paystatus_to_order(request, pay_id, order_id):
+# 	order = Orders.objects.get(id=order_id)
+# 	payment = Payment_Status.objects.get(id=pay_id)
+# 	order.Payment_Status = payment
+# 	order.save()
 
-	if not payment.Order_No:
-		payment.Order_No = order
+# 	if not payment.Order_No:
+# 		payment.Order_No = order
 
-	inv = Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0).order_by('Invoice_Date')
-	payments  = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date')
-	t_inv = sum(inv.values_list('Invoice_Amount', flat=True))
-	t_pay = sum(payments.values_list('Received_Amount', flat=True))
-	#here t_pay = total payment received except current payment, bcz pay_status not assigned to order
+# 	inv = Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0).order_by('Invoice_Date')
+# 	payments  = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date')
+# 	t_inv = sum(inv.values_list('Invoice_Amount', flat=True))
+# 	t_pay = sum(payments.values_list('Received_Amount', flat=True))
+# 	#here t_pay = total payment received except current payment, bcz pay_status not assigned to order
 
-	if t_inv==0 and t_pay==0:
-		payment.Payment_Type = 'Advance'
+# 	if t_inv==0 and t_pay==0:
+# 		payment.Payment_Type = 'Advance'
 
-	elif t_inv - t_pay > 0:
-		payment.Payment_Type = 'Due'
+# 	elif t_inv - t_pay > 0:
+# 		payment.Payment_Type = 'Due'
+# 	else:
+# 		payment.Payment_Type = 'Advance'
+
+# 	payment.user = Account.objects.get(user=request.user)
+# 	payment.save()
+
+def assign_paystatus_to_order(request, pay_id):
+  payment = Payment_Status.objects.get(id=pay_id)
+  payment.user = Account.objects.get(user=request.user)
+  payment.save()
+  
+  if not payment.Order_No:
+  	po_no = payment.Invoice_No.Order_No
+  	payment.Order_No = po_no
+  	payment.save()
+  else:
+  	if payment.Invoice_No:
+	  	inv = Invoices.objects.filter(Invoice_No=payment.Invoice_No.Invoice_No).last()
+	  	inv.Payment_Status = payment
+	  	inv.save()
+	  	payment = Payment_Status.objects.get(id=pay_id)
+	  	inv_rec = sum(Payment_Status.objects.filter(Invoice_No=payment.Invoice_No).values_list('Received_Amount', flat=True))
+  		if inv.Due_Amount <= inv_rec:
+	  		inv.Due_Amount = 0
+	  		inv.Payment_Cleared_Date = payment.Payment_Date
+	  		inv.Final_Payment_Status = 1
+	  		inv.save()
+	  	else:
+	  		inv.Due_Amount = inv.Due_Amount - inv_rec
+	  		inv.Payment_Cleared_Date = None
+	  		inv.Final_Payment_Status = 0
+	  		inv.save()
+  
+  po = Orders.objects.filter(Order_No=payment.Order_No.Order_No).last()
+  po.Payment_Status = payment
+  po.save()
+
+  payment = Payment_Status.objects.get(id=pay_id)
+  customer = payment.Order_No.Customer_Name
+
+  invs = Invoices.objects.filter(Order__Customer_Name=customer).order_by('Invoice_Date')
+  pays = Payment_Status.objects.filter(Order_No__Customer_Name=customer).order_by('Payment_Date')
+  
+  invs_amnt = sum(invs.values_list('Invoice_Amount', flat=True))
+  invs_due = sum(invs.values_list('Due_Amount', flat=True))
+  pays_total = sum(pays.values_list('Received_Amount', flat=True))
+
+  due = invs_amnt - pays_total
+  case1 = Invoices.objects.filter(Order=payment.Order_No, Due_Amount__gt=0).order_by('Invoice_Date')
+  case2 = Invoices.objects.filter(Order__Customer_Name=customer, Due_Amount__gt=0).order_by('Invoice_Date')
+
+  case3 = Invoices.objects.filter(Order=payment.Order_No, Due_Amount=0).order_by('Invoice_Date')
+  case4 = Invoices.objects.filter(Order__Customer_Name=customer, Due_Amount=0).order_by('Invoice_Date')
+
+  if due > 0:
+  	if due != invs_due:
+  		diff = invs_due - due 
+	  	if diff > 0: # if it is positive diff  deduct from other invoices i.e decrease due amount
+	  		diff = inv_adj(request, case1, diff, pay_id)
+	  		if diff > 0:
+	  			diff = inv_adj(request, case2, diff, pay_id)
+		  	# if still duff > 0, its remains as advance
+	  	elif diff < 0: # increase due amount
+	  		diff = -(diff)
+	  		diff = inv_adj1(request, case1, diff)
+	  		if diff > 0:
+	  			diff = inv_adj1(request, case2, diff)
+	  			if diff > 0:
+	  				diff = inv_adj1(request, case3, diff)
+	  				if diff > 0:
+	  					diff = inv_adj1(request, case4, diff)
+  elif due == 0:
+  	pass
+  else:
+  	Invoices.objects.filter(Order__Customer_Name=customer, Due_Amount__gt=0).update(Due_Amount=0, Final_Payment_Status=1, Payment_Cleared_Date=payment.Payment_Date, Payment_Status=payment)
+
+def paymentdelete(request, ordid, invid, dlt_amount):
+	order = Orders.objects.get(id=ordid)
+	inv =  Invoices.objects.filter(id=invid).last()
+
+	inv_rec = inv.Invoice_Amount - inv.Due_Amount
+	
+	if dlt_amount >= inv_rec:
+		dlt_amount = dlt_amount - inv_rec
+		inv.Due_Amount = inv.Invoice_Amount
+		inv.Payment_Cleared_Date = None
+		inv.Final_Payment_Status = 0
+		inv.Payment_Status = None
+		inv.save()
 	else:
-		payment.Payment_Type = 'Advance'
+		inv.Due_Amount = inv.Invoice_Amount - (inv_rec - dlt_amount)
+		inv.Payment_Cleared_Date = None
+		inv.Final_Payment_Status = 0
+		inv.save()
+		dlt_amount = 0
+	
+	if dlt_amount > 0:
+		case1 = Invoices.objects.filter(Order=order, Due_Amount__gt=0).order_by('Invoice_Date')
+		case2 = Invoices.objects.filter(Order__Customer_Name=order.Customer_Name, Due_Amount__gt=0).order_by('Invoice_Date')
+		case3 = Invoices.objects.filter(Order=order, Due_Amount=0).order_by('Invoice_Date')
+		case4 = Invoices.objects.filter(Order__Customer_Name=order.Customer_Name, Due_Amount=0).order_by('Invoice_Date')
 
-	payment.user = Account.objects.get(user=request.user)
-	payment.save()
+		diff = dlt_amount
+
+		diff = inv_adj1(request, case1, diff)
+		if diff > 0:
+			diff = inv_adj1(request, case2, diff)
+			if diff > 0:
+				diff = inv_adj1(request, case3, diff)
+				if diff > 0:
+					diff = inv_adj1(request, case4, diff)
+	
+	pay = Payment_Status.objects.filter(Order_No=order).last()
+	if pay:			
+		assign_paystatus_to_order(request, pay.id)
+	else:
+		pay = Payment_Status.objects.filter(Order_No__Customer_Name=order.Customer_Name).last()
+		if pay:			
+			assign_paystatus_to_order(request, pay.id)
+
+def inv_adj(request, invs, diff, pay_id):
+	if invs != None:
+		payment = Payment_Status.objects.get(id=pay_id)
+		for x in invs:
+			if x.Due_Amount <= diff:
+				diff = diff - x.Due_Amount
+				x.Due_Amount = 0
+				x.Payment_Status = payment
+				x.Payment_Cleared_Date = payment.Payment_Date
+				x.Final_Payment_Status = 1
+				x.save()
+			else:
+				x.Due_Amount = x.Due_Amount - diff
+				x.Payment_Cleared_Date = None
+				x.Final_Payment_Status = 0
+				x.save()
+				diff = 0
+	return diff
+
+def inv_adj1(request, invs, diff):
+	if invs != None:
+		for x in invs:
+			if diff >= (x.Invoice_Amount - x.Due_Amount):
+				diff = diff - (x.Invoice_Amount - x.Due_Amount)
+				x.Due_Amount = x.Invoice_Amount
+				x.Payment_Status = None
+				x.Payment_Cleared_Date = None
+				x.Final_Payment_Status = 0
+				x.save()
+			else:
+				x.Due_Amount = x.Due_Amount + diff
+				x.Payment_Cleared_Date = None
+				x.Final_Payment_Status = 0
+				x.save()
+				diff = 0
+	return diff
 
 
-def adjust_payments_to_invoices(request, orderid):
-	# if invoice lock and if any payments under this order before invoice gen.
-	# inv_current = Invoices.objects.filter(id=invid).last()
-	order = Orders.objects.get(id=orderid)
-	inv = Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0).order_by('Invoice_Date')
-	payments  = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date')
-	t_inv = inv.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0 if inv != None else 0
-	t_pay = payments.aggregate(sum=Sum('Received_Amount')).get('sum') or 0 if payments != None else 0
+def adjust_payments_to_invoices(request, ordid, invid):
+	order = Orders.objects.get(id=ordid)
+	customer = order.Customer_Name
+	inv = Invoices.objects.filter(id=invid).last()
+	inv.Due_Amount = inv.Invoice_Amount
+	inv.save()
+	inv = Invoices.objects.filter(id=invid).last()
+
+	if Payment_Status.objects.filter(Invoice_No=inv):
+		assign_paystatus_to_order(request, Payment_Status.objects.filter(Invoice_No=inv.Invoice_No).id)
+	else:
+		case1 = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date')
+		case2 = Payment_Status.objects.filter(Order_No__Customer_Name=customer).order_by('Payment_Date')
+
+		if case1 == None and case2 == None:
+			pass
+		else:
+			if case1:
+				assign_paystatus_to_order(request, case1.last().id)
+			else:
+				if case2:
+					assign_paystatus_to_order(request, case2.last().id)
+
+# def adjust_payments_to_invoices(request, orderid):
+# 	# if invoice lock and if any payments under this order before invoice gen.
+# 	# inv_current = Invoices.objects.filter(id=invid).last()
+# 	order = Orders.objects.get(id=orderid)
+# 	inv = Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0).order_by('Invoice_Date')
+# 	payments  = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date')
+# 	t_inv = inv.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0 if inv != None else 0
+# 	t_pay = payments.aggregate(sum=Sum('Received_Amount')).get('sum') or 0 if payments != None else 0
 	
 
-	# CASE-1: No Prev Invoices, No Payments (only cureent gen invoice)
-	if len(inv) == 1 and t_pay==0:
-		for x in inv:
-			x.Due_Amount = x.Invoice_Amount
-			x.save()
-		return 1
+# 	# CASE-1: No Prev Invoices, No Payments (only cureent gen invoice)
+# 	if len(inv) == 1 and t_pay==0:
+# 		for x in inv:
+# 			x.Due_Amount = x.Invoice_Amount
+# 			x.save()
+# 		return 1
 
-	# CASE-2: Previous invoices available against that order but no payments gainst order
-	if len(inv) > 1 and t_pay==0:
-		for x in inv:
-			x.Due_Amount = x.Invoice_Amount
-			x.save()
-		print('return 1')
-		return 2
+# 	# CASE-2: Previous invoices available against that order but no payments gainst order
+# 	if len(inv) > 1 and t_pay==0:
+# 		for x in inv:
+# 			x.Due_Amount = x.Invoice_Amount
+# 			x.save()
+# 		print('return 1')
+# 		return 2
 
-	# CASE-3: Invoices Due Amount Adjustments Against Order and Received Paymants
-	if t_inv+10 <= t_pay or t_inv-10 <= t_pay:
-		# if total billing value =< total received value update all bills due as 0
-		Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0).update(Due_Amount=0)
-		print('return 3')
-		return 3
-	else:
-		for x in inv:
-			if t_pay > x.Invoice_Amount:
-				x.Due_Amount = 0
-				x.save()
-				t_pay = t_pay - x.Invoice_Amount
-				print('return tpay', x, t_pay)
-			else:
-				# means whole received payment is less than one single invoice amount
-				x.Due_Amount = x.Invoice_Amount - t_pay
-				t_pay = 0
-				x.save()
-				print('return 4')
-				# Breaking for and while loops
-		return 4
+# 	# CASE-3: Invoices Due Amount Adjustments Against Order and Received Paymants
+# 	if t_inv+10 <= t_pay or t_inv-10 <= t_pay:
+# 		# if total billing value =< total received value update all bills due as 0
+# 		Invoices.objects.filter(Order=order, Lock_Status=1, Is_Proforma=0).update(Due_Amount=0)
+# 		print('return 3')
+# 		return 3
+# 	else:
+# 		for x in inv:
+# 			if t_pay > x.Invoice_Amount:
+# 				x.Due_Amount = 0
+# 				x.save()
+# 				t_pay = t_pay - x.Invoice_Amount
+# 				print('return tpay', x, t_pay)
+# 			else:
+# 				# means whole received payment is less than one single invoice amount
+# 				x.Due_Amount = x.Invoice_Amount - t_pay
+# 				t_pay = 0
+# 				x.save()
+# 				print('return 4')
+# 				# Breaking for and while loops
+# 		return 4
 
 def adj_pay_to_all_inv(request, customer):
 	pays = Payment_Status.objects.filter(Order_No__Customer_Name=customer).order_by('Payment_Date')
-	pays_total = sum(pays.values_list('Received_Amount', flat=True))
+	# pays_total = sum(pays.values_list('Received_Amount', flat=True))
 
-	invs = Invoices.objects.filter(Order__Customer_Name=customer).order_by('Invoice_Date')
-	for x in invs:
-		if pays_total >= x.Invoice_Amount:
-			pays_total = pays_total - x.Invoice_Amount
-			x.Due_Amount = 0
-			x.Final_Payment_Status = 1
-			# x.Payment_Cleared_Date = pays.last().Payment_Date
-			# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
-			# x.Payment_Status = pays.last()
-			x.save()
-		else:
-			if pays_total > 0:
-				x.Due_Amount = x.Invoice_Amount - pays_total
-				# x.Payment_Status = pays.last()
-				# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
-				pays_total = 0
-				x.save()
-			else:
-				x.Due_Amount = x.Invoice_Amount
-				x.save()
+	# invs = Invoices.objects.filter(Order__Customer_Name=customer).order_by('Invoice_Date')
+	# for x in invs:
+	# 	if pays_total >= x.Invoice_Amount:
+	# 		pays_total = pays_total - x.Invoice_Amount
+	# 		x.Due_Amount = 0
+	# 		x.Final_Payment_Status = 1
+	# 		# x.Payment_Cleared_Date = pays.last().Payment_Date
+	# 		# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
+	# 		# x.Payment_Status = pays.last()
+	# 		x.save()
+	# 	else:
+	# 		if pays_total > 0:
+	# 			x.Due_Amount = x.Invoice_Amount - pays_total
+	# 			# x.Payment_Status = pays.last()
+	# 			# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
+	# 			pays_total = 0
+	# 			x.save()
+	# 		else:
+	# 			x.Due_Amount = x.Invoice_Amount
+	# 			x.save()
 
 
 def workstatus(request, workid, orderid):
@@ -243,7 +417,7 @@ def postform(request, rid, invid, fnc):
 				p.Billing_To, p.Order, p.Lock_Status, p.Is_Manual = order.Customer_Name, order, 1, 1
 				p.save() 
 				updateduedays(request, p.id)
-				adjust_payments_to_invoices(request, order.id)
+				adjust_payments_to_invoices(request, order.id, p.id)
 				return 'invlist'
 	else:
 		return 'getform'

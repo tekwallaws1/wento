@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static %} 
 {% load humanize %}
 {% load mathfilters %} 
 
@@ -77,7 +77,7 @@
   var wdths = ['4%', '25%', '25%', '46%'];
   var ort = 'portrait'; //landscape
   
-   if ('{{status}}' == 'Issued' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} \n Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}}  |  Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}}';}
+   if ('{{status}}' == 'Issued' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}} | Total Received {{total_rec|floatformat:0|intcomma}} | Total Due  {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}} \n Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} | Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}}';}
     else { var msgTop = ''};
     var title = '{{pdata.pj}} - {{status}} Invoices List';
     var filename = '{{pdata.pj}}-{{status}}InvoicesList_{{table.first.Invoice_Date|date:'dMy'}}to{{table.last.Invoice_Date|date:'dMy'}}'
@@ -230,56 +230,71 @@
 <!-- ######### -->
                 
 {% if status == 'Issued' %}
-  <div class="row">
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-info shadow h-100 py-2">
-        <a ht="payment not yet started" ><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Full Due Invoices  - {{count.fdc}}</div>
-              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|floatformat:0|intcomma}}</div>
-            </div>
+  <div class="row"> 
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-dark shadow h-100 py-2">
+      <a ht="total issued invoices i.e due and cleared" ><div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Billing - {{count.tbc}}</div>
+            <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_billing|floatformat:0|intcomma}}</div>
           </div>
-        </div></a>
-      </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-success shadow h-100 py-2">
-        <a ht="payment started but not cleared fully" ><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Partial Due Invoices - {{count.pdc}}</div>
-              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.part_due_inv|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div></a>
-      </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-danger shadow h-100 py-2">
-        <a ht="toatl payment cleared invoices" ><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Payment Cleared Invoices - {{count.fcc}}</div>
-              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_clear_inv|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div></a>
-      </div>
-    </div>
-    <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-dark shadow h-100 py-2">
-        <a ht="total issued invoices i.e due and cleared" ><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Billing - {{count.tbc}}</div>
-              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_billing|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div></a>
-      </div>
+        </div>
+      </div></a>
     </div>
   </div>
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-primary shadow h-100 py-2">
+      <a ht="toatl payment cleared invoices" ><div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Payment Status</div>
+            <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">Received ₹ {{total_rec|floatformat:0|intcomma}}
+              <br>
+              Due&nbsp; ₹ {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}}
+            </div>
+          </div>
+        </div>
+      </div></a>
+    </div>
+  </div>
+  <div class="col-xl-2 col-md-6 mb-4">
+    <div class="card border-left-info shadow h-100 py-2">
+      <a ht="payment not yet started" ><div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Full Due Bills  - {{count.fdc}}</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|floatformat:0|intcomma}}</div>
+          </div>
+        </div>
+      </div></a>
+    </div>
+  </div>
+  <div class="col-xl-2 col-md-6 mb-4">
+    <div class="card border-left-success shadow h-100 py-2">
+      <a ht="payment started but not cleared fully" ><div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Partial Due Bills - {{count.pdc}}</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.part_due_inv|floatformat:0|intcomma}}</div>
+          </div>
+        </div>
+      </div></a>
+    </div>
+  </div>
+  <div class="col-xl-2 col-md-6 mb-4">
+    <div class="card border-left-danger shadow h-100 py-2">
+      <a ht="toatl payment cleared invoices" ><div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Cleared Bills - {{count.fcc}}</div>
+            <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_clear_inv|floatformat:0|intcomma}}</div>
+          </div>
+        </div>
+      </div></a>
+    </div>
+  </div>
+</div>
 {% endif %}
 
 <!-- ######### -->
@@ -544,7 +559,8 @@
         <div class="modal-body">
           <div class="template-demo">
             <button   onclick="location.href='/{{pdata.pj}}/paymentslist/Received/'" type="button" class="btn btn-sm btn-info">Customer Payments</button>
-            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>          
+            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button>          
           </div>
         </div>
       </div>

@@ -7,7 +7,7 @@ from django.views.generic import View
 from .filters import *
 from django.shortcuts import get_object_or_404, render
 from django.db import IntegrityError
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required 
 from django.utils.decorators import method_decorator
 from django.contrib.auth import logout
 from django.db.models import Q
@@ -15,7 +15,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from django.db.models import Sum, Avg, Count
 from Projects.fyear import get_financial_year, get_fy_date, get_fy_date_fy
 from Projects.basedata import projectname
-from .customfunctions import genPO_initial_dataload, update_po_amount, assign_paystatus_to_po, adjust_payments_to_invoices, update_vendor_invoice, updateduedays, update_delivery_status, check_no_po, adj_pay_to_all_inv
+from .customfunctions import genPO_initial_dataload, update_po_amount, update_qt_amount, assign_paystatus_to_po, adjust_payments_to_invoices, update_vendor_invoice, updateduedays, update_delivery_status, check_no_po, adj_pay_to_all_inv, paymentdelete
 from num2words import num2words
 from django.urls import reverse
  
@@ -271,11 +271,13 @@ def PO_Payments_Form(request, proj, poid):
 		form = POPaymentsForm(request.POST, request.FILES)
 		if form.is_valid():
 			p = form.save()
-			assign_paystatus_to_po(request, p.id, po.id)
-			adjust_payments_to_invoices(request, po.id)
-			adj_pay_to_all_inv(request, po.Vendor)
+			p.PO_No = po
+			p.save() 
+			assign_paystatus_to_po(request, p.id, 'create')
+			# adjust_payments_to_invoices(request, po.id)
+			# adj_pay_to_all_inv(request, po.Vendor)
 			messages.success(request, "Payment Has Been Added")
-			return redirect('/%s/vendorpaymentslist/Paid/'%pdata['pj'])
+			return redirect('/%s/vendorpaymentslist/Paid/vendflt/'%pdata['pj'])
 		else:
 			return render(request, 'products/VendorPaymentsForm.html', {'form': form, 'pdata':pdata})
 	else:
@@ -287,6 +289,7 @@ def Vendor_Payments_Form(request, proj, fnc, payid):
   pdata = projectname(request, proj)
   lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
   lookup1 = {'PO_No__Related_Project__isnull':False} if proj == 'All' else {'PO_No__Related_Project':pdata['pj']}
+  
   if fnc == 'edit':
     if request.method ==  'POST':
       getdata = get_object_or_404(Vendor_Payment_Status, id=payid)
@@ -295,11 +298,11 @@ def Vendor_Payments_Form(request, proj, fnc, payid):
         p = form.save(commit=False)
         p= form.save()
         po = Purchases.objects.get(id=p.PO_No.id)
-        assign_paystatus_to_po(request, p.id, po.id)
-        adjust_payments_to_invoices(request, po.id)
-        adj_pay_to_all_inv(request, po.Vendor)
+        assign_paystatus_to_po(request, p.id, fnc)
+        # adjust_payments_to_invoices(request, po.id)
+        # adj_pay_to_all_inv(request, po.Vendor)
         messages.success(request, "Selected Payment Details Has Been Updated")
-        return redirect('/%s/vendorpaymentslist/Paid/'%pdata['pj'])
+        return redirect('/%s/vendorpaymentslist/Paid/vendflt/'%pdata['pj'])
       else:
         return render(request, 'products/VendorPaymentsForm.html', {'form': form, 'pdata':pdata})
     else:
@@ -310,15 +313,28 @@ def Vendor_Payments_Form(request, proj, fnc, payid):
   elif fnc == 'delete': #Delete
     getdata = get_object_or_404(Vendor_Payment_Status, id=payid)
     po = getdata.PO_No
+    inv = getdata.Invoice_No
+    dlt_amount = getdata.Paid_Amount
     getdata.delete()
+
     po = Purchases.objects.get(id=po.id)
-    adjust_payments_to_invoices(request, po.id)
-    adj_pay_to_all_inv(request, po.Vendor)
-    if not po.Payment_Status:
-      po.Payment_Status = Vendor_Payment_Status.objects.filter(PO_No=po).order_by('Payment_Date').last()
-      po.save()
-    messages.success(request, "Selected Payment Details Has Deleted")
-    return redirect('/%s/vendorpaymentslist/Paid/'%pdata['pj'])
+    ag_po = Vendor_Payment_Status.objects.filter(PO_No=po).order_by('-Payment_Date')
+    ag_vend = Vendor_Payment_Status.objects.filter(PO_No__Vendor=po.Vendor).order_by('-Payment_Date')
+
+    if ag_po == None and ag_vend == None:
+    	messages.success(request, "Selected Payment Details Has Deleted")
+    	return redirect('/%s/vendorpaymentslist/Paid/vendflt/'%pdata['pj'])
+    else:
+    	if ag_po:
+    		last_pay = ag_po.last()
+    	else:
+    		last_pay = ag_vend.last()
+    	po.Payment_Status = last_pay
+    	po.save()
+    	po = Purchases.objects.get(id=po.id)
+    	paymentdelete(request, po.id, inv.id, dlt_amount)
+    	messages.success(request, "Selected Payment Details Has Deleted")
+    	return redirect('/%s/vendorpaymentslist/Paid/vendflt/'%pdata['pj'])
 
   if request.method ==  'POST': #Create
     form = VendorPaymentForm(request.POST, request.FILES)
@@ -326,19 +342,19 @@ def Vendor_Payments_Form(request, proj, fnc, payid):
       p = form.save(commit=False)
       if p.PO_No==None and p.Invoice_No==None:
         messages.error(request, "Either PO No or Invoice No Must Be Geiven to Record Payment")
-        return redirect('/%s/vendorpaymentslist/Paid/'%pdata['pj'])
+        return redirect('/%s/vendorpaymentslist/Paid/vendflt/'%pdata['pj'])
       p= form.save()
       if not p.PO_No: # when paymentbthrough invoice number
         p.PO_No = p.Invoice_No.PO_No
         p.save()
-        assign_paystatus_to_po(request, p.id, p.PO_No.id)
+        assign_paystatus_to_po(request, p.id, fnc)
       else:
-        assign_paystatus_to_po(request, p.id, p.PO_No.id)
-      po = Purchases.objects.get(id=p.PO_No.id)
-      adjust_payments_to_invoices(request, po.id)
-      adj_pay_to_all_inv(request, p.PO_No.Vendor)
+        assign_paystatus_to_po(request, p.id, fnc)
+      # po = Purchases.objects.get(id=p.PO_No.id)
+      # adjust_payments_to_invoices(request, po.id)
+      # adj_pay_to_all_inv(request, p.PO_No.Vendor)
       messages.success(request, "Payment Has Been Added")
-      return redirect('/%s/vendorpaymentslist/Paid/'%pdata['pj'])
+      return redirect('/%s/vendorpaymentslist/Paid/vendflt/'%pdata['pj'])
     else:
       return render(request, 'products/VendorPaymentsForm.html', {'form': form, 'pdata':pdata})
   else:
@@ -365,7 +381,7 @@ def Vendor_Invoice_Form(request, proj, fnc, poid, invid):
         updateduedays(request, p.id)
         po = Purchases.objects.get(id=p.PO_No.id)
         update_vendor_invoice(request, p.id, po.id)
-        adjust_payments_to_invoices(request, po.id)
+        adjust_payments_to_invoices(request, po.id, p.id)
         messages.success(request, "Selected Invoice Details Has Been Updated")
         return redirect('/%s/vendorinvoiceslist/Issued/'%pdata['pj'])
       else:
@@ -385,7 +401,7 @@ def Vendor_Invoice_Form(request, proj, fnc, poid, invid):
 
     getdata.delete()
     po = Purchases.objects.get(id=poid)
-    adjust_payments_to_invoices(request, poid)
+    adjust_payments_to_invoices(request, poid, p.id)
     if not po.Billing_Status:
       po.Billing_Status = Vendor_Invoices.objects.filter(PO_No=po).order_by('Invoice_Date').last()
       po.save()
@@ -400,7 +416,7 @@ def Vendor_Invoice_Form(request, proj, fnc, poid, invid):
       p = Vendor_Invoices.objects.get(id=p.id)
       updateduedays(request, p.id)
       update_vendor_invoice(request, p.id, p.PO_No.id)
-      adjust_payments_to_invoices(request, p.PO_No.id)
+      adjust_payments_to_invoices(request, p.PO_No.id, p.id)
       messages.success(request, "Vendor Invoice Has Been Registered")
       return redirect('/%s/vendorinvoiceslist/Issued/'%pdata['pj'])
     else:
@@ -446,7 +462,7 @@ def Vendor_Invoices_List(request, proj, status):
 		table_inv = filter_data.qs
 		table_data = table_inv
 
-	full_due_inv, part_due_inv, full_clear_inv, total_billing = 0, 0, 0, 0
+	full_due_inv, part_due_inv, full_clear_inv, total_billing, total_paid = 0, 0, 0, 0, 0
 	fdc, pdc, fcc, tbc = 0, 0, 0, 0 #count
 	orders_list, invoices_list  = [], []
 
@@ -458,6 +474,7 @@ def Vendor_Invoices_List(request, proj, status):
 
 	for x in pos_list:
 		inv = Vendor_Invoices.objects.filter(PO_No=x).order_by('Invoice_Date')
+		pay = Vendor_Payment_Status.objects.filter(PO_No=x).order_by('Payment_Date')
 		invoices_list.append(inv)
 		inv_total 	 = sum(inv.values_list('Invoice_Amount', flat=True)) or 0
 		
@@ -476,8 +493,12 @@ def Vendor_Invoices_List(request, proj, status):
 				pdc = pdc + 1
 			else:
 				pass
+		if pay:
+			total_paid = total_paid+sum(pay.values_list('Paid_Amount',flat=True))
+
 	count = {'fdc':fdc, 'pdc':pdc, 'fcc':fcc, 'tbc':tbc}
-	heads = {'full_due_inv':full_due_inv, 'part_due_inv':part_due_inv, 'full_clear_inv':full_clear_inv, 'total_billing':total_billing}
+	# total_paid = total_billing-full_due_inv-part_due_inv
+	heads = {'full_due_inv':full_due_inv, 'part_due_inv':part_due_inv, 'full_clear_inv':full_clear_inv, 'total_billing':total_billing, 'total_paid':total_paid}
 	table_items  = zip(pos_list, invoices_list)	
 	
 	return render(request, 'products/VendorInvoicesList.html', {'table':table_data, 'table_items':table_items, 'count':count, 'heads':heads, 
@@ -598,7 +619,7 @@ def Vendor_Invoices_List(request, proj, status):
 #     'pdata':pdata, 'status':status, 'pc':pc, 'total_rec':total_rec, 'billed_rec':billed_rec, 'advances':advances, 'form_payments':form})
 
 @login_required
-def Vendor_Payments_List(request, proj, status):
+def Vendor_Payments_List(request, proj, status, vendflt):
   pdata = projectname(request, proj)
   lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
   lookup1 = {'PO_No__Related_Project__isnull':False} if proj == 'All' else {'PO_No__Related_Project':pdata['pj']}
@@ -606,17 +627,34 @@ def Vendor_Payments_List(request, proj, status):
   form = VendorPaymentForm()
   form.fields["PO_No"].queryset = Purchases.objects.filter(**lookup, Payment_Final_Status=0, Lock_Status=1, Final_Status=0)
   form.fields["Invoice_No"].queryset = Vendor_Invoices.objects.filter(**lookup1, Due_Amount__gt=0)
+
+  if vendflt != 'vendflt':
+  	form.fields["Invoice_No"].queryset = Vendor_Invoices.objects.filter(PO_No__Vendor__Supplier_Name=vendflt, Due_Amount__gt=0)
+  vendors = VendDt.objects.filter(Status=1, ds=1)
   
+
   table_data = Vendor_Payment_Status.objects.filter(**lookup1).order_by('Payment_Date')
   # table_fy_pays = Vendor_Payment_Status.objects.filter(**lookup1, Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
   
+
+  # ins = Vendor_Invoices.objects.all()
+  # for v in ins:
+  # 	v.Payment_Status = None
+  # 	v.Due_Amount = v.Invoice_Amount
+  # 	v.Payment_Cleared_Date = None
+  # 	v.save()
+
+  # for x in Vendor_Payment_Status.objects.all():
+  # 	assign_paystatus_to_po(request, x.id, 'edit')
+  # return HttpResponse('payments update')
+
+
   filter_data = VendorPaymentsFilter1(request.GET, queryset=table_data)
   table_data = filter_data.qs
   has_filter_pays = any(field in request.GET for field in set(filter_data.get_fields()))
  
-  total_billed, total_paid, total_due, vendors = 0,0,0,[]
+  total_billed, total_paid, total_due, advances, vendors = 0,0,0,0,[]
   
-  print(table_data)
   if has_filter_pays: #update filter data queyset
   	for x in table_data: vendors.append(x.PO_No.Vendor)
   	vendors = list(dict.fromkeys(vendors))
@@ -624,19 +662,21 @@ def Vendor_Payments_List(request, proj, status):
     for x in Purchases.objects.filter(**lookup, Lock_Status=1): vendors.append(x.Vendor)
     vendors = list(dict.fromkeys(vendors))
   
-  print(vendors)
   for x in vendors:
-			inv_list = Vendor_Invoices.objects.filter(PO_No__Vendor=x)
-			pay_list = Vendor_Payment_Status.objects.filter(PO_No__Vendor=x)
-			print(inv_list)
+			inv_list = Vendor_Invoices.objects.filter(**lookup1, PO_No__Vendor=x)
+			pay_list = Vendor_Payment_Status.objects.filter(**lookup1, PO_No__Vendor=x)
 			if inv_list:
 				total_billed = total_billed + sum(inv_list.values_list('Invoice_Amount', flat=True))
+				total_due = total_due + sum(inv_list.values_list('Due_Amount', flat=True))
 			if pay_list:
 				total_paid = total_paid + sum(pay_list.values_list('Paid_Amount', flat=True))
 	
-  total_due = total_billed - total_paid
+  advance = total_due - (total_billed - total_paid)
+  # total_due = total_billed - total_paid
+  # print(due, total_due)
+
   return render(request, 'products/VendorPaymentsList.html', {'table':table_data, 'filter_data':filter_data, 
-    'pdata':pdata, 'status':status, 'total_billed':total_billed, 'total_paid':total_paid, 'total_due':total_due, 'form_payments':form})
+    'pdata':pdata, 'status':status, 'total_billed':total_billed, 'total_paid':total_paid, 'total_due':total_due, 'advance':advance, 'form_payments':form, 'vendors':vendors, 'vendflt':vendflt})
 
 
 @login_required
@@ -1005,8 +1045,16 @@ def Inventory_List(request, proj, status):
 @login_required
 def Quotation_List(request, proj, status):
 	pdata = projectname(request, proj)
-	form_select_customer = QuotationForm()
-	return render(request, 'quotations/QuotationsList.html', {'pdata':pdata, 'form_select_customer':form_select_customer})
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	
+	if status == 'all':
+		table = Quotes.objects.filter(**lookup, Lock_Status=1)
+	else:
+		table = Quotes.objects.filter(**lookup, Lock_Status=0)
+
+	print(table)
+
+	return render(request, 'quotations/QuotationsList.html', {'pdata':pdata, 'table':table, 'status':status})
 
 @login_required
 def Quotation_Form(request, proj, fnc, qid):
@@ -1015,6 +1063,12 @@ def Quotation_Form(request, proj, fnc, qid):
 		form = QuotationForm(request.POST)
 		if form.is_valid():
 			p = form.save()
+			p.Related_Project = pdata['pj']
+			p.Prepared_By = Account.objects.get(user=request.user)
+			p.Date = date.today()
+			p.Quote_Submitted_By = Account.objects.get(user=request.user)
+			p.save()
+			
 			messages.success(request, 'Quotation Added Successfully')
 			return redirect('/%s/quotationslist/'%pdata['pj'])
 		else:
@@ -1034,6 +1088,12 @@ def Gen_Quotation(request, proj, fnc, qid, itemid, msg):
 			form = QuotationForm(request.POST)
 			if form.is_valid():
 				p = form.save()
+				p.Related_Project = pdata['pj']
+				p.Prepared_By = Account.objects.get(user=request.user)
+				p.Date = date.today()
+				p.Quote_Submitted_By = Account.objects.get(user=request.user)
+				p.Thanks_Note = 'Thanking you and assuring you of our best services at all times'
+				p.save()
 				tc = Quote_TC_Default.objects.all().last()
 				Quote_TC.objects.create(Quote_No=p, Taxes=tc.Taxes, Payment_Terms=tc.Payment_Terms, Delivery_Terms=tc.Delivery_Terms, 
 					Transport_Terms=tc.Transport_Terms, Validation_Terms=tc.Validation_Terms, FOR=tc.FOR, Other_Terms=tc.Other_Terms) if tc != None else None
@@ -1050,8 +1110,8 @@ def Gen_Quotation(request, proj, fnc, qid, itemid, msg):
 			return render(request, 'quotations/QuotationsForm.html', {'form': form, 'pdata':pdata})
 
 	qt = Quotes.objects.get(id=qid)
-	form_qt = QuotationForm(instance=get_object_or_404(Quotes, id=qt.id))
-		
+	form_qt = QuotationEditForm(instance=get_object_or_404(Quotes, id=qt.id))
+
 	items = Copy_Quote_Items.objects.filter(Quote_No = qt)
 	amount, total_gst, total_amount, final_gst, final_without_tax_amount, final_with_tax_amount = [],[],[],[],[],[] 
 	if items:
@@ -1078,22 +1138,21 @@ def Gen_Quotation(request, proj, fnc, qid, itemid, msg):
 		'form_tc':form_tc, 'amount_in_words':amount_in_words, 'item_id':itemid, 'form_item':form_item, 'fnc':fnc, 'msg':msg})
 
 @login_required
-def Edit_Quotation_Form(request, proj, fnc, poid):
+def Edit_Quotation_Form(request, proj, fnc, qid):
 	pdata = projectname(request, proj)
-	# po_id = Purchases.objects.get(id=poid).id
 	msg='msg'
-	url = '/'+str(pdata['pj'])+'/po/edit/'+str(poid)+'/itemid/'
+	url = '/'+str(pdata['pj'])+'/genquote/edit/'+str(qid)+'/itemid/'
 	
 	if request.method == 'POST':
-		form = PurchasesForm(request.POST, request.FILES, instance=get_object_or_404(Purchases, id=poid))
+		form = QuotationEditForm(request.POST, request.FILES, instance=get_object_or_404(Quotes, id=qid))
 		if form.is_valid():
 			p= form.save()
 			# updateduedays(request, p.Invoice_No)			
 			
 			if p.Lock_Status == 1:
-				msg = "PO Has Been Locked and Generated Successfully"
-				if update_po_amount(request, p.id) == 0:
-					msg = "No Items Added in List of Items. Please Add Items to Complete PO"
+				msg = "Quote Has Been Locked and Generated Successfully"
+				if update_qt_amount(request, p.id) == 0:
+					msg = "No Items Added in List of Items. Please Add Items to Complete Quote"
 					p.Lock_Status = 0
 					p.save()
 					url = url+msg+'/'
@@ -1108,22 +1167,22 @@ def Edit_Quotation_Form(request, proj, fnc, poid):
 	else:
 		url = url+msg+'/'
 		if fnc == 'delete':
-			Purchases.objects.get(id=poid).delete()
-			return redirect('/%s/purchaseslist/Inprogress/'%pdata['pj'])
+			Quotes.objects.get(id=qid).delete()
+			return redirect('/%s/quotationslist/all/'%pdata['pj'])
 		else:
 			return redirect(url)
 
 @login_required
-def Add_Quotation_Item_Form(request, proj, fnc, poid, itemid):
+def Add_Quotation_Item_Form(request, proj, fnc, qid, itemid):
 	pdata = projectname(request, proj)
 	msg = 'msg'
-	url = '/'+str(pdata['pj'])+'/po/edit/'+poid+'/itemid/'
+	url = '/'+str(pdata['pj'])+'/genquote/edit/'+qid+'/itemid/'
 	if request.method == 'POST':
 		if fnc == 'edit':
-			form = CopyPOItemsForm(request.POST, request.FILES, instance=get_object_or_404(Copy_PO_Items, id=itemid))
+			form = CopyQuoteItemsForm(request.POST, request.FILES, instance=get_object_or_404(Copy_Quote_Items, id=itemid))
 			if form.is_valid():
 				p= form.save()
-				# inv_amoumt_update(request, invid)
+				update_qt_amount(request, qid)
 				msg = "Item Details Has Been Updated Successfully"
 				url = url+msg+'/'
 				return redirect(url)
@@ -1131,21 +1190,20 @@ def Add_Quotation_Item_Form(request, proj, fnc, poid, itemid):
 				url = url+msg+'/'
 				return redirect(url)
 		else:
-			form = POItemsForm(request.POST, request.FILES)
+			form = QuoteItemsForm(request.POST, request.FILES)
 			if form.is_valid():
 				p = form.save()
-				p.PO_No = Purchases.objects.get(id=poid)
+				p.Quote_No = Quotes.objects.get(id=qid)
 				p.save()
-				if PO_Items.objects.filter(PO_No=p.PO_No, Add_Item=p.Add_Item).order_by('id').count() > 1:
-					PO_Items.objects.filter(PO_No=p.PO_No, Add_Item=p.Add_Item).order_by('id').last().delete()
+				if Quote_Items.objects.filter(Quote_No=p.Quote_No, Add_Item=p.Add_Item).order_by('id').count() > 1:
+					Quote_Items.objects.filter(Quote_No=p.Quote_No, Add_Item=p.Add_Item).order_by('id').last().delete()
 					msg = "This Item Aleady Added, You Can Modify Quantity from Existing Items List"
 					url = url+msg+'/'
 					return redirect(url)
 				else:
-					copy_item = Copy_PO_Items.objects.create(PO_No=p.PO_No, Item_Description=p.Add_Item.Product_Name.Product_Name, Quantity=p.Quantity, UOM=p.Add_Item.Product_Name.UOM,
-				Unit_Price=p.Add_Item.Unit_Price, HSN_Code=p.Add_Item.HSN_Code, GST=p.Add_Item.GST, 
-				CESS=p.Add_Item.CESS, Other_Taxes=p.Add_Item.Other_Taxes, Item_From_Product=p)
-				# inv_amoumt_update(request, invid)
+					copy_item = Copy_Quote_Items.objects.create(Quote_No=p.Quote_No, Item_Description=p.Add_Item.Product_Name.Product_Name, Quantity=p.Quantity, UOM=p.Add_Item.Product_Name.UOM,
+				Unit_Price=p.Add_Item.Unit_Price, GST=p.Add_Item.GST, Item_From_Product=p)
+				update_qt_amount(request, qid)
 				msg = "Item Details Has Been Updated Successfully"
 				url = url+msg+'/'
 				return redirect(url)
@@ -1155,24 +1213,24 @@ def Add_Quotation_Item_Form(request, proj, fnc, poid, itemid):
 	else:
 		url = url+msg+'/'
 		if fnc == 'delete':
-			copy_item = Copy_PO_Items.objects.get(id=itemid)
-			item = PO_Items.objects.filter(Add_Item__Product_Name__Product_Name=copy_item.Item_From_Product.Add_Item.Product_Name.Product_Name)
+			copy_item = Copy_Quote_Items.objects.get(id=itemid)
+			item = Quote_Items.objects.filter(Add_Item__Product_Name__Product_Name=copy_item.Item_From_Product.Add_Item.Product_Name.Product_Name)
 			copy_item.delete()
 			item.delete()
-			# inv_amoumt_update(request, invid)
+			update_qt_amount(request, qid)
 			return redirect(url)
 		else:
 			return redirect(url)
 
 @login_required
-def Quotation_TC_Form(request, proj, fnc, poid):
+def Quotation_TC_Form(request, proj, fnc, qid):
 	pdata = projectname(request, proj)
-	po = Purchases.objects.get(id=poid)
+	qt = Quotes.objects.get(id=qid)
 	msg = 'msg'
-	url = '/'+str(pdata['pj'])+'/po/edit/'+poid+'/itemid/'
+	url = '/'+str(pdata['pj'])+'/genquote/edit/'+qid+'/itemid/'
 	if request.method == 'POST':
 		if fnc == 'edit':
-			form = POTCForm(request.POST, request.FILES, instance=get_object_or_404(PO_Terms_Conditions, id=po.Terms_and_Conditions.id))
+			form = QuoteTCForm(request.POST, request.FILES, instance=get_object_or_404(Quote_TC, id=Quote_TC.objects.filter(Quote_No=qt).last().id))
 			if form.is_valid():
 				p= form.save()
 				msg = "Terms and Condition Details Has Been Updated Successfully"
@@ -1182,13 +1240,11 @@ def Quotation_TC_Form(request, proj, fnc, poid):
 				url = url+msg+'/'
 				return redirect(url)
 		else:
-			form = POTCForm(request.POST, request.FILES)
+			form = QuoteTCForm(request.POST, request.FILES)
 			if form.is_valid():
 				p= form.save()
-				p.PO_No = po
+				p.Quote_No = qt
 				p.save()
-				po.Terms_and_Conditions = p
-				po.save()
 				msg = "Terms and Condition Details Has Been Added Successfully"
 				url = url+msg+'/'
 				return redirect(url)
@@ -1198,7 +1254,7 @@ def Quotation_TC_Form(request, proj, fnc, poid):
 	else:
 		url = url+msg+'/'
 		if fnc == 'delete':
-			tc = PO_Terms_Conditions.objects.get(id=po.Terms_and_Conditions.id)
+			tc = Quote_TC.objects.get(id=Quote_TC.objects.filter(Quote_No=qt).last().id)
 			tc.delete()
 			return redirect(url)
 		return redirect(url)

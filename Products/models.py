@@ -166,7 +166,7 @@ class Purchases(models.Model):
 	ds					= models.BooleanField(default=True)
 
 	def __str__(self):
-		return str(self.PO_No)+'-'+str(self.Vendor.Supplier_Name)+'-'+str(self.PO_Value)
+		return str(self.Vendor.Supplier_Name)+'-'+str(self.PO_No)+'-'+str(self.PO_Value)
 
 class Vendor_Invoices(models.Model): 
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL)
@@ -187,9 +187,11 @@ class Vendor_Invoices(models.Model):
 	Payment_Due_Date 	= models.DateField(blank=True, null=True, help_text='payment due date')
 	Attach				= models.FileField(upload_to='vendorinvoices/', blank=True, null=True, help_text='attach order copy if available')
 	Last_Update 		= models.DateField(blank=True, null=True)
+	Set_For_Returns		= models.BooleanField(default=True)
+	Amended_GST_Returns_Date = models.DateField(blank=True, null=True, help_text='returns month/date, by default its invoice date')
 
 	def __str__(self):
-		return str(self.Invoice_No)+'-'+str(self.Invoice_Amount)+'-'+ str(self.PO_No.Vendor.Supplier_Name) if self.PO_No.Vendor.Supplier_Name != None else None
+		return str(self.PO_No.Vendor.Supplier_Name) if self.PO_No.Vendor.Supplier_Name != None else None +'-'+str(self.Invoice_No)+'-'+str(self.Invoice_Amount)
 
 
 class PO_Delivery_Status(models.Model): 
@@ -213,7 +215,7 @@ class Quotes(models.Model):
 	Related_Project		= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL, help_text='leave empty if product meant for many projects') 		
 	Quote_From			= models.ForeignKey(CompanyDetails, null=True, on_delete=models.SET_NULL) 		
 	Quote_No 			= models.CharField(max_length=30, blank=True, null=True, unique=True, help_text='Quote No') #backend
-	Date 				= models.DateTimeField(blank=True, null=True, help_text='quote date')
+	Date 				= models.DateField(blank=True, null=True, help_text='quote date')
 
 	Quote_To			= models.ForeignKey(CustContDt, null=True, blank=True, on_delete=models.SET_NULL)
 	#or
@@ -225,10 +227,10 @@ class Quotes(models.Model):
 
 	Quote_Value			= models.FloatField(max_length=20, null=True, blank=True, help_text='excluding taxes')
 	Valid_Days 			= models.IntegerField(blank=True, null=True, help_text='quote validation in days such as 15, 30 etc..')
-	# Subject 			= models.CharField(max_length=150, blank=True, null=True, help_text='quote subject if necessary')
+	Subject 			= models.TextField(max_length=500, blank=True, null=True, help_text='quote subject if necessary')
 	# Welcome_Text 		= models.TextField(max_length=1000, blank=True, null=True, help_text='quote subject if necessary')
 	Comments 			= models.TextField(max_length=500, blank=True, null=True, help_text='anything to specify with note')
-	Thanks_Note 		= models.CharField(max_length=150, blank=True, null=True, help_text='thanks giving text')
+	Thanks_Note 		= models.TextField(max_length=500, blank=True, null=True, help_text='thanks giving text')
 	Quote_Submitted_By 	= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL, related_name='sbmby')
 	Lock_Status			= models.BooleanField(default=False, help_text='mark if wnat to lock quote to avoid editing')
 

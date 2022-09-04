@@ -42,6 +42,20 @@ class PaymentsFilter(django_filters.FilterSet):
 		model 	= Payment_Status
 		fields = ['user', 'Order_No', 'Order_No__Customer_Name']
 
+class PaymentsFilter1(django_filters.FilterSet):
+	def __init__(self, *args, **kwargs):
+  		super().__init__(*args, **kwargs)
+  		for field in self.form.fields:
+  			self.form.fields[field].widget.attrs.update({'class': 'form-control'})
+	from_date 	= DateFilter(field_name='Payment_Date', lookup_expr='gte')
+	to_date 	= DateFilter(field_name='Payment_Date', lookup_expr='lte')
+	from_value 	= NumberFilter(field_name='Received_Amount', lookup_expr='gte')
+	to_value 	= NumberFilter(field_name='Received_Amount', lookup_expr='lte')
+
+	class Meta:
+		model 	= Payment_Status
+		fields = ['user', 'Order_No__Customer_Name']
+
 
 class WorksFilter(django_filters.FilterSet):
 	# def __init__(self, *args, **kwargs):

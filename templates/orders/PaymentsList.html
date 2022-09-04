@@ -55,56 +55,55 @@
 <script type="text/javascript">
   // Datatables Excel Formating Before Export//
   var customexcel = function( xlsx ) {
-    var sheet = xlsx.xl.worksheets['sheet1.xml'];
-    var style = xlsx.xl['styles.xml'];
-    var tagName = style.getElementsByTagName('sz');
-    for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
-    $('row:first c', sheet).attr('s', '2')
-    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); //wrap text
-    var col = $('col', sheet);
-    // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
-    $(col[1]).attr('width', 25); $(col[2]).attr('width', 25); $(col[3]).attr('width', 45); $(col[4]).attr('width', 25); }; 
-  //--End--//
+  var sheet = xlsx.xl.worksheets['sheet1.xml'];
+  var style = xlsx.xl['styles.xml'];
+  var tagName = style.getElementsByTagName('sz');
+  for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+  $('row:first c', sheet).attr('s', '2')
+  $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' );  //wrap text
+  var col = $('col', sheet);
+  // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
+  $(col[1]).attr('width', 45); $(col[2]).attr('width', 25); $(col[3]).attr('width', 20); }; 
+//--End--//
 
-  var cl = [0,  1, 2, 3, 4]
-  var wdths = ['4%', '20%', '20%', '36%', '20%'];
-  var ort = 'portrait'; //landscape
-  
-   if ('{{status}}' == 'Received' ) { var msgTop = 'Total Received Amount  {{total_rec|floatformat:0|intcomma}}{% if advances != 0 %}  |  Advances in Received Payments {{advances|floatformat:0|intcomma}}{% endif %}';}
-    else { var msgTop = 'Billed Orders Over Due Payments {{pc.t_due_overdue|floatformat:0|intcomma}}  |  Billed Orders Coming Due Payments {{pc.t_due_coming|floatformat:0|intcomma}} \n Total Due Payments (Over Due and Coming Due)  {{pc.t_due_all|floatformat:0|intcomma}}';};
-    var title = '{{pdata.pj}} - {{status}} Payments List';
-    var filename = '{{pdata.pj}}-{{status}}Payments_{{table.first.Payment_Date|date:'dMy'}}to{{table.last.Payment_Date|date:'dMy'}}'
+var cl = [0,  1, 2, 3]
+var wdths = ['4%', '50%', '26%', '20%'];
+var ort = 'portrait'; //landscape
 
-  // Datatables Customise PDF Before Export//
-  var pdf_custom = function ( doc ) {
-    doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
-    doc.pageMargins = [40,60,20,30];
-    doc['footer']= footer1;
-    doc['header']= header1;
-    var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
-    objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
-    objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
-    objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
-    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
-    // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
-  doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
-  {text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
-  };
+var msgTop = 'Total Billings  {{total_billed|floatformat:0|intcomma}} | Total Received  {{total_received|floatformat:0|intcomma}} | Due Payments  {{total_due|floatformat:0|intcomma}}'
+  var title = '{{pdata.pj}} - {{status}} Payments List';
+  var filename = '{{pdata.pj}}-{{status}}Payments_{{table.first.Payment_Date|date:'dMy'}}to{{table.last.Payment_Date|date:'dMy'}}'
 
-  //--End--//
+// Datatables Customise PDF Before Export//
+var pdf_custom = function ( doc ) {
+  doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+  doc.pageMargins = [40,60,20,30];
+  doc['footer']= footer1;
+  doc['header']= header1;
+  var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+  objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+  objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+  objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+  doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+  // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+{text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+};
+
+//--End--//
 </script>
 
 <!-- Data Tables Export Script -->
 <script type="text/javascript">
-  $('#{{status}}').DataTable( {
-  autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
-  buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
-      
-    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
+$('#{{status}}').DataTable( {
+autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
+buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
+    
+  {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
 
-    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
+  {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
 
-    {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
+  {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
 </script>
 {% endblock %} <!-- For Scripts -->
 
@@ -120,12 +119,12 @@
 <div>
   <div style="float:left">
     <button type="button" data-toggle="modal" data-target="#paymentsAgainstModal" class="btn btn-sm btn-primary mb-4" ht="add received payment details order wise/bill wise">Add New Payment</button>
-    
+    <!-- 
     {% if status == 'Due' %}
       &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/paymentslist/Received/'" class="btn btn-sm btn-success mb-4" ht="received payments against billed or unbilled orders">Received Payments</button>
     {% else %}
       &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/paymentslist/Due/'" class="btn btn-sm  btn-success mb-4" ht="due payments against billed orders">Due Payments</button>
-    {% endif %} 
+    {% endif %}  -->
     <!-- &emsp;<button type="button"  onclick="location.href=''" class="btn btn-sm  btn-info mb-4">Dash Board</button> -->
    &emsp;&emsp;
     <button type="button" data-toggle='modal', data-target="#MorePagesModal" class="btn btn-sm btn-danger mb-4" >More Pages</button>
@@ -159,13 +158,13 @@
                     <div class="row">
                       <div class="col-md-6 col-sm-6 col-12">
                         <div class="form-group start-date">
-                          <label style=" font-weight: 200; color: black; font-size: 13px;">Payment Received From</label>
+                          <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
                           <input type="date" name="from_date" class="form-control">
                         </div>
                       </div>
                       <div class="col-md-6 col-sm-6 col-12">
                         <div class="form-group start-date">
-                          <label style="font-weight: 200; color: black; font-size: 13px;">Payment Received To</label>
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
                           <input type="date" name="to_date" class="form-control">
                         </div>
                       </div>
@@ -193,17 +192,17 @@
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Customer Name</label>
                         {{ filter_data.form.Order_No__Customer_Name}}
                       </div>
-                      <div class="col-md-6 col-sm-6 col-12">
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Order Details</label>
                         {{ filter_data.form.Order_No}}
-                      </div>
-                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                      </div> -->
+                      <div class="col-md-6 col-sm-6 col-12">
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Follow Up By</label>
                         {{ filter_data.form.user}}
                       </div>
                       
                       
-                      <div class="" style=" float:left; margin-left: 10px; margin-top:48px;">
+                      <div class="" style=" float:left; margin-left: 10px; margin-top:20px;">
                         <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
                         <!-- <button id="add-e" class="btn">Add Task</button> -->
                         <button id="edit-event" class="btn"></button>
@@ -216,102 +215,47 @@
       </div>
     </div>
   </div>
-  
-{% if status == 'Due' %}
-  <div class="row">
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-primary shadow h-100 py-2">
-        <div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Billed Orders</div>
-              <br><div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-20px; font-size:13px;">Over Due Payments</div>
-              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{pc.t_due_overdue|floatformat:0|intcomma}}</div>
-            </div>
+
+<div class="row">
+  <div class="col-xl-4 col-md-6 mb-4">
+    <div class="card border-left-primary shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Billings</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{total_billed|floatformat:0|intcomma}}</div>
           </div>
         </div>
-      </div>
-    </div>
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-success shadow h-100 py-2">
-        <div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Billed Orders</div>
-              <br><div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-20px; font-size:13px;">COMING DUE PAYMENTS</div>
-              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{pc.t_due_coming|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xl-4 col-md-6 mb-4"> 
-      <div class="card border-left-dark shadow h-100 py-2">
-        <div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Due Payments</div>
-              <br><div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-20px; font-size:13px;">Over Due and Coming Due</div>
-              <div class="h6 mb-0 font-weight-bold text-blue-1000">₹ {{pc.t_due_all|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- <div class="col-xl-3 col-md-6 mb-4"> 
-      <div class="card border-left-info shadow h-100 py-2">
-        <div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Estimated Payments Against</div>
-              <br><div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-20px; font-size:13px;">Unbilled Orders</div>
-              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{pc.t_due_unbilled|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div> -->
-  </div>
-{% else %}
-  <div class="row">
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-primary shadow h-100 py-2">
-        <a ht="all received payments against billed orders"><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Received Payments Against Billed</div>
-              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{billed_rec|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div></a>
-      </div>
-    </div>
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-info shadow h-100 py-2">
-        <a ht="received advance payments against unbilled orders"><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Received Advances Against Unbilled </div>
-              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{pc.total_balance_as_advance|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div></a>
-      </div>
-    </div>
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-info shadow h-100 py-2">
-        <a ht="total received payments against billed and  advances against unbilled"><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Received Payments</div>
-              <div class="h6 mb-0 mr-3 font-weight-bold text-blue-1000">₹ {{total_rec|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div></a>
       </div>
     </div>
   </div>
-{% endif %}
+  <div class="col-xl-4 col-md-6 mb-4">
+    <div class="card border-left-success shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Paid Amounts</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">
+              ₹ {{total_received|floatformat:0|intcomma}} {% if advance > 0 %} <span style="color:voilet; font-size:15px;">(Received As Advance {{advance|floatformat:0|intcomma}})</span>{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4 col-md-6 mb-4"> 
+    <div class="card border-left-dark shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments</div>
+            <div class="h6 mb-0 font-weight-bold text-blue-1000">₹ {{total_due|floatformat:0|intcomma}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% if status == 'Received' %}
 <!-- Payments List -->
@@ -323,71 +267,28 @@
           <tr>
             <th>#</th>
             <th>Customer Details</th>
-            <th>Received Payment Details</th>
-            <th>Billing Details</th>
-            <th>Order Details</th>
+            <th>Payment Date</th>
+            <th>Received Amount</th>
           </tr>
         </thead>
         <tbody>
-          {% for x, y, z, tr, td, adv, t_billed, due_date, clr in data %}
+          {% for x in table %}
           <tr>
             <td >{{forloop.counter}}</td>
 
             <td style="white-space:normal;">
-              {{x.Customer_Name.Customer_Name}}
-              <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Customer_Name.Phone_Number_1}}'>{{x.Customer_Name.Phone_Number_1}}</a>
+              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {{x.id}})">{{x.Order_No.Customer_Name}}</a>
+              <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Order_No.Customer_Name.Phone_Number_1}}'>{{x.Order_No.Customer_Name.Phone_Number_1}}</a>
             </td>
 
             <td style="white-space:normal;">
-              {% if y %}
-                {% for p in y %}
-                   <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{p.id}}, {{x.id}})">
-                    <span class='hlt5'>{{p.Payment_Date|date:'d M y'}}</span>&emsp;₹ {{p.Received_Amount|floatformat:0|intcomma}}{% if p.Payment_Type == 'Advance' %}<span class="hlt2 font-weight-bold">**</span>{% endif %}</a>
-                    <br>
-                {% endfor %}
-                {% if t_billed %}<br><span class='hlt5'>Total Billed: </span>{{t_billed|floatformat:0|intcomma}}{% endif %}
-                <br><span class='hlt5'>Total Received: </span>{{tr|floatformat:0|intcomma}}
-                  {% if td != 0 and td != None %}
-                    <br><span class='font-weight-bold bg-warning'>Total Due Payment: {{td|floatformat:0|intcomma}}</span>
-                  {% else %}
-                    {% if t_billed %}<br><span class='hlt2'>All Payments Cleared</span>{% endif %}
-                  {% endif %}
-                {% if adv == 'True' %}<br><br><span class='hlt2 italic font-weight-bold'>**</span>Advance Payments{% endif %}
-              {% else %}
-                <span class='hlt3'>No Payments Received</span>
-              {% endif %}
+              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {{x.id}})">
+                {{x.Payment_Date|date:'d M y'}}</a>
             </td>
 
             <td style="white-space:normal;">
-              {% if z %}
-                {% for p in z %}
-                  <a class="ahr" ht="open invoice" target="_blank"  onclick="location.href='/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
-                    <span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
-                    <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} | {% if p.Invoice_Amount != p.Due_Amount %}<span class='hlt5'>Received Amount: </span>₹ {{p.Due_Amount|mul:-1|add:p.Invoice_Amount|floatformat:0|intcomma}}{% else %}<span class='hlt3'>No Payments Received</span>{% endif %}
-                  {% if p.Due_Amount > 0  %}
-                    <br><span class='hlt3'>Due Amount: </span>₹ {{p.Due_Amount|floatformat:0|intcomma}} | <span class='hlt5'>Due Date: </span>{{p.Payment_Due_Date|date:'d M Y'}}{% if p.Payment_Over_Due_Days == 0  %}<span class="hlt2 font-weight-bold">**</span>{% endif %}
-                    {% if p.Payment_Over_Due_Days > 0 %}<br><span class='hlt3'>Over Due Days: </span>{{p.Payment_Over_Due_Days}}{% endif %}
-                  {% else %}
-                    <br><span class='hlt2'>Payment Done</span>
-                  {% endif %}
-                  </a><br><br>
-                {% endfor %}
-                {% if due_date == 'True' %}<span class='hlt2 italic font-weight-bold'>**</span>Due Date Not Yet Came{% endif %}
-              {% else %}
-                <span class='hlt5'>No Bills Generated</span>
-              {% endif %}
-            </td>
-
-            <td style="white-space:normal;">
-              {{x.Order_Details}}
-              <br><br><span class="hlt2">Order Value: ₹ {{x.Order_Value|floatformat:0|intcomma}}</span>
-              {% if x.PO_No %}<br><span class='hlt5'>Purchase Order No
-                <br></span>{{x.PO_No}}
-              {% else %}
-                <br><span class='hlt5'>Order Reference No
-                <br></span>{{x.Order_No}}
-              {% endif %}
-              {% if x.user.Nick_Name %}<br>Followup By: {{x.user.Nick_Name}}{% endif %}
+              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {{x.id}})">
+                ₹ {{x.Received_Amount|floatformat:0|intcomma}}</a>
             </td>
 
           </tr>
@@ -442,7 +343,7 @@
   </div>
   {% endif %}
 
-  {% if status == 'Due' %}
+  <!-- {% if status == 'Due' %}
   <div class="card">
     <div class="card-body2">
       <div class="table-responsive mb-4 mt-4">
@@ -529,7 +430,7 @@
       </div>
     </div>
   </div>
-  {% endif %}
+  {% endif %} -->
 
   <div class="modal fade text-left" id="paymentsAgainstModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document" style="width:250px;%">
@@ -600,7 +501,8 @@
         <div class="modal-body">
           <div class="template-demo">
             <button   onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
-            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>          
+            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button>          
           </div>
         </div>
       </div>

@@ -20,11 +20,10 @@ def get_errors(request, formerrors):
 
 def update_salary_breaking(request, sid):
 	p = Empl_Salaries.objects.get(id=sid)
-	
 	p.ESI_Amount = p.Basic*0.0075 if p.ESI_Eligibility == True else 0
 	pf_per = 0.12 if p.Is_Providing_PF_Employer_Share == True else 0.24
 	p.PF_Amount = p.Basic*pf_per if p.PF_Eligibility == True else 0
-	p.Net_Salary = p.Gross_Salary-p.PF_Amount-p.ESI_Amount-0 #if p.Net_Salary == None else p.Net_Salary 
+	p.Net_Salary = p.Gross_Salary-p.PF_Amount-p.ESI_Amount-0 #if p.Net_Salary == None else p.Net_Salary
 	
 	if (p.Gross_Salary - p.Basic - p.PF_Amount - p.ESI_Amount - 0) >= p.Basic*0.4:
 		p.HRA= p.Basic*0.4
@@ -40,6 +39,7 @@ def update_salary_breaking(request, sid):
 		p.Next_Revision_Date = date(join_dt.year+1, join_dt.month, join_dt.day) if join_dt != None else date(p.Effective_From.year+1, p.Effective_From.month, p.Effective_From.day)
 	
 	p.save()
+
 
 def update_sal_revision(request, p):
 	empl_sal = Empl_Salaries.objects.filter(Employ_Name=p.Employ_Name).last()
@@ -348,6 +348,7 @@ def Employ_Salaries_Form(request, proj, fnc, eid):
 			form = EmploySalariesForm(request.POST, instance=get_object_or_404(Empl_Salaries, id=eid))
 			if form.is_valid():
 				p= form.save()
+				print('kjhgdsfdghjk')
 				update_salary_breaking(request, p.id)
 				messages.success(request, "Employ Salary Details Has Been Updated successfully")
 				return redirect('/%s/employsalarieslist/'%pdata['pj'])
@@ -474,9 +475,9 @@ def Employ_Salaries(request, proj):
 		rev = Empl_Salary_Revisions.objects.filter(Employ_Name=x.Employ_Name).filter(Employ_Name__Status=1).order_by('Effective_From').last()
 		if rev:
 			if rev.Effective_From <= date.today() and rev.Revised_Gross > x.Gross_Salary:
-				x.Gross_Salary = p.Revised_Gross
-				x.Basic = p.Revised_Basic
-				x.Effective_From = p.Effective_From
+				x.Gross_Salary = rev.Revised_Gross
+				x.Basic = rev.Revised_Basic
+				x.Effective_From = rev.Effective_From
 				x.save()
 				update_salary_breaking(request, x.id)
 		sal_rev.append(rev)

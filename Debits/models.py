@@ -21,7 +21,7 @@ class Expenses(models.Model):
 	Sales_Order			= models.ForeignKey(Orders, null=True, blank=True, on_delete=models.SET_NULL)
 	Purpose	    		= models.CharField(max_length=100, null=True, help_text='purpose of expenses')
 	Total_Amount		= models.FloatField(max_length=10, null=True, blank=True, help_text='amount in rupees')
-	Balance_Amount		= models.FloatField(max_length=10, null=True, blank=True, help_text='balance due/advance amount in rupees')
+	Balance_Amount		= models.FloatField(max_length=10, null=True, blank=True, help_text='due amount')
 	Lock_Status 		= models.BooleanField(default=False, help_text='lock status')	
 	Approval_Status 	= models.BooleanField(default=False, help_text='approval status')	
 	Issued_By			= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL, related_name='issueddby')
@@ -31,6 +31,7 @@ class Expenses(models.Model):
 	Over_Due_Days 		= models.IntegerField(null=True, blank=True)
 	Clearing_Status 	= models.BooleanField(default=False, help_text='mark if all amounts cleared')
 	Edit_Status 		= models.BooleanField(default=False, help_text='mark if want to lock edit')	
+	Balance_Advance		= models.FloatField(default=0, max_length=10, null=True, blank=True, help_text='if any advance at that time')
 	
 
 	def __str__(self):
@@ -130,22 +131,39 @@ class Working_Days(models.Model):
 		return str(self.Month)+'-'+str(self.Working_Days)
 
 class Monthly_Salaries(models.Model):
-	Attendance 				= models.ForeignKey(Monthatnd, null=True, on_delete=models.SET_NULL)
-	Salary 					= models.ForeignKey(Empl_Salaries, null=True, on_delete=models.SET_NULL)
+	Name 					= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL)
+	Month	 				= models.DateField(null=True, blank=True)	
 	Issued_Salary 			= models.IntegerField(null=True, blank=True, help_text='issued salary or net salary for this month')
 	Issued_Date 			= models.DateField(null=True, help_text='salary issued date')
-	LOP 					= models.IntegerField( null=True, blank=True, help_text='loss of pay if eligible')
+	LOP 					= models.FloatField(max_length=10, null=True, blank=True, help_text='loss of pay if eligible')
 	OT_Amount 				= models.IntegerField(null=True, blank=True, help_text='over time amount if eligible')
-	PF_Employer 			= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PF employer share 12% of basic if eligible')
-	PF_Employee 			= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PF employee share 12% of basic if eligible')
-	ESI_Employer 			= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='0.75% employee on gross')
-	ESI_Employee 			= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='3.25% employer on gross')
+	PF						= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PF employee share 12% of basic if eligible')
+	ESI 					= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='3.25% employer on gross')
 	Professional_Tax 		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PT deductions if eligible, <15K 0, 15-20K 150, >15K 200 of gross')
-	Income_Tax_Deductions 	= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='TDS/income tax deductions if eligible')
+	TDS 					= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='TDS/income tax deductions if eligible')
 	Other_Deductions 		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='other deductions')
-	Advance					= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='advances with employes')
+	Salary_Advance			= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='advances with employes')
 	Issued_Status			= models.BooleanField(default=True, help_text='issued status')
-	Status					= models.BooleanField(default=True, help_text='active status')
+	Automatic				= models.BooleanField(default=True)
+	Last_Updated_Date	    = models.DateField(null=True, blank=True)
 
 	def __str__(self):
-		return str(self.Employ_Name)+'-'+str(self.Issued_Date)+'-'+str(self.Issued_Salary)
+		return str(self.Name.Name)+'-'+str(self.Issued_Date)+'-'+str(self.Issued_Salary)
+
+class Month_Sal_Exp(models.Model):
+	Month	 				= models.DateField(null=True, blank=True)	
+	Issued_Salareis 		= models.IntegerField(null=True, blank=True, help_text='total issued salaries')
+	Pending_Salaries 		= models.IntegerField(null=True, blank=True, help_text='pending salaries')
+	Issued_Date 			= models.DateField(null=True, help_text='salary issued date')
+	Total_LOP 				= models.FloatField(max_length=10, null=True, blank=True, help_text='loss of pay if eligible')
+	Total_OT 				= models.IntegerField(null=True, blank=True, help_text='over time amount if eligible')
+	Paid_PF					= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PF employee share 12% of basic if eligible')
+	Paid_ESI 				= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='3.25% employer on gross')
+	Total_Paid 				= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PT deductions if eligible, <15K 0, 15-20K 150, >15K 200 of gross')
+	Total_TDS 				= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='TDS/income tax deductions if eligible')
+	Other_Deductions 		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='other deductions')
+	Total_Advances			= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='advances with employes')
+	Last_Updated_Date	    = models.DateField(null=True, blank=True)
+
+	def __str__(self):
+		return str(self.Month)+'-'+str(self.Issued_Date)+'-'+str(self.Issued_Salaries)

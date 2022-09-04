@@ -77,6 +77,10 @@ class PaymentsEmptyForm(forms.ModelForm):
 		model = Payment_Status
 		exclude = ['user', 'As_Advance_Amount', 'Payment_Type']
 		widgets = {'Payment_Date': widgets.DateInput(attrs={'type': 'datetime-local'}),'Next_Commitment_Date': widgets.DateInput(attrs={'type': 'date'})}
+	
+	def __str__(self):
+		return str(self.Invoice_No)
+
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		for _, value in self.fields.items():

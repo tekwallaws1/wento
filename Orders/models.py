@@ -2,6 +2,8 @@ from django.db import models
 from Projects.models import *
 from Products.models import * 
 from UserAccounts.models import *
+from django.contrib.auth.models import User
+from Projects.basedata import call_i
 # Create your models here.    
 
 order_by = (('By PO', 'By PO'), ('By Mail', 'By Mail'), ('By Phone', 'By Phone'), ('By Reference', 'By Reference'))
@@ -42,7 +44,16 @@ class Orders(models.Model):
 	    super().save(*args, **kwargs)
 
 	def __str__(self):
-		return str(self.PO_No)+'-'+str(self.Customer_Name.Customer_Name)+'-'+str(self.Order_Value)
+		if request.user.username == 'praveen' or  request.user.username == '9849203852' or  request.user.username == '9010654596':
+			return str(self.Customer_Name.Customer_Name)+'-'+str(self.PO_No)+'-'+str(self.Order_Value)
+
+	# def process_request(self, request):
+	# 	if request.user.username == 'praveen' or  request.user.username == '9849203852' or  request.user.username == '9010654596':
+	# 		def __str__(self):
+	# 			return str(self.Customer_Name.Customer_Name)+'-'+str(self.PO_No)+'-'+str(self.Order_Value)
+	# 	else:
+	# 		def __str__(self):
+	# 			return str(self.Customer_Name.Customer_Name)+'-'+str(self.PO_No)
 
 class Order_Items(models.Model): 
 	Order_No 		    = models.ForeignKey(Orders, null=True, blank=True, on_delete=models.CASCADE)
@@ -124,6 +135,7 @@ class Invoices(models.Model):
 	Attach				= models.FileField(upload_to='customerinvoices/', blank=True, null=True, help_text='attach invoice copy if available')	
 	Is_Manual			= models.BooleanField(default=False, help_text='wether it is manual entry or online generation')
 	Set_For_Returns		= models.BooleanField(default=True)
+	Amended_GST_Returns_Date = models.DateField(blank=True, null=True, help_text='any date in a month which you want make returns')
 	ds					= models.BooleanField(default=True)
 	Last_Update 		= models.DateField(blank=True, null=True)
 
@@ -137,7 +149,7 @@ class Invoices(models.Model):
 	    super().save(*args, **kwargs)
 
 	def __str__(self):
-		return str(self.Invoice_No)+'-'+str(self.Billing_To.Customer_Name)+'-'+str(self.Invoice_Amount)
+		return str(self.Billing_To.Short_Name)+'-'+str(self.Invoice_No)+'-'+str(self.Invoice_Amount)
 
 class Billed_Items(models.Model): 
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL) 

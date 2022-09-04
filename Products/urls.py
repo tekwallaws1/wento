@@ -22,7 +22,7 @@ urlpatterns = [
 	path('<proj>/<fnc>/po_tc/<poid>/', views.PO_TC_Form, name='po_tc'),
 	path('<proj>/vendor_inv_edit/<fnc>/<invid>/', views.Edit_Vendor_Invoice_Form, name='editvendorinvoice'),
 
-    path('<proj>/vendorpaymentslist/<status>/', views.Vendor_Payments_List, name='vendorpaymentslist'),
+    path('<proj>/vendorpaymentslist/<status>/<vendflt>/', views.Vendor_Payments_List, name='vendorpaymentslist'),
     path('<proj>/vendorpaymentsform/<fnc>/<payid>/', views.Vendor_Payments_Form, name='vendorpaymentsform'),
     path('<proj>/popaymentsform/<poid>/', views.PO_Payments_Form, name='popaymentsform'),
 

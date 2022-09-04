@@ -31,7 +31,7 @@
     {% if qt.Lock_Status == 1 %}
       <button type="button" ht='unlock it for edit/change the quote' id='hidelockbutton' data-toggle="modal" data-target="#unlockPasswordModal" onclick="javascript:fnc('unlockqt')" class="btn2 btn2-danger">Unlock Quote</button>
     {% else %}
-      <button type="button" ht='by click this confirm quote and lock edit options' data-toggle="modal" data-target="#editPOModal" onclick="javascript:fnc('lockqt')" class="btn2 btn2-danger">Confirm Quote</button>
+      <button type="button" ht='by click this confirm quote and lock edit options' data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('lockqt')" class="btn2 btn2-danger">Confirm Quote</button>
       
       <button type="button" ht='Delete this Draft Quote' data-toggle="modal" data-target="#deletepoModal" class="btn2 btn2-dark">Delete</button>
       <button style="float: right;border:none; background:none; color: blue; font-size:16px; font-weight:600;">Draft Copy</h5></button>
@@ -105,104 +105,189 @@
 
       <div style="margin-top:10px"></div>
 
-      <table class="t3" style="width:55%; font-size: 11.5px; float: left;">
+      <table  style="width:55%; font-size: 12px; float: left;">
         <tr>
-          <th class="th1">Quote To</th>
+          <th class="tb0" style="font-size:13px;"><a class="ahr" ht="edit" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('quoteto')">Quote To</a></th>
         </tr>
         <tr>
-          <th class="td1">
-            <a class="ahr" ht="Change Billing Address" data-toggle="modal" data-target="#editPOModal" onclick="javascript:fnc('customeraddress')">
-              <span class="sh1">M/s. {{qt.Vendor.Supplier_Name}}</span>
-              {% if qt.Vendor.Address_Line_1 %}<br>{{qt.Vendor.Address_Line_1}},{% endif %}
-              {% if qt.Vendor.Address_Line_2 %}<br>{{qt.Vendor.Address_Line_2}},{% endif %}
-              <br><span class="sh1">State &nbsp; : </span>{{qt.Vendor.State}}{% if qt.Vendor.State_Code %}, <span class="sh1">Code: </span>{{qt.Vendor.State_Code}}{% endif %}{% if qt.Vendor.GST_No %}<br><span class="sh1">GSTIN : </span>{{qt.Vendor.GST_No}}{% endif %}
-              {% if qt.Vendor_Contact %}
-                <br><span class="sh1">Contact Person: </span>{{qt.Vendor_Contact.Contact_Person}}
-                <span class="sh1">, Cell: </span>{{qt.Vendor_Contact.Phone_Number_1}}
-                <!-- {% if qt.Vendor_Contact.Email %}<span class="sh1">, Email: </span>{{qt.Contact.Email}}.{% endif %} -->
-              {% endif %}
+          <th class="tb0" style="font-weight:500;">
+            <a class="ahr" ht="edit" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('quoteto')">
+              {% if qt.Quote_To %}
+                <span class="sh1" style="font-weight:bold">M/s. {{qt.Quote_To.Contact_Person}}</span>
+                <br>{{qt.Quote_To.Customer_Name.Customer_Name}}
+                <br>{{qt.Quote_To.Phone_Number_1}}
+                {% if qt.Quote_To.Email %}<br>Email: {{qt.Quote_To.Email}}{% endif %}
             </a>
+                
+                <!-- {% if qt.Quote_To.Customer_Name.Address_Line_1 %}<br>{{qt.Quote_To.Customer_Name.Address_Line_1}},{% endif %}
+                {% if qt.Quote_To.Customer_Name.Address_Line_2 %}<br>{{qt.Quote_To.Customer_Name.Address_Line_2}},{% endif %} -->
+                <!-- <br>{{qt.Quote_To.Customer_Name.State}} -->
+
+              {% else %}
+                <a class="ahr" ht="edit" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('quoteto1')">
+                  {% if qt.Reference_Person %}<span class="sh1" style="font-weight:bold">M/s. {{qt.Reference_Person}}</span>{% endif %}
+                  {% if qt.Firm_Name %}<br>{{qt.Firm_Name}}{% endif %}
+                  {% if qt.Phone_Number %}<br>{{qt.Phone_Number}}{% endif %}
+                  {% if qt.Location %}<br>{{qt.Location}}{% endif %}
+                  {% if qt.Email %}<br>Email: {{qt.Email}}{% endif %}
+                {% endif %}
+              </a>
           </th>
         </tr>
       </table>
-      <table class="t3" style="width:35%; font-size: 11.5px; float: right;">
+
+      <a class="ahr" ht="Change Quote No and Date" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('qt_details')">
+      <table  style="width:35%; font-size: 12px; float: right;">
         <tr>
           <th class="th1" style="text-align: left; ">Quotation No</th>
           <th class="th1" style="text-align: right; width: 40%; ">Date</th>
         </tr>
         <tr>
-          <td class="td2" style="text-align: left;">ABCD/EF/22-23/001</td>
-          <td class="td2" style="text-align: right;">20 Aug 2022</td>
+          
+          <td class="td2" style="text-align: left; font-weight: 600;">{{qt.Quote_No}}</a></td>
+          <td class="td2" style="text-align: right; font-weight: 600;">{{qt.Date|date:'d-M-Y'}}</td> 
+        </tr>
+      </table></a>
+
+
+      {% if qt.Subject %}
+      <div style="margin-top:100px;"></div>
+
+        <table class="t3 tclass1" style="width:100%; float: right;  font-size:12px; font-style: italic;">
+          <tr>
+            <th><a class="ahr" ht="Edit Subject" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('subject')">Subject: <span style="font-weight: 600;background:yellow">{{qt.Subject}}</span></a></th>
+          </tr>
+        </table>
+      {% else %}
+      {% if qt.Lock_Status == 0 %}
+      <div style="margin-top:65px;"></div>
+      <table class="t3 tclass1" style="width:100%; float: right;  font-size:12px; font-style: italic;">
+        <tr>
+          <th><button type="button" id='hideaddsubjectbutton' data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('subject')" class="btn1 btn1-sm btn1-warning">+Add Subject</button>{% endif %}</th>
         </tr>
       </table>
 
-      <div style="margin-top:85px;"></div>
-      <a class="ahr" title="click to edit" data-toggle="modal" data-target="#editExpenseModal" onclick="expedit('expenses')">
-        <table class="t3 tclass1" style="width:100%; float: right;  font-size:12px; font-style: italic;">
-          <tr>
-            <th>Subject: <span style="font-weight: 600;background:yellow">fdfd</span></th>
-          </tr>
-        </table>
-      </a>
+      {% endif %}
 
-      <div style="margin-top:120px"></div>
+      <div style="margin-top:135px"></div>
 
       {% if itm %}
-        <table class="t3" style="font-size:11px">
+        <table class="t3" style="font-size:11.5px">
           <tr>
-            <th class="td11 font-weight-bold" style="width:4%">SNo</th>
+            <th class="td11 font-weight-bold" style="width:5%">SNo</th>
             <th class="td1 font-weight-bold" >Description of Goods</th>
             <th class="td11 font-weight-bold" style="width:10%">QTY</th>
             <th class="td11 font-weight-bold" style="width:8%">UOM</th>
             <th class="td11 font-weight-bold" style="width:12%">Rate</th>
-            <th class="td11 font-weight-bold" style="width:12%">Amount</th>
+            <th class="td11 font-weight-bold" style="width:12%;">Amount</th>
           </tr>
-          {% for x, a, b, c in itm %}
+          {% for x, a in itm %}
             <tr {%  if forloop.last %}id="gp1" style="height:0px;"{% endif %}>
               <td class="td33" style="text-align:center;">{{forloop.counter}}</td>
               <td class="td33 mb-4" style="font-weight:600; text-align:left">
                 <a class="ahr" ht="Edit/Delete Item Details" data-toggle="modal" data-target="#itemEditButtons" onclick="javascript:edititem({{x.id}})">{% if x.Item_Code == '0' or x.Item_Code == None %}{% else %}<span>{{x.Item_Code}} </span>{% endif %}{{x.Item_Description}}</a>
                <!--  {%  if forloop.last %}{% if roundoff != 0 %}<span id="gp2" style="float:right; margin-top:5px"><br>Rounding Off</span>{% endif %}{% endif %} -->
               </td>
-              <td class="td33">{{x.HSN_Code}}</td>
-              <td class="td33">{% if x.UOM == 'Kg' or x.UOM == 'Mtr' or x.UOM == 'Ltr' %}{{x.Quantity|floatformat:1}}{% else %}{{x.Quantity|floatformat:0}}{% endif %}</td>
-                <td class="td33"><span style="font-weight:600; font-style:italic;">{{x.UOM}}{% if x.Quantity > 1 %}s{% endif %}</span></td>
-              <td class="td33">{{x.Unit_Price|floatformat:'1'}}</td>
-              <td class="td33">{{a|floatformat:'0'}}</td>
+              <td class="td33" style="font-weight:600;">{% if x.UOM == 'Kg' or x.UOM == 'Mtr' or x.UOM == 'Ltr' %}{{x.Quantity|floatformat:1}}{% else %}{{x.Quantity|floatformat:0}}{% endif %}</td>
+                <td class="td33" style="font-weight:600;"><span style="font-weight:600; font-style:italic;">{{x.UOM}}{% if x.Quantity > 1 %}s{% endif %}</span></td>
+              <td class="td33" style="font-weight:600;">{{x.Unit_Price|floatformat:'1'}}</td>
+              <td class="td33" style="font-weight:600;">{{a|floatformat:'2'}}</td>
             </tr>
           {% endfor %}
         </table>
+        {% if qt.Lock_Status == 0 %}
+          <button style="margin-top:5px" type="button" id='hideitembutton' data-toggle="modal" data-target="#addNewItemModal" onclick="javascript:fnc('addnewitem')" class="btn2 btn2-sm btn2-primary">+Add Quote Item</button>
+          <script> var hide4=1;</script>
+        {% endif %}
       {% endif %}
 
-        <div style="text-transform: capitalize; margin-top: 10px; margin-bottom: 18px; color:black; font-size:12px; font-style: italic; font-weight:normal"><span style="font-weight:bold; font-style: normal;">Total PO Amount in Words<br></span>{{amount_in_words}} Rupees Only</div>
-        
-        
+      <table class="t3" style="float: right; width: 24.1%; font-size: 12px;">
+        <tr>
+          <th class="td1 font-weight-bold" style="text-align: right;">Total</th>
+          <th class="td1" style="width:50%; text-align: right; font-weight: bold; ">{{qt.Quote_Value|floatformat:'0'|intcomma}}</th>
+        </tr>
+
+        <tr>
+          <th colspan="2" class="td1" style="border:none; padding-top: 5px; font-style: italic; font-size:12.5px; width: 38%; font-weight: bold; text-align: right;">
+            <div style="margin-top:10px; font-size:12.5px">**This is Computer Generated Quotation<br>Authorised Signaturory Do Not Required</div>
+          </th>
+        </tr>
+      </table>
+
+        <div style="margin-top:20px"></div>
 
         {% if tc %}
-          <table class="t3" style="width:59%; float:left; margin-bottom: 5px;">
-            <tr>
-              <th class="th1">General Terms and Conditions</th>
-            </tr>
-            <tr>
-              <th class="td1">
-                <a class="ahr" ht="Edit Terms and Conditions" data-toggle="modal" data-target="#editTCModal" onclick="javascript:edittc({{tc.id}})">
-                  {% if tc.Terms_and_Condition1 %}1. {{tc.Terms_and_Condition1}}{% endif %}
-                  {% if tc.Terms_and_Condition2 %}<br>2. {{tc.Terms_and_Condition2}}{% endif %}
-                  {% if tc.Terms_and_Condition3 %}<br>3. {{tc.Terms_and_Condition3}}{% endif %}
-                  {% if tc.Terms_and_Condition4 %}<br>4. {{tc.Terms_and_Condition4}}{% endif %}
-                  {% if tc.Terms_and_Condition5 %}<br>5. {{tc.Terms_and_Condition5}}{% endif %}
-                  {% if tc.Terms_and_Condition6 %}<br>6. {tc.Terms_and_Condition6}}{% endif %}
-                  {% if tc.Terms_and_Condition7 %}<br>7. {{tc.Terms_and_Condition7}}{% endif %}
-                  {% if tc.Terms_and_Condition8 %}<br>8. {{tc.Terms_and_Condition8}}{% endif %}
-                </a>
-              </th>
-            </tr>
-          </table>
-          <script>var hide2=0;</script>
-        {% else %}
-          {% if qt.Lock_Status == 0 %}<button type="button" id='hideaddtcbutton' data-toggle="modal" data-target="#TCModal" onclick="javascript:fnc('addtc')" class="btn1 btn1-sm btn1-info">+Add Terms and Conditions</button> {% endif %}
+        
+        <div style="color:black; font-size:13px; font-style: italic; font-weight:bold; margin-bottom: 5px;">General Terms and Conditions</div>
+        
+          <a class="ahr" ht="Edit Terms and Conditions" data-toggle="modal" data-target="#editTCModal" onclick="javascript:fnc('tcedit')">
+          <table  style="width:75%; float: left; font-size:12px;">
+            {% if tc.Taxes %}
+              <tr>
+                <th class="tb0" >Taxes</th>
+                <th class="tb0" style="width: 90%; font-weight:500">: {{tc.Taxes}}</th>
+              </tr>
+            {% endif %}
+            {% if tc.Payment_Terms %}
+              <tr>
+                <th class="tb0" >Payment</th>
+                <th class="tb0" style="width: 60%; font-weight:500">: {{tc.Payment_Terms}}</th>
+              </tr>
+            {% endif %}
+
+            {% if tc.Delivery_Terms %}
+              <tr>
+                <th class="tb0" >Delivery</th>
+                <th class="tb0" style="width: 60%; font-weight:500">: {{tc.Delivery_Terms}}</th>
+              </tr>
+            {% endif %}
+
+            {% if tc.Transport_Terms %}
+              <tr>
+                <th class="tb0" >Transport</th>
+                <th class="tb0" style="width: 60%; font-weight:500">: {{tc.Transport_Terms}}</th>
+              </tr>
+            {% endif %}
+
+            {% if tc.Validation_Terms %}
+              <tr>
+                <th class="tb0" >Validation</th>
+                <th class="tb0" style="width: 60%; font-weight:500">: {{tc.Validation_Terms}}</th>
+              </tr>
+            {% endif %}
+
+            {% if tc.FOR %}
+              <tr>
+                <th class="tb0" >Rates</th>
+                <th class="tb0" style="width: 60%; font-weight:500">: {{tc.FOR}}</th>
+              </tr>
+            {% endif %}
+
+            {% if tc.Other_Terms %}
+              <tr>
+                <th class="tb0" >Other Terms</th>
+                <th class="tb0_1" style="width: 60%; font-weight:500">: {{tc.Other_Terms}}</th>
+              </tr>
+            {% endif %}
+              
+          </table></a>
+
         {% endif %}
 
+        <table  style="width:100%; float:left;  padding:0px">
+        <tr>
+          <th class="td1" style="border:none;  text-align: left;">
+            <div style=" margin-top: 10px;   color:black; font-size:13px; font-style: italic; font-weight:normal"><a class="ahr" ht="edit thanks note" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('thanks')">{{qt.Thanks_Note}}</a>
+            <br><br>
+            <span style="font-style: normal; font-size:13px; font-weight:bold;">Yours Faithfully,</span>
+            <br>
+            <span style="font-style: normal; font-size:15px; font-weight:bold;">For {{qt.Quote_From.Company_Name}}</span>
+          </div>
+          </th>
+        </tr>
+      </table>
+        
+        
       
       
 
@@ -215,41 +300,46 @@
 
   
 <!-- PO Addresses and Details Update Popups - Buttons and Forms -->
-  <div class="modal fade text-left" id="editPOModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade text-left" id="editQuoteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" >
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">PO Details Update Form</h5>
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Quote Details Update Form</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">   
-          <form class="forms-sample" action="" id='po_edit_action' method="POST" enctype="multipart/form-data">
+          <form class="forms-sample" action="" id='qt_edit_action' method="POST" enctype="multipart/form-data">
             <div class="form-group mb-4">
               {% csrf_token %}
               <div class="form-group">
 
-                <div style="display:none;" id="pofrom"><label for="{{ field.label }}">{{ form_qt.PO_From.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.PO_From }}</div>
+                <div style="display:none;" id="qtfrom"><label>{{ form_qt.Quote_From.label }}</label>{{ form_qt.Quote_From }}</div>
 
-                <div style="display:none;" id="podetails">
-                  <label for="{{ field.label }}">{{ form_qt.PO_No.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.PO_No }}
-                  <!-- <label for="{{ field.label }}">choose PO No format ff want to change default format as above{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.PO_No_Format }} -->
-                   <label for="{{ field.label }}">{{ form_qt.PO_Date.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.PO_Date }}
-                   <!-- <label>Ref Contact Person</label>{{ form_qt.Contact }} -->
-                   <label for="{{ field.label }}">{{ form_qt.Delivery_Date.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Delivery_Date }}
-                   <label for="{{ field.label }}">{{ form_qt.Warranty_In.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Warranty_In }}
-                   <label for="{{ field.label }}">{{ form_qt.Warranty.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Warranty }}
-                   <label for="{{ field.label }}">{{ form_qt.Payment_Term_1.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Payment_Term_1 }}
-                   <label for="{{ field.label }}">{{ form_qt.Payment_Term_2.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Payment_Term_2 }}
-                   <label for="{{ field.label }}">{{ form_qt.Packing_and_Forwarding.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Packing_and_Forwarding }}   
-                   <label for="{{ field.label }}">Overal Purchase Short Description{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Purchase_Details }}
-                   <label for="{{ field.label }}">specify if PO related to any specifc received work order{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Order }}
+                <div style="display:none;" id="qtdetails">
+                  <label>{{ form_qt.Quote_No.label }}</label>{{ form_qt.Quote_No }}
+                  <label>{{ form_qt.Date.label }}</label>{{ form_qt.Date }}
                 </div>
 
-                <div style="display:none;" id='shippingto'>
-                  <label for="{{ field.label }}">Material Delivery Address{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Shipping_To }}
-                  <label>Ref Contact Person</label>{{ form_qt.Contact }}
+                <div style="display:none;" id="sub">
+                  <label>{{ form_qt.Subject.label }}</label>{{ form_qt.Subject }}
+                </div>
+
+                <div style="display:none;" id="thanknote">
+                  <label>Thnaks Notes</label>{{ form_qt.Thanks_Note }}
+                </div>
+
+                <div style="display:none;" id='quote_to'>
+                  <label>{{ form_qt.Quote_To.label }}</label>{{ form_qt.Quote_To }}
+                </div>
+
+                <div style="display:none;" id='quote_to1'>
+                  <label>{{ form_qt.Reference_Person.label }}</label>{{ form_qt.Reference_Person }}
+                  <label>{{ form_qt.Firm_Name.label }}</label>{{ form_qt.Firm_Name }}
+                  <label>{{ form_qt.Phone_Number.label }}</label>{{ form_qt.Phone_Number }}
+                  <label>{{ form_qt.Email.label }}</label>{{ form_qt.Email }}
+                  <label>{{ form_qt.Location.label }}</label>{{ form_qt.Location }}
                 </div>
 
                 <div style="display:none;" id='vendor_address'>
@@ -257,8 +347,8 @@
                   <label for="{{ field.label }}">Vendor Conatct Details{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_qt.Vendor_Contact}}
                 </div>
 
-                <div class="form-check"  style="display:none; " id='lock_po'>
-                  <label class="form-check-label">{{ form_qt.Lock_Status }}</label><br><span style="font-size:17px;">Are You Sure !<br>Once You Lock It You Can't Modify/Edit PO Without Unlock Password<br>Tick Above Box and Submit to Lock the PO</span>
+                <div class="form-check"  style="display:none; " id='lock_qt'>
+                  <label class="form-check-label">{{ form_qt.Lock_Status }}</label><br><span style="font-size:17px;">Are You Sure !<br>Once You Lock It You Can't Modify/Edit Quote Without Unlock Password<br>Tick Above Box and Submit to Lock the PO</span>
                 </div>
 
               </div>
@@ -276,7 +366,7 @@
     <div class="form-group mb-4">
       {% csrf_token %}
       <div class="form-group newheight">
-        {% for field in form_po %}
+        {% for field in form_qt %}
           {% if field.label != 'Lock Status' %}
             <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
           {% endif %}           
@@ -316,7 +406,7 @@
 <!-- End -->
 
 <!-- Terms and Conditions Add, Update or Delete Popups - Buttons and Forms -->
-  <div class="modal fade text-left" id="editTCModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <!-- <div class="modal fade text-left" id="editTCModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" style="width:250px;%">
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">
@@ -328,15 +418,15 @@
         <div class="modal-body">
           <div class="template-demo">
             <button type="button" data-toggle="modal" data-target="#TCModal" class="btn btn-sm btn-primary mb-2">Edit T&C</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/delete/po_tc/'+{{qt.id}}+'/'" class="btn btn-sm btn-danger mb-2">Delete T&C</button>            
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/delete/quote_tc/'+{{qt.id}}+'/'" class="btn btn-sm btn-danger mb-2">Delete T&C</button>            
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Terms and Conditions Add, Update or Delete Form -->
-  <div class="modal fade text-left" id="TCModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade text-left" id="editTCModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" >
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">
@@ -382,7 +472,7 @@
         <div class="modal-body">
           <div class="template-demo">
             <button type="button" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{qt.id}}+'/'+getid+'/msg/'" class="btn btn-sm btn-primary mb-2">Update Item</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/delete/qtitem/'+{{qt.id}}+'/'+getid+'/'" class="btn btn-sm btn-danger mb-2">Delete Item</button>            
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/delete/quoteitem/'+{{qt.id}}+'/'+getid+'/'" class="btn btn-sm btn-danger mb-2">Delete Item</button>            
           </div>
         </div>
       </div>
@@ -408,7 +498,7 @@
                 {% for field in form_item %}
                     <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
                     {% if field.label != 'Quantity' %}
-                      <a title="add new item to products (after add new product add price details also" target="_blank" href="/{{pdata.pj}}/addproduct/create/1/"><i class="fas fa-square-plus float-right" style="color:purple; padding-bottom:-20px;"></i></a>
+                      <a title="add new item to products (after add new product add price details also" target="_blank" href="/{{pdata.pj}}/productsform/Products/create/1/"><i class="fas fa-square-plus float-right" style="color:purple; padding-bottom:-20px;"></i></a>
                     {% endif %}
                     {{ field}}
                   {% for error in field.errors %}
@@ -428,45 +518,54 @@
 
   <script type="text/javascript">  
     function fnc(tag) {
-      document.getElementById("po_edit_action").action = '/{{pdata.pj}}/qt_edit/edit/'+{{qt.id}}+'/';
+      document.getElementById("qt_edit_action").action = '/{{pdata.pj}}/quote_edit/edit/'+{{qt.id}}+'/';
 
-      if ( tag == 'companyaddress' ) {document.getElementById("pofrom").style.display = 'block';}
-      else {document.getElementById("pofrom").style.display = 'none';};
+      if ( tag == 'companyaddress' ) {document.getElementById("qtfrom").style.display = 'block';}
+      else {document.getElementById("qtfrom").style.display = 'none';};
 
-      if ( tag == 'po_details' ) {document.getElementById("podetails").style.display = 'block';}      
-        else {document.getElementById("podetails").style.display = 'none';};
+      if ( tag == 'qt_details' ) {document.getElementById("qtdetails").style.display = 'block';}      
+        else {document.getElementById("qtdetails").style.display = 'none';};
 
       if ( tag == 'customeraddress' ) {document.getElementById("vendor_address").style.display = 'block';}      
         else {document.getElementById("vendor_address").style.display = 'none';};
 
-      if ( tag == 'shippingaddress' ) {document.getElementById("shippingto").style.display = 'block';}      
-        else {document.getElementById("shippingto").style.display = 'none';};
+      if ( tag == 'subject' ) {document.getElementById("sub").style.display = 'block';}      
+        else {document.getElementById("sub").style.display = 'none';};
 
-        if ( tag == 'lockqt' ) { document.getElementById("lock_po").style.display = 'block'; var lock=1;}     
-        else {document.getElementById("lock_po").style.display = 'none';};  
+        if ( tag == 'thanks' ) {document.getElementById("thanknote").style.display = 'block';}      
+        else {document.getElementById("thanknote").style.display = 'none';};
+
+        if ( tag == 'lockqt' ) { document.getElementById("lock_qt").style.display = 'block'; var lock=1;}     
+        else {document.getElementById("lock_qt").style.display = 'none';};  
 
       // if ( tag == 'tc' ) {document.getElementById('tc').style.display = 'block';}
       // else {document.getElementById("tc").style.display = 'none';};
       
-      if ( tag == 'addnewitem' ) {document.getElementById("itemaction").action = '/{{pdata.pj}}/create/qtitem/'+{{qt.id}}+'/'+tag+'/';}
+      if ( tag == 'addnewitem' ) {document.getElementById("itemaction").action = '/{{pdata.pj}}/create/quoteitem/'+{{qt.id}}+'/'+tag+'/';}
 
-      if ( tag == 'addtc' ) {document.getElementById("tcaction").action = '/{{pdata.pj}}/create/po_tc/'+{{qt.id}}+'/';}
+      if ( tag == 'tcedit' ) {document.getElementById("tcaction").action = '/{{pdata.pj}}/edit/quote_tc/'+{{qt.id}}+'/';}
+
+      if ( tag == 'quoteto' ) {document.getElementById("quote_to").style.display = 'block';}      
+        else {document.getElementById("quote_to").style.display = 'none';};
+
+         if ( tag == 'quoteto1' ) {document.getElementById("quote_to1").style.display = 'block';}      
+        else {document.getElementById("quote_to1").style.display = 'none';};
     }
 
       function edittc(id){
         getid = id;
-        document.getElementById("tcaction").action = '/{{pdata.pj}}/edit/qt_tc/'+{{qt.id}}+'/';}
+        document.getElementById("tcaction").action = '/{{pdata.pj}}/edit/quote_tc/'+{{qt.id}}+'/';}
 
       function edititem(id) {getid = id;}
 
       function validatepoepswd(pswd) { 
         if ( pswd == 'sse123') {
-          document.getElementById("unlockqtaction").action = '/{{pdata.pj}}/qt_edit/edit/'+{{qt.id}}+'/';
+          document.getElementById("unlockqtaction").action = '/{{pdata.pj}}/quote_edit/edit/'+{{qt.id}}+'/';
           document.getElementById("unlocksubmit").click();}
         else { alert('Password did not matched. Please Try Again')}
         }
       function deletepo(tag){
-        if (tag=='sse123') {location.href='/{{pdata.pj}}/qt_edit/delete/'+{{qt.id}}+'/' }
+        if (tag=='sse123') {location.href='/{{pdata.pj}}/quote_edit/delete/'+{{qt.id}}+'/' }
           else { alert('Password did not matched. Please Try Again')}
       }
 
@@ -475,7 +574,7 @@
   <script>
     function test() {
       if ('{{qt.Lock_Status}}' == 'False') {
-      if(hide2!=0){document.getElementById("hideaddtcbutton").style.display = 'none';}
+      // if(hide2!=0){document.getElementById("hideaddtcbutton").style.display = 'none';}
       if(hide4!=0){document.getElementById("hideitembutton").style.display = 'none';}
     };
 
@@ -484,7 +583,7 @@
       margin:       [10, 15, 15, 5],
        // margin:       [t, l, b, r],
         // margin:       [10, 10, 20, 10],
-        filename: '{{qt.PO_No}}',
+        filename: '{{qt.Quote_No}}',
         html2canvas: { dpi: 0, letterRendering: true, scale:5},
         image: { type: 'jpeg', quality: 0.25},
        pageBreak: { mode: 'css', before:'#nextpage1'},
@@ -511,7 +610,8 @@
     window.onload = function () {
 
       var ph = $("#po").height();
-        if (ph<760){var nht = 760-ph;
+        if (ph<730){var nht = 730-ph;
+          // alert(ph)
       $('#gp1').css('height',nht);
     }
       
@@ -531,7 +631,7 @@
       if ('{{fnc}}' == 'create') {location.href='/{{pdata.pj}}/genquote/edit/'+{{qt.id}}+'/itemid/msg/'};
      if ('{{item_id}}' != 'itemid') {
       document.getElementById('itemidclick').click(); 
-      document.getElementById("itemaction").action = '/{{pdata.pj}}/edit/qtitem/'+{{qt.id}}+'/'+{{item_id}}+'/';}
+      document.getElementById("itemaction").action = '/{{pdata.pj}}/edit/quoteitem/'+{{qt.id}}+'/'+{{item_id}}+'/';}
     }
   </script>
 

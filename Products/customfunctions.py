@@ -20,7 +20,7 @@ def genPO_initial_dataload(request, poid, last_poid):
 			fd.PO_No_1 = 1
 	else: 
 		fd.PO_No_1 = 1 
-	
+	 
 	if len(str(fd.PO_No_1)) == 1: 
 		pono1 = '00'+str(fd.PO_No_1)
 	elif len(str(fd.PO_No_1)) == 2:
@@ -69,104 +69,284 @@ def update_po_amount(request, poid):
 		po.Due_Amount = po_value
 	po.save()
 
-def assign_paystatus_to_po(request, pay_id, poid):
-  po = Purchases.objects.get(id=poid)
+def update_qt_amount(request, qid):
+	qt = Quotes.objects.get(id=qid)
+	items = Copy_Quote_Items.objects.filter(Quote_No=qt)
+	if not items:
+		return 0
+
+	qt_value = 0
+	for x in items:
+		qt_value = qt_value + (x.Unit_Price*x.Quantity)
+	qt.Quote_Value = qt_value
+
+	qt.save()
+
+def assign_paystatus_to_po(request, pay_id, fnc):
+  
   payment = Vendor_Payment_Status.objects.get(id=pay_id)
+  payment.user = Account.objects.get(user=request.user)
+  payment.save()
+  
+  if not payment.PO_No:
+  	po_no = payment.Invoice_No.PO_No
+  	payment.PO_No = po_no
+  	payment.save()
+  else:
+  	if payment.Invoice_No:
+	  	inv = Vendor_Invoices.objects.filter(Invoice_No=payment.Invoice_No.Invoice_No).last()
+	  	inv.Payment_Status = payment
+	  	inv.save()
+	  	payment = Vendor_Payment_Status.objects.get(id=pay_id)
+	  	inv_paid = sum(Vendor_Payment_Status.objects.filter(Invoice_No=payment.Invoice_No).values_list('Paid_Amount', flat=True))
+  		if inv.Due_Amount <= inv_paid:
+	  		inv.Due_Amount = 0
+	  		inv.Payment_Cleared_Date = payment.Payment_Date
+	  		inv.save()
+	  	else:
+	  		inv.Due_Amount = inv.Due_Amount - inv_paid
+	  		inv.Payment_Cleared_Date = None
+	  		inv.save()
+  
+  po = Purchases.objects.get(PO_No=payment.PO_No.PO_No)
   po.Payment_Status = payment
   po.save()
 
-  if not payment.PO_No:
-    payment.PO_No = po
+  payment = Vendor_Payment_Status.objects.get(id=pay_id)
+  vendor = payment.PO_No.Vendor
 
-  inv = Vendor_Invoices.objects.filter(PO_No=po).order_by('Invoice_Date')
-  payments  = Vendor_Payment_Status.objects.filter(PO_No=po).order_by('Payment_Date')
-  t_inv = sum(inv.values_list('Invoice_Amount', flat=True))
-  t_pay = sum(payments.values_list('Paid_Amount', flat=True))
-  #here t_pay = total payment paid except current payment, bcz pay_status not assigned to po
+  invs = Vendor_Invoices.objects.filter(PO_No__Vendor=vendor).order_by('Invoice_Date')
+  pays = Vendor_Payment_Status.objects.filter(PO_No__Vendor=vendor).order_by('Payment_Date')
+  
+  invs_amnt = sum(invs.values_list('Invoice_Amount', flat=True))
+  invs_due = sum(invs.values_list('Due_Amount', flat=True))
+  pays_total = sum(pays.values_list('Paid_Amount', flat=True))
 
-  if t_inv==0 and t_pay==0:
-    payment.Payment_Type = 'Advance'
+  due = invs_amnt - pays_total
+  case1 = Vendor_Invoices.objects.filter(PO_No=payment.PO_No, Due_Amount__gt=0).order_by('Invoice_Date')
+  case2 = Vendor_Invoices.objects.filter(PO_No__Vendor=vendor, Due_Amount__gt=0).order_by('Invoice_Date')
 
-  elif t_inv - t_pay > 0:
-    payment.Payment_Type = 'Due'
+  case3 = Vendor_Invoices.objects.filter(PO_No=payment.PO_No, Due_Amount=0).order_by('Invoice_Date')
+  case4 = Vendor_Invoices.objects.filter(PO_No__Vendor=vendor, Due_Amount=0).order_by('Invoice_Date')
+
+  if due > 0:
+  	if due != invs_due:
+  		diff = invs_due - due 
+	  	if diff > 0: # if it is positive diff  deduct from other invoices i.e decrease due amount
+	  		diff = inv_adj(request, case1, diff, pay_id)
+	  		if diff > 0:
+	  			diff = inv_adj(request, case2, diff, pay_id)
+		  	# if still duff > 0, its remains as advance
+	  	elif diff < 0: # increase due amount
+	  		diff = -(diff)
+	  		diff = inv_adj1(request, case1, diff)
+	  		if diff > 0:
+	  			diff = inv_adj1(request, case2, diff)
+	  			if diff > 0:
+	  				diff = inv_adj1(request, case3, diff)
+	  				if diff > 0:
+	  					diff = inv_adj1(request, case4, diff)
+  elif due == 0:
+  	pass
   else:
-    payment.Payment_Type = 'Advance'
+  	Vendor_Invoices.objects.filter(PO_No__Vendor=vendor, Due_Amount__gt=0).update(Due_Amount=0, Payment_Cleared_Date=payment.Payment_Date, Payment_Status=payment)
 
-  payment.user = Account.objects.get(user=request.user)
-  payment.save()  
 
-def adjust_payments_to_invoices(request, poid):
-  # if invoice lock and if any payments under this po before invoice gen.
-  # inv_current = Vendor_Invoices.objects.filter(id=invid).last()
-  po = Purchases.objects.get(id=poid)
-  inv = Vendor_Invoices.objects.filter(PO_No=po).order_by('Invoice_Date')
-  payments  = Vendor_Payment_Status.objects.filter(PO_No=po).order_by('Payment_Date')
-  t_inv = inv.aggregate(sum=Sum('Invoice_Amount')).get('sum') or 0 if inv != None else 0
-  t_pay = payments.aggregate(sum=Sum('Paid_Amount')).get('sum') or 0 if payments != None else 0
-  vendor = po.Vendor
-  # CASE-1: No Prev Invoices, No Payments (only cureent gen invoice)
-  if len(inv) == 1 and t_pay==0:
-    for x in inv:
-      x.Due_Amount = x.Invoice_Amount
-      x.save()
-    adj_pay_to_all_inv(request, vendor)
-    return 1
+def paymentdelete(request, poid, invid, dlt_amount):
+	po = Purchases.objects.get(id=poid)
+	inv =  Vendor_Invoices.objects.filter(id=invid).last()
 
-  # CASE-2: Previous invoices available against that po but no payments gainst po
-  if len(inv) > 1 and t_pay==0:
-    for x in inv:
-      x.Due_Amount = x.Invoice_Amount
-      x.save()
-    adj_pay_to_all_inv(request, vendor)
-    return 2
+	inv_paid = inv.Invoice_Amount - inv.Due_Amount
+	
+	if dlt_amount >= inv_paid:
+		dlt_amount = dlt_amount - inv_paid
+		inv.Due_Amount = inv.Invoice_Amount
+		inv.Payment_Cleared_Date = None
+		inv.Payment_Status = None
+		inv.save()
+	else:
+		inv.Due_Amount = inv.Invoice_Amount - (inv_paid - dlt_amount)
+		inv.Payment_Cleared_Date = None
+		inv.save()
+		dlt_amount = 0
+	
+	if dlt_amount > 0:
+		case1 = Vendor_Invoices.objects.filter(PO_No=po, Due_Amount__gt=0).order_by('Invoice_Date')
+		case2 = Vendor_Invoices.objects.filter(PO_No__Vendor=po.Vendor, Due_Amount__gt=0).order_by('Invoice_Date')
+		case3 = Vendor_Invoices.objects.filter(PO_No=po, Due_Amount=0).order_by('Invoice_Date')
+		case4 = Vendor_Invoices.objects.filter(PO_No__Vendor=po.Vendor, Due_Amount=0).order_by('Invoice_Date')
 
-  # CASE-3: Invoices Due Amount Adjustments Against po and Received Paymants
-  if t_inv+10 <= t_pay or t_inv-10 <= t_pay:
-    # if total billing value =< total received value update all bills due as 0
-    Vendor_Invoices.objects.filter(PO_No=po).update(Due_Amount=0)
-    adj_pay_to_all_inv(request, vendor)
-    return 3
-  else:
-    for x in inv:
-      if t_pay > x.Invoice_Amount:
-        x.Due_Amount = 0
-        x.save()
-        t_pay = t_pay - x.Invoice_Amount
-      else:
-        # means whole received payment is less than one single invoice amount
-        x.Due_Amount = x.Invoice_Amount - t_pay
-        t_pay = 0
-        x.save()
-        # Breaking for and while loops
-    adj_pay_to_all_inv(request, vendor)
-    return 4
+		diff = dlt_amount
 
-def adj_pay_to_all_inv(request, vendor):
-	# invs = Vendor_Invoices.objects.filter(PO_No__Vendor=vendor, Due_Amount = 0).order_by('Invoice_Date')
-	# invs = Vendor_Invoices.objects.filter(PO_No__Vendor=vendor).order_by('Invoice_Date')
-	pays = Vendor_Payment_Status.objects.filter(PO_No__Vendor=vendor).order_by('Payment_Date')
-	# invs_total = sum(invs.values_list('Invoice_Amount', flat=True))
-	pays_total = sum(pays.values_list('Paid_Amount', flat=True))
+		diff = inv_adj1(request, case1, diff)
+		if diff > 0:
+			diff = inv_adj1(request, case2, diff)
+			if diff > 0:
+				diff = inv_adj1(request, case3, diff)
+				if diff > 0:
+					diff = inv_adj1(request, case4, diff)
 
-	invs = Vendor_Invoices.objects.filter(PO_No__Vendor=vendor).order_by('Invoice_Date')
-	for x in invs:
-		if pays_total >= x.Invoice_Amount:
-			pays_total = pays_total - x.Invoice_Amount
-			x.Due_Amount = 0
-			x.Payment_Cleared_Date = pays.last().Payment_Date
-			# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
-			x.Payment_Status = pays.last()
-			x.save()
-		else:
-			if pays_total > 0:
-				x.Due_Amount = x.Invoice_Amount - pays_total
-				x.Payment_Status = pays.last()
-				# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
-				pays_total = 0
+	pay = Vendor_Payment_Status.objects.filter(PO_No=po).last()
+	if pay:			
+		assign_paystatus_to_po(request, pay.id)
+	else:
+		pay = Vendor_Payment_Status.objects.filter(PO_No__Vendor=po.Vendor).last()
+		if pay:			
+			assign_paystatus_to_po(request, pay.id)
+
+
+def inv_adj(request, invs, diff, pay_id):
+	if invs != None:
+		payment = Vendor_Payment_Status.objects.get(id=pay_id)
+		for x in invs:
+			if x.Due_Amount <= diff:
+				diff = diff - x.Due_Amount
+				x.Due_Amount = 0
+				x.Payment_Status = payment
+				x.Payment_Cleared_Date = payment.Payment_Date
 				x.save()
 			else:
-				x.Due_Amount = x.Invoice_Amount
+				x.Due_Amount = x.Due_Amount - diff
+				x.Payment_Cleared_Date = None
 				x.save()
+				diff = 0
+	return diff
+
+def inv_adj1(request, invs, diff):
+	if invs != None:
+		for x in invs:
+			if diff >= (x.Invoice_Amount - x.Due_Amount):
+				diff = diff - (x.Invoice_Amount - x.Due_Amount)
+				x.Due_Amount = x.Invoice_Amount
+				x.Payment_Status = None
+				x.Payment_Cleared_Date = None
+				x.save()
+			else:
+				x.Due_Amount = x.Due_Amount + diff
+				x.Payment_Cleared_Date = None
+				x.save()
+				diff = 0
+	return diff
+
+
+
+def adjust_payments_to_invoices(request, poid, invid):
+	po = Purchases.objects.get(id=poid)
+	vendor = po.Vendor
+	inv = Vendor_Invoices.objects.filter(id=invid).last()
+	inv.Due_Amount = inv.Invoice_Amount
+	inv.save()
+	inv = Vendor_Invoices.objects.filter(id=invid).last()
+
+	if Vendor_Payment_Status.objects.filter(Invoice_No=inv):
+		assign_paystatus_to_po(request, Vendor_Payment_Status.objects.filter(Invoice_No=inv.Invoice_No).id, 'edit')
+	else:
+		case1 = Vendor_Payment_Status.objects.filter(PO_No=po).order_by('Payment_Date')
+		case2 = Vendor_Payment_Status.objects.filter(PO_No__Vendor=vendor).order_by('Payment_Date')
+		# case3 = Vendor_Invoices.objects.filter(PO_No=po).order_by('Invoice_Date')
+		# case4 =Vendor_Invoices.filter(PO_No__Vendor=po.Vendor).order_by('Invoice_Date')
+
+		if case1 == None and case2 == None:
+			pass
+		else:
+			if case1:
+				assign_paystatus_to_po(request, case1.last().id, 'edit')
+			else:
+				if case2:
+					assign_paystatus_to_po(request, case2.last().id, 'edit')
+
+		# 	if case1:
+		# 		tpay = sum(case1.values_list('Paid_Amount', flat=True))
+		# 		tinv = sum(case3.values_list('Invoice_Amount', flat=True))
+
+		# 		if tpay > tinv:
+		# 			diff = tpay - tinv
+		# 			if diff >= inv.Due_Amount:
+		# 				diff = diff - inv.Due_Amount
+		# 				inv.Due_Amount = 0
+		# 				inv.Payment_Status = case1.last()
+		# 				inv.Payment_Cleared_Date = case1.last().Payment_Date
+		# 				inv.save()
+		# 				case11 = Vendor_Invoices.objects.filter(PO_No=po, Due_Amount__gt=0).order_by('Invoice_Date')
+		# 				case22 = Vendor_Invoices.objects.filter(PO_No__Vendor=po.Vendor, Due_Amount__gt=0).order_by('Invoice_Date')
+		# 				en = 1
+		# 				if case11:
+		# 					inv_adj(request, case11, diff, case1.last().id)
+		# 					if diff > 0:
+		# 						inv_adj(request, case22, diff, case1.last().id)
+		# 						en = 0
+		# 				elif case22 and en == 1:
+		# 					inv_adj(request, case22, diff, case1.last().id)
+		# 				else:
+		# 					pass
+		# 			else:
+		# 				inv.Due_Amount = inv.Due_Amount - diff
+		# 				inv.Payment_Cleared_Date = None
+		# 				inv.save()
+		# 		elif tpay < tinv:
+		# 			pass
+		# 		else:
+		# 			pass
+		# if case2:
+		# 		tpay = sum(case2.values_list('Paid_Amount', flat=True))
+		# 		tinv = sum(case4.values_list('Invoice_Amount', flat=True))
+
+		# 		if tpay > tinv:
+		# 			diff = tpay - tinv
+		# 			if diff >= inv.Due_Amount:
+		# 				diff = diff - inv.Due_Amount
+		# 				inv.Due_Amount = 0
+		# 				inv.Payment_Status = case1.last()
+		# 				inv.Payment_Cleared_Date = case1.last().Payment_Date
+		# 				inv.save()
+		# 				case11 = Vendor_Invoices.objects.filter(PO_No=po, Due_Amount__gt=0).order_by('Invoice_Date')
+		# 				case22 = Vendor_Invoices.objects.filter(PO_No__Vendor=po.Vendor, Due_Amount__gt=0).order_by('Invoice_Date')
+		# 				if case11:
+		# 					inv_adj(request, case11, diff, case1.last().id)
+		# 				elif case22:
+		# 					inv_adj(request, case22, diff, case1.last().id)
+		# 				else:
+		# 					pass
+		# 			else:
+		# 				inv.Due_Amount = inv.Due_Amount - diff
+		# 				inv.Payment_Cleared_Date = None
+		# 				inv.save()
+		# 		elif tpay < tinv:
+		# 			pass
+		# 		else:
+		# 			pass
+
+def adj_pay_to_all_inv(request, vendor):
+	x = 0
+	# invs = Vendor_Invoices.objects.filter(PO_No__Vendor=vendor, Due_Amount = 0).order_by('Invoice_Date')
+	# invs = Vendor_Invoices.objects.filter(PO_No__Vendor=vendor).order_by('Invoice_Date')
+	
+
+	# pays = Vendor_Payment_Status.objects.filter(PO_No__Vendor=vendor).order_by('Payment_Date')
+	# # invs_total = sum(invs.values_list('Invoice_Amount', flat=True))
+	# pays_total = sum(pays.values_list('Paid_Amount', flat=True))
+
+	# invs = Vendor_Invoices.objects.filter(PO_No__Vendor=vendor).order_by('Invoice_Date')
+	# for x in invs:
+	# 	if pays_total >= x.Invoice_Amount:
+	# 		pays_total = pays_total - x.Invoice_Amount
+	# 		x.Due_Amount = 0
+	# 		x.Payment_Cleared_Date = pays.last().Payment_Date
+	# 		# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
+	# 		x.Payment_Status = pays.last()
+	# 		x.save()
+	# 	else:
+	# 		if pays_total > 0:
+	# 			x.Due_Amount = x.Invoice_Amount - pays_total
+	# 			x.Payment_Status = pays.last()
+	# 			# Purchases.objects.filter(PO_No=x.PO_No.PO_No).update(Payment_Status=pays.last())
+	# 			pays_total = 0
+	# 			x.save()
+	# 		else:
+	# 			x.Due_Amount = x.Invoice_Amount
+	# 			x.save()
+
+
 
 
 	# diff = invs_total - pays_total
