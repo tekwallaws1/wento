@@ -14,6 +14,7 @@ urlpatterns = [
     path('<proj>/debitlist/', views.Debit_List, name='debitlist'),
     path('<proj>/debitform/<fnc>/<did>/', views.Debit_Form, name='debitform'),
     path('<proj>/debitreceipt/<did>/', views.Debit_Receipt, name='debitreceipt'),
+    path('<proj>/employwiseclaims/', views.Employ_Claims, name='employwiseclaims'),
     
     path('<proj>/attendanceform/<fnc>/<eid>/<returnpage>/', views.Attendance_Form, name='attendanceform'),
     path('<proj>/daywiseattendancelist/<day>/', views.DayWise_Attendance, name='daywiseattendancelist'),

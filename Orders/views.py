@@ -314,7 +314,7 @@ def Orders_Payments_Form(request, proj, rid):
 			p = form.save()
 			assign_paystatus_to_order(request, p.id)
 			messages.success(request, "Payment Has Been Added")
-			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+			return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 		else:
 			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
 	else:
@@ -338,7 +338,7 @@ def Payments_Form(request, proj, fnc, rid):
 				order = Orders.objects.get(id=p.Order_No.id)
 				assign_paystatus_to_order(request, p.id)
 				messages.success(request, "Selected Payment Details Has Been Updated")
-				return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+				return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 			else:
 				return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
 		else:
@@ -359,7 +359,7 @@ def Payments_Form(request, proj, fnc, rid):
 
 		if ag_ord == None and ag_cust == None:
 			messages.success(request, "Selected Payment Details Has Been Deleted")
-			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+			return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 		else:
 			if ag_ord:
 				last_pay = ag_ord.last()
@@ -370,7 +370,7 @@ def Payments_Form(request, proj, fnc, rid):
 			order = Purchases.objects.get(id=order.id)
 			paymentdelete(request, order.id, inv.id, dlt_amount)
 			messages.success(request, "Selected Payment Details Has Deleted")
-			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+			return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 
 		# getdata.delete()
 		# order = Orders.objects.get(id=order.id)
@@ -380,7 +380,7 @@ def Payments_Form(request, proj, fnc, rid):
 		# 	order.Payment_Status = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date').last()
 		# 	order.save()
 		# messages.success(request, "Selected Payment Details Has Deleted")
-		# return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+		# return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 
 	if request.method ==  'POST': #Create
 		form = PaymentsForm(request.POST, request.FILES)
@@ -388,7 +388,7 @@ def Payments_Form(request, proj, fnc, rid):
 			p = form.save(commit=False)
 			if p.Order_No==None and p.Invoice_No==None:
 				messages.error(request, "Either Order Details or Invoice Details Must Be Geiven to Record Payment")
-				return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+				return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 			p= form.save()
 			if not p.Order_No: # when paymentbthrough invoice number
 				p.Order_No = p.Invoice_No.Order
@@ -397,7 +397,7 @@ def Payments_Form(request, proj, fnc, rid):
 			else:
 				assign_paystatus_to_order(request, p.id)
 			messages.success(request, "Payment Has Been Added")
-			return redirect('/%s/paymentslist/Received/'%pdata['pj'])
+			return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 		else:
 			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
 	else:
@@ -529,7 +529,7 @@ def Payments_Form(request, proj, fnc, rid):
 # 		'pdata':pdata, 'status':status, 'pc':pc, 'total_rec':total_rec, 'billed_rec':billed_rec, 'advances':advances, 'form_payments':form})
 
 @login_required
-def Payments_List(request, proj, status):
+def Payments_List(request, proj, status, custflt):
   pdata = projectname(request, proj)
   lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
   lookup1 = {'Order__Related_Project__isnull':False} if proj == 'All' else {'Order__Related_Project':pdata['pj']}
@@ -537,6 +537,11 @@ def Payments_List(request, proj, status):
   form = PaymentsEmptyForm()
   form.fields["Order_No"].queryset = Orders.objects.filter(**lookup, Order_Type='Confirmed').filter(Q(Payment_Status__isnull=True)|Q(Payment_Status__isnull=False))
   form.fields["Invoice_No"].queryset = Invoices.objects.filter(**lookup1, Lock_Status=1, Is_Proforma=0, Due_Amount__gt=0)
+
+  if custflt != 'custflt':
+  	form.fields["Invoice_No"].queryset = Invoices.objects.filter(Order__Customer_Name__Customer_Name=custflt, Due_Amount__gt=0)
+
+  
 
   lookup2 = {'Order_No__Related_Project__isnull':False} if proj == 'All' else {'Order_No__Related_Project':pdata['pj']}
 
@@ -579,8 +584,8 @@ def Payments_List(request, proj, status):
 				total_received = total_received + sum(pay_list.values_list('Received_Amount', flat=True))
 	
   advance = total_due - (total_billed - total_received)
-  return render(request, 'orders/PaymentsList.html', {'table':table_data, 'filter_data':filter_data, 
-    'pdata':pdata, 'status':status, 'total_billed':total_billed, 'total_received':total_received, 'total_due':total_due, 'advance':advance, 'form_payments':form})
+  return render(request, 'orders/PaymentsList.html', {'table':table_data, 'filter_data':filter_data, 'customers':customers,
+    'pdata':pdata, 'status':status, 'total_billed':total_billed, 'total_received':total_received, 'total_due':total_due, 'advance':advance, 'form_payments':form, 'custflt':custflt})
 
 
 #create work from orderlsit, only create
@@ -852,12 +857,12 @@ def Edit_Invoice_Form(request, proj, fnc, invid):
 	msg='msg'
 	url = '/'+str(pdata['pj'])+'/invoice/edit/'+invid+'/'+str(inv_order_id)+'/itemid/'
 
-	if p.Set_For_Returns == 1:
-		if p.Amended_GST_Returns_Date == None:
-			p.Amended_GST_Returns_Date = p.Invoice_Date
-	else:
-		p.Amended_GST_Returns_Date == None
-	p.save()
+	# if p.Set_For_Returns == 1:
+	# 	if p.Amended_GST_Returns_Date == None:
+	# 		p.Amended_GST_Returns_Date = p.Invoice_Date
+	# else:
+	# 	p.Amended_GST_Returns_Date == None
+	# p.save()
 
 	if fnc == 'edit_manually':
 		k = postform(request, inv_order_id, invid, fnc)

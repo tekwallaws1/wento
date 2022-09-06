@@ -1229,3 +1229,37 @@ def Get_Order_Wise_Salaries(request, proj, month, mode):
 	total = sum(sal_list) or 0
 
 	return render(request, 'expenses/OrderWiseSalaries.html', {'month': mnth, 'month1':month, 'pdata':pdata, 'data':data,  'mode':'get', 'total':total})
+
+
+@login_required
+def Employ_Claims(request, proj):
+	pdata = projectname(request, proj)
+	lookup = {'Related_Project__isnull':False}
+	expns = Expenses.objects.filter(Q(Submitted_By__Status=1)&Q(Submitted_By__ds=1)&Q(Approval_Status=1))
+	print(expns)
+	empls = []
+	for e in expns:
+		empls.append(e.Submitted_By)
+	empls = list(dict.fromkeys(empls))
+
+	employs, total_claims, paid, due, advances, sal_advances = [], [], [], [], [], []
+
+	for e in empls:
+		employs.append(e)
+		dbt_sum, dbt_sum1, d, exp_issue = 0,0,0,0
+		exp = Expenses.objects.filter(Submitted_By=e, Approval_Status=1)
+		dbt = Debit_Amounts.objects.filter(Q(Employ=e)&Q(Employ__Status=1)&Q(Employ__ds=1))
+		dbt1 = dbt.filter(Related_To='Salary_Advance')
+		t_claims = sum(exp.values_list('Total_Amount', flat=True)) if exp != None else 0
+		dbt_sum = sum(dbt.values_list('Issued_Amount', flat=True)) if dbt != None else 0
+		dbt1_sum = sum(dbt1.values_list('Issued_Amount', flat=True)) if dbt1 != None else 0
+		exp_issue = dbt_sum - dbt1_sum
+		d = t_claims - exp_issue
+		due.append((t_claims - exp_issue) if (t_claims - exp_issue) > 0 else 0)
+		advances.append(-(d)) if d < 0 else advances.append(0)
+		sal_advances.append(dbt1_sum)
+		paid.append(exp_issue)
+		total_claims.append(t_claims)
+
+	data = zip(employs, total_claims, paid, due, advances, sal_advances)
+	return render(request, 'expenses/EmployWiseClaims.html', {'pdata':pdata, 'data':data})

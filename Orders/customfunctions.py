@@ -219,7 +219,7 @@ def adjust_payments_to_invoices(request, ordid, invid):
 	inv = Invoices.objects.filter(id=invid).last()
 
 	if Payment_Status.objects.filter(Invoice_No=inv):
-		assign_paystatus_to_order(request, Payment_Status.objects.filter(Invoice_No=inv.Invoice_No).id)
+		assign_paystatus_to_order(request, Payment_Status.objects.filter(Invoice_No=inv).last().id)
 	else:
 		case1 = Payment_Status.objects.filter(Order_No=order).order_by('Payment_Date')
 		case2 = Payment_Status.objects.filter(Order_No__Customer_Name=customer).order_by('Payment_Date')

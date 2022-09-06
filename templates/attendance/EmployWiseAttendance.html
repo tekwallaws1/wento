@@ -3,7 +3,7 @@
 {% load humanize %}
 {% load mathfilters %} 
 
-{% block css %}
+{% block css %} 
   <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
   <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
@@ -34,9 +34,12 @@
   
   function fnchide(){$("#editModal .close").click()}
 
-  function actionurl() {
-      document.getElementById('employaction').action = '/{{pdata.pj}}/employwiseattendance/month/employ/';
-    } 
+  function getemploy(){
+      var dt = $("#getmonth").val();
+      var name = $("#getname").val();
+      if ( dt == '' ){dt = 'month'};
+      if ( name == '' ){dt = 'noemploy'};
+      location.href='/{{pdata.pj}}/employwiseattendance/'+dt+'/'+name+'/'}
     
     function getdt(){
       var dt = $("#getdate").val();
@@ -116,8 +119,10 @@
         {% endif %}
       </span>
     </h3>
-    <button class="btn1 btn1-primary" type="submit" data-toggle="modal" data-target="#selectEmployModal" onclick="actionurl()">Change Employ</button>
+    <button class="btn btn-sm btn-primary" type="submit" data-toggle="modal" data-target="#selectEmployModal" onclick="actionurl()">Change Employ</button>
+    <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger" ht="select category">Do More</button>
     <div>
+      
 
     <form class="forms-sample" action="" id='formaction' method="POST" >
       {% csrf_token %}
@@ -268,7 +273,7 @@
     </div>
   </div>
 
-  <!-- Add/Edit attendance Form -->
+  <!-- Employ and Month Selection -->
   <div class="modal fade text-left" id="selectEmployModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" >
       <div class="modal-content" id="modal-reload">
@@ -279,27 +284,56 @@
           </button>
         </div>
         <div class="modal-body">   
-          <form class="forms-sample" id='employaction' action='' method="POST">
             <div class="form-group mb-4">
               {% csrf_token %}
               <div class="form-group">
-                  <label style="color:green; font-size: 14px;">Choose Employ to Get Report</label>
-                  <select id='sel' name="employ" class="form-select form-control">
+                  <label style="color:green; font-size: 14px;">Choose Employ</label>
+                  <select id='getname' name="employ" class="form-select form-control">
                   <!-- <option selected>-------------</option> -->
                   <option value="">----------</option>
                     {% for x in employes %}
                       <option >{{ x.Name }}</option>
                     {% endfor %}
                 </select>
+              </div>
+              <div>
+                <label style="color:green; font-size: 14px;">Choose Month</label><br>
+                <input type="month" name='dates' id='getmonth' style="width: 135px; font-size: 14px; margin-bottom:10px;">
               </div>            
             </div>
-          <button type="submit" id="sbmt" class="btn btn-primary" >Submit</button>     
-        </form>
+          <button  class="btn btn-primary" onclick="getemploy()" >Submit</button>     
         </div>
       </div>
     </div>
   </div>
 <!-- End -->
+
+<!-- more pages -->
+  <div class="modal fade text-left" id="doMoreModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button class="btn btn-sm btn-primary" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'">Daily Attendance</button>
+            <button class="btn btn-sm btn-info" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
+            <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+            {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
+              <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/employeslist/'">Employes List</button>
+              <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
+              <button class="btn btn-sm btn-danger" onclick="location.href='/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
+              <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 {% endblock %}
  

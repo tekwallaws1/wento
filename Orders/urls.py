@@ -11,7 +11,7 @@ urlpatterns = [
     path('<proj>/orderslist/<status>/', views.Orders_List, name='orderslist'),
     path('<proj>/ordersform/<fnc>/<rid>/', views.Orders_Form, name='ordersform'),
 
-    path('<proj>/paymentslist/<status>/', views.Payments_List, name='paymentslist'),
+    path('<proj>/paymentslist/<status>/<custflt>/', views.Payments_List, name='paymentslist'),
     path('<proj>/paymentsform/<fnc>/<rid>/', views.Payments_Form, name='paymentsform'),
     path('<proj>/orderspaymentsform/<rid>/', views.Orders_Payments_Form, name='orderspaymentsform'),
 

@@ -340,7 +340,7 @@
   </div>
   <div class="col-md-4 stretch-card grid-margin">
     <div class="card bg-gradient-primary card-img-holder text-white">
-      <a href="/{{pdata.pj}}/vendorpaymentslist/Due/" ht="click to get vendor due payments list"><div class="card-body1">
+      <a href="/{{pdata.pj}}/vendorpaymentslist/Due/vendflt/" ht="click to get vendor due payments list"><div class="card-body1">
         <img src="{% static 'img/circle.svg' %}" class="card-img-absolute" alt="circle-image" />
         <div class="card-statistic-3"><div class="card-icon card-icon-large" ><i class="fas fa-bandage"></i></div></div>
         <h4 class="mb-3 blk">Due Payments</h4>
@@ -399,7 +399,7 @@
   <div class="col-md-8 grid-margin stretch-card"> 
     <div class="card shadow mb-4">
       <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-        <h7 class="m-1 font-weight-bold "><a href="/{{pdata.pj}}/vendorpaymentslist/Paid/" ht="click to get sales orders list">Paid Payments</a><span style="color: #0854a6">
+        <h7 class="m-1 font-weight-bold "><a href="/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/" ht="click to get sales orders list">Paid Payments</a><span style="color: #0854a6">
           {% if dur == '30' %} - Latest Month
           {% elif dur == '90' %} - Latest 3 Months
           {% elif dur == '180' %} - Latest 6 Months

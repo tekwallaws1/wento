@@ -44,8 +44,7 @@ class Orders(models.Model):
 	    super().save(*args, **kwargs)
 
 	def __str__(self):
-		if request.user.username == 'praveen' or  request.user.username == '9849203852' or  request.user.username == '9010654596':
-			return str(self.Customer_Name.Customer_Name)+'-'+str(self.PO_No)+'-'+str(self.Order_Value)
+		return str(self.Customer_Name.Customer_Name)+'-'+str(self.PO_No)+'-'+str(self.Order_Value)
 
 	# def process_request(self, request):
 	# 	if request.user.username == 'praveen' or  request.user.username == '9849203852' or  request.user.username == '9010654596':
