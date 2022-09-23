@@ -191,7 +191,7 @@ class Vendor_Invoices(models.Model):
 	Amended_GST_Returns_Date = models.DateField(blank=True, null=True, help_text='returns month/date, by default its invoice date')
 
 	def __str__(self):
-		return str(self.PO_No.Vendor.Supplier_Name) if self.PO_No.Vendor.Supplier_Name != None else None +'-'+str(self.Invoice_No)+'-'+str(self.Invoice_Amount)
+		return (str(self.PO_No.Vendor.Short_Name) if self.PO_No.Vendor.Supplier_Name != None else None) +'-'+str(self.Invoice_No)+'-Billed '+str(self.Invoice_Amount)
 
 
 class PO_Delivery_Status(models.Model): 
@@ -263,7 +263,9 @@ class Copy_Quote_Items(models.Model):
 	UOM 				= models.CharField(max_length=15, null=True, choices=uom)
 	Unit_Price			= models.FloatField(max_length=15, blank=True, null=True, help_text='each unit price excluding all taxes')
 	GST					= models.FloatField(max_length=5, blank=True, null=True, help_text='GST in % such as 12, 18 etc')
-	
+	HSN_Code			= models.IntegerField(blank=True, null=True, help_text='HSN/SAC Code for this product')
+	Ref_PO 				= models.CharField(max_length=30, null=True, blank=True)
+
 	def __str__(self):
 		return str(self.Quote_No)+'-'+str(self.Item_Description)
 

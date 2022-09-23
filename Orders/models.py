@@ -3,7 +3,6 @@ from Projects.models import *
 from Products.models import * 
 from UserAccounts.models import *
 from django.contrib.auth.models import User
-from Projects.basedata import call_i
 # Create your models here.    
 
 order_by = (('By PO', 'By PO'), ('By Mail', 'By Mail'), ('By Phone', 'By Phone'), ('By Reference', 'By Reference'))
@@ -207,5 +206,13 @@ class Sales_TC(models.Model): #By default
 
 	def __str__(self):
 		return str(self.Terms_and_Condition1)
+
+class Inv_Adjust_Table(models.Model):
+	Invoice_No	    	 = models.ForeignKey(Invoices, null=True, blank=True, on_delete=models.CASCADE)
+	Table_No             = models.IntegerField(null=True, blank=True)
+	Row_No             	 = models.IntegerField(null=True, blank=True)
+
+	def __str__(self):
+		return str(self.Invoice_No)+'-'+str(self.Table_No)
 
 

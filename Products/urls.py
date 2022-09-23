@@ -4,7 +4,7 @@ from .import views
 from django.conf import settings
 from django.conf.urls.static import static
 
-urlpatterns = [
+urlpatterns = [ 
     
     path('<proj>/purchasesdb/<dur>/', views.Purchases_Dashboard, name='purchasesdb'),
 
@@ -37,6 +37,8 @@ urlpatterns = [
     path('<proj>/quote_edit/<fnc>/<qid>/', views.Edit_Quotation_Form, name='quote_edit'),
     path('<proj>/<fnc>/quoteitem/<qid>/<itemid>/', views.Add_Quotation_Item_Form, name='quoteitem'),
     path('<proj>/<fnc>/quote_tc/<qid>/', views.Quotation_TC_Form, name='quote_tc'),
+
+    path('<proj>/uploadquote/<qid>/', views.Upload_Quote, name='uploadquote'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
  

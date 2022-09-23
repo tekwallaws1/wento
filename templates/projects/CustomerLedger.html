@@ -1,0 +1,376 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %}  
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+{% endblock %} 
+
+{% block scripts %}
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
+  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
+  <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
+  <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script>
+
+<script type="text/javascript">
+
+function fncsbmt(){
+  var customer = $("#sel").val();
+  document.getElementById('customeraction').action = '/{{pdata.pj}}/paymentslist/Received/'+customer+'/';
+}
+
+  function rid(tid, xid) {getid = tid; getxid = xid;}
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/{{pdata.pj}}/paymentsform/delete/'+getid+'/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
+  function selectmode(tag){
+    document.getElementById('paymentaction').action =  '/{{pdata.pj}}/paymentsform/create/1/'
+    if (tag=='againstorder') {document.getElementById('orderno').style.display='block';}
+    else {document.getElementById('orderno').style.display='none';}
+    if (tag=='againstinvoice') {document.getElementById('invoiceno').style.display='block';}
+    else {document.getElementById('invoiceno').style.display='none';}}
+
+  function fnchide(){document.getElementById('exampleModal11').style.display='none';}
+  
+</script>
+
+<script type="text/javascript">
+  document.getElementById("popup").click();
+    function unauth(){
+    $('.widget-content .message', function () {
+        swal({title: 'Un Authorisation Alert !',text: 'Sorry! You Can Not Access This Page. Need Authorisation To Access This Page',padding: '2em'})}) }
+</script>
+
+<!-- Data Tables Export Script -->
+<script src="{% static 'js/datatablesexport.js' %}"></script>
+<script type="text/javascript">
+  // Datatables Excel Formating Before Export//
+  var customexcel = function( xlsx ) {
+  var sheet = xlsx.xl.worksheets['sheet1.xml'];
+  var style = xlsx.xl['styles.xml'];
+  var tagName = style.getElementsByTagName('sz');
+  for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+  $('row:first c', sheet).attr('s', '2')
+  $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); $('row c[r^="F"]', sheet).attr( 's', '55' ); $('row c[r^="G"]', sheet).attr( 's', '55' ); $('row c[r^="H"]', sheet).attr( 's', '55' );//wrap text
+  var col = $('col', sheet);
+  // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
+  $(col[1]).attr('width', 10); $(col[2]).attr('width', 35); $(col[3]).attr('width', 20); $(col[4]).attr('width', 15); $(col[5]).attr('width', 15); $(col[6]).attr('width', 15); $(col[7]).attr('width', 15);}; 
+//--End--//
+
+{% if custflt == 0 %}
+  var cl = [0,  1, 2, 3, 4, 5, 6, 7];
+  var wdths = ['3%', '10%', '20%', '18%', '10%', '12%', '12%', '15%'];
+{% else %}
+  var cl = [0,  1, 2, 3, 4, 5, 6];
+  var wdths = ['3%', '10%', '24%', '20%', '14%', '14%', '15%'];
+{% endif %}
+
+var ort = 'portrait'; //landscape
+
+var msgTop = '{% if custflt != 0 %}Customer Name: {{custflt}} | {% endif %}Duration: {{table.first.Date}} to {{table.last.Date}} \n {% if custflt != 0 %}Opening Balance: {{table.first.Bal_Customer|floatformat:'0'|intcomma}} | Closing Balance: {{table.last.Bal_Customer|floatformat:'0'|intcomma}}{% else %}Opening Balance: {{table.first.Bal_All|floatformat:'0'|intcomma}} | Closing Balance: {{table.last.Bal_All|floatformat:'0'|intcomma}}{% endif %}'
+  var title = 'Customer Ledger Account';
+  var filename = '{% if custflt == 0 %}CustomerLedgerAccount{% else %}{{custflt}}_LedgerAccount{% endif %}'
+
+// Datatables Customise PDF Before Export//
+var pdf_custom = function ( doc ) {
+  doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+  doc.pageMargins = [40,60,20,30];
+  doc['footer']= footer1;
+  doc['header']= header1;
+  var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+  objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+  objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+  objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+  doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+  // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+{text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+};
+
+//--End--//
+</script>
+
+<!-- Data Tables Export Script -->
+<script type="text/javascript">
+$('#ledger').DataTable( {
+autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
+buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
+    
+  {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
+
+  {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
+
+  {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
+</script>
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+{% if request.user.username == 'praveen' %}
+<!-- ######### -->
+
+<div class="page-header">
+  <h3 class="page-title">{{pdata.pj.Short_Name}} - Customer Ledger Account {% if custflt != 0 %}<span style="color:green;"> - {{custflt}}</span>{% endif %}</h3>
+</div>
+
+<div>
+  <div style="float:left">
+    <button type="button" data-toggle='modal', data-target="#MorePagesModal" class="btn btn-sm btn-danger mb-4" >More Pages</button>
+  </div>
+  <div style="float:right">
+    <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+    &nbsp;&nbsp;&nbsp;
+    <button type="button" onclick="location.href='/{{pdata.pj}}/customerledger/mode/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+  </div>
+  <div style="clear:both"></div>
+</div>
+
+  
+  <!--Filter/Serch History Form-->
+  <div id="addEventsModal" class="modal animated fadeIn"> 
+    <div class="modal-dialog modal-dialog-centered">                            
+      <!-- Modal content -->
+      <div class="card modal-content">
+        <div class="modal-body">
+          <span id="discard" data-dismiss="modal" class="close">&times;</span>
+          <div class="add-edit-event-box">
+            <div class="add-edit-event-content">
+              <div class="add-event-title edit-event-title"></div>
+                <h5 class="modal-title">Search Data by Applying Filter</h5>
+                  <form class="">
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
+                          <input type="date" name="from_date" class="form-control">
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
+                          <input type="date" name="to_date" class="form-control">
+                        </div>
+                      </div>
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">From Value</label>
+                          <input  name="from_value" class="form-control">
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Value</label>
+                          <input  name="to_value" class="form-control">
+                        </div>
+                      </div> -->
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Customer Name</label>
+                        {{ filter_data.form.Partner}}
+                      </div> -->
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Select Customer</label>
+                          <select id='sel' name="customer" class="form-select form-control">
+                            <option value="">----------</option>
+                            {% for x in cust %}
+                              <option >{{x.Customer_Name}}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      </div>
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Work Order</label>
+                        {{ filter_data.form.Order_No}}
+                      </div> -->
+                                           
+                      <div class="" style=" float:left; margin-left: 10px; margin-top:20px;">
+                        <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                        <!-- <button id="add-e" class="btn">Add Task</button> -->
+                        <button id="edit-event" class="btn"></button>
+                      </div>
+                    </div>   
+                  </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="row">
+  <div class="col-xl-4 col-md-6 mb-4">
+    <div class="card border-left-primary shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Duration</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">{{table.first.Date}} to {{table.last.Date}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4 col-md-6 mb-4">
+    <div class="card border-left-success shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Opening Balance</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">
+              ₹ {% if custflt != 0 %}{{table.first.Bal_Customer|floatformat:'0'|intcomma}}{% else %}{{table.first.Bal_All|floatformat:'0'|intcomma}}{% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-4 col-md-6 mb-4"> 
+    <div class="card border-left-dark shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Closing Balance</div>
+            <div class="h6 mb-0 font-weight-bold text-blue-1000">₹ {% if custflt != 0 %}{{table.last.Bal_Customer|floatformat:'0'|intcomma}}{% else %}{{table.last.Bal_All|floatformat:'0'|intcomma}}{% endif %}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payments List -->
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="ledger">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            {% if custflt == 0 %}
+            <th>Customer Name</th>
+            {% endif %}
+            <th>Reference Type</th>
+            <th>Reference No</th>
+            <th>Debit</th>
+            <th>Credit</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x in table %}
+          <tr>
+            <td >{{forloop.counter}}</td>
+
+            <td style="white-space:normal; width: 10%;">
+              {{x.Date|date:'d M y'}}
+            </td>
+
+            {% if custflt == 0 %}
+            <td style="white-space:normal; width: 25%;">
+              {{x.Partner}}
+            </td>
+            {% endif %}
+
+            <td style="white-space:normal;">
+              {% if x.Debit %}Sales Invoice{% else %}Payment Receipt{% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {{x.Ref_No}}
+            </td>
+
+            <td style="white-space:normal;">
+              {% if x.Debit %}₹ {{x.Debit|floatformat:0|intcomma}}{% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {% if x.Credit %}₹ {{x.Credit|floatformat:0|intcomma}}{% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+             {% if custflt == 0 %}₹ {{x.Bal_All|floatformat:0|intcomma}}{% else %}₹ {{x.Bal_Customer|floatformat:0|intcomma}}{% endif %}
+            </td>
+
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+{% else %}
+<!-- ######### -->
+<button type="button" id="popup" style="display:none" onclick="unauth()"></button>
+{% endif %}
+
+<!-- more pages -->
+  <div class="modal fade text-left" id="MorePagesModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button   onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
+            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
+            <button type="button"  onclick="location.href='/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button>          
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="selectCustomerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" >
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Select Customer</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">   
+          <form class="forms-sample" id='customeraction' action='' method="POST">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                  <label for="id_Supplier_Name" style="color:green; font-size: 14px;">Select Customer</label>
+                  <select id='sel' name="vendor" class="form-select form-control">
+                  <!-- <option selected>-------------</option> -->
+                  <option value="">----------</option>
+                    {% for x in customers %}
+                      <option >{{ x.Customer_Name }}</option>
+                    {% endfor %}
+                </select>
+              </div>            
+            </div>
+          <button type="submit" onclick="fncsbmt()" class="btn btn-primary" >Submit</button>     
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+ 

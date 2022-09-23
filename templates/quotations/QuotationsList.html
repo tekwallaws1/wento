@@ -175,7 +175,7 @@
                 <td style="white-space:normal;">
                   {% if x.Quote_To %}                  
                     <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">M/s. {{x.Quote_To.Contact_Person}}
-                      <br>{{x.Quote_To.Customer_Name.Customer_Name}}</a>
+                      {% if x.Firm_Name %}<br> {{x.Firm_Name}}{% endif %}
                       <br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Quote_To.Phone_Number_1}}'>{{x.Quote_To.Phone_Number_1}}</a>
                       {% if x.Quote_To.Email %}<br><i class="mdi mdi-email-outline"></i>&nbsp;<a href="mailto:{{x.Quote_To.Email}}">{{x.Quote_To.Email}}</a>{% endif %}
                     </a>

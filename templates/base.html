@@ -239,6 +239,21 @@
             </li>
 
             <li class="nav-item">
+              <a class="nav-link" data-toggle="collapse" href="#ui-basicledger" aria-expanded="false" aria-controls="ui-basicledger">
+                <span class="menu-title">Ledgers</span>
+                <i class="menu-arrow"></i>
+                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
+                <i class="  fas fa-lg fa-balance-scale-left"></i>
+              </a>
+              <div class="collapse" id="ui-basicledger">
+                <ul class="nav flex-column sub-menu">
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/customerledger/mode/">Customer Ledger</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/customerledger/mode/">Vendor Ledger</a></li>
+                </ul>
+              </div>
+            </li>
+
+            <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicexpenses" aria-expanded="false" aria-controls="ui-basicexpenses">
                 <span class="menu-title">Expenses</span>
                 <i class="menu-arrow"></i>
@@ -353,7 +368,7 @@
               </a>
               <div class="collapse" id="ui-basicempl">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employeslist/">List of Employes</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employeslist/active/">List of Employes</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employsalarieslist/">Employ Salaries</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/emplsalrevisions/">Salary Revisions</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/monthlysalaries/month/select/">Employ Month<br>Salaries</a></li>

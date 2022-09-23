@@ -20,6 +20,7 @@ urlpatterns = [
     path('<proj>/daywiseattendancelist/<day>/', views.DayWise_Attendance, name='daywiseattendancelist'),
     path('<proj>/autoattendance/<month>/', views.Gen_Auto_Attendance, name='autoattendance'),
     path('<proj>/monthwiseattendancelist/<month>/', views.MonthWise_Attendance, name='monthwiseattendancelist'),
+    path('<proj>/monthlyattendanceedit/<empl>/<dt>/<fnc>/', views.Month_Attendance_Edit, name='monthlyattendanceedit'),
     path('<proj>/employwiseattendance/<month>/<empl>/', views.Employ_Wise_Attendance, name='employwiseattendance'),
     path('<proj>/holidaysform/<fnc>/<hid>/', views.Holidays_Form, name='holidaysform'),
     path('<proj>/holidayslist/<year>/', views.Holidays_List, name='holidayslist'),

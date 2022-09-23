@@ -145,38 +145,39 @@
       <div style="margin-top:10px"></div>
 
       {% if itm %}
-        <table class="t3" style="font-size:11px">
+        <table class="t3" style="font-size:11px" id='newTable{{forloop.counter}}' >
           <tr>
-            <th class="th2" style="width:5%">SNo</th>
-            <th class="th2" >Description of Goods</th>
-            <th class="th2" style="width:7%">HSN</th>
-            <th class="th2" style="width:7.5%">Quantity</th>
-            <th class="th2" style="width:9%">Rate</th>
-            <th class="th2" style="width:9%">Amount</th>
+            <th class="td11 font-weight-bold" style="width:4%">SNo</th>
+            <th class="td1 font-weight-bold" >Description of Goods</th>
+            <th class="td11 font-weight-bold" style="width:8%">HSN/SAC</th>
+            <th class="td11 font-weight-bold" style="width:8%">QTY</th>
+            <th class="td11 font-weight-bold" style="width:5%">UOM</th>
+            <th class="td11 font-weight-bold" style="width:9%">Rate</th>
+            <th class="td11 font-weight-bold" style="width:9%">Amount</th>
             {% if po.Billing_To.State == po.Billing_From.State %}
-              <th class="th2" style="width:8%">CGST</th>
-              <th class="th2" style="width:8%">SGST</th>
+              <th class="td11 font-weight-bold" style="width:8%">CGST</th>
+              <th class="td11 font-weight-bold" style="width:8%">SGST</th>
             {% else %}
-              <th class="th2" style="width:9%">IGST</th>
+              <th class="td11 font-weight-bold" style="width:9%">IGST</th>
             {% endif %}
-            <th class="th2" style="text-align:right; width:12%">Total Amount</th>
+            <th class="td11 font-weight-bold" style="text-align:right; width:12%">Total Amount</th>
           </tr>
           {% for x, a, b, c in itm %}
             <tr>
-              <th class="td2" {%  if forloop.last %}id="gp1" style="height:0px;"{% endif %}>{{forloop.counter}}</th>
-              <th class="td2" style="font-weight:600"><a class="ahr" ht="Edit/Delete Item Details" data-toggle="modal" data-target="#itemEditButtons" onclick="javascript:edititem({{x.id}})">{{x.Item_Description}}</a></th>
-              <th class="td2">{{x.HSN_Code}}</th>
-              <th class="td2">{% if x.UOM == 'Kg' or x.UOM == 'Mtr' or x.UOM == 'Ltr' %}{{x.Quantity|floatformat:2}}{% else %}{{x.Quantity|floatformat:0}}{% endif %}
-                <br><span style="font-weight:600; font-style:italic;">{{x.UOM}}{% if x.Quantity > 1 %}s{% endif %}</span></th>
-              <th class="td2">{{x.Unit_Price|floatformat:'0'}}</th>
-              <th class="td2">{{a|floatformat:'0'}}</th>
+              <td class="td33" {%  if forloop.last %}id="gp1" style="height:0px;"{% endif %}>{{forloop.counter}}</td>
+              <td class="td33 mb-4" style="font-weight:600; text-align:left"><a class="ahr" ht="Edit/Delete Item Details" data-toggle="modal" data-target="#itemEditButtons" onclick="javascript:edititem({{x.id}})">{{x.Item_Description}}</a></td>
+              <td class="td33">{{x.HSN_Code}}</td>
+              <td class="td33">{% if x.UOM == 'Kg' or x.UOM == 'Mtr' or x.UOM == 'Ltr' %}{{x.Quantity|floatformat:1}}{% else %}{{x.Quantity|floatformat:0}}{% endif %}</td>
+                <td class="td33"><span style="font-weight:600; font-style:italic;">{{x.UOM}}{% if x.Quantity > 1 %}s{% endif %}</span></td>
+              <td class="td33">{{x.Unit_Price|floatformat:'2'}}</td>
+              <td class="td33">{{a|floatformat:'1'}}</td>
               {% if po.Billing_To.State == po.Billing_From.State %}
-                <th class="td2">{{b|div:2|floatformat:'0'}}<br><span style="font-style:italic">{{x.GST|div:2|floatformat:'1'}}%</span></th>
-                <th class="td2">{{b|div:2|floatformat:'0'}}<br><span style="font-style:italic">{{x.GST|div:2|floatformat:'1'}}%</span></th>
+                <td class="td33">{{b|div:2|floatformat:'1'}}<br><span style="font-style:italic">{{x.GST|div:2|floatformat:'1'}}%</span></td>
+                <td class="td33">{{b|div:2|floatformat:'1'}}<br><span style="font-style:italic">{{x.GST|div:2|floatformat:'1'}}%</span></td>
               {% else %}
-                <th class="td2">{{b|floatformat:'0'}}<br><span style="font-style:italic">{{x.GST|floatformat:'1'}}%</span></th>
+                <td class="td33">{{b|floatformat:'1'}}<br><span style="font-style:italic">{{x.GST|floatformat:'1'}}%</span></td>
               {% endif %}
-              <th class="td2" style="font-weight:bold;text-align:right;">{{c|floatformat:'0'|intcomma}}</th>
+              <td class="td33" style="font-weight:bold;text-align:right;">{{c|floatformat:'2'|intcomma}}</td>
             </tr>
           {% endfor %}
         </table>

@@ -14,7 +14,7 @@ from django.db.models import Q
 from django.utils.datastructures import MultiValueDictKeyError 
 from django.db.models import Sum, Avg, Count
 from Projects.fyear import get_financial_year, get_fy_date, get_fy_date_fy
-from Projects.basedata import projectname
+from Projects.basedata import projectname, customer_updateledger
 from .customfunctions import assign_paystatus_to_order, workstatus, updateduedays, get_invoice_number, inv_amoumt_update, inv_amount_exceed, adjust_payments_to_invoices, genOrderNo, postform, adj_pay_to_all_inv, paymentdelete
 from num2words import num2words
 from django.urls import reverse 
@@ -233,14 +233,15 @@ def Orders_List(request, proj, status):
 
 
 	for x in table_data:
-		if x.Order_Type == 'Confirmed':
-			total, tc = int(total + x.Order_Value), tc+1
-		if x.Order_Type == 'Pipeline':
-			pipeline, pc = int(pipeline + x.Order_Value), pc+1
-		elif x.Final_Status == 1:
-			closed, cc = int(closed + x.Order_Value), cc+1
-		else:
-			inprogress, ic = int(inprogress + x.Order_Value), ic+1	
+		if x.Order_Value != None:
+			if x.Order_Type == 'Confirmed':
+				total, tc = int(total + x.Order_Value), tc+1
+			if x.Order_Type == 'Pipeline':
+				pipeline, pc = int(pipeline + x.Order_Value), pc+1
+			elif x.Final_Status == 1:
+				closed, cc = int(closed + x.Order_Value), cc+1
+			else:
+				inprogress, ic = int(inprogress + x.Order_Value), ic+1	
 	orders = {'total':total, 'closed':closed, 'inprogress':inprogress, 'pipeline':pipeline}
 	count = {'tc':tc, 'cc':cc, 'ic':ic, 'pc':pc}
 
@@ -294,10 +295,11 @@ def Orders_Form(request, proj, fnc, rid):
 		if fnc == 'copy':
 			getdata = get_object_or_404(Orders, id=rid)
 			form = OrdersForm(instance=getdata)
+			form.fields["Customer_Name"].queryset = CustDt.objects.filter(ds=1, Status=1, Address_Type='Billing')
 			return render(request, 'orders/OrdersForm.html', {'form': form, 'pdata':pdata})
 		else:
 			form = OrdersEmptyForm()
-			form.fields["Customer_Name"].queryset = CustDt.objects.filter(ds=1, Status=1) #load only active and non deleted customers
+			form.fields["Customer_Name"].queryset = CustDt.objects.filter(ds=1, Status=1, Address_Type='Billing') #load only active and non deleted customers
 			form.fields["Order_Reference_Person"].queryset = CustContDt.objects.filter(ds=1) #load only non deleted customers
 
 			return render(request, 'orders/OrdersForm.html', {'form': form, 'pdata':pdata})
@@ -313,6 +315,7 @@ def Orders_Payments_Form(request, proj, rid):
 		if form.is_valid():
 			p = form.save()
 			assign_paystatus_to_order(request, p.id)
+			customer_updateledger(request, 'custpay', 'create', pdata, Payment_Status.objects.get(id=p.id))
 			messages.success(request, "Payment Has Been Added")
 			return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 		else:
@@ -337,6 +340,7 @@ def Payments_Form(request, proj, fnc, rid):
 				p= form.save()
 				order = Orders.objects.get(id=p.Order_No.id)
 				assign_paystatus_to_order(request, p.id)
+				customer_updateledger(request, 'custpay', 'edit', pdata, Payment_Status.objects.get(id=p.id))
 				messages.success(request, "Selected Payment Details Has Been Updated")
 				return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 			else:
@@ -347,6 +351,7 @@ def Payments_Form(request, proj, fnc, rid):
 			return render(request, 'orders/PaymentsForm.html', {'form': form, 'pdata':pdata})
 
 	elif fnc == 'delete': #Delete
+		customer_updateledger(request, 'custpay', 'delete', pdata, Payment_Status.objects.get(id=rid))
 		getdata = get_object_or_404(Payment_Status, id=rid)
 		order = getdata.Order_No
 		inv = getdata.Invoice_No
@@ -368,7 +373,8 @@ def Payments_Form(request, proj, fnc, rid):
 			order.Payment_Status = last_pay
 			order.save()
 			order = Purchases.objects.get(id=order.id)
-			paymentdelete(request, order.id, inv.id, dlt_amount)
+			paymentdelete(request, order.id, inv.id, dlt_amount) if inv != None else None
+
 			messages.success(request, "Selected Payment Details Has Deleted")
 			return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 
@@ -396,6 +402,7 @@ def Payments_Form(request, proj, fnc, rid):
 				assign_paystatus_to_order(request, p.id)
 			else:
 				assign_paystatus_to_order(request, p.id)
+			customer_updateledger(request, 'custpay', 'create', pdata, Payment_Status.objects.get(id=p.id))
 			messages.success(request, "Payment Has Been Added")
 			return redirect('/%s/paymentslist/Received/custflt/'%pdata['pj'])
 		else:
@@ -545,7 +552,7 @@ def Payments_List(request, proj, status, custflt):
 
   lookup2 = {'Order_No__Related_Project__isnull':False} if proj == 'All' else {'Order_No__Related_Project':pdata['pj']}
 
-  table_data = Payment_Status.objects.filter(**lookup2).order_by('Payment_Date')
+  table_data = Payment_Status.objects.filter(**lookup2).order_by('-Payment_Date')
   # table_fy_pays = Vendor_Payment_Status.objects.filter(**lookup1, Payment_Date__date__lte=date.today(), Payment_Date__date__gte=get_fy_date()).order_by('Payment_Date')
   
   # ins = Invoices.objects.all()
@@ -744,6 +751,7 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 
 	if fnc == 'create_manually':
 		k = postform(request, rid, 1, fnc)
+
 		if k == 'invlist':
 			return redirect('/%s/invoiceslist/Issued/'%pdata['pj'])
 		elif k == 'orderslist':
@@ -801,21 +809,59 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 	else:
 		tc = None
 	
+	
+
+	tbs = Inv_Adjust_Table.objects.filter(Invoice_No=inv)
+	table_list = []
+	if tbs:
+		ln = 0
+		pre_id = 0
+		for t in tbs:
+			amount, total_gst, total_amount, lenth = [],[],[],[] 
+			items = Copy_Billed_Items.objects.filter(Invoice_No = inv, id__gte=pre_id, id__lt=t.Row_No).order_by('id')
+			for x in items:
+				lenth.append(ln)
+				amount.append(x.Quantity*x.Unit_Price)
+				total_gst.append(x.Quantity*x.Unit_Price*x.GST/100)
+				total_amount.append((x.Quantity*x.Unit_Price)+(x.Quantity*x.Unit_Price*x.GST/100))
+			ln = ln + len(items)
+			itm = zip(items, amount, total_gst, total_amount, lenth)
+			table_list.append(itm)
+			pre_id = t.Row_No
+
+		amount, total_gst, total_amount, lenth = [],[],[],[]
+		items = Copy_Billed_Items.objects.filter(Invoice_No = inv, id__gte=pre_id).order_by('id')
+		for x in items:
+			lenth.append(ln)
+			amount.append(x.Quantity*x.Unit_Price)
+			total_gst.append(x.Quantity*x.Unit_Price*x.GST/100)
+			total_amount.append((x.Quantity*x.Unit_Price)+(x.Quantity*x.Unit_Price*x.GST/100))
+		itm = zip(items, amount, total_gst, total_amount, lenth)
+		table_list.append(itm)
+	else:
+		items = Copy_Billed_Items.objects.filter(Invoice_No = inv).order_by('id')
+		amount, total_gst, total_amount, lenth = [],[],[],[]
+		for x in items:
+			lenth.append(0)
+			amount.append(x.Quantity*x.Unit_Price)
+			total_gst.append(x.Quantity*x.Unit_Price*x.GST/100)
+			total_amount.append((x.Quantity*x.Unit_Price)+(x.Quantity*x.Unit_Price*x.GST/100))
+		itm = zip(items, amount, total_gst, total_amount, lenth)
+		table_list.append(itm)
+	tbl_count = len(table_list)
+
+	
 	items = Copy_Billed_Items.objects.filter(Invoice_No = inv).order_by('id')
-	amount, total_gst, total_amount, final_gst, final_without_tax_amount, final_with_tax_amount = [],[],[],[],[],[] 
+	amount, total_gst, total_amount, final_gst, final_without_tax_amount, final_with_tax_amount = [],[],[],0,0,0 
 	for x in items:
 		amount.append(x.Quantity*x.Unit_Price)
 		total_gst.append(x.Quantity*x.Unit_Price*x.GST/100)
 		total_amount.append((x.Quantity*x.Unit_Price)+(x.Quantity*x.Unit_Price*x.GST/100))
 	final_gst, final_without_tax_amount, final_with_tax_amount = int(sum(total_gst)), sum(amount), int(sum(total_amount))
-
-	itm = zip(items, amount, total_gst, total_amount)
 	ss = {'final_gst':final_gst, 'final_without_tax_amount':final_without_tax_amount, 'final_with_tax_amount':final_with_tax_amount}
-
 	
 	form_invoice = InvoicesForm(instance=get_object_or_404(Invoices, id=inv.id))
 	
-
 	if Delivery_Note.objects.filter(Invoice_No=inv).last():
 		form_deliverynote = DeliveryNoteForm(instance=get_object_or_404(Delivery_Note, Invoice_No=inv))
 	else:
@@ -844,11 +890,10 @@ def Gen_Invoice(request, proj, fnc, invid, rid, itemid, msg):
 	for x in copy_items: same_gst_perc.append(x.GST)
 	same_gst_perc = list(dict.fromkeys(same_gst_perc))
 	same_gst_perc = same_gst_perc[0] if len(same_gst_perc) == 1 else None
-	print(same_gst_perc)
 
-	return render(request, 'docformats/Invoice1.html', {'pdata':pdata, 'inv':inv, 'itm':itm, 'ss':ss, 'tc':tc, 'form_invoice':form_invoice,
+	return render(request, 'docformats/Invoice1.html', {'pdata':pdata, 'inv':inv, 'ss':ss, 'tc':tc, 'form_invoice':form_invoice,
 		'form_deliverynote':form_deliverynote, 'form_tc':form_tc, 'amount_in_words':amount_in_words, 'tax_words':tax_words, 
-		'item_id':itemid, 'form_item':form_item, 'fnc':fnc, 'msg':msg, 'roundoff':roundoff, 'samegst':same_gst_perc})
+		'item_id':itemid, 'form_item':form_item, 'fnc':fnc, 'msg':msg, 'roundoff':roundoff, 'samegst':same_gst_perc, 'table_list':table_list, 'tbl_count':tbl_count})
 	
 @login_required
 def Edit_Invoice_Form(request, proj, fnc, invid):
@@ -908,6 +953,19 @@ def Edit_Invoice_Form(request, proj, fnc, invid):
 			else:
 				msg = "Requested Details Has Been Updated Successfully"
 
+			if p.Lock_Status == 1 and p.Is_Proforma == 0:
+				ldgr = Customer_Ledger.objects.filter(Ref_No=p.Invoice_No)
+				if ldgr:
+					customer_updateledger(request, 'custinv', 'edit', pdata, Invoices.objects.get(id=p.id))
+				else:
+					customer_updateledger(request, 'custinv', 'create', pdata, Invoices.objects.get(id=p.id))
+			
+			if p.Lock_Status == 0:
+				ldgr = Customer_Ledger.objects.filter(Ref_No=p.Invoice_No)
+				if ldgr:
+					customer_updateledger(request, 'custinv', 'delete', pdata, Invoices.objects.get(id=p.id))
+
+
 			# if p.Set_For_Returns == 0:
 			# 	msg = "Invoice Has Been Removed From GST Returns for this time Successfully"
 
@@ -923,8 +981,6 @@ def Edit_Invoice_Form(request, proj, fnc, invid):
 			return redirect('/%s/orderslist/Inprogress/'%pdata['pj'])
 		else:
 			return redirect(url)
-
-
 
 @login_required
 def Add_Item_Form(request, proj, fnc, invid, itemid):
@@ -975,6 +1031,9 @@ def Add_Item_Form(request, proj, fnc, invid, itemid):
 			copy_item.delete()
 			item.delete()
 			inv_amoumt_update(request, invid)
+			tbs = Inv_Adjust_Table.objects.filter(Invoice_No__id=invid)
+			if tbs:
+				tbs.delete()
 			return redirect(url)
 		else:
 			return redirect(url)
@@ -1076,23 +1135,23 @@ def Invoices_List(request, proj, status):
 	# update invoices due dates
 	invoiceslist = Invoices.objects.filter(**lookup, Last_Update__lt=date.today(), Due_Amount__gt=0, Lock_Status=1, Is_Proforma=0)
 	if invoiceslist:
-		for x in invoiceslist:			
+		for x in invoiceslist:
+			print(x)			
 			x.Last_Update = date.today()
 			x.save()
-			updateduedays(request, x.id)
+			updateduedays(request, x.id) 
 
-	table_inv = Invoices.objects.filter(**lookup).order_by('-Invoice_Date')
-	table_fy_inv = Invoices.objects.filter(**lookup, Invoice_Date__date__lte=date.today(), Invoice_Date__date__gte=get_fy_date()).order_by('-Invoice_Date')
+	table_data = Invoices.objects.filter(**lookup).order_by('-Invoice_Date')
+	# table_fy_inv = Invoices.objects.filter(**lookup, Invoice_Date__date__lte=date.today(), Invoice_Date__date__gte=get_fy_date()).order_by('-Invoice_Date')
 	
-	filter_data = InvoicesFilter(request.GET, queryset=table_fy_inv)
-	table_fy_inv = filter_data.qs
-	table_data = table_fy_inv
-	has_filter_inv = any(field in request.GET for field in set(filter_data.get_fields()))
+	filter_data = InvoicesFilter(request.GET, queryset=table_data)
+	table_data = filter_data.qs
 	
-	if has_filter_inv: #update filter data queyset
-		filter_data = InvoicesFilter(request.GET, queryset=table_inv)
-		table_inv = filter_data.qs
-		table_data = table_inv
+	# has_filter_inv = any(field in request.GET for field in set(filter_data.get_fields()))
+	# if has_filter_inv: #update filter data queyset
+	# 	filter_data = InvoicesFilter(request.GET, queryset=table_inv)
+	# 	table_inv = filter_data.qs
+	# 	table_data = table_inv
 
 	full_due_inv, part_due_inv, full_clear_inv, total_billing, total_rec = 0, 0, 0, 0, 0
 	fdc, pdc, fcc, tbc = 0, 0, 0, 0 #count
@@ -1135,44 +1194,36 @@ def Invoices_List(request, proj, status):
 			inv = table_data.filter(Order=x)
 			invoices_list.append(inv)
 
-
-
-	# for x in table_data:
-	# 	orders_list.append(x.Order)
-	# orders_list = list(dict.fromkeys(orders_list))
-
-	# for x in orders_list:
-	# 	if status == 'Issued':
-	# 		inv = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=0)
-	# 	elif status == 'Proforma':
-	# 		inv = Invoices.objects.filter(Order=x, Lock_Status=1, Is_Proforma=1)
-	# 	else:
-	# 		inv = Invoices.objects.filter(Order=x, Lock_Status=0, Is_Proforma=0)
-
-	# 	invoices_list.append(inv)
-	# 	inv = inv.filter(Invoice_Amount__isnull=False)
-	# 	inv_total 	 = sum(inv.values_list('Invoice_Amount', flat=True)) or 0
-		
-	# 	total_billing = total_billing + inv_total
-	# 	tbc = tbc + len(inv)
-
-	# 	for a in inv:
-	# 		if a.Due_Amount:
-	# 			if a.Due_Amount == a.Invoice_Amount:
-	# 				full_due_inv = full_due_inv + a.Invoice_Amount
-	# 				fdc = fdc + 1
-	# 			elif a.Due_Amount == 0:
-	# 				full_clear_inv = full_clear_inv + a.Invoice_Amount
-	# 				fcc = fcc + 1
-	# 			elif a.Due_Amount > 0 and a.Due_Amount != a.Invoice_Amount:
-	# 				part_due_inv = part_due_inv + a.Due_Amount
-	# 				pdc = pdc + 1
-	# 			else:
-	# 				pass
-
 	count = {'fdc':fdc, 'pdc':pdc, 'fcc':fcc, 'tbc':tbc}
 	heads = {'full_due_inv':full_due_inv, 'part_due_inv':part_due_inv, 'full_clear_inv':full_clear_inv, 'total_billing':total_billing}
 	table_items  = zip(orders_list, invoices_list)
 
 	return render(request, 'orders/InvoicesList.html', {'table':table_data, 'table_items':table_items, 'count':count, 'heads':heads, 
 		'filter_data':filter_data, 'pdata':pdata, 'status':status, 'form':form, 'total_rec':total_rec})
+
+
+def Inv_AdjustTable(request, proj, invid, rowid, fnc):
+	pdata = projectname(request, proj)
+	inv = Invoices.objects.get(id=invid)
+	url = '/'+str(pdata['pj'])+'/invoice/edit/'+str(inv.id)+'/'+str(inv.Order.id)+'/itemid/'
+	if fnc == 'adjust':
+		if rowid == None:
+			msg = 'Please choose row to braek table and move to next page.'
+			return redirect(url+msg+'/')
+		else:
+			ids = Inv_Adjust_Table.objects.filter(Invoice_No = inv)
+			if ids:
+				for x in ids:
+					if rowid == x.Row_No:
+						msg = 'Table already breaked from this row of selected item'
+						return redirect(url+msg+'/')
+
+			table_no = len(Inv_Adjust_Table.objects.filter(Invoice_No = inv)) if Inv_Adjust_Table.objects.filter(Invoice_No = inv) != None else 0
+			create = Inv_Adjust_Table.objects.create(Invoice_No=inv, Table_No=table_no+1, Row_No=rowid)
+			# here row id is item id
+	if fnc == 'reset':
+		Inv_Adjust_Table.objects.filter(Invoice_No=inv).delete()
+	
+	
+	return redirect(url+'msg/')
+

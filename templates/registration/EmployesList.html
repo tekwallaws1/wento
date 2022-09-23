@@ -86,14 +86,14 @@
     var tagName = style.getElementsByTagName('sz');
     for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
     $('row:first c', sheet).attr('s', '2')
-    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); //wrap text
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );  $('row c[r^="F"]', sheet).attr( 's', '55' ); //wrap text
     var col = $('col', sheet);
     // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
-    $(col[1]).attr('width', 40); $(col[2]).attr('width', 25); $(col[3]).attr('width', 25); $(col[4]).attr('width', 25); }; 
+    $(col[2]).attr('width', 40); $(col[3]).attr('width', 25); $(col[4]).attr('width', 25); $(col[5]).attr('width', 25); }; 
   //--End--//
 
-  var cl = [0,  1, 2, 3, 4]
-  var wdths = ['4%', '30%', '22%', '22%', '22%'];
+  var cl = [0,  1, 2, 3, 4, 5]
+  var wdths = ['2%', '3%', '29%', '22%', '22%', '22%'];
   var ort = 'portrait'; //landscape
   
     var msgTop = 'No of Employes - {{count}}'
@@ -121,7 +121,7 @@
 
 <!-- Data Tables Export Script -->
 <script type="text/javascript">
-  $('#employes123').DataTable( {
+  $('#employes').DataTable( { order: [[0, 'asc']],
   autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
   buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       
@@ -136,12 +136,21 @@
 
 {% block content %}
 <div class="page-header">
-  <h3 class="page-title">{{pdata.pj.Short_Name}} - Employes List - {{count}}</h3>
+  {% if status == 'active' %}
+    <h3 class="page-title">{{pdata.pj.Short_Name}} - Active Employes List - {{count}}</h3>
+  {% else %}
+    <h3 class="page-title">{{pdata.pj.Short_Name}} - Old Employes List - {{count}}</h3>
+  {% endif %}
 </div>
 
 <div>
   <div style="float:left">
-    <button type="button" onclick="location.href='/{{pdata.pj}}/employesform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="register new employee here">Add New Employee</button>
+    <button type="button" onclick="location.href='/{{pdata.pj}}/employesform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="register new employee here">Add New Employ</button>
+    {% if status == 'active' %}
+      <button type="button" onclick="location.href='/{{pdata.pj}}/employeslist/old/'" class="btn btn-sm btn-danger mb-4" ht="list of old employes who are not active or not in company">Old Employes List</button>
+    {% else %}
+      <button type="button" onclick="location.href='/{{pdata.pj}}/employeslist/active/'" class="btn btn-sm btn-success mb-4" ht="list of active employes">Active Employes List</button>
+    {% endif %}
   </div>
   <div style="float:right">
     <!-- <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
@@ -150,80 +159,7 @@
   <div style="clear:both"></div>
 </div>
 
-<!--Filter/Serch History Form-->
-<div id="addEventsModal" class="modal animated fadeIn"> 
-  <div class="modal-dialog modal-dialog-centered">                            
-    <!-- Modal content -->
-    <div class="card modal-content">
-      <div class="modal-body">
-        <span id="discard" data-dismiss="modal" class="close">&times;</span>
-        <div class="add-edit-event-box">
-          <div class="add-edit-event-content">
-            <div class="add-event-title edit-event-title"></div>
-              <h5 class="modal-title">Search Data by Applying Filter</h5>
-                <form class="">
-                  <div class="row">
-                    <div class="col-md-6 col-sm-6 col-12">
-                      <div class="form-group start-date">
-                        <label style=" font-weight: 200; color: black; font-size: 13px;">Payment Received From</label>
-                        <input type="date" name="from_date" class="form-control">
-                      </div>
-                    </div>
-                    <div class="col-md-6 col-sm-6 col-12">
-                      <div class="form-group start-date">
-                        <label style="font-weight: 200; color: black; font-size: 13px;">Payment Received To</label>
-                        <input type="date" name="to_date" class="form-control">
-                      </div>
-                    </div>
-                    <div class="col-md-6 col-sm-6 col-12">
-                      <div class="form-group start-date">
-                        <label style="font-weight: 200; color: black; font-size: 13px;">From Value</label>
-                        <input  name="from_value" class="form-control">
-                      </div>
-                    </div>
-                    <div class="col-md-6 col-sm-6 col-12">
-                      <div class="form-group start-date">
-                        <label style="font-weight: 200; color: black; font-size: 13px;">To Value</label>
-                        <input  name="to_value" class="form-control">
-                      </div>
-                    </div>
-                    <!-- <div class="col-md-6 col-sm-6 col-12 mt-4">
-                      <label style="font-weight: 200; color: black; font-size: 13px;">Payment Status</label>
-                        <select class="form-control" name="Closing_Status">
-                          <option value="">Select</option>
-                          <option value="true">Cloased</option>
-                          <option value="false">Due</option>
-                        </select>
-                    </div> -->
-                    <div class="col-md-6 col-sm-6 col-12">
-                      <label style=" font-weight: 200; color: black; font-size: 13px;">Customer Name</label>
-                      {{ filter_data.form.Order_No__Customer_Name}}
-                    </div>
-                    <div class="col-md-6 col-sm-6 col-12">
-                      <label style=" font-weight: 200; color: black; font-size: 13px;">Order Details</label>
-                      {{ filter_data.form.Order_No}}
-                    </div>
-                    <div class="col-md-6 col-sm-6 col-12 mt-4">
-                      <label style=" font-weight: 200; color: black; font-size: 13px;">Follow Up By</label>
-                      {{ filter_data.form.user}}
-                    </div>
-                    
-                    
-                    <div class="" style=" float:left; margin-left: 10px; margin-top:48px;">
-                      <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
-                      <!-- <button id="add-e" class="btn">Add Task</button> -->
-                      <button id="edit-event" class="btn"></button>
-                    </div>
-                  </div>   
-                </form>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
   
-
 <!-- Employes List -->
   <div class="card">
     <div class="card-body2">
@@ -232,6 +168,7 @@
         <thead>
           <tr>
             <th>#</th>
+            <th>DP</th>
             <th>Employee Name</th>
             <th>Other Details</th>
             <th>Bank Account Details</th>
@@ -241,8 +178,10 @@
         <tbody>
           {% for x, y, z in data %}
           <tr>
+            <td >{{forloop.counter}}</td>
+
             <td >
-              {{forloop.counter}}&nbsp;<a class="ahr" ht="update employee details" data-toggle="modal" data-target="#editModal1" onclick="javascript:editemp1('{{x.id}}')">
+              <a class="ahr" ht="update employee details" data-toggle="modal" data-target="#editModal1" onclick="javascript:editemp1('{{x.id}}')">
                 {% if x.Upload_Photo %}
                   <img src="/media/{{x.Upload_Photo}}/" alt="image" />
                 {% endif %}

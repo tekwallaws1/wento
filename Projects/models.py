@@ -128,7 +128,7 @@ class CustContDt(models.Model):
 	ds						= models.BooleanField(default=True)
 
 	def __str__(self):
-		return str(self.Customer_Name.Customer_Name)+'-'+str(self.Contact_Person)+'-'+str(self.Phone_Number_1)
+		return (str(self.Customer_Name.Customer_Name) if self.Customer_Name != None else str(self.Customer_Name)) +'-'+str(self.Contact_Person)+'-'+str(self.Phone_Number_1)
 
 class VendContDt(models.Model):
 	Supplier_Name 			= models.ForeignKey(VendDt, null=True, on_delete=models.SET_NULL)
@@ -164,4 +164,36 @@ class No_Formats(models.Model):
 	def __str__(self):
 		return str(self.No_Format)
 
+class Customer_Ledger(models.Model):
+	Related_Project			= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL, help_text='leave empty if product meant for many projects') 		
+	Date 					= models.DateField(null=True, blank=True)
+	Partner					= models.CharField(max_length=100, null=True, blank=True)
+	Ref_No 					= models.CharField(max_length=30, null=True, blank=True)
+	# Voucher_No 			= models.IntegerField(null=True, unique=True, blank=True)
+	Debit     				= models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+	Credit     				= models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+	Bal_Customer     		= models.DecimalField(default=0, max_digits=12, decimal_places=2, null=True, blank=True)
+	Bal_All     			= models.DecimalField(default=0, max_digits=12, decimal_places=2, null=True, blank=True)
+	Lock_Status             = models.BooleanField(default=True)
+	Row_ID                  = models.IntegerField(null=True, blank=True)
+	Sr_No                   = models.IntegerField(null=True, blank=True)
 
+	def __str__(self):
+		return str(self.Date)+('-Credit-'+str(self.Credit)) if self.Credit != None else str(self.Date)+('-Debit-'+str(self.Debit))
+
+class Vendor_Ledger(models.Model):
+	Related_Project			= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL, help_text='leave empty if product meant for many projects') 		
+	Date 					= models.DateField(null=True, blank=True)
+	Partner					= models.CharField(max_length=100, null=True, blank=True)
+	Ref_No 					= models.CharField(max_length=30, null=True, blank=True)
+	# Voucher_No 			= models.IntegerField(null=True, unique=True, blank=True)
+	Debit     				= models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+	Credit     				= models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+	Bal_Customer     		= models.DecimalField(default=0, max_digits=12, decimal_places=2, null=True, blank=True)
+	Bal_All     			= models.DecimalField(default=0, max_digits=12, decimal_places=2, null=True, blank=True)
+	Lock_Status             = models.BooleanField(default=True)
+	Row_ID                  = models.IntegerField(null=True, blank=True)
+	Sr_No                   = models.IntegerField(null=True, blank=True)
+
+	def __str__(self):
+		return str(self.Date)+('-Credit-'+str(self.Credit)) if self.Credit != None else str(self.Date)+('-Debit-'+str(self.Debit))

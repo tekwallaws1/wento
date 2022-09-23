@@ -322,16 +322,16 @@
         {% for x, y in data %}
           <tr>
         
-            <td >{{forloop.counter}}{% if x.Total_Amount and x.Balance_Amount == 0 %}#{% endif %}</td>
+            <td >{{forloop.counter}}</td>
 
               <td style="white-space:normal;">
                 <a class="ahr" ht="{% if apr != 'approvalreq' %}open expenses claim form{% else %}approve claim here by click and approve{% endif %}" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+'{{x.id}}'+'/itemid/'" target="_blank">
                   {{x.Reference_No}}
                   {% if x.From_Date == x.To_Date or x.To_Date == None %}
-                    <br><span style="color:#0d65e0">{{x.From_Date|date:'d M Y'}}</span>
+                    <br><span>{{x.From_Date|date:'d M Y'}}</span>
                   {% else %}
-                    <br>from <span style="color:#0d65e0">{{x.From_Date|date:'d M y'}}</span>
-                    <br>to <span style="color:#0d65e0">&emsp;&nbsp;{{x.To_Date|date:'d M y'}}</span>
+                    <br>from <span>{{x.From_Date|date:'d M y'}}</span>
+                    <br>to <span>&emsp;&nbsp;{{x.To_Date|date:'d M y'}}</span>
                   {% endif %}
                 </a>
               </td>
@@ -342,7 +342,7 @@
                   {% if x.Submitted_By.Employee_Id %}<br>{{x.Submitted_By.Employee_Id}}{% endif %}
                 </a>
                 <br>Submitted On
-                <br>{{x.Submitted_Date|date:'d-M-Y'}}
+                <br><span style="color:#0d65e0">{{x.Submitted_Date|date:'d-M-Y'}}</span>
               </td>
 
               <td style="white-space:normal; width: 19%;">
@@ -381,7 +381,7 @@
                       <span class="hlt2">Amount Settled</span>
                     {% elif x.Balance_Amount > 0 %}
                       <span class="hlt3">Due </span> ₹ {{x.Balance_Amount|floatformat:0|intcomma}}
-                      <span class="hlt3"><br>Due Days </span>{{x.Over_Due_Days}}
+                      {% if x.Over_Due_Days > 0 %}<span class="hlt3"><br>Due Days </span>{{x.Over_Due_Days}}{% endif %}
                     {% else %}
                     {% endif %}
                   {% else %}

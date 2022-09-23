@@ -6,6 +6,7 @@ from .models import *
 @admin.register(Exp_Items)
 @admin.register(Debit_Amounts)
 @admin.register(Staff_Advances)
+@admin.register(Salary_Advances)
 @admin.register(Attendance)
 @admin.register(Monthatnd)
 @admin.register(Working_Days)

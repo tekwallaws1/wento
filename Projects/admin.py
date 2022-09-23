@@ -10,6 +10,9 @@ from .models import *
 @admin.register(VendContDt)
 @admin.register(Bank_Accounts)
 @admin.register(No_Formats)
+@admin.register(Customer_Ledger)
+@admin.register(Vendor_Ledger)
+
 
 class ProjectsAdmin(ImportExportModelAdmin):
 	pass

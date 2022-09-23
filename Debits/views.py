@@ -17,7 +17,7 @@ import calendar
 from calendar import monthrange
 
 
- 
+
 def get_errors(request, formerrors): 
 	x = 'Errors: '
 	for field, errors in formerrors.items():
@@ -99,50 +99,64 @@ def update_exp_duedays(request, expid):
 		exp.Over_Due_Days = 0
 	exp.save()
 
+def exp_update(request, expid):
+	exp = Expenses.objects.get(id=expid)
+	exp.Balance_Amount = exp.Total_Amount
+	exp.save()
+	# empl_adv = Staff_Advances.objects.filter(Employ=exp.Submitted_By).last()
+	# adv = empl_adv.Advance if empl_adv else None
+	# if adv != None:
+	# 	if adv != 0:
+	# 		exp.Balance_Advance = adv
+	# 		exp.save()
+	# 		if adv >= exp.Total_Amount:
+	# 			exp.Balance_Amount = 0
+	# 			exp.save()
+	# 		else:
+	# 			exp.Balance_Amount = exp.Total_Amount - adv
+	# 			exp.save()
+	# else:
+	# 	exp.Balance_Amount = exp.Total_Amount
+	# 	exp.save()
+
+
 def exp_apr_update(request, expid):
 	exp = Expenses.objects.filter(id=expid).update(Approval_Status=1)
 	exp = Expenses.objects.get(id=expid)
 	empl_adv = Staff_Advances.objects.filter(Employ=exp.Submitted_By).last()
 	adv = empl_adv.Advance if empl_adv else None
+	dbt = Debit_Amounts.objects.filter(Employ=exp.Submitted_By)
 	if adv != None:
-		if adv != 0:
-			if adv >= exp.Total_Amount:
-				exp.Balance_Amount = 0
-				exp.Issued_Date = empl_adv.Issued_Date
-				exp.Clearing_Status = 1
-				exp.Issued_By = empl_adv.Issued_By
-				exp.save()
-				empl_adv.Advance = adv - exp.Total_Amount
-				empl_adv.save()
+		if dbt:
+			if adv != 0:
+				if adv >= exp.Total_Amount:
+					exp.Balance_Amount = 0
+					exp.Issued_Date = empl_adv.Issued_Date
+					exp.Clearing_Status = 1
+					exp.Issued_By = empl_adv.Issued_By
+					exp.save()
+					empl_adv.Advance = adv - exp.Total_Amount
+					empl_adv.save()
+				else:
+					exp.Balance_Amount = exp.Total_Amount - adv
+					exp.Issued_Date = empl_adv.Issued_Date
+					exp.Issued_By = empl_adv.Issued_By
+					exp.save()
+					empl_adv.Advance = 0
+					empl_adv.save()
 			else:
-				exp.Balance_Amount = exp.Total_Amount - adv
-				exp.Issued_Date = empl_adv.Issued_Date
-				exp.Issued_By = empl_adv.Issued_By
+				exp.Balance_Amount = exp.Total_Amount
 				exp.save()
-				empl_adv.Advance = 0
-				empl_adv.save()
-	else:
-		exp.Balance_Amount = exp.Total_Amount
-		exp.save()
-def exp_update(request, expid):
-	exp = Expenses.objects.get(id=expid)
-	empl_adv = Staff_Advances.objects.filter(Employ=exp.Submitted_By).last()
-	adv = empl_adv.Advance if empl_adv else None
-	if adv != None:
-		if adv != 0:
-			exp.Balance_Advance = adv
+		else:
+			empl_adv.delete()
+			exp.Balance_Amount = exp.Total_Amount
 			exp.save()
-			if adv >= exp.Total_Amount:
-				exp.Balance_Amount = 0
-				exp.save()
-			else:
-				exp.Balance_Amount = exp.Total_Amount - adv
-				exp.save()
 	else:
 		exp.Balance_Amount = exp.Total_Amount
 		exp.save()
 
-def update_debits(requestf, did, fnc):
+
+def update_debits(request, did, fnc):
 	df = Debit_Amounts.objects.get(id=did)
 	if df.Party_Name:
 		df.Issued_To = None
@@ -158,92 +172,272 @@ def update_debits(requestf, did, fnc):
 		df.Expenses = None
 		df.Party_Name = None
 		df.save()
-
 	if df.Expenses or df.Issued_To:
 		if df.Expenses:
 			df.Employ = df.Expenses.Submitted_By
 		else:
 			df.Employ = df.Issued_To
 		df.save()
-		employ = df.Employ
-				
-		if fnc != 'create':
-			t_issues = sum(Debit_Amounts.objects.filter(Employ=employ).values_list('Issued_Amount', flat=True))
-			t_exp = sum(Expenses.objects.filter(Submitted_By=employ, Approval_Status=1).values_list('Total_Amount', flat=True))
-			if t_issues >= t_exp:
-				bal = t_issues - t_exp
-				exp = Expenses.objects.filter(Submitted_By=employ, Approval_Status=1, Clearing_Status=0).order_by('Balance_Amount')
-				exp.update(Balance_Amount=0, Clearing_Status=1, Issued_Date=df.Issued_Date, Issued_By=df.Issued_By)
-			else:
-				exp = Expenses.objects.filter(Submitted_By=employ, Approval_Status=1).order_by('Balance_Amount')
-				bal = t_issues
-				print('2', bal)
-				for x in exp:
-					if bal >= x.Total_Amount and x.Balance_Amount == 0:
-						bal = bal - x.Total_Amount
-					elif bal >= x.Total_Amount and x.Balance_Amount != 0:
-						bal = bal - x.Balance_Amount
-						x.Balance_Amount = 0
-						x.Issued_Date = df.Issued_Date
-						x.Clearing_Status = 1
-						x.Issued_By = df.Issued_By
-						x.save()						
-					elif bal < x.Total_Amount and bal != 0:
-						x.Balance_Amount = x.Total_Amount - bal
-						x.Issued_Date = df.Issued_Date
-						x.Clearing_Status = 0
-						x.Issued_By = df.Issued_By
-						x.save()
-						bal = 0
-					else: #means bal = 0
-						x.Balance_Amount = x.Total_Amount
-						x.Issued_Date = None
-						x.Clearing_Status = 0
-						x.Issued_By = None
-						x.save()
+		# employ = df.Employ
+	
+	df = Debit_Amounts.objects.get(id=did)
+	# direct debits to invoice clearance if debit against invoice
+	if df.Expenses:
+		if fnc == 'create':
+			exp = Expenses.objects.filter(id=df.Expenses.id)
+			diff = add_exp(request, exp, df.Issued_Amount, df) # against that particular expenses
+			if df.Employ:
+				if diff == 0:
+					return 1
+				if diff > 0:
+					exp = Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount__gt=0, Approval_Status=1).order_by('Submitted_By') 
+					diff = add_exp(request, exp, diff, df)
+					if diff > 0:
+						add_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff, df)				
 		else:
-			exp = Expenses.objects.filter(Submitted_By=employ, Approval_Status=1, Clearing_Status=0).order_by('Balance_Amount')
-			empl_adv = Staff_Advances.objects.filter(Employ=employ).last()
-			adv = empl_adv.Advance if empl_adv else 0 #find if any previous advances
-			bal = df.Issued_Amount + adv
-			for x in exp:
-				if bal >= x.Balance_Amount:
-					bal = bal - x.Balance_Amount
-					x.Balance_Amount = 0
-					x.Issued_Date = df.Issued_Date
-					x.Clearing_Status = 1
-					x.Issued_By = df.Issued_By
-					x.save()					
+			exp = Expenses.objects.filter(id=df.Expenses.id).last()
+			if df.Issued_Amount >= exp.Total_Amount:
+				exp.Balance_Amount, exp.Issued_By, exp.Issued_Date, exp.Clearing_Status = 0, df.Issued_By, df.Issued_Date, 1
+				exp.save() 
+			diff = add_exp(request, Expenses.objects.filter(id=df.Expenses.id), df.Issued_Amount, df)
+			edit_dbt(request, exp, df)			
+	else:
+		if df.Paid_To == 'As Advance to Staff':
+			if df.Related_To != 'Salary Advance':
+				if fnc == 'create':
+					exp = Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount__gt=0, Approval_Status=1).order_by('Submitted_By')
+					diff = add_exp(request, exp, df.Issued_Amount, df)
+					if diff > 0:
+						add_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff, df)
 				else:
-					if bal != 0:
-						x.Balance_Amount = x.Balance_Amount - bal
-						x.Issued_Date = df.Issued_Date
-						x.Clearing_Status = 0
-						x.Issued_By = df.Issued_By
-						x.save()
-						bal = 0
+					t_exps = sum(Expenses.objects.filter(Submitted_By=df.Employ, Approval_Status=1).values_list('Total_Amount', flat=True)) or 0
+					t_dbts = sum(Debit_Amounts.objects.filter(Employ=df.Employ).exclude(Related_To='Salary Advance').values_list('Issued_Amount', flat=True)) or 0
+					if t_dbts >= t_exps:
+						Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount__gt=0).update(Balance_Amount=0, Issued_Date = df.Issued_Date, Issued_By = df.Issued_By, Clearing_Status = 1)
+						diff = t_dbts - t_exps
+						if diff == 0:
+							updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff, df)
+							return 1
+						if diff > 0:
+							updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff, df)
+							return 1
 					else:
-						break
+						t_exps_bal = sum(Expenses.objects.filter(Submitted_By=df.Employ, Approval_Status=1).values_list('Balance_Amount', flat=True)) or 0
+						t_exps_issue = t_exps - t_exps_bal
+						if t_dbts < t_exps_issue: # it should equal otherwise we need to deduct somewhere
+							updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), 0, df)
+							set_expns = Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount__gt=0, Approval_Status=1).order_by('-Submitted_By')
+							diff = t_exps_issue - t_dbts
+							diff = del_exp(request, set_expns, diff)
+							if diff > 0:
+								set_expns = Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount=0, Approval_Status=1).order_by('-Submitted_By')
+								diff = del_exp(request, set_expns, diff)
+								if diff > 0:
+									diff = del_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff)	
+									return 1
+						elif t_dbts > t_exps_issue:
+							diff = t_dbts - t_exps_issue 
+							set_expns = Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount__gt=0, Approval_Status=1).order_by('Submitted_By')
+							diff = add_exp(request, set_expns, diff, df)
+							if diff > 0:
+								updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff, df)
+						else:
+							updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), 0, df)
 
-		empl = Staff_Advances.objects.filter(Employ=employ).last()
-		if bal > 0: #if still have balance after adjust all expenses
-			if empl:
-				empl.Advance = bal
-				empl.Issued_By=df.Issued_By
-				empl.Issued_Date=df.Issued_Date
-				empl.save()
-			else:
-				Staff_Advances.objects.create(Employ=employ, Advance=bal,Issued_By=df.Issued_By, Issued_Date=df.Issued_Date)
+
+
+    # test cases
+	# against expenses
+	# create: case11:first need to add/clear against that expnses
+	# 	   case2: if still more balance after clear againt that particular invoice add to expenses which are 
+	# 	   having due more than 0 submitted date wise
+	# 	   case3: if still balance after all adding -> add balance to advance to related staff
+	# edit: case1: if amount is leass that that against expenses direct adjustment against that expenses
+	# 	  case2: if amount is more than expenses, 
+	# 	  step1: first clear that expense
+	# 	  step2: check all debits and expenses against that staff
+	# 	  step3: if all all debits is more than all expenses, 
+	# 	         -> clear all expenses, if any still balance add to advances
+	# 	  step4: else if all debits is less than all expenses, may we need to deduct amount from expenses or not, for that
+	# 	  		-> check all issued amounts against expenses (total - balance)
+	# 	  		-> if isuued is less than all debit amount, we need to deduct amounts from Expenses
+	# 	  		-> exclude that particular expense
+	# 	  		-> filter due more than 0 date wise and deduct
+	# 	  		-> if still need to deduct, filter cleared expenses and deduct datewise
+	#           -> if still need to deduct, deduct from advances 
+
+	# against staff as advance
+	# create/edit: get all expenses to that staff, get all beit amount against that staff, adjust duewise by dtewise
+	#              if still balance add to advance against that staff
+
+def edit_dbt(request, exp, df):
+	if df.Employ:
+		t_exps = sum(Expenses.objects.filter(Submitted_By=df.Employ, Approval_Status=1).values_list('Total_Amount', flat=True)) or 0
+		t_dbts = sum(Debit_Amounts.objects.filter(Employ=df.Employ).exclude(Related_To='Salary Advance').values_list('Issued_Amount', flat=True)) or 0
+		if t_dbts >= t_exps:
+			Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount__gt=0).update(Balance_Amount=0, Issued_Date = df.Issued_Date, Issued_By = df.Issued_By, Clearing_Status = 1)
+			diff = t_dbts - t_exps
+			if diff == 0:
+				updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff, df)
+				return 1
+			if diff > 0:
+				updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff, df)
 		else:
-			if empl:
-				empl.Advance = 0
-				empl.save()
-		adv = Staff_Advances.objects.filter(Employ=employ).last()
-		if adv:
-			Debit_Amounts.objects.filter(Employ=employ).update(As_Advance=0)
-			k = Debit_Amounts.objects.filter(Employ=employ).order_by('Issued_Date').last()
-			k.As_Advance=adv.Advance
-			k.save()	
+			t_exps_bal = sum(Expenses.objects.filter(Submitted_By=df.Employ, Approval_Status=1).values_list('Balance_Amount', flat=True)) or 0
+			t_exps_issue = t_exps - t_exps_bal
+			if t_dbts < t_exps_issue: # it should equal otherwise we need to deduct somewhere
+				updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), 0, df)
+				set_expns = Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount__gt=0, Approval_Status=1).order_by('Submitted_By').exclude(Reference_No=exp.Reference_No)
+				diff = t_exps_issue - t_dbts
+				diff = del_exp(request, set_expns, diff)
+				if diff > 0:
+					set_expns = Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount=0, Approval_Status=1).order_by('Submitted_By').exclude(Reference_No=exp.Reference_No)
+					diff = del_exp(request, set_expns, diff)
+					if diff > 0:
+						set_expns = Expenses.objects.filter(Reference_No=exp.Reference_No)
+						diff = del_exp(request, set_expns, diff)
+						# if diff > 0:
+						# diff = del_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff, df)
+			elif t_dbts > t_exps_issue:
+				diff = t_dbts - t_exps_issue 
+				set_expns = Expenses.objects.filter(Submitted_By=df.Employ, Balance_Amount__gt=0, Approval_Status=1).order_by('Submitted_By').exclude(Reference_No=exp.Reference_No)
+				diff = add_exp(request, set_expns, diff, df)
+				if diff > 0:
+					set_expns = Expenses.objects.filter(Reference_No=exp.Reference_No)
+					diff = add_exp(request, set_expns, diff, df)
+					if diff > 0:
+						updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), diff, df)
+			else:
+				updt_adv(request, Staff_Advances.objects.filter(Employ=df.Employ).last(), 0, df)
+
+def edit_dbt1(request, employ):
+	t_exps = sum(Expenses.objects.filter(Submitted_By=employ, Approval_Status=1).values_list('Total_Amount', flat=True)) or 0
+	t_dbts = sum(Debit_Amounts.objects.filter(Employ=employ).exclude(Related_To='Salary Advance').values_list('Issued_Amount', flat=True)) or 0			
+	t_exps_bal = sum(Expenses.objects.filter(Submitted_By=employ, Approval_Status=1).values_list('Balance_Amount', flat=True)) or 0
+	t_exps_issue = t_exps - t_exps_bal
+	if t_dbts < t_exps_issue: # it should equal otherwise we need to deduct somewhere
+		updt_adv(request, Staff_Advances.objects.filter(Employ=employ).last(), 0, None)
+		set_expns = Expenses.objects.filter(Submitted_By=employ, Balance_Amount__gt=0, Approval_Status=1).order_by('-Submitted_By')
+		diff = t_exps_issue - t_dbts
+		diff = del_exp(request, set_expns, diff)
+		if diff > 0:
+			set_expns = Expenses.objects.filter(Submitted_By=employ, Balance_Amount=0, Approval_Status=1).order_by('-Submitted_By')
+			diff = del_exp(request, set_expns, diff)
+			if diff > 0:
+				diff = del_adv(request, Staff_Advances.objects.filter(Employ=employ).last(), diff)	
+				return 1
+	elif t_dbts > t_exps_issue:
+		diff = t_dbts - t_exps_issue 
+		set_expns = Expenses.objects.filter(Submitted_By=employ, Balance_Amount__gt=0, Approval_Status=1).order_by('Submitted_By')
+		diff = add_exp(request, set_expns, diff, None)
+		if diff > 0:
+			updt_adv(request, Staff_Advances.objects.filter(Employ=employ).last(), diff, None)
+	else:
+		updt_adv(request, Staff_Advances.objects.filter(Employ=employ).last(), 0, None)
+
+
+def delete_debit(request, amount, expid, empl):
+	if expid:
+		exp = Expenses.objects.filter(id=expid).last()
+		if exp.Total_Amount <= amount:
+			diff = amount - exp.Total_Amount + exp.Balance_Amount
+			Expenses.objects.filter(id=expid).update(Balance_Amount=exp.Total_Amount, Clearing_Status=0, Issued_By=None, Issued_Date=None)
+		else:
+			diff = del_exp(request, Expenses.objects.filter(id=expid), amount)
+		edit_dbt1(request, empl)
+		# if diff > 0:
+		# 	diff = del_adv(request, Staff_Advances.objects.filter(Employ=empl).last(), diff)
+		# 	if diff > 0:
+		# 		set_expns = Expenses.objects.filter(Submitted_By=empl, Balance_Amount__gt=0, Approval_Status=1).order_by('-Submitted_By')
+		# 		diff = del_exp(request, set_expns, diff)
+		# 		if diff > 0:
+		# 			set_expns = Expenses.objects.filter(Submitted_By=empl, Balance_Amount=0, Approval_Status=1).order_by('-Submitted_By')
+		# 			diff = del_exp(request, set_expns, diff)
+	else:
+		if empl:
+			diff = del_adv(request, Staff_Advances.objects.filter(Employ=empl).last(), amount)
+			if diff > 0:
+				set_expns = Expenses.objects.filter(Submitted_By=empl, Balance_Amount__gt=0, Approval_Status=1).order_by('-Submitted_By')
+				diff = del_exp(request, set_expns, diff)
+				if diff > 0:
+					set_expns = Expenses.objects.filter(Submitted_By=empl, Balance_Amount=0, Approval_Status=1).order_by('-Submitted_By')
+					diff = del_exp(request, set_expns, diff)
+
+def add_exp(request, exp, diff, df):
+	for x in exp:
+		if diff >= x.Balance_Amount:
+			diff = 	diff - 	x.Balance_Amount
+			x.Balance_Amount = 0
+			if df != None:
+				x.Issued_By = df.Issued_By
+				x.Issued_Date = df.Issued_Date
+			x.Clearing_Status = 1
+			x.save()				
+		else:
+			x.Balance_Amount = x.Balance_Amount - diff
+			if df != None:
+				x.Issued_Date = df.Issued_Date
+				x.Issued_By = df.Issued_By
+			x.Clearing_Status = 0
+			x.save()
+			diff = 0
+	
+	return diff
+
+def del_exp(request, exp, diff):
+	for x in exp:
+		if diff >= (x.Total_Amount - x.Balance_Amount):
+			diff = 	diff - x.Total_Amount + x.Balance_Amount
+			x.Balance_Amount = x.Total_Amount
+			x.Issued_Date = None
+			x.Clearing_Status = 0
+			x.Issued_By = None
+			x.save()				 					
+		else:
+			x.Balance_Amount = x.Balance_Amount + diff
+			x.Clearing_Status = 0
+			x.save()
+			diff = 0
+
+	return diff
+
+
+def add_adv(request, empl, adv, df):
+	if empl:
+		ad = empl.Advance + adv if empl.Advance != None else adv
+		empl.Advance = ad
+		if df != None:
+			empl.Issued_By, empl.Issued_Date = df.Issued_By, df.Issued_Date
+		empl.save()
+	else:
+		Staff_Advances.objects.create(Employ=df.Employ, Advance=adv, Issued_By=df.Issued_By, Issued_Date=df.Issued_Date)
+	return 1
+
+def updt_adv(request, empl, adv, df):
+	if empl:
+		empl.Advance = adv
+		if df != None:
+			empl.Issued_By, empl.Issued_Date = df.Issued_By, df.Issued_Date
+		empl.save()
+	else:
+		Staff_Advances.objects.create(Employ=df.Employ, Advance=adv, Issued_By=df.Issued_By, Issued_Date=df.Issued_Date)
+	return 1
+
+def del_adv(request, empl, adv):
+	if empl:
+		ad = empl.Advance - adv if empl.Advance != None else 0
+		diff = adv - empl.Advance
+		if ad < 0:
+			ad = 0
+		empl.Advance = ad
+		empl.save()
+		if diff <= 0:
+			diff = 0
+		return diff		
+	else:
+		return adv
+
+
 
 def working_days(request, dt):
 	# CASE1 - call when monthly attendance open
@@ -260,7 +454,7 @@ def working_days(request, dt):
 	halfday_holidays = len(DeclareDayAs.objects.filter(Date__gte=sDate).filter(Date__lte=eDate, Declare_Day_As='Half Day')) or 0
 	force_work_days = len(DeclareDayAs.objects.filter(Date__gte=sDate).filter(Date__lte=eDate, Declare_Day_As='Working Day')) or 0
 	total_working_days = int(eDate.day) + force_work_days - sundays - fullday_holidays - (halfday_holidays/2)
-	workdays = Working_Days.objects.filter(Month__month=eDate.month).last()
+	workdays = Working_Days.objects.filter(Month__month=eDate.month, Month__year=eDate.year).last()
 	if workdays:
 		workdays.Working_Days = total_working_days
 		workdays.save()
@@ -280,27 +474,49 @@ def update_month_atnd(request, pid):
 	month = p.Date.month
 	yr = p.Date.year
 
-	atnd = Attendance.objects.filter(Date__month=month, Name=p.Name).order_by('Date')
+	atnd = Attendance.objects.filter(Date__month=month, Date__year=p.Date.year, Name=p.Name).order_by('Date')
 	presents = len(atnd.filter(Day_Status = 'Present')) or 0
 	absents  = len(atnd.filter(Day_Status = 'Absent'))
 	leaves   = len(atnd.filter(Day_Status = 'Leave'))
+	half_days  = len(atnd.filter(Day_Status = 'Half Day')) or 0
+	presents = presents + (half_days/2)
 
 	total_hours = sum(atnd.filter(Total_Hours__isnull=False).values_list('Total_Hours', flat=True)) or 0
 	tot = 0
+	
+	hdl = DeclareDayAs.objects.filter(Date__month=month, Declare_Day_As='Holiday', Date__year=p.Date.year).order_by('Date')
+	hds = [] 
+	for pj in hdl:
+		hds.append(pj.Date)
+	for x in range(1, calendar.monthrange(p.Date.year, month)[1]+1):
+		if date(p.Date.year, month, x).strftime('%a') == 'Sun':
+			hds.append(date(p.Date.year, month, x))
+	hds.sort() if hds != None else hds
+
+
 	for y in atnd:
-		if y.Total_Hours and y.Total_Hours > 9.5:
-			ot = y.Total_Hours-9 
-			roundoff = ot - int(ot)
-			ot = int(ot)+1 if roundoff*10 > 5 else int(ot)
+		if y.Date in hds and y.Day_Status == 'Present':
+			if y.Total_Hours:
+				if y.Total_Hours > 7.5:
+					y.Total_Hours = y.Total_Hours - 1
+				hrs = (y.Total_Hours * 1.5) if y.Total_Hours > 4.5 else y.Total_Hours
+			tot = tot + hrs
+			presents = presents - 1
 		else:
-			ot = 0
-		tot = tot + ot
+			if y.Total_Hours and y.Total_Hours > 9.5:
+				ot = y.Total_Hours-9 
+				roundoff = ot - int(ot)
+				ot = int(ot)+1 if roundoff*10 >= 5 else int(ot)
+			else:
+				ot = 0
+			tot = tot + ot
+
 	if atnd.last() and atnd.last().Name.Joining_Date:
 		allocated_leaves = 24 if atnd.last().Name.Joining_Date <= date(yr, 1, 1) else (12-atnd.last().Name.Joining_Date.month)*(24/12)
 	else:
 		allocated_leaves = 0
-	leaves_left = allocated_leaves - leaves if Monthatnd.objects.filter(Month__month= month-1 if month != 1 else month, Name=p.Name) != None else allocated_leaves			
-	month_atnd = Monthatnd.objects.filter(Month__month=month, Name=p.Name)
+	leaves_left = allocated_leaves - leaves if Monthatnd.objects.filter(Month__month= month-1 if month != 1 else month, Name=p.Name, Month__year=p.Date.year,) != None else allocated_leaves			
+	month_atnd = Monthatnd.objects.filter(Month__month=month, Month__year=p.Date.year, Name=p.Name)
 	if month_atnd:
 		month_atnd.update(Presents=presents, Absents=absents, Leaves=leaves, Leaves_Left=leaves_left, Total_Hours=total_hours, Total_OT=tot, Last_Updated_Date=date.today())
 	else:
@@ -434,10 +650,10 @@ def Expenses_List(request, proj, apr, expid):
 	lookup1 = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
 	
 	if apr != 'approvalreq':
-		table = Exp_Items.objects.filter(**lookup).order_by('Expenses__Submitted_Date')
+		table = Exp_Items.objects.filter(**lookup).order_by('-Expenses__Submitted_Date')
 	else:
 		account = Account.objects.get(user=request.user)
-		table = Exp_Items.objects.filter(**lookup, Expenses__Approval_Request_To=account, Expenses__Lock_Status=1).order_by('Expenses__Submitted_Date')	
+		table = Exp_Items.objects.filter(**lookup, Expenses__Approval_Request_To=account, Expenses__Lock_Status=1).order_by('-Expenses__Submitted_Date')	
 
 	# if apr != 'approvalreq':
 	# 	table = Expenses.objects.filter(**lookup).order_by('Submitted_Date')
@@ -464,41 +680,7 @@ def Expenses_List(request, proj, apr, expid):
 	# 		k.save()
 	# 	deb = Debit_Amounts.objects.filter(Q(Employ=a)|Q(Issued_To=a)).order_by('Issued_Date')
 	# 	deb.update(As_Advance=0)
-	# 	if exp:
-	# 		if deb:				
-	# 			diff = sum(deb.values_list('Issued_Amount', flat=True)) or 0
-	# 			expp = sum(exp.values_list('Total_Amount', flat=True)) or 0
-	# 			if diff >= expp:
-	# 				exp.update(Balance_Amount=0, Clearing_Status=1, Balance_Advance = 0)
-	# 				bal = diff - expp
-	# 				if bal > 0:
-	# 					st = Expenses.objects.filter(Submitted_By=a, Approval_Status=1, Lock_Status=1).order_by('Submitted_Date').last()
-	# 					st.Balance_Advance = bal
-	# 					st.save()
-	# 					stdb = Debit_Amounts.objects.filter(Q(Employ=a)|Q(Issued_To=a)).order_by('Issued_Date').last()
-	# 					stdb.As_Advance = bal
-	# 					stdb.save()
-	# 					adv = Staff_Advances.objects.filter(Employ=a).last()
-	# 					if adv:
-	# 						adv.Advance = bal
-	# 						adv.Issued_Date = date.today() if adv.Issued_Date != None else adv.Issued_Date
-	# 						adv.save()
-	# 					else:
-	# 						Staff_Advances.objects.create(Employ=a, Advance=bal, Issued_Date=date.today())
-	# 			else:
-	# 				for e in exp:
-	# 					if diff >= e.Total_Amount:
-	# 						diff = diff - e.Total_Amount
-	# 						e.Balance_Amount = 0
-	# 						e.Clearing_Status = 1
-	# 						e.Balance_Advance = 0
-	# 						e.save()
-	# 					else:
-	# 						if diff > 0:
-	# 							e.Balance_Amount = e.Total_Amount - diff
-	# 							e.save()
-	# 							diff = 0
-	# return HttpResponse('gg')
+
 	
 	for x in table:
 		exp_no.append(Expenses.objects.get(Reference_No=x.Expenses.Reference_No))
@@ -511,7 +693,7 @@ def Expenses_List(request, proj, apr, expid):
 	# else:
 	# 	exp = []
 	# 	for x in Expenses.objects.filter(**lookup1).order_by('Submitted_Date'): exp.append(x)
-	
+	print(exp)
 	cat_list = []
 	for x in exp:
 		cat = []
@@ -586,7 +768,19 @@ def Debit_Form(request, proj, fnc, did):
 			form = IssuedAmountsForm(request.POST, request.FILES, instance=get_object_or_404(Debit_Amounts, id=did))
 			if form.is_valid():
 				p= form.save()				
-				update_debits(request, p.id, fnc)
+				if p.Related_To != 'Salary Advance':
+					update_debits(request, p.id, fnc)
+				else:
+					p.Employ = p.Issued_To
+					p.save()
+					sal_adv = Salary_Advances.objects.filter(Employ=p.Employ).last()
+					print(sal_adv)
+					if sal_adv:
+						sal_adv = sal_adv.Advance+p.Issued_Amount if sal_adv.Advance != None else p.Issued_Amount
+						sal_adv.Issued_By, sal_adv.Issued_Date = p.Issued_By, p.Issued_Date
+						sal_adv.save()
+					else:
+						Salary_Advances.objects.create(Employ=p.Employ, Advance=p.Issued_Amount, Issued_By=p.Issued_By, Issued_Date = p.Issued_Date)
 				messages.success(request, "Debit Details Has Been Updated successfully")
 				return redirect('/%s/debitlist/'%pdata['pj'])
 			else:
@@ -597,40 +791,24 @@ def Debit_Form(request, proj, fnc, did):
 			return render(request, 'expenses/DebitForm.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
 	elif fnc == 'delete':
 		df = Debit_Amounts.objects.get(id=did)
-		if df.Expenses or df.Issued_To:
-			if df.Expenses:
-				empl = df.Expenses.Submitted_By
-			elif df.Issued_To:
-				empl = df.Issued_To
-			else:
-				empl = None
+		amount = df.Issued_Amount
+		empl = df.Employ if df.Employ != None else None
+		
+		if df.Related_To == 'Salary Advance':
+			sal_adv = Salary_Advances.objects.filter(Employ=empl)
+			if sal_adv:
+				sal_adv = sal_adv.Advance - amount if sal_adv.Advance != None else amount
+				sal_adv = 0 if sal_adv < 0 else sal_adv
+				sal_adv.save()
+				df.delete()
+				messages.success(request, "Debit Details Has Been Deleted")
+				return redirect('/%s/debitlist/'%pdata['pj'])
+		if df.Expenses:
+			expid = df.Expenses.id
 		else:
-			empl = None
-
-		df.Attach.delete(save=True)
+			expid = None
 		df.delete()
-		if empl:
-			e = Debit_Amounts.objects.filter(Issued_To=empl).last()
-			if e:				
-				update_debits(request, e.id, fnc)
-			else:
-				e = Debit_Amounts.objects.filter(Expenses__Submitted_By=empl).last()
-				if e:
-					update_debits(request, e.id, fnc)
-				else:
-					dl = Staff_Advances.objects.filter(Employ=empl).last()
-					if dl:
-						dl.delete()
-					
-					# means employ won't have any issued amounts, means all expnses belongs to him due
-					exp = Expenses.objects.filter(Submitted_By=empl)
-					for x in exp:
-						if x.Total_Amount:
-							x.Balance_Amount = x.Total_Amount
-							x.Clearing_Status = 0
-							x.Issued_By = None
-							x.save()
-
+		delete_debit(request, amount, expid, empl)
 		messages.success(request, "Debit Details Has Been Deleted")
 		return redirect('/%s/debitlist/'%pdata['pj'])
 	else:
@@ -647,39 +825,66 @@ def Debit_Form(request, proj, fnc, did):
 					if not p.Employ:
 						messages.error(request, 'Please Choose Employ If You Select As Advance To Staff. Try Again')
 						return redirect('/%s/debitlist/'%pdata['pj'])
-
 				p.Voucher_No = n
 				p.save()
 				p.Related_Project = pdata['pj']
 				p.Related_Company = CompanyDetails.objects.all().last()
 				p.save()
-				update_debits(request, p.id, fnc)
+				if p.Related_To != 'Salary Advance':
+					update_debits(request, p.id, fnc)
+				else:
+					p.Employ = p.Issued_To
+					p.save()
+					sal_adv = Salary_Advances.objects.filter(Employ=p.Employ).last()
+					if sal_adv:
+						sal_adv = sal_adv.Advance+p.Issued_Amount if sal_adv.Advance != None else p.Issued_Amount
+						sal_adv.Issued_By, sal_adv.Issued_Date = p.Issued_By, p.Issued_Date
+						sal_adv.save()
+					else:
+						Salary_Advances.objects.create(Employ=p.Employ, Advance=p.Issued_Amount, Issued_By=p.Issued_By, Issued_Date = p.Issued_Date)
 				messages.success(request, "Debit Details Has Been Added Successfully")
 				return redirect('/%s/debitlist/'%pdata['pj'])
 			else:				
 				return render(request, 'expenses/DebitForm.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
 		else:
 			form = IssuedAmountsForm()
-			form.fields["Expenses"].queryset = Expenses.objects.filter(Clearing_Status=0, Approval_Status=1) #load only active and non deleted customers
+			form.fields["Expenses"].queryset = Expenses.objects.filter(Balance_Amount__gt=0, Approval_Status=1) #load only active and non deleted customers
 			return render(request, 'expenses/DebitForm.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
 
 @login_required 
 def Debit_List(request, proj):
 	pdata = projectname(request, proj)	
 	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
-	table = Debit_Amounts.objects.filter(**lookup).order_by('-Issued_Date')
+	table = Debit_Amounts.objects.filter(**lookup).order_by('-Voucher_No')
 	
 	filter_data = DebitFilter(request.GET, queryset=table)
 	table = filter_data.qs
+
+	if filter_data.form.cleaned_data.get('Employ'):
+		employfilter = filter_data.form.cleaned_data.get('Employ')
+	else:
+		employfilter = 0
+
+	empl_list = []
+	for x in table:
+		if x.Employ:
+			empl_list.append(x.Employ)
+	empl_list = list(dict.fromkeys(empl_list))
+
+	print(empl_list)
 
 	# for x in Debit_Amounts.objects.all():
 	# 	update_debits(request, x.id, 'create')
 	# return HttpResponse('kk')
 
-	total, staff, outside, advances = 0,0,0,0
+	total, staff, outside, advances, exp_adv, sal_adv = 0,0,0,0,0,0
 	if table:
-		total = sum(table.values_list('Issued_Amount', flat=True)) or o
-		advances = sum(table.filter(As_Advance__gt=0).values_list('As_Advance', flat=True)) or 0
+		total = sum(table.values_list('Issued_Amount', flat=True)) or 0
+		for x in empl_list:
+			e1 = Staff_Advances.objects.filter(Employ=x).last()
+			exp_adv = (exp_adv + e1.Advance) if e1 != None and e1.Advance != None else exp_adv
+			e2 = Salary_Advances.objects.filter(Employ=x).last()
+			sal_adv = (sal_adv + e2.Advance) if e2 != None and e2.Advance != None else sal_adv
 		for x in table:
 			if x.Employ:
 				staff = staff + x.Issued_Amount if x.Issued_Amount != None else 0
@@ -688,11 +893,8 @@ def Debit_List(request, proj):
 				if x.Issued_Amount and x.Amount_to_be_Pay:
 					if x.Issued_Amount > x.Amount_to_be_Pay:
 						advances = advances + x.Issued_Amount - x.Amount_to_be_Pay
-	df = {'total':total, 'staff':staff, 'outside':outside, 'advances':advances}
-	if filter_data.form.cleaned_data.get('Employ'):
-		employfilter = filter_data.form.cleaned_data.get('Employ')
-	else:
-		employfilter = 0
+	df = {'total':total, 'staff':staff, 'outside':outside, 'advances':advances, 'exp_adv':exp_adv, 'sal_adv':sal_adv}
+	
 	return render(request, 'expenses/DebitList.html', {'table': table, 'filter_data':filter_data, 'pdata':pdata, 'df':df, 'employfilter':employfilter})
 
 @login_required
@@ -851,30 +1053,139 @@ def MonthWise_Attendance(request, proj, month):
 	pdata = projectname(request, proj)
 	dt = date.today() 
 	month = date.today()  if month == 'month' else (datetime.strptime(month, '%Y-%m'))
-
-	employes = Account.objects.filter(Status=1, ds=1).order_by('Employee_Id')
+	m = month.strftime('%Y-%m')
 
 	if month.month == date.today().month:
 		month = date.today()
 
 	if month.month > date.today().month and month.year >= date.today().year:
 		messages.error(request, "Please Choose Less Than or Equal to Current Month for Monthly Attendance")
-		return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'pdata':pdata, 'employes':employes})
+		return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'm':m, 'pdata':pdata})
 	
-	if not Attendance.objects.filter(Date__month=month.month):
+	if not Attendance.objects.filter(Date__month=month.month, Date__year=month.year) or not Monthatnd.objects.filter(Month__month=month.month, Month__year=month.year):
 		messages.error(request, "Daily Attendance Not Available for Selected Month to Generate Monthly Attendance Report")
-		return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'pdata':pdata, 'employes':employes})
+		return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'm':m, 'pdata':pdata})
 	
 	k = working_days(request, month)
 
-	table = Monthatnd.objects.filter(Month__month=month.month)
+	monthatnds = Monthatnd.objects.filter(Month__month=month.month, Month__year=month.year)
+	table = Attendance.objects.filter(Date__month=month.month, Date__year=month.year).order_by('Name__Employee_Id')
+	filter_data = AttendanceFilter(request.GET, queryset=table)
+	table = filter_data.qs
+
+	if filter_data.form.cleaned_data.get('Sales_Order'):
+		orderfilter = filter_data.form.cleaned_data.get('Sales_Order')
+	else:
+		orderfilter = 0
+
+	print(orderfilter)
+
+	empl_list = []
+	if orderfilter == 0:
+		for x in monthatnds:
+			empl_list.append(x.Name)
+	else:
+		for x in table:
+			empl_list.append(x.Name)
+		empl_list = list(dict.fromkeys(empl_list))
+
+	if month.month == dt.month:
+		eDate = date.today().day
+	else:
+		eDate = calendar.monthrange(month.year, month.month)[1]
+
+	dt_list, dates_list, daily_atnd, month_atnd, presents, leaves, absents, ot, hds = [],[],[],[],[],[],[],[],[]
+	hdl = DeclareDayAs.objects.filter(Date__month=month.month, Declare_Day_As='Holiday', Date__year=month.year).order_by('Date')
+	 
+	for p in hdl:
+		hds.append(p.Date)
+	
+	for x in range(1, eDate+1):
+		dt_list.append(x)
+		dates_list.append(date(month.year, month.month, x).strftime('%Y-%m-%d'))
+		if date(month.year, month.month, x).strftime('%a') == 'Sun':
+			hds.append(date(month.year, month.month, x))
+
+	hds.sort() if hds != None else hds
+
+	for x in empl_list:
+		if orderfilter == 0:
+			atnd = Attendance.objects.filter(Name=x, Date__month=month.month, Date__year=month.year)
+			m_atnd = Monthatnd.objects.filter(Name=x, Month__month=month.month, Month__year=month.year).last()
+		else:
+			atnd = Attendance.objects.filter(Name=x, Date__month=month.month, Date__year=month.year, Sales_Order=orderfilter)
+			if month.month == dt.month and month.year == dt.year:
+				m_atnd = None
+			else:
+				m_atnd = Monthatnd.objects.filter(Name=x, Month__month=month.month, Month__year=month.year).last()
+		# atnd = Attendance.objects.filter(Name=x, Date__month=month.month, Date__year=month.year)
+		# m_atnd = Monthatnd.objects.filter(Name=x, Month__month=month.month, Month__year=month.year).last()
+		# presents, leaves, absents, ot = len(atnd.filter(Day_Status='Present')), len(atnd.filter(Day_Status='Leave')), len(atnd.filter(Day_Status='Absent')), sum(atnd.values_list('T'))
+		d_atnd = []
+		ot = []
+		# daily_atnd = []
+		if (atnd and m_atnd) or (atnd != None and orderfilter != 0):
+			for a in dt_list:
+				s = atnd.filter(Date__day=a).last()
+				if s:
+					if s.Date in hds and s.Day_Status == 'Present':
+						if s.Total_Hours:
+							if s.Total_Hours > 7.5:
+								s.Total_Hours = s.Total_Hours - 1
+							hrs = (s.Total_Hours * 1.5) if s.Total_Hours > 4.5 else s.Total_Hours
+						d_atnd.append('OT'+str(int(hrs)))
+						ot.append(0)
+					elif s.Day_Status == 'Present':
+						oth = 0
+						d_atnd.append('P')
+						if s.Total_Hours and s.Total_Hours > 9.5:
+							oth = s.Total_Hours-9 
+							roundoff = oth - int(oth)
+							oth = int(oth)+1 if roundoff*10 >= 5 else int(oth)
+						else:
+							oth = 0
+						ot.append(oth)
+					elif s.Day_Status == 'Leave':
+						d_atnd.append('L')
+						ot.append(0)
+					elif s.Day_Status == 'Absent':
+						d_atnd.append('A')
+						ot.append(0)
+					elif s.Day_Status == 'Half Day':
+						d_atnd.append('HF')
+						ot.append(0)
+					else:
+						d_atnd.append('')
+						ot.append(0)
+				else:
+					ot.append(0)
+					if date(month.year, month.month, a) in hds:
+						d_atnd.append('HD')
+					else:
+						d_atnd.append('NR') if orderfilter == 0 else d_atnd.append('') #not mentioned
+			dat = zip(d_atnd, dates_list, ot)
+			daily_atnd.append(dat)
+			# daily_atnd.append(d_atnd)
+			month_atnd.append(m_atnd)
+		else:
+			for x in dates_list:
+				d_atnd.append(None)
+				ot.append(0)
+			dat = zip(d_atnd, dates_list, ot)
+			daily_atnd.append(dat)
+			# daily_atnd.append(None)
+			month_atnd.append(None)
+
+	data = zip(empl_list, daily_atnd, month_atnd)
+		
 	if month.month != date.today().month and month.year <= date.today().year:
 		dates = None
 	else: 
 		month = None
 		dates = {'start':date(date.today().year, date.today().month, 1), 'end':date.today()}
 	
-	return render(request, 'attendance/MonthWiseAttendance.html', {'month': month, 'dates':dates, 'pdata':pdata, 'table':table, 'workdays':k, 'workhours1':(k*9)+(k*9*0.05), 'workhours2':(k*9)-(k*9*0.05), 'employes':employes})
+	return render(request, 'attendance/MonthWiseAttendance.html', {'data':data, 'dt_list':dt_list, 'month': month, 'dates':dates, 'pdata':pdata, 
+		'filter_data':filter_data, 'workdays':k, 'workhours1':(k*9)+(k*9*0.05), 'workhours2':(k*9)-(k*9*0.05), 'order':orderfilter, 'm':m})
 
 @login_required
 def DayWise_Attendance(request, proj, day):
@@ -924,13 +1235,13 @@ def Employ_Wise_Attendance(request, proj, month, empl):
 		return render(request, 'attendance/EmployWiseAttendance.html', {'month': month, 'pdata':pdata, 'table':atnd, 'employ':employ, 'employes':employes})
 	
 	k = working_days(request, month)
-	workingdays = Working_Days.objects.filter(Month__month=month.month).last()
+	workingdays = Working_Days.objects.filter(Month__month=month.month, Month__year=month.year).last()
 	workingdays = workingdays.Working_Days if workingdays != None else 0
 	presents, leaves, absents, leaves_left = 0,0,0,0
 	presents = len(atnd.filter(Day_Status = 'Present'))
 	absents = len(atnd.filter(Day_Status = 'Absent'))
 	leaves = len(atnd.filter(Day_Status = 'Leave'))
-	leaves_left = Monthatnd.objects.filter(Month__month=month.month, Name__Name=empl)
+	leaves_left = Monthatnd.objects.filter(Month__month=month.month, Month__year=month.year, Name__Name=empl)
 
 	df = {'presents':presents, 'absents':absents, 'leaves':leaves, 'workingdays':workingdays, 'leaves_left':leaves_left}
 	
@@ -969,7 +1280,7 @@ def Gen_Auto_Attendance(request, proj, month):
 		if date(month.year, month.month, 1+d).strftime('%a') != 'Sun':
 			month_dates.append(date(month.year, month.month, 1+d).strftime('%Y-%m-%d'))
 	
-	holidays = DeclareDayAs.objects.filter(Q(Date__month=month.month, Declare_Day_As='Holiday', Date__lte=date.today())|Q(Date__month=month.month, Declare_Day_As='Half Day', Date__lte=date.today())).order_by('Date')
+	holidays = DeclareDayAs.objects.filter(Q(Date__month=month.month,  Date__year=month.year, Declare_Day_As='Holiday', Date__lte=date.today())|Q(Date__month=month.month,  Date__year=month.year, Declare_Day_As='Half Day', Date__lte=date.today())).order_by('Date')
 	hds=[]
 	for x in holidays:
 		hds.append((x.Date).strftime('%Y-%m-%d'))
@@ -978,7 +1289,7 @@ def Gen_Auto_Attendance(request, proj, month):
 			if d in month_dates:
 				month_dates.remove(d)
 
-	extra_work_days = DeclareDayAs.objects.filter(Date__month=month.month, Declare_Day_As='Working Day', Date__lte=date.today()).order_by('Date')
+	extra_work_days = DeclareDayAs.objects.filter(Date__month=month.month, Date__year=month.year, Declare_Day_As='Working Day', Date__lte=date.today()).order_by('Date')
 	ewd = []
 	for x in extra_work_days:
 		ewd.append((x.Date).strftime('%Y-%m-%d'))
@@ -989,7 +1300,7 @@ def Gen_Auto_Attendance(request, proj, month):
 		
 	for e in empls:
 		dates = month_dates.copy()
-		atnd = Attendance.objects.filter(Name=e, Date__month=month.month)
+		atnd = Attendance.objects.filter(Name=e, Date__month=month.month, Date__year=month.year)
 		if  atnd:
 			for d in atnd:
 				if (d.Date).strftime('%Y-%m-%d') in month_dates:
@@ -999,19 +1310,19 @@ def Gen_Auto_Attendance(request, proj, month):
 				Attendance.objects.create(Name=e, Date=x, Start_Time='09:00:00', End_Time='18:00:00', Total_Hours=9, Day_Status='Present', Issued_By=Account.objects.get(user=request.user), Is_Manual=False)
 		if hds:
 			for h in hds:
-				atnd = Attendance.objects.filter(Name=e, Date__month=month.month, Date=h)
+				atnd = Attendance.objects.filter(Name=e, Date__month=month.month, Date__year=month.year, Date=h)
 				if atnd:
 					atnd.delete()
 		if ewd:
 			for w in ewd:
-				atnd = Attendance.objects.filter(Name=e, Date__month=month.month, Date=w)
+				atnd = Attendance.objects.filter(Name=e, Date__month=month.month, Date__year=month.year, Date=w)
 				if atnd:
 					pass
 				else:
 					Attendance.objects.create(Name=e, Date=w, Start_Time='09:00:00', End_Time='18:00:00', Total_Hours=9, Day_Status='Present', Issued_By=Account.objects.get(user=request.user), Is_Manual=False)
 
 
-		update_month_atnd(request, Attendance.objects.filter(Name=e, Date__month=month.month).last().id)		
+		update_month_atnd(request, Attendance.objects.filter(Name=e, Date__month=month.month, Date__year=month.year).last().id)		
 		
 	url = '/'+str(pdata['pj'])+'/monthwiseattendancelist/'+month.strftime('%Y-%m')+'/'
 	return redirect(url)
@@ -1042,7 +1353,6 @@ def call_extra_work_days_sal(request, month, a):
 				if d.Total_Hours > 7.5:
 					d.Total_Hours = d.Total_Hours - 1
 				hrs = hrs + (d.Total_Hours * 1.5) if d.Total_Hours > 4.5 else (hrs + d.Total_Hours)
-	print(hrs)
 	return hrs
 
 	# d1 = date(month.year, month.month, 1)
@@ -1132,7 +1442,7 @@ def Gen_Monthly_Salaries(request, proj, month, mode):
 						i_lop = i_lop if i_lop >= 0 else 0
 						i_ot = (((e_sal.Gross_Salary/k/8)*((atnd.Total_OT+hrs) if atnd.Total_OT != None else 0)) if e_sal.OT_Eligibility == 1 else 0) 
 						i_net = i_net + i_ot 
-						gen_sal = Monthly_Salaries.objects.create(Name=a, Month=date(month.year, m, 1), Issued_Salary=int(i_net),
+						gen_sal = Monthly_Salaries.objects.create(Name=a, Month=date(month.year, m, 1), Presents=i_wd, Issued_Salary=int(i_net),
 						PF=int(i_pf), ESI=int(i_esi), OT_Amount=int(i_ot), Professional_Tax=e_sal.Professional_Tax, LOP=int(i_lop))
 
 	if mode == 'gen':
@@ -1236,10 +1546,14 @@ def Employ_Claims(request, proj):
 	pdata = projectname(request, proj)
 	lookup = {'Related_Project__isnull':False}
 	expns = Expenses.objects.filter(Q(Submitted_By__Status=1)&Q(Submitted_By__ds=1)&Q(Approval_Status=1))
-	print(expns)
+	debits = Debit_Amounts.objects.filter(Employ__isnull=False)
+	debits = debits.filter(Q(Employ__Status=1)&Q(Employ__ds=1))
 	empls = []
 	for e in expns:
 		empls.append(e.Submitted_By)
+	for e in debits:
+		empls.append(e.Employ)
+
 	empls = list(dict.fromkeys(empls))
 
 	employs, total_claims, paid, due, advances, sal_advances = [], [], [], [], [], []
@@ -1248,8 +1562,8 @@ def Employ_Claims(request, proj):
 		employs.append(e)
 		dbt_sum, dbt_sum1, d, exp_issue = 0,0,0,0
 		exp = Expenses.objects.filter(Submitted_By=e, Approval_Status=1)
-		dbt = Debit_Amounts.objects.filter(Q(Employ=e)&Q(Employ__Status=1)&Q(Employ__ds=1))
-		dbt1 = dbt.filter(Related_To='Salary_Advance')
+		dbt = Debit_Amounts.objects.filter(Employ=e)
+		dbt1 = dbt.filter(Related_To='Salary Advance')
 		t_claims = sum(exp.values_list('Total_Amount', flat=True)) if exp != None else 0
 		dbt_sum = sum(dbt.values_list('Issued_Amount', flat=True)) if dbt != None else 0
 		dbt1_sum = sum(dbt1.values_list('Issued_Amount', flat=True)) if dbt1 != None else 0
@@ -1263,3 +1577,88 @@ def Employ_Claims(request, proj):
 
 	data = zip(employs, total_claims, paid, due, advances, sal_advances)
 	return render(request, 'expenses/EmployWiseClaims.html', {'pdata':pdata, 'data':data})
+
+@login_required
+def Month_Attendance_Edit(request, proj, empl, dt, fnc):
+	pdata = projectname(request, proj)
+	month = datetime.strptime(dt, '%Y-%m-%d')
+	month = month.strftime('%Y-%m')
+	atnd = Attendance.objects.filter(Name__id=empl, Date=dt).last()
+	acnt = Account.objects.get(id=empl)
+	if atnd:
+		eid = atnd.id
+	
+	if fnc == 'edit':
+		if request.method == 'POST':
+			form = AttendanceForm1(request.POST, instance=get_object_or_404(Attendance, id=eid))
+			if form.is_valid():
+				p= form.save()
+				p.Is_Manual = True
+				p.save()
+				if p.Day_Status == 'Absent' or p.Day_Status == 'Leave':
+					p.Start_Time, p.End_Time, p.Total_Hours = None, None, None
+					p.save()
+					update_month_atnd(request, p.id)
+				if p.End_Time:
+					update_month_atnd(request, p.id)
+				messages.success(request, "Attendance for the Selected Emoploy Has Been Updated Successfully")
+				url = '/'+str(pdata['pj'])+'/monthwiseattendancelist/'+month+'/'
+				return redirect(url)
+			else:
+				messages.error(request, get_errors(request, form.errors))
+				url = '/'+str(pdata['pj'])+'/monthwiseattendancelist/'+month+'/'
+				return redirect(url)
+		else:
+			form = AttendanceForm(instance=get_object_or_404(Attendance, id=eid))
+			form.fields["Sales_Order"].queryset = Orders.objects.filter(Final_Status=0) 
+			return render(request, 'attendance/AttendanceForm1.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
+	# elif fnc == 'delete':
+	# 	atnd = Attendance.objects.get(id=eid)
+	# 	dt = atnd.Date
+	# 	empl = atnd.Name
+	# 	atnd.delete()
+	# 	atnd = Attendance.objects.filter(Name=empl).order_by('Date').last()
+	# 	update_month_atnd(request, atnd.id) if atnd != None else None
+	# 	messages.success(request, "Attendance for the Selected Emoploy Has Been Deleted")
+	# 	if returnpage == 'employwise':
+	# 		dt = str(dt.strftime('%Y-%m'))
+	# 		url = '/'+str(pdata['pj'])+'/employwiseattendance/'+dt+'/'+empl.Name+'/'
+	# 	else:
+	# 		url = '/'+str(pdata['pj'])+'/daywiseattendancelist/day/'
+	# 	return redirect(url)
+	else:
+		if request.method == 'POST':
+			form = AttendanceForm(request.POST)
+			data_copy = request.POST.items()
+			if form.is_valid():
+				p= form.save(commit=False)
+				atnd = Attendance.objects.filter(Date=p.Date)
+				if atnd:
+					for x in atnd: 
+						if p.Name == x.Name:
+							messages.error(request, "Employ Attendance Already Registered, Please Check Employ Name Again")
+							form = AttendanceForm(initial=data_copy)
+							return render(request, 'attendance/AttendanceForm1.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
+
+				p.Issued_By = Account.objects.get(user=request.user)
+				
+				if p.Day_Status == 'Absent' or p.Day_Status == 'Leave':
+					p.Start_Time, p.End_Time, p.Total_Hours = None, None, None
+					p.save()
+					update_month_atnd(request, p.id)
+				p.Is_Manual = True
+				p.save()
+				if p.End_Time:
+					update_month_atnd(request, p.id)
+				
+				messages.success(request, "Attendance for the Selected Emoploy Has Been Added Successfully")
+				url = '/'+str(pdata['pj'])+'/monthwiseattendancelist/'+month+'/'
+				return redirect(url)
+			else:				
+				return render(request, 'attendance/AttendanceForm1.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
+		else:
+			form = AttendanceForm(initial={'Date':dt, 'Name':acnt, 'Day_Status':None})
+			form.fields["Sales_Order"].queryset = Orders.objects.filter(Final_Status=0, Related_Project__Short_Name='Services') 
+			return render(request, 'attendance/AttendanceForm1.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
+
+

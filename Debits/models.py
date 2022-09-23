@@ -87,6 +87,15 @@ class Staff_Advances(models.Model):
 	def __str__(self):
 		return str(self.Employ)+'-'+str(self.Advance)
 
+class Salary_Advances(models.Model):
+	Employ				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.CASCADE, related_name='employ1') 
+	Advance				= models.FloatField(max_length=10, null=True, help_text='advances with employees')
+	Issued_By			= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL, related_name='advanceissueddby1')
+	Issued_Date 		= models.DateField(null=True, blank=True, help_text='date of amount issued')
+
+	def __str__(self):
+		return str(self.Employ)+'-'+str(self.Advance)
+
 
 class Attendance(models.Model):
 	Name 				= models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='attender')
@@ -135,6 +144,7 @@ class Monthly_Salaries(models.Model):
 	Month	 				= models.DateField(null=True, blank=True)	
 	Issued_Salary 			= models.IntegerField(null=True, blank=True, help_text='issued salary or net salary for this month')
 	Issued_Date 			= models.DateField(null=True, help_text='salary issued date')
+	Presents 				= models.FloatField(max_length=5, null=True, blank=True)
 	LOP 					= models.FloatField(max_length=10, null=True, blank=True, help_text='loss of pay if eligible')
 	OT_Amount 				= models.IntegerField(null=True, blank=True, help_text='over time amount if eligible')
 	PF						= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PF employee share 12% of basic if eligible')

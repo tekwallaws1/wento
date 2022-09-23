@@ -4,7 +4,7 @@ from.models import *
 from .forms import * 
 from django.http import HttpResponse, JsonResponse
 from Projects.fyear import get_financial_year, get_fy_date
-from Projects.basedata import projectname
+from Projects.basedata import projectname, customer_updateledger
 from django.contrib import messages
 
 def genOrderNo(request, order_id, last_order_id):
@@ -418,6 +418,11 @@ def postform(request, rid, invid, fnc):
 				p.save() 
 				updateduedays(request, p.id)
 				adjust_payments_to_invoices(request, order.id, p.id)
+				pdata = projectname(request, Projects.objects.filter(Short_Name = order.Related_Project.Short_Name).last().Short_Name)
+				if fnc == 'create_manually':
+					customer_updateledger(request, 'custinv', 'create', pdata, Invoices.objects.get(id=p.id))
+				else:
+					customer_updateledger(request, 'custinv', 'edit', pdata, Invoices.objects.get(id=p.id))
 				return 'invlist'
 	else:
 		return 'getform'

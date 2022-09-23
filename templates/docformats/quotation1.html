@@ -107,10 +107,10 @@
 
       <table  style="width:55%; font-size: 12px; float: left;">
         <tr>
-          <th class="tb0" style="font-size:13px;"><a class="ahr" ht="edit" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('quoteto')">Quote To</a></th>
+          <th class="tb0" style="font-size:13px;"><a class="ahr" ht="edit" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('quoteto1')">To,</a></th>
         </tr>
         <tr>
-          <th class="tb0" style="font-weight:500;">
+          <!-- <th class="tb0" style="font-weight:500;">
             <a class="ahr" ht="edit" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('quoteto')">
               {% if qt.Quote_To %}
                 <span class="sh1" style="font-weight:bold">M/s. {{qt.Quote_To.Contact_Person}}</span>
@@ -118,11 +118,6 @@
                 <br>{{qt.Quote_To.Phone_Number_1}}
                 {% if qt.Quote_To.Email %}<br>Email: {{qt.Quote_To.Email}}{% endif %}
             </a>
-                
-                <!-- {% if qt.Quote_To.Customer_Name.Address_Line_1 %}<br>{{qt.Quote_To.Customer_Name.Address_Line_1}},{% endif %}
-                {% if qt.Quote_To.Customer_Name.Address_Line_2 %}<br>{{qt.Quote_To.Customer_Name.Address_Line_2}},{% endif %} -->
-                <!-- <br>{{qt.Quote_To.Customer_Name.State}} -->
-
               {% else %}
                 <a class="ahr" ht="edit" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('quoteto1')">
                   {% if qt.Reference_Person %}<span class="sh1" style="font-weight:bold">M/s. {{qt.Reference_Person}}</span>{% endif %}
@@ -132,6 +127,15 @@
                   {% if qt.Email %}<br>Email: {{qt.Email}}{% endif %}
                 {% endif %}
               </a>
+          </th> -->
+          <th class="tb0" style="font-weight:500;">
+            <a class="ahr" ht="edit" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('quoteto1')">
+              {% if qt.Reference_Person %}<span class="sh1" style="font-weight:bold">M/s. {{qt.Reference_Person}}</span>{% endif %}
+              {% if qt.Firm_Name %}<br> {{qt.Firm_Name}}{% endif %}
+              {% if qt.Phone_Number %}<br>{{qt.Phone_Number}}{% endif %}
+              {% if qt.Location %}<br>{{qt.Location}}{% endif %}
+              {% if qt.Email %}<br>Email: {{qt.Email}}{% endif %}
+            </a>
           </th>
         </tr>
       </table>
@@ -155,7 +159,7 @@
 
         <table class="t3 tclass1" style="width:100%; float: right;  font-size:12px; font-style: italic;">
           <tr>
-            <th><a class="ahr" ht="Edit Subject" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('subject')">Subject: <span style="font-weight: 600;background:yellow">{{qt.Subject}}</span></a></th>
+            <th><a class="ahr" ht="Edit Subject" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('subject')">Subject: <span style="font-weight: 600;background:yellow">{{qt.Subject}}</span></a><div style="margin-top:10px"></div></th>
           </tr>
         </table>
       {% else %}
@@ -163,23 +167,28 @@
       <div style="margin-top:65px;"></div>
       <table class="t3 tclass1" style="width:100%; float: right;  font-size:12px; font-style: italic;">
         <tr>
-          <th><button type="button" id='hideaddsubjectbutton' data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('subject')" class="btn1 btn1-sm btn1-warning">+Add Subject</button>{% endif %}</th>
+          <th><button type="button" id='hideaddsubjectbutton' data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('subject')" class="btn1 btn1-sm btn1-danger">+Add Subject</button><div style="margin-bottom:10px">{% endif %}</th>
         </tr>
       </table>
 
       {% endif %}
 
-      <div style="margin-top:135px"></div>
+      {% if qt.Subject %}<div style="margin-top:135px"></div>{% else %}<div style="margin-top:120px">{% endif %}
 
       {% if itm %}
         <table class="t3" style="font-size:11.5px">
           <tr>
             <th class="td11 font-weight-bold" style="width:5%">SNo</th>
-            <th class="td1 font-weight-bold" >Description of Goods</th>
-            <th class="td11 font-weight-bold" style="width:10%">QTY</th>
-            <th class="td11 font-weight-bold" style="width:8%">UOM</th>
-            <th class="td11 font-weight-bold" style="width:12%">Rate</th>
-            <th class="td11 font-weight-bold" style="width:12%;">Amount</th>
+            <th class="td1 font-weight-bold" style="text-align: center;">Description of Goods</th>
+            <th class="td1 font-weight-bold" style="width:9%; text-align: center;">HSN/SAC</th>
+            <!-- <th class="td1 font-weight-bold" style="width:10%; text-align: center;">Ref. PO No</th> -->
+            <th class="td11 font-weight-bold" style="width:7%; text-align: center;">QTY</th>
+            <th class="td11 font-weight-bold" style="width:5%; text-align: center;">UOM</th>
+            <th class="td11 font-weight-bold" style="width:9%; text-align: center;">Rate</th>
+            <th class="td11 font-weight-bold" style="width:10%; text-align: center;">Amount</th>
+            {% if refpo == 1 %}
+              <th class="td11 font-weight-bold" style="width:10%; text-align: center;">Remarks</th>
+            {% endif %}
           </tr>
           {% for x, a in itm %}
             <tr {%  if forloop.last %}id="gp1" style="height:0px;"{% endif %}>
@@ -188,15 +197,23 @@
                 <a class="ahr" ht="Edit/Delete Item Details" data-toggle="modal" data-target="#itemEditButtons" onclick="javascript:edititem({{x.id}})">{% if x.Item_Code == '0' or x.Item_Code == None %}{% else %}<span>{{x.Item_Code}} </span>{% endif %}{{x.Item_Description}}</a>
                <!--  {%  if forloop.last %}{% if roundoff != 0 %}<span id="gp2" style="float:right; margin-top:5px"><br>Rounding Off</span>{% endif %}{% endif %} -->
               </td>
+              <td class="td33" style="font-weight:600;">{% if x.HSN_Code %}{{x.HSN_Code}}{% endif %}</td>
+              <!-- <td class="td33" style="font-weight:600;">{% if x.Ref_PO %}{{x.Ref_PO}}{% endif %}</td> -->
               <td class="td33" style="font-weight:600;">{% if x.UOM == 'Kg' or x.UOM == 'Mtr' or x.UOM == 'Ltr' %}{{x.Quantity|floatformat:1}}{% else %}{{x.Quantity|floatformat:0}}{% endif %}</td>
                 <td class="td33" style="font-weight:600;"><span style="font-weight:600; font-style:italic;">{{x.UOM}}{% if x.Quantity > 1 %}s{% endif %}</span></td>
               <td class="td33" style="font-weight:600;">{{x.Unit_Price|floatformat:'1'}}</td>
-              <td class="td33" style="font-weight:600;">{{a|floatformat:'2'}}</td>
+              <td class="td33" style="font-weight:600; text-align:right">{{a|floatformat:'1'}}</td>
+              {% if refpo == 1 %}
+                <td class="td33" style="font-weight:600; text-align:right">{{x.Ref_PO}}</td>
+              {% endif %}
             </tr>
           {% endfor %}
         </table>
         {% if qt.Lock_Status == 0 %}
           <button style="margin-top:5px" type="button" id='hideitembutton' data-toggle="modal" data-target="#addNewItemModal" onclick="javascript:fnc('addnewitem')" class="btn2 btn2-sm btn2-primary">+Add Quote Item</button>
+
+          <button style="margin-top:5px" type="button" id='hideitembutton1' data-toggle="modal" data-target="#uploadModal" onclick="javascript:fnc('addnewitem')" class="btn2 btn2-sm btn2-success">Uplaod From Excel File</button>
+        
           <script> var hide4=1;</script>
         {% endif %}
       {% endif %}
@@ -277,7 +294,16 @@
         <table  style="width:100%; float:left;  padding:0px">
         <tr>
           <th class="td1" style="border:none;  text-align: left;">
-            <div style=" margin-top: 10px;   color:black; font-size:13px; font-style: italic; font-weight:normal"><a class="ahr" ht="edit thanks note" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('thanks')">{{qt.Thanks_Note}}</a>
+            <div style=" margin-top: 10px;   color:black; font-size:13px; font-style: italic; font-weight:normal">
+              {% if qt.Lock_Status == 0 and qt.Thanks_Note == '' or qt.Thanks_Note == None %}
+                <button type="button"  data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('thanks')" class="btn1 btn1-sm btn1-warning">+Add Remarks</button><br><br>
+              {% endif %}
+              {% if qt.Thanks_Note %}
+                <a class="ahr" ht="edit thanks note" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:fnc('thanks')"><span style="font-weight:600">Remarks: </span>{{qt.Thanks_Note}}</a>
+                <br><br>
+              {% endif %}
+            
+            Thanking you and assuring you of our best services at all times
             <br><br>
             <span style="font-style: normal; font-size:13px; font-weight:bold;">Yours Faithfully,</span>
             <br>
@@ -287,10 +313,6 @@
         </tr>
       </table>
         
-        
-      
-      
-
       <div id="nextpage1"></div>
     </div>
 
@@ -327,16 +349,24 @@
                 </div>
 
                 <div style="display:none;" id="thanknote">
-                  <label>Thnaks Notes</label>{{ form_qt.Thanks_Note }}
+                  <label>Remarks</label>{{ form_qt.Thanks_Note }}
                 </div>
 
-                <div style="display:none;" id='quote_to'>
+                <!-- <div style="display:none;" id='quote_to'>
                   <label>{{ form_qt.Quote_To.label }}</label>{{ form_qt.Quote_To }}
                 </div>
 
                 <div style="display:none;" id='quote_to1'>
                   <label>{{ form_qt.Reference_Person.label }}</label>{{ form_qt.Reference_Person }}
                   <label>{{ form_qt.Firm_Name.label }}</label>{{ form_qt.Firm_Name }}
+                  <label>{{ form_qt.Phone_Number.label }}</label>{{ form_qt.Phone_Number }}
+                  <label>{{ form_qt.Email.label }}</label>{{ form_qt.Email }}
+                  <label>{{ form_qt.Location.label }}</label>{{ form_qt.Location }}
+                </div> -->
+
+                <div style="display:none;" id='quote_to1'>
+                  <label>{{ form_qt.Reference_Person.label }}</label>{{ form_qt.Reference_Person }}
+                  <label>Customer Name</label>{{ form_qt.Firm_Name }}
                   <label>{{ form_qt.Phone_Number.label }}</label>{{ form_qt.Phone_Number }}
                   <label>{{ form_qt.Email.label }}</label>{{ form_qt.Email }}
                   <label>{{ form_qt.Location.label }}</label>{{ form_qt.Location }}
@@ -496,11 +526,16 @@
               {% csrf_token %}
               <div class="form-group newheight">
                 {% for field in form_item %}
+                  {% if field.label != 'Ref PO' %}
                     <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
-                    {% if field.label != 'Quantity' %}
+                    {% if field.label == 'Item Description' %}
                       <a title="add new item to products (after add new product add price details also" target="_blank" href="/{{pdata.pj}}/productsform/Products/create/1/"><i class="fas fa-square-plus float-right" style="color:purple; padding-bottom:-20px;"></i></a>
                     {% endif %}
                     {{ field}}
+                  {% endif %}
+                  {% if field.label == 'Ref PO' %}
+                    <label for="{{ field.label }}">Remarks/Ref. PO</label>{{ field}}
+                  {% endif %}
                   {% for error in field.errors %}
                     <p style="color: red; margin-top: -20px">{{ error }}</p>
                   {% endfor %}
@@ -508,6 +543,39 @@
               </div>
            </div>
           <button type="submit" class="btn btn-primary" >Submit</button>    
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- End -->
+
+  <div class="modal fade text-left" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" >
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Excel Sheet Uplaod Form</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{qt.id}}+'/'+'itemid/msg/'">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">   
+          <form class="forms-sample" action="/{{pdata.pj}}/uploadquote/{{qt.id}}/" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+
+                <div class="form-group">
+                  {% for field in form_fileupload %}
+                    {% if field.label ==  'Attach' %}
+                      <label style="color:#32a852;"></label>{{field}} 
+                    {% endif %}
+                    {% for error in field.errors %}
+                      <p style="color: red; margin-top: -20px">{{ error }}</p>
+                    {% endfor %}
+                  {% endfor %}  
+                </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Uplaod From Excel File</button>
         </form>
         </div>
       </div>
@@ -545,8 +613,8 @@
 
       if ( tag == 'tcedit' ) {document.getElementById("tcaction").action = '/{{pdata.pj}}/edit/quote_tc/'+{{qt.id}}+'/';}
 
-      if ( tag == 'quoteto' ) {document.getElementById("quote_to").style.display = 'block';}      
-        else {document.getElementById("quote_to").style.display = 'none';};
+      // if ( tag == 'quoteto' ) {document.getElementById("quote_to").style.display = 'block';}      
+      //   else {document.getElementById("quote_to").style.display = 'none';};
 
          if ( tag == 'quoteto1' ) {document.getElementById("quote_to1").style.display = 'block';}      
         else {document.getElementById("quote_to1").style.display = 'none';};

@@ -11,7 +11,7 @@ class AttendanceFilter(django_filters.FilterSet):
   			self.form.fields[field].widget.attrs.update({'class': 'form-control'})
 	# order 	= CharFilter(field_name='Sales_Order__Related_Project__Short_Name', lookup_expr='icontains', label='Services')
 	Sales_Order = django_filters.ModelChoiceFilter(
-    queryset=Orders.objects.filter(Related_Project__Short_Name='Services').distinct()
+    queryset=Orders.objects.filter(Related_Project__Short_Name='Edu').distinct()
 )
 
 	class Meta:

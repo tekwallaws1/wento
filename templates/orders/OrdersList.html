@@ -110,7 +110,7 @@
 
 <!-- Data Tables Export Script -->
 <script type="text/javascript">
-  $('#html5-extension').DataTable( {
+  $('#html5-extension').DataTable( {order: [[0, 'asc']],
   autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
   buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       
@@ -347,13 +347,14 @@
                 <tr>
                {% endif %}
               
-                <td >{{forloop.counter}}{% if x.Final_Status == 1 %}#{% endif %}<a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">&nbsp;<i class="fas fa-lg fa-pen-to-square"></i></a></td>
+                <td >{{forloop.counter}}</td>
 
                 <td style="white-space:normal;">
+                  <a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">
                   {{x.Customer_Name.Customer_Name}}                    
                   {% if x.Order_Reference_Person %}
                     <br><br><span class="hlt5">Order Reference Person</span>
-                    <br>{{x.Order_Reference_Person.Contact_Person}}
+                    <br>{{x.Order_Reference_Person.Contact_Person}}</a>
                     <br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Order_Reference_Person.Phone_Number_1}}'>{{x.Order_Reference_Person.Phone_Number_1}}</a>
                     {% if x.Order_Reference_Person.Email %}
                       <br>{{x.Order_Reference_Person.Email}}
@@ -366,10 +367,12 @@
                 </td>
 
                 <td style="white-space:normal;">
-                  {% if x.Order_Details %}{{x.Order_Details}}{% endif %}
+                  <a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">
+                  {% if x.Order_Details %}{{x.Order_Details}}{% endif %}</a>
                 </td>
 
                 <td style="white-space:normal; width: 21%;">
+                  <a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">
                   <span class="hlt2">Order/PO Value: ₹ {{x.Order_Value|floatformat:0|intcomma}}</span>
                   
                   {% if x.PO_No %}<br><span class='hlt5'>Purchase Order No
@@ -381,10 +384,11 @@
                   <br><span class='hlt5'>Order/PO Date: </span>{{x.Order_Received_Date|date:'d M Y'}}
                   <br><span class='hlt5'>Order Through: </span>{{x.Order_Through}}{% if x.Attach %}<a class="ahr" ht='click here to download copy' href="{{x.Attach.url}}" target="_blank"><br><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
-                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}
+                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}</a>
                 </td>
 
                 <td style="white-space:normal;">
+                  <a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">
                 {% if request.user.username == 'praveen' %}
 
 
@@ -427,10 +431,11 @@
                   {% else %}
                     <span class="hlt3">No Bills Generted</span>
                   {% endif %}
-                {% endif %}
+                {% endif %}</a>
                 </td>
 
                 <td style="white-space:normal;">
+                  <a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">
                   {% if x.Work_Status %}                
                     {% if x.PO_Status == 1 %} 
                       <span class="hlt2">Works Under PO Delivered Fully</span>
@@ -446,7 +451,7 @@
                       {% if x.Work_Status.user.Nick_Name %}<br><span class="hlt5">Followup By: </span> {{x.Work_Status.user.Nick_Name}}{% endif %}
                   {% else %}
                     <span class="hlt3">No Work Updates Yet</span>
-                  {% endif %}
+                  {% endif %}</a>
                 </td>
               </tr>
             {% endif %}

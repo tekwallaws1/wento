@@ -27,4 +27,6 @@ urlpatterns = [
     path('<proj>/<fnc>/inv_deliverynote/<invid>/<rid>/', views.Invoice_Delivery_Note_Form, name='inv_deliverynote'),
     path('<proj>/<fnc>/inv_tc/<invid>/<rid>/', views.Invoice_TC_Form, name='inv_tc'),
 
+    path('<proj>/inv_adjusttable/<invid>/<rowid>/<fnc>/', views.Inv_AdjustTable, name='inv_adjusttable'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

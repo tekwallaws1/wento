@@ -99,14 +99,15 @@
       <table style="width:26.5%; float: right;  font-size:12px;">
         <tr>
           <th class="th1 th11" style="text-align: left; padding: 5px;">Reference No</th>
-          <th class="th1 th11" style="text-align: right; padding: 5px;">Status</th>
+          <th class="th1 th11" style="text-align: right; padding: 5px;">Amount</th>
         </tr>
         <tr>
           <td class="td1 td11" style="text-align: left;">{{exp.Reference_No}}</td>
           <td class="td1 td11" style="text-align: right;">
-            {% if exp.Balance_Amount != None %}
+            <span class="hlt3">₹ {{exp.Total_Amount|floatformat:'0'|intcomma}}</span>
+            <!-- {% if exp.Balance_Amount != None %}
               {% if exp.Balance_Amount > 0 %}<span class="hlt3">Due ₹ {{exp.Balance_Amount|floatformat:'0'|intcomma}}</span>{% else %}<span style="color:green">Amount Paid</span>{% endif %}
-            {% endif %}            
+            {% endif %}  -->           
           </td>
         </tr>
       </table>
@@ -184,23 +185,25 @@
           <th class="th1 th11" style="text-align: right;">Sub Total</th>
           <th class="td2 td22" style="width:35%; text-align: right; font-weight: bold; ">{{exp.Total_Amount|floatformat:'0'|intcomma}}</th>
         </tr>
-        <tr>
+        <!-- <tr>
           <th class="th1 th11" style="text-align: right;">Cash Advances</th>
           <th class="td2 td22" style="width:35%; text-align: right; font-weight: bold;">
-            {% if exp.Balance_Amount < 0 %}
-              {{exp.Balance_Amount|intcomma}}
+            {% if exp.Advance_Amount < 0 %}
+              {{exp.Advance_Amount|intcomma}}
             {% else %}
               0
             {% endif %}
           </th>
-        </tr>
+        </tr> -->
         <tr>
           <th class="th1 th11" style="text-align: right; ">Total Reimbursament</th>
           <th class="td2 td22" style="width:30%; text-align: right; font-weight: bold;font-size: 12px;">
-            {% if exp.Balance_Amount == 0 %}₹ 0
+              ₹ {{exp.Total_Amount|floatformat:'0'|intcomma}}
+            <!-- {% if exp.Advance_Amount == 0 %}
+              ₹ {{exp.Total_Amount|floatformat:'0'|intcomma}}
             {% else %}
               ₹{{exp.Balance_Amount|floatformat:'0'|intcomma}}
-            {% endif %} 
+            {% endif %} --> 
           </th>
         </tr>
         <tr>

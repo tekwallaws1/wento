@@ -441,3 +441,6 @@ class CopyQuoteItemsForm(forms.ModelForm):
 			self.fields[field].widget.attrs.update({
 	            'class': 'form-control mb-4'
 	        })
+
+class QuoteFileForm(forms.Form):
+	Attach = forms.FileField()

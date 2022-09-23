@@ -99,7 +99,7 @@ class DeclareDayAsForm(forms.ModelForm):
 class EmployMonthlySalaryForm(forms.ModelForm):	
 	class Meta:
 		model = Monthly_Salaries
-		fields = ['Issued_Salary', 'LOP', 'OT_Amount', 'PF', 'ESI', 'TDS', 'Other_Deductions', 'Salary_Advance']
+		fields = ['Presents', 'Issued_Salary', 'LOP', 'OT_Amount', 'PF', 'ESI', 'TDS', 'Other_Deductions', 'Salary_Advance']
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		for _, value in self.fields.items():

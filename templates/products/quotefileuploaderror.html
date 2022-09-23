@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Invalid Data Uploaded, Please Correct Ecxel Sheet and Upload Again</h2>
+<br>
+<button type="button" onclick="location.href='/{{pdata.pj}}/genquote/edit/{{qid}}/itemid/msg/'" class="btn btn-sm btn-primary mb-2">Back To Quotation</button>
+{% endblock %}  
+ 

@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
+from django.db.models import Q
 from .models import *
 from .forms import *
 from .filters import *
@@ -12,7 +13,7 @@ from django.contrib.auth.decorators import login_required
 from UserAccounts.models import *
 from Orders.models import *
 from Products.models import *
-from .basedata import projectname
+from .basedata import projectname, customer_updateledger, vendor_updateledger
 
 
 @login_required
@@ -277,8 +278,8 @@ def GST_Returns(request, proj, cat, months):
 	months = mnth
 	mnth = months.month
 
-	inputgst  = Vendor_Invoices.objects.filter(Invoice_Date__month=mnth, GST_Amount__isnull=False)
-	outputgst = Invoices.objects.filter(Invoice_Date__month=mnth, Lock_Status=1, Set_For_Returns=1, GST_Amount__isnull=False)
+	inputgst  = Vendor_Invoices.objects.filter(Invoice_Date__month=mnth, GST_Amount__isnull=False).order_by('Invoice_No')
+	outputgst = Invoices.objects.filter(Invoice_Date__month=mnth, Lock_Status=1, Set_For_Returns=1, GST_Amount__isnull=False).order_by('Invoice_No')
 
 	Ival, Oval, Igst, Ogst, Ocgst, Osgst, Oigst = [],[],[],[],[],[],[]
 	ic, oc, It_gst, Ot_gst, Ot_cgst, Ot_sgst, Ot_igst = 0,0,0,0,0,0,0
@@ -312,3 +313,42 @@ def GST_Returns(request, proj, cat, months):
 
 	return render(request, 'projects/gst.html', {'pdata':pdata, 'input_gst':input_gst, 'output_gst':output_gst, 'gst':gst, 'cat':cat, 'month':months, 'cust_bil':cust_bil, 'vend_bil':vend_bil})
 
+
+@login_required
+def Cust_Ledger(request, proj, mode):
+	
+	# Customer_Ledger.objects.all().delete()
+	# invs = Invoices.objects.filter(Lock_Status=1)
+	# for x in invs:
+	# 	pdata = projectname(request, x.Order.Related_Project.Short_Name)
+	# 	customer_updateledger(request, 'custinv', 'create', pdata, x)
+	
+	# pays = Payment_Status.objects.all()
+	# for x in pays:
+	# 	pdata = projectname(request, x.Order_No.Related_Project.Short_Name)
+	# 	customer_updateledger(request, 'custpay', 'create', pdata, x)
+	# return HttpResponse('hi')
+	
+	pdata = projectname(request, proj)
+	lookup = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
+	table = Customer_Ledger.objects.filter(**lookup).order_by('Sr_No')
+	filter_data = CustomerLedgerFilter(request.GET, queryset=table)
+	table = filter_data.qs
+	if filter_data.form.cleaned_data.get('customer'):
+		custflt = filter_data.form.cleaned_data.get('customer')
+	else:
+		custflt = 0
+	cust = CustDt.objects.filter(Address_Type='Billing', Status=1, ds=1)
+	return render(request, 'projects/CustomerLedger.html', {'pdata':pdata, 'table':table, 'filter_data':filter_data, 'custflt':custflt, 'cust':cust})
+
+# invs = Invoices.objects.filter(Lock_Status=1)
+# for x in invs:
+# 	pdata = projectname(request, x.Order.Related_Project.Short_Name)
+# 	customer_updateledger(request, 'custinv', 'create', pdata, x)
+# return HttpResponse('hi')
+
+# pays = Payment_Status.objects.all()
+# for x in pays:
+# 	pdata = projectname(request, x.Order_No.Related_Project.Short_Name)
+# 	customer_updateledger(request, 'custpay', 'create', pdata, x)
+# return HttpResponse('hi')

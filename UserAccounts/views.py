@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 
 
 
-from .forms import *
+from .forms import * 
 
 def get_errors(request, formerrors):
 	x = 'Errors: '
@@ -199,10 +199,10 @@ def Employes_Form(request, proj, fnc, eid):
 					p.ds = 0
 					p.save()
 				messages.success(request, "Employee Details Has Been Updated successfully")
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 			else:
 				messages.error(request, get_errors(request, form.errors))
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 		else:
 			form = EmployesForm1(instance=get_object_or_404(Account, id=eid))
 			return render(request, 'registration/EmployesForm.html', {'form': form, 'pdata':pdata, 'fnc':fnc})
@@ -213,7 +213,7 @@ def Employes_Form(request, proj, fnc, eid):
 		emp.Status = 0
 		emp.save()
 		messages.success(request, "Employee Details Has Been Deleted")
-		return redirect('/%s/employeslist/'%pdata['pj'])
+		return redirect('/%s/employeslist/active/'%pdata['pj'])
 	else:
 		if request.method == 'POST':
 			form = EmployesForm(request.POST, request.FILES)
@@ -221,7 +221,7 @@ def Employes_Form(request, proj, fnc, eid):
 			if form.is_valid():
 				p= form.save()
 				messages.success(request, "Employee Details Has Been Registered successfully")
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 			else:				
 				messages.error(request, get_errors(request, form.errors))
 				form = EmployesForm(initial=data_copy)
@@ -243,10 +243,10 @@ def Employes_Bank_Form(request, proj, fnc, bid, eid):
 			if form.is_valid():
 				p= form.save()
 				messages.success(request, "Employee Bank Details Has Been Updated successfully")
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 			else:
 				messages.error(request, get_errors(request, form.errors))
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 		else:
 			form = EmployesBankForm(instance=get_object_or_404(EMP_Bank_Dtls, id=bid))
 			return render(request, 'registration/EmployesBankForm.html', {'form': form, 'pdata':pdata})
@@ -254,7 +254,7 @@ def Employes_Bank_Form(request, proj, fnc, bid, eid):
 		emp = EMP_Bank_Dtls.objects.get(id=bid)
 		emp.delete()
 		messages.success(request, "Employee Bank Details Has Been Deleted")
-		return redirect('/%s/employeslist/'%pdata['pj'])
+		return redirect('/%s/employeslist/active/'%pdata['pj'])
 	else:
 		if request.method == 'POST':
 			data_copy = request.POST.items()
@@ -268,7 +268,7 @@ def Employes_Bank_Form(request, proj, fnc, bid, eid):
 					p.Employee = Account.objects.get(id=eid)
 					p.save()
 				messages.success(request, "Employee Bank Details Has Been Registered successfully")
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 			else:
 				messages.error(request, get_errors(request, form.errors))
 				form = EmployesBankForm(initial=data_copy)
@@ -290,10 +290,10 @@ def Employes_Prsnl_Form(request, proj, fnc, pid, eid):
 			if form.is_valid():
 				p= form.save()
 				messages.success(request, "Employee Personal Details Has Been Updated successfully")
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 			else:
 				messages.error(request, get_errors(request, form.errors))
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 		else:
 			form = EmployesPrsnlForm1(instance=get_object_or_404(EMP_More_Dtls, id=pid))
 			return render(request, 'registration/EmployesPrsnlForm.html', {'form': form, 'pdata':pdata})
@@ -302,7 +302,7 @@ def Employes_Prsnl_Form(request, proj, fnc, pid, eid):
 		emp.Upload_Aadhaar.delete(save=True), emp.Upload_PAN.delete(save=True), emp.Upload_PAN.delete(save=True)
 		emp.delete()
 		messages.success(request, "Employee Personal Details Has Been Deleted")
-		return redirect('/%s/employeslist/'%pdata['pj'])
+		return redirect('/%s/employeslist/active/'%pdata['pj'])
 	else:
 		if request.method == 'POST':
 			form = EmployesPrsnlForm(request.POST, request.FILES)
@@ -312,10 +312,10 @@ def Employes_Prsnl_Form(request, proj, fnc, pid, eid):
 					p.Employee = Account.objects.get(id=eid)
 					p.save()
 				messages.success(request, "Employee Personal Details Has Been Registered successfully")
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 			else:
 				messages.error(request, get_errors(request, form.errors))
-				return redirect('/%s/employeslist/'%pdata['pj'])
+				return redirect('/%s/employeslist/active/'%pdata['pj'])
 		else:
 			if fnc == 'copy':
 				form = EmployesPrsnlForm(instance=get_object_or_404(EMP_More_Dtls, id=pid))
@@ -325,9 +325,13 @@ def Employes_Prsnl_Form(request, proj, fnc, pid, eid):
 				return render(request, 'registration/EmployesPrsnlForm.html', {'form': form, 'pdata':pdata})
 
 @login_required
-def Employes_List(request, proj):
+def Employes_List(request, proj, status):
 	pdata = projectname(request, proj)
-	emp_ofcl = Account.objects.filter(Status=1, ds=1).order_by('Sr_No')
+	if status == 'active':
+		emp_ofcl = Account.objects.filter(Status=1, ds=1).order_by('Sr_No')
+	else:
+		emp_ofcl = Account.objects.filter(Status=0).order_by('Sr_No')
+		
 	count = len(emp_ofcl)
 	emp_bank, emp_prsnl = [],[]
 
@@ -337,7 +341,7 @@ def Employes_List(request, proj):
 	data = zip(emp_ofcl, emp_bank, emp_prsnl)
 	# print(emp_ofcl, emp_bank, emp_prsnl)
 	# return HttpResponse('l')
-	return render(request, 'registration/EmployesList.html', {'data':data, 'pdata':pdata, 'count':count})
+	return render(request, 'registration/EmployesList.html', {'data':data, 'pdata':pdata, 'count':count, 'status':status})
 
 
 @login_required

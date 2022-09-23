@@ -64,24 +64,36 @@
     var tagName = style.getElementsByTagName('sz');
     for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
     $('row:first c', sheet).attr('s', '2')
-    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );$('row c[r^="F"]', sheet).attr( 's', '55' );  $('row c[r^="H"]', sheet).attr( 's', '55' ); $('row c[r^="H"]', sheet).attr( 's', '55' );//wrap text
-    var col = $('col', sheet);
-    // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
-    $(col[1]).attr('width', 35); $(col[2]).attr('width', 25); $(col[3]).attr('width', 15); $(col[4]).attr('width', 15); $(col[5]).attr('width', 15); $(col[5]).attr('width', 15); }; 
+    $('row c[r^="B"]',sheet).attr('s','55');$('row c[r^="C"]',sheet).attr('s','55');$('row c[r^="D"]',sheet).attr('s','55');
+    $('row c[r^="E"]',sheet).attr('s','55');$('row c[r^="F"]',sheet).attr('s','55');$('row c[r^="G"]',sheet).attr('s','55');
+    $('row c[r^="H"]',sheet).attr('s','55');$('row c[r^="I"]',sheet).attr('s','55');$('row c[r^="J"]',sheet).attr('s','55');
+    $('row c[r^="K"]',sheet).attr('s','55');$('row c[r^="L"]',sheet).attr('s','55');$('row c[r^="M"]',sheet).attr('s','55');
+    $('row c[r^="N"]',sheet).attr('s','55');$('row c[r^="O"]',sheet).attr('s','55');$('row c[r^="P"]',sheet).attr('s','55');
+    $('row c[r^="Q"]',sheet).attr('s','55');$('row c[r^="R"]',sheet).attr('s','55');$('row c[r^="S"]',sheet).attr('s','55');
+    $('row c[r^="T"]',sheet).attr('s','55');$('row c[r^="U"]',sheet).attr('s','55');$('row c[r^="V"]',sheet).attr('s','55');
+    $('row c[r^="W"]',sheet).attr('s','55');$('row c[r^="X"]',sheet).attr('s','55');$('row c[r^="Y"]',sheet).attr('s','55');
+    $('row c[r^="Z"]',sheet).attr('s','55');$('row c[r^="AA"]',sheet).attr('s','55');$('row c[r^="AB"]',sheet).attr('s','55');
+    $('row c[r^="AC"]',sheet).attr('s','55');$('row c[r^="AD"]',sheet).attr('s','55');$('row c[r^="AE"]',sheet).attr('s','55');
+    $('row c[r^="AF"]',sheet).attr('s','55');$('row c[r^="AG"]',sheet).attr('s','55');$('row c[r^="AH"]',sheet).attr('s','55');
+    $('row c[r^="AI"]',sheet).attr('s','55');$('row c[r^="AJ"]',sheet).attr('s','55');$('row c[r^="AK"]',sheet).attr('s','55');//wrap text
+     
+
+     }; 
   //--End--//
 
             
-  var cl = [0,  1, 2, 3, 4, 5, 6]
-  var wdths = ['4%', '27%', '21%', '12%', '16%', '11%', '9%'];
+  // var cl = [0,  1, 2, 3]
+  // var wdths = ['3%', '20%', '60%', '17%'];
   
-   var msgTop = "{% if dates == None %}{{month|date:'M-Y'}}{% else %}{{dates.start|date:'d-M-y'}} to {{dates.end|date:'d-M-y'}}{% endif %}"
+   var msgTop = "{% if dates == None %}{{month|date:'M-Y'}}{% else %}{{dates.start|date:'d-M-y'}} to {{dates.end|date:'d-M-y'}}{% endif %} {% if order %} | Work Order: {{order.Customer_Name.Customer_Name}} - {{order.PO_No}}{% endif %}"
     var title = 'Month Wise Attendance Report';
     var filename = 'monthattendance'
-    var ort = 'portrait'
+    var ort = 'landscape'
 
   // Datatables Customise PDF Before Export//
   var pdf_custom = function ( doc ) {
-    doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+    // doc.content[1].table.widths = wdths; 
+    doc.content[0].text = doc.content[0].text.trim();
     doc.pageMargins = [40,60,20,30];
     // doc.content[1].margin = [ 0, 50, 0, 50 ]
     doc['footer']= footer1;
@@ -90,7 +102,7 @@
     objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
     objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
     objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
-    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+    doc.defaultStyle.fontSize = 7;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
     // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
   doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
   {text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
@@ -101,15 +113,15 @@
 
 <!-- Data Tables Export Script -->
 <script type="text/javascript">
-  $('#html5-extension').DataTable( {
+  $('#html5-extension').DataTable( {ordering: false,
   autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
   buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       
-    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
+    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
 
-    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
+    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
 
-    {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
+    {extend: 'print',title: title, filename: filename, exportOptions: {format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
 </script>
 {% endblock %} <!-- For Scripts -->
 
@@ -124,90 +136,181 @@
           {{dates.start|date:'d-M-y'}} to {{dates.end|date:'d-M-y'}}
         {% endif %}
       </span>
+      {% if order %} | Work Order: {{order.Customer_Name.Short_Name}} - {{order.PO_No}}{% endif %}
     </h3>
-    <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger" ht="select category">Do More</button>
-    
-    <div>
-    <form class="forms-sample" action="" id='formaction' method="POST" >
-      {% csrf_token %}
-      <input type="month" name='dates' id='getdate' style="width: 135px; font-size: 14px; margin-bottom:10px;">
-      <button class="btn1 btn1-success" type="submit" onclick="getdt()">Change Month</button>
-    </form>
+  </div>
+
+  <div>
+    <div style="float:left">
+      <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger mb-4" ht="select category">Do More</button> 
+      <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/{{m}}/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+    </div>
+    <div style="float:right">
+      <div>
+        <form class="forms-sample" action="" id='formaction' method="POST" >
+          {% csrf_token %}
+          <input type="month" name='dates' id='getdate' style="width: 135px; font-size: 14px; margin-bottom:10px;">
+          <button class="btn1 btn1-success" type="submit" onclick="getdt()">Change Month</button>
+        </form>
+      </div>
+     </div>
+    <div style="clear:both"></div>
+  </div>
+
+  <!--Filter/Serch History Form-->
+  <div id="addEventsModal" class="modal animated fadeIn"> 
+    <div class="modal-dialog modal-dialog-centered">                            
+      <!-- Modal content -->
+      <div class="card modal-content">
+        <div class="modal-body">
+          <span id="discard" data-dismiss="modal" class="close">&times;</span>
+          <div class="add-edit-event-box">
+            <div class="add-edit-event-content">
+              <div class="add-event-title edit-event-title"></div>
+                <h5 class="modal-title">Search Data by Applying Filter</h5>
+                  <form class="">
+                    <div class="row">
+                      
+                       <div class="col-md-6 col-sm-6 col-12">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Service Order</label>
+                        {{ filter_data.form.Sales_Order}}
+                      </div>
+                     
+                      <div style="float:left; margin-left: 10px; margin-top:20px;" style="">
+                        <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                        <!-- <button id="add-e" class="btn">Add Task</button> -->
+                        <button id="edit-event" class="btn"></button>
+                      </div>
+                    </div>   
+                  </form>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-body2">
       <div class="table-responsive mb-4 mt-4">
-      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="html5-extension">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%;"  id="html5-extension">
         <thead>
           <tr>
             <th>#</th>
             <th>Employ Name</th>
-            <th>Designation</th>
-            <th>Work Days</th>
-            <th>Work Hours</th>
+            {% for g in dt_list %}
+              <th style="width:5%; padding-left: 4px;">{{g}}</th>
+            {% endfor %}
+            <th>Month Status</th>
+            
+
+            <!-- <th>Work Hours</th>
             <th>Extra Hours</th>
-            <th>Leaves</th>
+            <th>Leaves</th> -->
             <!-- <th>Leaves Left</th> -->
           </tr>
         </thead>
         <tbody>
-          {% for x in table %}
+          {% for e, atnd, m in data %}
 
           <tr>
 
-            <td style="white-space:normal;">
+            <td style="white-space:normal; width: 3%;">
               {{forloop.counter}}
             </td>
 
-            <td style="white-space:normal; width: 25%;">
-              {{x.Name.Name}}
+            <td style="white-space:normal; width: 20%;">
+              <span style="color:#0d65e0">{{e.Name}}</span>
+              {% if e.Designation %}<br>{{e.Designation}}{% endif %}
             </td>
 
-            <td style="white-space:normal; width: 20%">
-              {{x.Name.Designation}}
+            
+            {% if atnd %}
+              {% for t, date, ot in atnd %}
+                {% if t == 'P' %}
+                  <td style="background: #06b85f; width:5%; padding-left: 4px;"><a class="ahr" ht="Present" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">
+                  {{t}}
+                  {% if ot >= 1 %}
+                    <br>OT {{ot|floatformat:'0'}}
+                  {% endif %}
+                  </a></td>
+                {% elif t == 'HD' %}
+                  <td style="background: #4287f5; width:5%; padding-left: 4px;"><a class="ahr" ht="Holiday" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/create/'">{{t}}</a></td>
+                {% elif t == 'A' %}
+                  <td style="background: #f7252c; width:5%; padding-left: 4px;"><a class="ahr" ht="Absent" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</a></td>
+                {% elif t == 'L' %}
+                  <td style="background: #8df542; width:5%; padding-left: 4px;"><a class="ahr" ht="Leave" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</a></td>
+                {% elif t == 'HF' %}
+                  <td style="background: #06b85f; width:5%; padding-left: 4px;"><a class="ahr" ht="Half Day Present" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</a></td>
+                {% elif t == 'NR' %}
+                  <td style="background: #09cfed; width:5%; padding-left: 4px;"><a class="ahr" ht="Attendance Not Registered" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/create/'">{{t}}</a></td>
+                {% elif t == '' %}
+                  <td style="width:5%; padding-left: 4px;">{{t}}</td>
+                {% else  %}
+                  <td style="background: #016131; width:5%; padding-left: 4px;"><a class="ahr" ht="{{t}} Hrs" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</td>
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              {% for t in dt_list %}
+                <td style="width:5%; padding-left: 4px;"></td>
+              {% endfor %}
+            {% endif %}
+
+
+            <td style="white-space:normal; width: 20%;">
+              {% if m %}
+                <span class="hlt5">Presents: </span>{{m.Presents}}/{{workdays}}
+                {% if m.Leaves or m.Absents %}
+                  <br>{% if m.Leaves %}<span class="hlt5">Leaves </span>{{m.Leaves}}{% endif %}
+                  {% if m.Absents %}<span class="hlt5"> Absents </span>{{m.Absents}}{% endif %}
+                {% endif %}
+                {% if m.Total_OT != 0  %}
+                  <br><span class="hlt5">Extra Hours </span>{{m.Total_OT|floatformat:'0'}}
+                {% endif %}
+        
+              {% endif %}
             </td>
 
-            {% if x.Presents > workdays %}
+<!--             {% if m.Presents > workdays %}
               <td style="white-space:normal; background:#34eb74">
-                {{x.Presents}}/{{workdays}}
+                {{m.Presents}}/{{workdays}}
               </td>
             {% elif x.Presents < workdays %}
               <td style="white-space:normal; background:red">
-                {{x.Presents}}/{{workdays}}
+                {{m.Presents}}/{{workdays}}
               </td>
             {% else %}
               <td style="white-space:normal;">
-                {{x.Presents}}/{{workdays}}
+                {{m.Presents}}/{{workdays}}
               </td>
-            {% endif %}
+            {% endif %} -->
 
-            {% if workhours1 <= x.Total_Hours %}
+            <!-- {% if workhours1 <= x.Total_Hours %}
               <td style="white-space:normal; background:#34eb74">
-                {{x.Total_Hours|floatformat:1}} Hours              
+                {{m.Total_Hours|floatformat:1}} Hours              
               </td>
             {% elif workhours >= x.Total_Hours %}
               <td style="white-space:normal; background:red">
-                {{x.Total_Hours|floatformat:1}} Hours              
+                {{m.Total_Hours|floatformat:1}} Hours              
               </td>
             {% else %}
               <td style="white-space:normal;">
-                {{x.Total_Hours|floatformat:1}} Hours              
+                {{m.Total_Hours|floatformat:1}} Hours              
               </td>
-            {% endif %}
+            {% endif %} -->
 
-            {% if x.Total_OT != 0 %}
+<!--             {% if x.Total_OT != 0 %}
               <td style="white-space:normal; background:#34eb74">
-                {{x.Total_OT}} Hours
+                {{m.Total_OT}} Hours
               </td>
             {% else %}
               <td style="white-space:normal;">0</td>
             {% endif %}
 
             <td style="white-space:normal;">
-              {% if x.Leaves or x.Absents %}{% if x.Leaves %}<span class="hlt5">Leaves </span>{{x.Leaves}}{% endif %}{% if x.Absents %}<span class="hlt5">Absents </span>{{x.Absents}}{% endif %}{% else %}0{% endif %}
-            </td>
+              {% if m.Leaves or m.Absents %}{% if m.Leaves %}<span class="hlt5">Leaves </span>{{m.Leaves}}{% endif %}{% if m.Absents %}<span class="hlt5">Absents </span>{{m.Absents}}{% endif %}{% else %}0{% endif %}
+            </td> -->
 
             <!-- <td style="white-space:normal;">
              {{x.Leaves_Left}}
@@ -342,7 +445,7 @@
             <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#selectEmployModal" onclick="fnchide()">Employ Wise Attendance</button>
             <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
             {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
-              <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/employeslist/'">Employes List</button>
+              <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/employeslist/active/'">Employes List</button>
               <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
               <button class="btn btn-sm btn-danger" onclick="location.href='/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
               <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>

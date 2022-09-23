@@ -55,19 +55,19 @@
     var tagName = style.getElementsByTagName('sz');
     for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
     $('row:first c', sheet).attr('s', '2')
-    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );$('row c[r^="F"]', sheet).attr( 's', '55' );  $('row c[r^="H"]', sheet).attr( 's', '55' ); $('row c[r^="H"]', sheet).attr( 's', '55' );//wrap text
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );$('row c[r^="F"]', sheet).attr( 's', '55' );  $('row c[r^="G"]', sheet).attr( 's', '55' ); //wrap text
     var col = $('col', sheet);
     // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
     $(col[1]).attr('width', 15); $(col[2]).attr('width', 25); $(col[3]).attr('width', 35); $(col[4]).attr('width', 15); $(col[5]).attr('width', 20); $(col[6]).attr('width', 15); $(col[7]).attr('width', 20);}; 
   //--End--//
 
             
-  var cl = [0,  1, 2, 3, 4, 5, 6, 7]
-  var wdths = ['4%', '10%', '17%', '15%', '10%', '16%', '14%', '14%'];
+  var cl = [0,  1, 2, 3, 4, 5, 6]
+  var wdths = ['4%', '10%', '17%', '20%', '16%', '14%', '19%'];
   
-   var msgTop = '{% if employfilter == 0 %}Total Debits {{df.total|floatformat:0|intcomma}} | Towards Staff: {{df.staff|floatformat:0|intcomma}} | Towards Outside {{df.outside|floatformat:0|intcomma}} | Remaing Advances {{df.advances|floatformat:0|intcomma}} {% else %} Employ Name: {{employfilter.Name}} | Total Issued Amount: {{df.total|floatformat:0|intcomma}} | Remaing Advances: {{df.advances|floatformat:0|intcomma}} {% endif %}'
-    var title = 'Expenses Debits List-{{pdata.pj}}';
-    var filename = 'ExpensesDebits-{{pdata.pj}}'
+   var msgTop = '{% if employfilter == 0 %}Total Issues {{df.total|floatformat:0|intcomma}} | Towards Staff: {{df.staff|floatformat:0|intcomma}} | Towards Outside {{df.outside|floatformat:0|intcomma}} {% endif %}{% if df.sal_adv > 0 %} | Salary Advances: {{df.sal_adv|floatformat:0|intcomma}}{% endif %}{% if df.exp_adv > 0 %} | Expenses Advances: {{df.exp_adv|floatformat:0|intcomma}}{% endif %}'
+    var title = 'Issued Expendatures List-{{pdata.pj}}';
+    var filename = 'IssuedExpendatures-{{pdata.pj}}'
     var ort = 'landscape'
 
   // Datatables Customise PDF Before Export//
@@ -107,7 +107,7 @@
 
 {% block content %}
 <div class="page-header">
-  <h3 class="page-title">{{pdata.pj.Short_Name}} - Expendetures (Debits)</h3>
+  <h3 class="page-title">{{pdata.pj.Short_Name}} - Issued Expendatures</h3>
 </div>
 
 
@@ -188,12 +188,12 @@
 </div>
 
 <div class="row">
-  <div class="col-xl-3 col-md-6 mb-4">
+  <div class="col-xl-2 col-md-6 mb-4">
     <div class="card border-left-info shadow h-100 py-2">
       <a ht="total debits/expendetures (other than tax purchases)" ><div class="card-body2">
         <div class="row no-gutters align-items-center">
           <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Expendetures/Debits</div>
+            <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;"> Total Issues</div>
             <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{df.total|floatformat:0|intcomma}}</div>
           </div>
         </div>
@@ -201,12 +201,12 @@
     </div>
   </div>
   {% if employfilter == 0 %}
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl-2 col-md-6 mb-4">
       <div class="card border-left-primary shadow h-100 py-2">
         <a ht="issued against staff/employs" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Expenses Against Staff</div>
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Against Staff</div>
               <div class="h6 mb-0 font-weight-800 text-black-700">
                 <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{df.staff|floatformat:0|intcomma}}</div>
               </div>
@@ -215,12 +215,12 @@
         </div></a>
       </div>
     </div>
-    <div class="col-xl-3 col-md-6 mb-4">
+    <div class="col-xl-2 col-md-6 mb-4">
       <div class="card border-left-danger shadow h-100 py-2">
         <a ht="issued against outside parties/suppliers (non-tax purchases/debits)" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Expenses Against Outside</div>
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Against Outside</div>
               <div class="h6 mb-0 font-weight-800 text-black-700">
                 <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{df.outside|floatformat:0|intcomma}}</div>
               </div>
@@ -230,20 +230,38 @@
       </div>
     </div>
   {% endif %}
-  <div class="col-xl-3 col-md-6 mb-4">
-    <div class="card border-left-dark shadow h-100 py-2">
-      <a ht="adavnaces remaining with staff or outside suppliers" ><div class="card-body2">
-        <div class="row no-gutters align-items-center">
-          <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Advances Remaining</div>
-            <div class="h6 mb-0 font-weight-800 text-black-700">
-              <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{df.advances|floatformat:0|intcomma}}</div>
+  {% if df.sal_adv > 0 %}
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <a ht="advances related to salaries" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Salary Advances</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">
+                <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{df.sal_adv|floatformat:0|intcomma}}</div>
+              </div>
             </div>
           </div>
-        </div>
-      </div></a>
+        </div></a>
+      </div>
     </div>
-  </div>
+  {% endif %}
+  {% if df.exp_adv > 0 %}
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-dark shadow h-100 py-2">
+        <a ht="advances related to expenses" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Expenses Advances</div>
+              <div class="h6 mb-0 font-weight-800 text-black-700">
+                <div class="h6 mb-0 font-weight-800 text-black-700">₹ {{df.exp_adv|floatformat:0|intcomma}}</div>
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+  {% endif %}
 </div>
 
 <!-- Expenses List -->
@@ -257,7 +275,7 @@
           <th>Voucher No</th>
           <th>Paid To</th>
           <th>Issued Amount</th>
-          <th>Status</th>
+          <!-- <th>Status</th> -->
           <th>Related Business</th>
           <th>Purpose</th>
           <th>Authorisation</th> 
@@ -304,7 +322,7 @@
                 </a>
               </td>
 
-              <td style="white-space:normal;"> 
+              <!-- <td style="white-space:normal;"> 
                 {% if x.Expenses.Balance_Amount > 0 %}
                   <span class="hlt3">Due </span>₹ {{x.Expenses.Balance_Amount|floatformat:0|intcomma}}
                 {% elif x.Expenses.Balance_Amount == 0 %}
@@ -314,7 +332,7 @@
                   <br><span class="hlt5">Advance Remaining</span>
                   <br>₹ {{x.As_Advance|floatformat:0|intcomma}}
                 {% endif %}
-              </td>
+              </td> -->
 
               <td style="white-space:normal;">
                 <a class="ahr" ht="edit or update" data-toggle="modal" data-target="#editModal" onclick="edit('{{x.id}}')">
@@ -370,7 +388,7 @@
                 </a>
               </td>
 
-              <td style="white-space:normal;"> 
+              <!-- <td style="white-space:normal;"> 
                 {% if x.Party_Name %}
                   {% if x.Amount_to_be_Pay == x.Issued_Amount %}
                     <span class="hlt2">No Dues</span>
@@ -387,7 +405,7 @@
                     <br>₹ {{x.As_Advance|floatformat:0|intcomma}}
                   {% endif %}
                 {% endif %}
-              </td>
+              </td> -->
 
               <td style="white-space:normal;">
                 <a class="ahr" ht="edit or update" data-toggle="modal" data-target="#editModal" onclick="edit('{{x.id}}')">

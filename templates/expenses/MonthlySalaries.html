@@ -74,16 +74,16 @@
     $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );$('row c[r^="F"]', sheet).attr( 's', '55' );  $('row c[r^="H"]', sheet).attr( 's', '55' ); $('row c[r^="H"]', sheet).attr( 's', '55' );//wrap text
     var col = $('col', sheet);
     // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
-    $(col[1]).attr('width', 35); $(col[2]).attr('width', 25); $(col[3]).attr('width', 15); $(col[4]).attr('width', 15); $(col[5]).attr('width', 15); $(col[5]).attr('width', 15); }; 
+    $(col[1]).attr('width', 30); $(col[2]).attr('width', 10); $(col[3]).attr('width', 15); $(col[4]).attr('width', 10); $(col[5]).attr('width', 15); $(col[5]).attr('width', 10); $(col[6]).attr('width', 10); $(col[7]).attr('width', 15);}; 
   //--End--//
 
             
-  var cl = [0,  1, 2, 3, 4, 5, 6]
-  var wdths = ['4%', '27%', '21%', '12%', '16%', '11%', '9%'];
+  var cl = [0,  1, 2, 3, 4, 5, 6, 7]
+  var wdths = ['4%', '36%', '7%', '12%', '8%', '8%', '8%', '17%'];
   
-   var msgTop = "{% if dates == None %}{{month|date:'M-Y'}}{% else %}{{dates.start|date:'d-M-y'}} to {{dates.end|date:'d-M-y'}}{% endif %}"
-    var title = 'Month Wise Attendance Report';
-    var filename = 'monthattendance'
+   var msgTop = "Working Days: {{wd}}"
+    var title = '{{month1|date:'M-Y'}} - Salaries';
+    var filename = '{{month1|date:'M-Y'}}_Salaries'
     var ort = 'portrait'
 
   // Datatables Customise PDF Before Export//
@@ -108,7 +108,7 @@
 
 <!-- Data Tables Export Script -->
 <script type="text/javascript">
-  $('#html5-extension').DataTable( {
+  $('#employes').DataTable( {
   autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
   buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       
@@ -123,7 +123,7 @@
 
 {% block content %}
   <div class="page-header">
-    <h3 class="page-title">Salaries {% if month1 != 'month' %}<span style="color:blue;">{{month1|date:'M-Y'}}</span> Working Days: {{wd}}{% endif %}
+    <h3 class="page-title">Monthly Salaries {% if month1 != 'month' %}<span style="color:blue;">{{month1|date:'M-Y'}}</span> Working Days: {{wd}}{% endif %}
     </h3>
     <!-- <button type="button" data-toggle="modal" data-target="#autoAttendanceModal" class="btn btn-sm btn-primary" ht="by clicking this it will generate auto attendance for selected month excluding attendance entries by manually, it will generate all employes attendance as present and default start and end time, later you can edit employ wise if require">Generate Auto Attendance</button> -->
     <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger" ht="select category">Do More</button>
@@ -145,7 +145,7 @@
           <tr>
             <th>#</th>
             <th>Employ Name</th>
-            <!-- <th>Attendance</th> -->
+            <th>Days</th>
             <th>Net Payable</th>
             <!-- <th>LOP</th> -->
             <th>PF</th>
@@ -155,7 +155,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for x in table %}
+          {% for x in table %} 
           <tr>
 
             <td>{{forloop.counter}}</td>
@@ -167,11 +167,11 @@
               </a>
             </td>
 
-            <!-- <td style="white-space:normal;">
+            <td style="white-space:normal;">
               <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
-               NA
+               {{x.Presents}}
               </a>
-            </td> -->
+            </td>
 
             <td style="white-space:normal;">
               <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
