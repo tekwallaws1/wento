@@ -28,7 +28,7 @@
   function edit(e_id) {getid = e_id;}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/attendanceform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/attendanceform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
     
@@ -36,19 +36,19 @@
     function getdt(){
       var dt = $("#getdate").val();
       if ( dt == '' ){dt = 'month'} 
-      document.getElementById('formaction').action='/{{pdata.pj}}/monthwiseattendancelist/'+dt+'/'}
+      document.getElementById('formaction').action='/{{firm}}/{{pdata.pj}}/monthwiseattendancelist/'+dt+'/'}
 
     function autoatndmonth(){
       var dt = $("#getmonth").val();
       if ( dt == '' ){dt = 'month'} 
-      document.getElementById('genatndaction').action='/{{pdata.pj}}/autoattendance/'+dt+'/'}
+      document.getElementById('genatndaction').action='/{{firm}}/{{pdata.pj}}/autoattendance/'+dt+'/'}
 
     function getemploy(){
       var dt = $("#month_get").val();
       var name = $("#getname").val();
       if ( dt == '' ){dt = 'month'};
       if ( name == '' ){dt = 'noemploy'};
-      location.href='/{{pdata.pj}}/employwiseattendance/'+dt+'/'+name+'/'}
+      location.href='/{{firm}}/{{pdata.pj}}/employwiseattendance/'+dt+'/'+name+'/'}
 
     function fnchide(){$("#doMoreModal .close").click()}
 
@@ -144,7 +144,7 @@
     <div style="float:left">
       <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger mb-4" ht="select category">Do More</button> 
       <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-      <button type="button" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/{{m}}/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthwiseattendancelist/{{m}}/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     </div>
     <div style="float:right">
       <div>
@@ -212,7 +212,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for e, atnd, m in data %}
+          {% for e, atnd, m, hf in data %}
 
           <tr>
 
@@ -229,26 +229,26 @@
             {% if atnd %}
               {% for t, date, ot in atnd %}
                 {% if t == 'P' %}
-                  <td style="background: #06b85f; width:5%; padding-left: 4px;"><a class="ahr" ht="Present" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">
+                  <td style="background: #06b85f; width:5%; padding-left: 4px;"><a class="ahr" ht="Present" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">
                   {{t}}
                   {% if ot >= 1 %}
                     <br>OT {{ot|floatformat:'0'}}
                   {% endif %}
                   </a></td>
                 {% elif t == 'HD' %}
-                  <td style="background: #4287f5; width:5%; padding-left: 4px;"><a class="ahr" ht="Holiday" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/create/'">{{t}}</a></td>
+                  <td style="background: #4287f5; width:5%; padding-left: 4px;"><a class="ahr" ht="Holiday" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/create/'">{{t}}</a></td>
                 {% elif t == 'A' %}
-                  <td style="background: #f7252c; width:5%; padding-left: 4px;"><a class="ahr" ht="Absent" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</a></td>
+                  <td style="background: #f7252c; width:5%; padding-left: 4px;"><a class="ahr" ht="Absent" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</a></td>
                 {% elif t == 'L' %}
-                  <td style="background: #8df542; width:5%; padding-left: 4px;"><a class="ahr" ht="Leave" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</a></td>
+                  <td style="background: #8df542; width:5%; padding-left: 4px;"><a class="ahr" ht="Leave" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</a></td>
                 {% elif t == 'HF' %}
-                  <td style="background: #06b85f; width:5%; padding-left: 4px;"><a class="ahr" ht="Half Day Present" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</a></td>
+                  <td style="background: #06b85f; width:5%; padding-left: 4px;"><a class="ahr" ht="Half Day Present" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</a></td>
                 {% elif t == 'NR' %}
-                  <td style="background: #09cfed; width:5%; padding-left: 4px;"><a class="ahr" ht="Attendance Not Registered" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/create/'">{{t}}</a></td>
+                  <td style="background: #09cfed; width:5%; padding-left: 4px;"><a class="ahr" ht="Attendance Not Registered" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/create/'">{{t}}</a></td>
                 {% elif t == '' %}
                   <td style="width:5%; padding-left: 4px;">{{t}}</td>
                 {% else  %}
-                  <td style="background: #016131; width:5%; padding-left: 4px;"><a class="ahr" ht="{{t}} Hrs" onclick="location.href='/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</td>
+                  <td style="background: #016131; width:5%; padding-left: 4px;"><a class="ahr" ht="{{t}} Hrs" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">{{t}}</td>
                 {% endif %}
               {% endfor %}
             {% else %}
@@ -260,7 +260,7 @@
 
             <td style="white-space:normal; width: 20%;">
               {% if m %}
-                <span class="hlt5">Presents: </span>{{m.Presents}}/{{workdays}}
+                <span class="hlt5">Presents: </span>{{m.Presents | sub:hf | floatformat:1}}/{{workdays}}
                 {% if m.Leaves or m.Absents %}
                   <br>{% if m.Leaves %}<span class="hlt5">Leaves </span>{{m.Leaves}}{% endif %}
                   {% if m.Absents %}<span class="hlt5"> Absents </span>{{m.Absents}}{% endif %}
@@ -335,8 +335,8 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/attendanceform/edit/'+getid+'/'" class="btn btn-sm btn-primary ">Edit</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/attendanceform/copy/'+getid+'/'" class="btn btn-sm btn-info">Copy</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/attendanceform/edit/'+getid+'/'" class="btn btn-sm btn-primary ">Edit</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/attendanceform/copy/'+getid+'/'" class="btn btn-sm btn-info">Copy</button>
             <button type="button"  data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-danger">Delete</button>  
           </div>
         </div>
@@ -441,14 +441,14 @@
         <div class="modal-body">
           <div class="template-demo">
             <button type="button" data-toggle="modal" data-target="#autoAttendanceModal" class="btn btn-sm btn-warning" ht="by clicking this it will generate auto attendance for selected month excluding attendance entries by manually, it will generate all employes attendance as present and default start and end time, later you can edit employ wise if require" onclick="fnchide()">Generate Auto Montly Attendance</button>
-            <button class="btn btn-sm btn-primary" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
+            <button class="btn btn-sm btn-primary" onclick="location.href='/{{firm}}/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
             <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#selectEmployModal" onclick="fnchide()">Employ Wise Attendance</button>
-            <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
-            {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
-              <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/employeslist/active/'">Employes List</button>
-              <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
-              <button class="btn btn-sm btn-danger" onclick="location.href='/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
-              <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+            <button class="btn btn-sm btn-warning" onclick="location.href='/{{firm}}/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+            {% if user.username == 'sdgfhg' or  user.username == '9849203852' or  user.username == '9010654596' %}
+              <button class="btn btn-sm btn-dark" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/active/'">Employes List</button>
+              <button class="btn btn-sm btn-success" onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalarieslist/active/'">Salaries Master Data</button>
+              <button class="btn btn-sm btn-danger" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
+              <button class="btn btn-sm btn-secondary" onclick="location.href='/{{firm}}/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
             {% endif %}
           </div>
         </div>

@@ -5,7 +5,8 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>GPR-ProMan</title>
+    <title>Prakom-Pro</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo-mini.png' %}"/>
     <!-- plugins:css-->
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <!-- <link rel="stylesheet" href="{% static 'css/vendor.bundle.base.css' %}"> -->
@@ -14,6 +15,7 @@
     <link rel="stylesheet" href="{% static 'css/custom-modal.css' %}">
     <link rel="stylesheet" href="{% static 'css/sweetalert.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.css">
+    <link rel="stylesheet" href="{% static 'css/media_custom.css' %}">
     {% block css %}{% endblock %}
 
   </head> 
@@ -28,9 +30,9 @@
   margin-left: -72px;
 
 " > -->
-          <a class="navbar-brand brand-logo" href="/modules/{{pdata.pj}}/"><img src="{% static 'img/logo-sss.png' %}" /></a>
-          <!-- <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-sss.png' %}" /></a> -->
-          <a class="navbar-brand brand-logo-mini" href="/modules/{{pdata.pj}}/"><img src="{% static 'img/logo-mini.png' %}" alt="logo" /></a>
+          <a class="navbar-brand brand-logo" href="/{{firm}}/{{pdata.pj}}/modules/"><img src="{% static 'img/logo-name.png' %}" /></a>
+          <!-- <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-name.png' %}" /></a> -->
+          <a class="navbar-brand brand-logo-mini" href="/{{firm}}/{{pdata.pj}}/modules/"><img src="{% static 'img/logo-mini.png' %}" alt="logo" /></a>
 
           
         </div>
@@ -54,7 +56,7 @@
           </div> --> 
 
           <ul class="navbar-nav navbar-nav-right">
-            <li><span style="font-size: 19px; color: blue; font-weight:bold">{{pdata.pj}}</span></li>
+            <li><span style="font-size: 19px; color: blue; font-weight:bold">{{firm}}</span></li>
             <li class="nav-item nav-profile dropdown">
               <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                 <div class="nav-profile-img">
@@ -140,7 +142,6 @@
         <!-- partial:partials/_sidebar.html -->
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
           <ul class="nav">
-          {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
             <li class="nav-item nav-profile">
               <a href="#" class="nav-link">
                 <div class="nav-profile-image">
@@ -170,8 +171,9 @@
               </a>
               <div class="collapse" id="ui-basic">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/salesdb/All/">Received Orders</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/purchasesdb/All/">Purchases</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/salesdb/All/">Received Orders</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/purchasesdb/All/">Purchases</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/dailyfinancemovement/today/status/">Day Book</a></li>
                 </ul>
               </div>
             </li>
@@ -185,10 +187,13 @@
               </a>
               <div class="collapse" id="ui-basicorders">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/orderslist/Inprogress/">Received Orders<br>List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/invoiceslist/Issued/">Customer Invoices</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentslist/Received/custflt/">Customer Payments</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/quotationslist/all/">Quotations</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/">Received Orders<br>List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/">Customer Invoices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/paymentslist/Received/custflt/">Customer Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/salesquickform/create/1/">Quick Form</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/customerwisestatement/var1/">Customer Wise<br>Statement</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/quotationslist/all/">Online Quotes</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/manualquoteslist/active/">Manual Quotes</a></li>
                 </ul>
               </div>
             </li>
@@ -201,8 +206,8 @@
               </a>
               <div class="collapse" id="ui-basicsalesinv">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/invoiceslist/Issued/">Issued Invoices</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/invoiceslist/Proforma/">Proforma Invoices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/">Issued Invoices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/invoiceslist/Proforma/">Proforma Invoices</a></li>
                 </ul>
               </div>
             </li> -->
@@ -215,9 +220,9 @@
               </a>
               <div class="collapse" id="ui-basicpay">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentslist/Received/">Received Payments</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentslist/Due/">Due Payments</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/paymentsform/create/1/">Add New Payment</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/paymentslist/Received/">Received Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/paymentslist/Due/">Due Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/paymentsform/create/1/">Add New Payment</a></li>
                 </ul>
               </div>
             </li> -->
@@ -231,9 +236,10 @@
               </a>
               <div class="collapse" id="ui-basicpurchase">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/purchaseslist/Total/">PO's List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/vendorinvoiceslist/Issued/">Vendor Invoices</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/">Vendor Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/purchaseslist/Total/">PO's List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/vendorinvoiceslist/Issued/">Vendor Invoices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/">Vendor Payments</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/vendorwisestatement/var1/">Vendor Wise<br>Statement</a></li>
                 </ul>
               </div>
             </li>
@@ -247,8 +253,8 @@
               </a>
               <div class="collapse" id="ui-basicledger">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/customerledger/mode/">Customer Ledger</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/customerledger/mode/">Vendor Ledger</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/customerledger/mode/">Customer Ledger</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/vendorledger/mode/">Vendor Ledger</a></li>
                 </ul>
               </div>
             </li>
@@ -262,11 +268,11 @@
               </a>
               <div class="collapse" id="ui-basicexpenses">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expenseslist/apr/expid/">List of Expenses</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employwiseclaims/">Employwise Claims</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expensesform/create/1/">Claim Form</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expenseslist/approvalreq/expid/">Approve Requests</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/debitlist/">Debit Vouchers</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/expenseslist/apr/expid/">List of Expenses</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/employwiseclaims/">Employwise Claims</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/expensesform/create/1/">Claim Form</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/expenseslist/approvalreq/expid/">Approve Requests</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/debitlist/">Debit Vouchers</a></li>
                 </ul>
               </div>
             </li>
@@ -280,8 +286,8 @@
               </a>
               <div class="collapse" id="ui-basicgst">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/gst/Input/month/">Input GST</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/gst/Output/month/">Output GST</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/gst/Input/month/">Input GST</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/gst/Output/month/">Output GST</a></li>
                 </ul>
               </div>
             </li>
@@ -295,8 +301,8 @@
               </a>
               <div class="collapse" id="ui-basicwork">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/worklist/Inprogress/">Work Orders Progress</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/purchaseslist/Total/">PO's Progress</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/worklist/Inprogress/">Work Orders Progress</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/purchaseslist/Total/">PO's Progress</a></li>
                 </ul>
               </div>
             </li>
@@ -309,8 +315,8 @@
               </a>
               <div class="collapse" id="ui-basicproducts">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/productslist/Products/">Products</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/productslist/Services/">Services</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/productslist/Products/">Products</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/productslist/Services/">Services</a></li>
                 </ul>
               </div>
             </li>
@@ -337,10 +343,10 @@
               </a>
               <div class="collapse" id="ui-basicattendance">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/attendanceform/create/1/daywise/">Attendance Form</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/daywiseattendancelist/day/">Daily Attendance</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/monthwiseattendancelist/month/">Monthly Attendance</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/holidayslist/year/">Holidays List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/attendanceform/create/1/daywise/">Attendance Form</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/daywiseattendancelist/day/">Daily Attendance</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/monthwiseattendancelist/month/">Monthly Attendance</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/holidayslist/year/">Holidays List</a></li>
                 </ul>
               </div>
             </li> 
@@ -354,8 +360,8 @@
               </a>
               <div class="collapse" id="ui-basiccontact">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/customerslist/">Customers List</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/vendorslist/">Vendors List</a></li>                  
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/customerslist/">Customers List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/vendorslist/">Vendors List</a></li>                  
                 </ul>
               </div>
             </li>
@@ -368,12 +374,12 @@
               </a>
               <div class="collapse" id="ui-basicempl">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employeslist/active/">List of Employes</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employsalarieslist/">Employ Salaries</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/emplsalrevisions/">Salary Revisions</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/monthlysalaries/month/select/">Employ Month<br>Salaries</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/orderwisesalaries/month/select/">Order Wise<br>Salaries</a></li>
-                  <!-- <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/employesform/create/1/">Reg. New Employee</a></li> -->
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/employeslist/active/">List of Employes</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/employsalarieslist/active/">Employ Salaries</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/monthlysalaries/month/select/">Employ Month<br>Salaries</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/orderwisesalaries/month/select/">Order Wise<br>Salaries</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/emplsalrevisions/">Salary Revisions</a></li>
+                  <!-- <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/employesform/create/1/">Reg. New Employee</a></li> -->
                 </ul>
               </div>
             </li>
@@ -386,8 +392,8 @@
               </a>
               <div class="collapse" id="ui-basicinventory">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/inventorylist/active/">Inventory</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/stockmovement/create/1/">Stock Movement Form</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/inventorylist/active/">Inventory</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/stockmovement/create/1/">Stock Movement Form</a></li>
                 </ul>
               </div>
             </li> -->
@@ -416,32 +422,12 @@
               </a>
               <div class="collapse" id="ui-basicusers">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/companylist/">My Reg. Offices</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/userslist/">Manage Users</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/companylist/">My Reg. Offices</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/userslist/">Permissions List</a></li>
+                  <!-- <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/pagepermissionsform/create/1/1/">Permissions</a></li> -->
                 </ul>
               </div>
             </li>
-
-          {% else %}
-            <li class="nav-item">
-              <a class="nav-link" data-toggle="collapse" href="#ui-basicexpenses" aria-expanded="false" aria-controls="ui-basicexpenses">
-                <span class="menu-title">List</span>
-                <i class="menu-arrow"></i>
-                <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
-                <i class="fas fa-lg fa-coins"></i>
-              </a>
-              <div class="collapse" id="ui-basicexpenses">
-                <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expenseslist/apr/expid/">List of Expenses</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/expensesform/create/1/">Claim Form</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/attendanceform/create/1/">Attendance Form</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{pdata.pj}}/daywiseattendancelist/day/">Daily Attendance</a></li>
-
-                </ul>
-              </div>
-            </li>
-          {% endif %}
-
           </ul> 
         </nav>
         <!-- partial -->
@@ -569,6 +555,8 @@ window.onload = function () {
             padding: '2em'
           })
       })          
+      
+        
       </script>
     {% endif %}
   {% endfor %}

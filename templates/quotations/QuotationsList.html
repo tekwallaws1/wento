@@ -29,8 +29,8 @@
   function editpo(po_id, is_manual, is_nopo) {
     qid = po_id;
     
-    if(is_manual == 'True' || is_nopo == 'True') {editurl = '/{{pdata.pj}}/purchasesform/edit_manually/'+qid+'/'; }
-    else { editurl = '/{{pdata.pj}}/po/edit/'+qid+'/itemid/msg/'; }
+    if(is_manual == 'True' || is_nopo == 'True') {editurl = '/{{firm}}/{{pdata.pj}}/purchasesform/edit_manually/'+qid+'/'; }
+    else { editurl = '/{{firm}}/{{pdata.pj}}/po/edit/'+qid+'/itemid/msg/'; }
   };
 
   function edit() {
@@ -48,12 +48,12 @@
   };
 
   function hidedomore() {
-    document.getElementById('selectvendorformaction').action = '/{{pdata.pj}}/po/create/1/itemid/msg/'
+    document.getElementById('selectvendorformaction').action = '/{{firm}}/{{pdata.pj}}/po/create/1/itemid/msg/'
     $("#doMoreModal .close").click()
     // $('#doMoreModal').modal('hide');
 }
   function hidepoedit() {
-    document.getElementById('paymentformaction').action = '/{{pdata.pj}}/popaymentsform/'+qid+'/'
+    document.getElementById('paymentformaction').action = '/{{firm}}/{{pdata.pj}}/popaymentsform/'+qid+'/'
     $("#editQuoteModal .close").click()
   }
 
@@ -70,7 +70,7 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/purchasesform/delete/'+qid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/purchasesform/delete/'+qid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -146,7 +146,7 @@
 
   <!-- <div style="float:right">
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-    <button type="button" onclick="location.href='/{{pdata.pj}}/purchaseslist/Total/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Total/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
   </div> -->
   <div style="clear:both"></div>
 </div>
@@ -174,13 +174,13 @@
 
                 <td style="white-space:normal;">
                   {% if x.Quote_To %}                  
-                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">M/s. {{x.Quote_To.Contact_Person}}
+                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">M/s. {{x.Quote_To.Contact_Person}}
                       {% if x.Firm_Name %}<br> {{x.Firm_Name}}{% endif %}
                       <br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Quote_To.Phone_Number_1}}'>{{x.Quote_To.Phone_Number_1}}</a>
                       {% if x.Quote_To.Email %}<br><i class="mdi mdi-email-outline"></i>&nbsp;<a href="mailto:{{x.Quote_To.Email}}">{{x.Quote_To.Email}}</a>{% endif %}
                     </a>
                   {% else %}
-                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{% if x.Reference_Person %} M/s. {{x.Reference_Person}}{% endif %}
+                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{% if x.Reference_Person %} M/s. {{x.Reference_Person}}{% endif %}
                     {% if x.Firm_Name %}<br>{{x.Firm_Name}}{% endif %}</a>
                     {% if x.Phone_Number %}<br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Phone_Number}}'>{{x.Phone_Number}}</a>{% endif %}
                     {% if x.Location %}<br>{{x.Location}}{% endif %}
@@ -189,12 +189,12 @@
                 </td>
 
                 <td style="white-space:normal;">
-                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{{x.Quote_No}}
+                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{{x.Quote_No}}
                   <br>{{x.Date|date:'d-M-Y'}}</a>
                 </td>
 
                 <td style="white-space:normal;">                  
-                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">₹ {{x.Quote_Value|floatformat:0|intcomma}}</a>
+                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">₹ {{x.Quote_Value|floatformat:0|intcomma}}</a>
                 </td>      
               </tr>
           {% endfor %} 
@@ -223,13 +223,13 @@
 
                 <td style="white-space:normal;">
                   {% if x.Quote_To %}                  
-                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">M/s. {{x.Quote_To.Contact_Person}}
+                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">M/s. {{x.Quote_To.Contact_Person}}
                       <br>{{x.Quote_To.Customer_Name.Customer_Name}}</a>
                       <br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Quote_To.Phone_Number_1}}'>{{x.Quote_To.Phone_Number_1}}</a>
                       {% if x.Quote_To.Email %}<br><i class="mdi mdi-email-outline"></i>&nbsp;<a href="mailto:{{x.Quote_To.Email}}">{{x.Quote_To.Email}}</a>{% endif %}
                     </a>
                   {% else %}
-                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{% if x.Reference_Person %} M/s. {{x.Reference_Person}}{% endif %}
+                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{% if x.Reference_Person %} M/s. {{x.Reference_Person}}{% endif %}
                     {% if x.Firm_Name %}<br>{{x.Firm_Name}}{% endif %}</a>
                     {% if x.Phone_Number %}<br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Phone_Number}}'>{{x.Phone_Number}}</a>{% endif %}
                     {% if x.Location %}<br>{{x.Location}}{% endif %}
@@ -238,12 +238,12 @@
                 </td>
 
                 <td style="white-space:normal;">
-                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{{x.Quote_No}}
+                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{{x.Quote_No}}
                   <br>{{x.Date|date:'d-M-Y'}}</a>
                 </td>
 
                 <td style="white-space:normal;">                  
-                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">₹ {{x.Quote_Value|floatformat:0|intcomma}}</a>
+                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">₹ {{x.Quote_Value|floatformat:0|intcomma}}</a>
                 </td>      
               </tr>
           {% endfor %} 
@@ -266,15 +266,15 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/genquote/create/1/itemid/msg/'" class="btn btn-sm btn-primary">Generate Quotation</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/create/1/itemid/msg/'" class="btn btn-sm btn-primary">Generate Quotation</button>
             {% if status != 'all' %}
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-danger">Quotations List</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-danger">Quotations List</button>
             {% else %}
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/quotationslist/draft/'" class="btn btn-sm btn-danger">Quotation Draft Copies</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/quotationslist/draft/'" class="btn btn-sm btn-danger">Quotation Draft Copies</button>
             {% endif %}
-            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
-            <button   onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
-            <button   onclick="location.href='/{{pdata.pj}}/paymentslist/Received/'" type="button" class="btn btn-sm btn-primary">Customer Payments</button>          
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentslist/Received/'" type="button" class="btn btn-sm btn-primary">Customer Payments</button>          
           </div>
         </div>
       </div>

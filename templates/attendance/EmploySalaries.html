@@ -33,7 +33,7 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/employsalariesform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/employsalariesform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -59,8 +59,8 @@
   var ort = 'landscape';
   
     var msgTop = 'No of Employes {{count}} | Total Slaries {{total_sal|floatformat:0|intcomma}}'
-    var title = 'Employes Salaries List';
-    var filename = 'Employes_Salaries_List'
+    var title = "{% if mode == 'active' %}Employe Salaries Master Data{% else %}Left Emplyes Slaries Master Data{% endif %}";
+    var filename = 'Employe_Salaries_Master_Data'
 
   // Datatables Customise PDF Before Export//
   var pdf_custom = function ( doc ) {
@@ -98,17 +98,20 @@
 
 {% block content %}
 <div class="page-header">
-  <h3 class="page-title">Employes Salaries</h3>
+  <h3 class="page-title">{% if mode == 'active' %}Employe Salaries Master Data{% else %}Left Emplyes Slaries Master Data{% endif %}</h3>
 </div>
 
 <div>
   <div style="float:left">
-    <button type="button" onclick="location.href='/{{pdata.pj}}/employsalariesform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="add/register employ salary">Add Employ Salary</button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalariesform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="add/register employ salary">Add Employ Salary</button>
+    {% if mode != 'active' %}
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalarieslist/active/'" class="btn btn-sm btn-warning mb-4" ht="add/register employ salary">Active Emplyes Master Salaries Data</button>
+    {% endif %}
     <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger mb-4" ht="select category">Do More</button>
   </div>
   <div style="float:right">
     <!-- <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-      <button type="button" onclick="location.href='/{{pdata.pj}}/employeslist/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button> -->
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button> -->
   </div>
   <div style="clear:both"></div>
 </div>
@@ -261,8 +264,8 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/employsalariesform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/employsalariesform/copy/'+getid+'/'" class="btn btn-sm btn-info">Copy</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalariesform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalariesform/copy/'+getid+'/'" class="btn btn-sm btn-info">Copy</button>
             <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-danger">Delete</button>            
           </div>
         </div>
@@ -304,12 +307,15 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button class="btn btn-sm btn-primary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
-            <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
-            <button class="btn btn-sm btn-info" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
-            <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
-            <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employeslist/active/'">Employes List</button>
-            <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+            <button class="btn btn-sm btn-primary" onclick="location.href='/{{firm}}/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+            <button class="btn btn-sm btn-warning" onclick="location.href='/{{firm}}/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
+            <button class="btn btn-sm btn-info" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
+            <button class="btn btn-sm btn-dark" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
+            <button class="btn btn-sm btn-success" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/active/'">Employes List</button>
+            <button class="btn btn-sm btn-secondary" onclick="location.href='/{{firm}}/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+            {% if mode == 'active' %}
+              <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalarieslist/old/'" class="btn btn-sm btn-warning mb-4" ht="add/register employ salary">Left Emplyes Salaries Master Data</button>
+            {% endif %}
           </div>
         </div>
       </div>

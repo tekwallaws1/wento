@@ -7,7 +7,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>GPR-ProMan</title>
+    <title>Prakom-Pro</title>
     
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
@@ -28,25 +28,25 @@
     <!-- <button onclick="Convert_HTML_To_PDF();">Convert HTML to PDF</button> -->
     <br><br>
     {% if apr != 'approvalreq' %}
-      <button type="button"  onclick="location.href='/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn2 btn2-info">Expenses List</button>
+      <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn2 btn2-info">Expenses List</button>
         <button type="button"  id="btnTest" onclick="href='javascript:generatePDF()'" class="btn2 btn2-primary">Download</button>
       {% if exp.Lock_Status == 1 %}
         {% if exp.Approval_Status == 0 %}
-          <button type="button" ht='unlock it for edit/change the expenses claim form' id='hidelockbutton' onclick="location.href='/{{pdata.pj}}/expensesform/unlock/'+{{exp.id}}+'/'" class="btn2 btn2-danger">Unlock Form</button>
+          <button type="button" ht='unlock it for edit/change the expenses claim form' id='hidelockbutton' onclick="location.href='/{{firm}}/{{pdata.pj}}/expensesform/unlock/'+{{exp.id}}+'/'" class="btn2 btn2-danger">Unlock Form</button>
         {% endif %}
       {% else %}
-        <button type="button" id='hidelockbutton' ht='by click this confirm button Expenses claim form will be confirmed and send for approval as per your requsted . If want to edit this again, use unlock button to edit' class="btn2 btn2-success" onclick="location.href='/{{pdata.pj}}/expensesform/lock/'+{{exp.id}}+'/'">Confirm</button>
-        <button type="button" ht='delete this expenses claim form' onclick="location.href='/{{pdata.pj}}/expensesform/delete/'+{{exp.id}}+'/'" class="btn2 btn2-danger">Delete</button>    
+        <button type="button" id='hidelockbutton' ht='by click this confirm button Expenses claim form will be confirmed and send for approval as per your requsted . If want to edit this again, use unlock button to edit' class="btn2 btn2-success" onclick="location.href='/{{firm}}/{{pdata.pj}}/expensesform/lock/'+{{exp.id}}+'/'">Confirm</button>
+        <button type="button" ht='delete this expenses claim form' onclick="location.href='/{{firm}}/{{pdata.pj}}/expensesform/delete/'+{{exp.id}}+'/'" class="btn2 btn2-danger">Delete</button>    
         <h5 style="float:right; color:blue;">Draft Copy</h5>
       {% endif %}
     {% else %}
-      <button type="button"  onclick="location.href='/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn2 btn2-info">Approval Requests</button>
+      <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn2 btn2-info">Approval Requests</button>
       <button type="button"  id="btnTest" onclick="href='javascript:generatePDF()'" class="btn2 btn2-success">Download</button>      
       {% if exp.Approval_Status == 0 %}
-        <button type="button" id='hidelockbutton' ht='click here to approve this requested claim' class="btn2 btn2-primary float-right" onclick="location.href='/{{pdata.pj}}/expensesform/approvalreq1/'+{{exp.id}}+'/'">Approve Claim</button>
+        <button type="button" id='hidelockbutton' ht='click here to approve this requested claim' class="btn2 btn2-primary float-right" onclick="location.href='/{{firm}}/{{pdata.pj}}/expensesform/approvalreq1/'+{{exp.id}}+'/'">Approve Claim</button>
       {% else %}
         {% if exp.Balance_Amount == exp.Total_Amount %}
-          <button type="button" id='hidelockbutton' ht='click here to take your decision back from approve to disapprove' class="btn2 btn2-primary float-right" onclick="location.href='/{{pdata.pj}}/expensesform/approvalreq0/'+{{exp.id}}+'/'">Click Here to Back Your Decision to Disapprove</button>
+          <button type="button" id='hidelockbutton' ht='click here to take your decision back from approve to disapprove' class="btn2 btn2-primary float-right" onclick="location.href='/{{firm}}/{{pdata.pj}}/expensesform/approvalreq0/'+{{exp.id}}+'/'">Click Here to Back Your Decision to Disapprove</button>
         {% endif %}
         
       {% endif %}  
@@ -291,8 +291,8 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/'+getid+'/'" class="btn btn-sm btn-primary mb-2">Update Item</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/expensesitemsform/delete/'+{{exp.id}}+'/'+getid+'/'" class="btn btn-sm btn-danger mb-2">Delete Item</button>            
+            <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/'+getid+'/'" class="btn btn-sm btn-primary mb-2">Update Item</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/expensesitemsform/delete/'+{{exp.id}}+'/'+getid+'/'" class="btn btn-sm btn-danger mb-2">Delete Item</button>            
           </div>
         </div>
       </div>
@@ -306,7 +306,7 @@
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Expense Update Form</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/itemid/'">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.href='/{{firm}}/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/itemid/'">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -358,7 +358,7 @@
 
 <script type="text/javascript">
   function additem(tag){
-    if ( tag == 'addnewitem' ) {document.getElementById("itemaction").action = '/{{pdata.pj}}/expensesitemsform/create/'+{{exp.id}}+'/itemid/';} };
+    if ( tag == 'addnewitem' ) {document.getElementById("itemaction").action = '/{{firm}}/{{pdata.pj}}/expensesitemsform/create/'+{{exp.id}}+'/itemid/';} };
 
   function edititem(tag){getid=tag;}
 
@@ -369,7 +369,7 @@
       document.getElementById('selectorder').style.display='block'}
     else{ document.getElementById('selectorder').style.display='none' }   }
 
-  function expedit(tag){document.getElementById("exp_edit_action").action = '/{{pdata.pj}}/expensesform/edit/'+{{exp.id}}+'/';}
+  function expedit(tag){document.getElementById("exp_edit_action").action = '/{{firm}}/{{pdata.pj}}/expensesform/edit/'+{{exp.id}}+'/';}
 </script>
   
 <script>
@@ -401,7 +401,7 @@
         }}).save();
       
       setTimeout(func, 1000);
-      function func() {location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/itemid/'}
+      function func() {location.href='/{{firm}}/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/itemid/'}
   }
   document.getElementById('btnTest').onclick = test;
 </script>
@@ -419,12 +419,12 @@
   //           // type:'warning',
   //           confirmButtonText: 'OK',
   //         }).then((result) => {
-  // if (result.value) {location.href='/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/itemid/';}})
+  // if (result.value) {location.href='/{{firm}}/{{pdata.pj}}/expensesclaimreceipt/{{apr}}/edit/'+{{exp.id}}+'/itemid/';}})
   //     }) };
 
      if ('{{item_id}}' != 'itemid') {
       document.getElementById('itemidclick').click(); 
-      document.getElementById("itemaction").action = '/{{pdata.pj}}/expensesitemsform/edit/'+{{exp.id}}+'/'+{{item_id}}+'/';}
+      document.getElementById("itemaction").action = '/{{firm}}/{{pdata.pj}}/expensesitemsform/edit/'+{{exp.id}}+'/'+{{item_id}}+'/';}
 
       var selectBoxs = document.getElementById("id_Sales_Order");    
       var sv = selectBoxs.options[selectBoxs.selectedIndex].text;

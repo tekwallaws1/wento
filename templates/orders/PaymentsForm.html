@@ -8,18 +8,36 @@
 
 {% block scripts %}
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    
-    
-    <script>
-    // This code activates flatpickr on fields with the 'datetimefield' class when the document has loaded
-    window.addEventListener("DOMContentLoaded", function () {
-        flatpickr(".datetimefield", {
-            enableTime: true,
-            enableSeconds: true,
-            dateFormat: "Y-m-d H:i:S",
-        });
-    });
-</script>
+<!--     <script>
+      // This code activates flatpickr on fields with the 'datetimefield' class when the document has loaded
+      window.addEventListener("DOMContentLoaded", function () {
+          flatpickr(".datetimefield", {
+              enableTime: true,
+              enableSeconds: true,
+              dateFormat: "Y-m-d H:i:S",
+          });
+      });
+    </script> -->
+    <script type="text/javascript">
+      window.onload = function () {
+        if ('{{fnc}}'=='edit') {
+            var selectBoxs = document.getElementById("id_UPI_Account");    
+            var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+            if (sv != '---------'){
+              document.getElementById('selectupi').style.display='block'}
+            else{ document.getElementById('selectupi').style.display='none'; document.getElementById('refno').style.display='none'; }
+        } }
+  
+  function changeFunc1() {
+    var selectBoxs = document.getElementById("id_Payment_Account");    
+    var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+    if (sv == 'UPI'){
+      document.getElementById('selectupi').style.display='block'; document.getElementById('refno').style.display='none';}
+    else{ document.getElementById('selectupi').style.display='none';  document.getElementById('refno').style.display='block';}   
+    }
+    </script>
+
+
 {% endblock %} <!-- For Scripts -->
 
 {% block content %}
@@ -35,10 +53,11 @@
               {% csrf_token %}
               <div class="form-group">
                 {% for field in form %}
-                  <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                    <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                  
                   {% for error in field.errors %}
                     <p style="color: red; margin-top: -20px">{{ error }}</p>
-                  {% endfor %}
+                  {% endfor %} 
                 {% endfor %}  
               </div>
             </div>

@@ -117,9 +117,9 @@ DATABASES = {
 # DATABASES = {
 #      'default': {
 #          'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#          'NAME': 'gpr_postgres',
-#          'USER': 'gpr',
-#          'PASSWORD': 'Tekwall1@3',
+#          'NAME': 'prakomdb',
+#          'USER': 'prakom',
+#          'PASSWORD': 'Prakom1@3',
 #          'HOST': 'localhost',
 #          'PORT': '',
 #      }

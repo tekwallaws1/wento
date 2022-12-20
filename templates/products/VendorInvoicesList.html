@@ -9,7 +9,7 @@
   <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
 {% endblock %}  
-
+ 
 {% block scripts %} 
   <script src="{% static 'js/filterdate.js' %}"></script>
   <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
@@ -51,7 +51,7 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/vendorinvoicesform/delete/'+poid+'/'+invid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/vendorinvoicesform/delete/'+poid+'/'+invid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
@@ -77,7 +77,7 @@
   var wdths = ['4%', '25%', '25%', '46%'];
   var ort = 'portrait'; //landscape
   
-   if ('{{status}}' == 'Issued' ) { var msgTop = 'Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}} | Total Paid {{heads.total_paid|floatformat:0|intcomma}} | Total Due  {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}} \n Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} | Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}}';}
+   if ('{{status}}' == 'Issued' ) { var msgTop = 'Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}} | Total Againdt Billed Paid {{heads.total_paid|floatformat:0|intcomma}} | Total Due  {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}} \n Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} | Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}} {% if advance %} | Over Paid Payments {{advance|floatformat:0|intcomma}}{% endif %}';}
     else { var msgTop = ''};
     var title = '{{pdata.pj}} - Vendor Invoices List';
     var filename = '{{pdata.pj}}-VendorInvoicesList_{{table.last.Invoice_Date|date:'dMy'}}to{{table.first.Invoice_Date|date:'dMy'}}'
@@ -123,7 +123,7 @@
 
 <div>
   <div style="float:left">
-    <button type="button" target="_blank"  onclick="location.href='/{{pdata.pj}}/vendorinvoicesform/create/1/1/'" class="btn btn-sm btn-primary mb-4" ht="register vendor issued invoices againt PO">Register Invoice</button>
+    <button type="button" target="_blank"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorinvoicesform/create/1/1/'" class="btn btn-sm btn-primary mb-4" ht="register vendor issued invoices againt PO">Register Invoice</button>
   </div>
 
   &emsp;&emsp;
@@ -132,7 +132,7 @@
   <div style="float:right">
       <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
       &nbsp;&nbsp;&nbsp;
-      <button type="button" onclick="location.href='/{{pdata.pj}}/vendorinvoiceslist/Issued/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorinvoiceslist/Issued/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
   </div>
   <div style="clear:both"></div>
 </div>
@@ -206,14 +206,16 @@
       </div>
     </div>
   </div>
-{% if status == 'Issued' %}
-  <div class="row"> 
+
+
+  <div class="row">
+  {% if advance > 100 %}
     <div class="col-xl-3 col-md-6 mb-4">
-      <div class="card border-left-dark shadow h-100 py-2">
-        <a ht="total issued invoices i.e due and cleared" ><div class="card-body2">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="total vendor billing" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Vendor Bills - {{count.tbc}}</div>
+            <div class="col mr-3">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Vendor Bills - {{count.tbc}}</div>
               <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_billing|floatformat:0|intcomma}}</div>
             </div>
           </div>
@@ -222,49 +224,115 @@
     </div>
     <div class="col-xl-3 col-md-6 mb-4">
       <div class="card border-left-primary shadow h-100 py-2">
-        <a ht="toatl payment cleared invoices" ><div class="card-body2">
+        <a ht="toatl paid payments towards billed vendor invoices" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Payment Status</div>
-              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">Paid ₹ {{heads.total_paid|floatformat:0|intcomma}}
-                <br>
-                Due&nbsp; ₹ {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}}
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Paid Against Billed</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_paid|floatformat:0|intcomma}}
               </div>
             </div>
           </div>
         </div></a>
       </div>
     </div>
-    <div class="col-xl-2 col-md-6 mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="due payments towards billed invoices" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
       <div class="card border-left-info shadow h-100 py-2">
+        <a ht="payment that paid more than billing against some particular vendors" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Over Paid Payments</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{advance|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="total vendor billing" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-3">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Vendor Bills - {{count.tbc}}</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_billing|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <a ht="toatl paid payments towards billed vendor invoices" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Paid Against Billed</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_paid|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="due payments towards billed invoices" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+   {% endif %} 
+  </div> 
+  
+  <div class="row"> 
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
         <a ht="payment not yet started" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Full Due Bills  - {{count.fdc}}</div>
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Full Due Bills  - {{count.fdc}}</div>
               <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|floatformat:0|intcomma}}</div>
             </div>
           </div>
         </div></a>
       </div>
     </div>
-    <div class="col-xl-2 col-md-6 mb-4">
-      <div class="card border-left-success shadow h-100 py-2">
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
         <a ht="payment started but not cleared fully" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Partial Due Bills - {{count.pdc}}</div>
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Partial Due Bills - {{count.pdc}}</div>
               <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.part_due_inv|floatformat:0|intcomma}}</div>
             </div>
           </div>
         </div></a>
       </div>
     </div>
-    <div class="col-xl-2 col-md-6 mb-4">
-      <div class="card border-left-danger shadow h-100 py-2">
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
         <a ht="toatl payment cleared invoices" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Cleared Bills - {{count.fcc}}</div>
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Cleared Bills - {{count.fcc}}</div>
               <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_clear_inv|floatformat:0|intcomma}}</div>
             </div>
           </div>
@@ -272,7 +340,7 @@
       </div>
     </div>
   </div>
-{% endif %}
+
 
 <!-- Invoices List -->
 <!-- Locked Invoices -->
@@ -344,9 +412,9 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <!-- <button type="button"  onclick="location.href='/{{pdata.pj}}/popaymentsform/'+poid+'/'" class="btn btn-sm btn-success">Add New Payment</button> -->
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/vendorinvoicesform/edit/'+poid+'/'+invid+'/'" class="btn btn-sm btn-primary">Edit Invoice Details</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/vendorinvoicesform/copy/'+poid+'/'+invid+'/'" class="btn btn-sm btn-danger">Copy Invoice Details</button>
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/popaymentsform/'+poid+'/'" class="btn btn-sm btn-success">Add New Payment</button> -->
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorinvoicesform/edit/'+poid+'/'+invid+'/'" class="btn btn-sm btn-primary">Edit Invoice Details</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorinvoicesform/copy/'+poid+'/'+invid+'/'" class="btn btn-sm btn-danger">Copy Invoice Details</button>
             <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning">Delete Invoice Details</button>            
           </div>
         </div>
@@ -387,8 +455,8 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button   onclick="location.href='/{{pdata.pj}}/purchaseslist/Total/'" type="button" class="btn btn-sm btn-info">PO's to Vendor</button>
-            <button   onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/'" type="button" class="btn btn-sm btn-success">Vendor Payments</button>          
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Total/'" type="button" class="btn btn-sm btn-info">PO's to Vendor</button>
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/'" type="button" class="btn btn-sm btn-success">Vendor Payments</button>          
           </div>
         </div>
       </div>

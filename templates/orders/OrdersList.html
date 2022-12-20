@@ -23,7 +23,7 @@
   <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
   <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
   <script src="{% static 'js/tableexport.js' %}"></script>
-
+ 
 <script type="text/javascript">
 
   function rid(tid, can_gen_invoice, billed, ordervalue) {getid = tid;
@@ -56,9 +56,26 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/ordersform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/ordersform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
+{% if messages %}
+    {% for msg in messages %}
+      {% if msg.tags == 'error' %}
+        <script>
+          $('.widget-content .message', function () {
+          swal({
+              title: 'Error Alert !',
+              text: '{{msg}}',
+              padding: '2em'
+            })
+        })          
+        </script>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
 </script>
 
 <!-- Data Tables Export Script -->
@@ -80,8 +97,8 @@
   var cl = [0,  1, 2, 3, 4, 5]
   var wdths = ['4%', '*', '*', '*', '*', '*'];
   
-   if ('{{status}}' == 'Inprogress' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Total Inprogress Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}';}
-   else if ('{{status}}' == 'Total' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Total Orders {{count.tc}}, Value {{orders.total|floatformat:0|intcomma}}  |  Closed Orders {{count.cc}}, Value {{orders.closed|floatformat:0|intcomma}}{% if count.ic != 0 %}  |  Inprogress Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}{% endif %}';}
+   if ('{{status}}' == 'Inprogress' & '{{request.user.username}}' != 'dghgjhkjl' ) { var msgTop = 'Total Inprogress Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}';}
+   else if ('{{status}}' == 'Total' & '{{request.user.username}}' != 'dghgjhkjl' ) { var msgTop = 'Total Orders {{count.tc}}, Value {{orders.total|floatformat:0|intcomma}}  |  Closed Orders {{count.cc}}, Value {{orders.closed|floatformat:0|intcomma}}{% if count.ic != 0 %}  |  Inprogress Orders {{count.ic}}, Value {{orders.inprogress|floatformat:0|intcomma}}{% endif %}';}
     else if ('{{status}}' == 'Pipeline'  ) { var msgTop = 'Pipeline Orders {{count.pc}}, Value {{orders.pipeline|floatformat:0|intcomma}}';}
     else { var msgTop = ''}
     
@@ -130,16 +147,17 @@
 
 <div>
   <div style="float:left">
-    <button type="button" onclick="location.href='/{{pdata.pj}}/ordersform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="Create New Order">Add New Order</button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/ordersform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="Create New Order">Add New Order</button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/salesquickform/create/1/'" class="btn btn-sm btn-danger mb-4" ht="Create New Quick Order">Quick Form</button>
     {% if status == 'Total' %}
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button>
     {% elif status == 'Inprogress' %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-success mb-4">All Orders</button>
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-success mb-4">All Orders</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button>
     {% else %}
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-info mb-4">All Orders</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-info mb-4">All Orders</button>
     {% endif %}
 
     &emsp;&emsp;
@@ -151,9 +169,9 @@
       <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
       &nbsp;&nbsp;&nbsp;
       {% if status == 'Total' %}
-        <button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+        <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
       {% else %}
-        <button type="button" onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+        <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
       {% endif %}
     {% endif %}
   </div>
@@ -222,8 +240,13 @@
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Closed Orders</label>
                         {{ filter_data.form.Final_Status}}
                       </div>
+
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Billing Status</label>
+                        {{ filter_data.form.PO_No}}
+                      </div>
                      
-                      <div style="float:left; margin-left: 10px; margin-top:20px;" style="">
+                      <div style="float:left; margin-left: 10px; margin-top:47px;" style="">
                         <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
                         <!-- <button id="add-e" class="btn">Add Task</button> -->
                         <button id="edit-event" class="btn"></button>
@@ -237,7 +260,7 @@
     </div>
   </div>
 
-{% if request.user.username == 'praveen' %}
+{% if request.user.username != 'dghgjhkjl' %}
 <!-- ######### -->
 
 {% if status == 'Total' %}
@@ -338,7 +361,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for x, y, z, c in tableset %}
+            {% for x, y, z, c, pd in tableset %}
               {% if x.Order_Type == 'Confirmed' %} 
                {% if x.Final_Status == 1 %}
                 <tr class="customtr1" >
@@ -384,12 +407,15 @@
                   <br><span class='hlt5'>Order/PO Date: </span>{{x.Order_Received_Date|date:'d M Y'}}
                   <br><span class='hlt5'>Order Through: </span>{{x.Order_Through}}{% if x.Attach %}<a class="ahr" ht='click here to download copy' href="{{x.Attach.url}}" target="_blank"><br><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
-                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}</a>
+                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>
+                  {% else %}
+                    {% if pd > 100 %}<br><span class="hlt3">PO Pending: </span>₹ {{pd|floatformat:0|intcomma}}{% endif %}
+                  {% endif %}</a>
                 </td>
 
                 <td style="white-space:normal;">
                   <a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">
-                {% if request.user.username == 'praveen' %}
+                {% if request.user.username != 'dghgjhkjl' %}
 
 
                   <!-- ######### -->
@@ -535,17 +561,17 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit Order Details</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersform/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy Order</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/ordersform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit Order Details</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/ordersform/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy Order</button>
             <button type="button"  data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning">Delete Order</button>
             {% if status != 'Pipeline' %}
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-info">Update Work Status</button>
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/orderspaymentsform/'+getid+'/'" class="btn btn-sm btn-success">Update Payment Status</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-info">Update Work Status</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderspaymentsform/'+getid+'/'" class="btn btn-sm btn-success">Update Payment Status</button>
               
-              <br><button type="button" id='hidebillbutton' target='_blank' style="display:none"  onclick="location.href='/{{pdata.pj}}/invoice/create/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-dark">Gen Online Invoice</button>
+              <br><button type="button" id='hidebillbutton' target='_blank' style="display:none"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/create/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-dark">Gen Online Invoice</button>
               <button type="button" id='showbillbutton' style="display:none"  onclick="javascript:alertpopup()" class="btn btn-sm btn-dark">Generate Invoice</button>
 
-              <button type="button" id='hidebillbutton1' style="display:none"  onclick="location.href='/{{pdata.pj}}/invoice/create_manually/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-primary">Add Invoice Manually</button>           
+              <button type="button" id='hidebillbutton1' style="display:none"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/create_manually/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-primary">Add Invoice Manually</button>           
               <button type="button" id='showbillbutton1' style="display:none"  onclick="alertpopup()"  class="btn btn-sm btn-primary">Add Invoice Manually</button>  
             {% endif %}       
           </div>
@@ -589,9 +615,9 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button   onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
-            <button   onclick="location.href='/{{pdata.pj}}/paymentslist/Received/custflt/'" type="button" class="btn btn-sm btn-success">Customer Payments</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button>          
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentslist/Received/custflt/'" type="button" class="btn btn-sm btn-success">Customer Payments</button>
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button> -->          
           </div>
         </div>
       </div>

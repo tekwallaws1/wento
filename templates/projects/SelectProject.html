@@ -4,9 +4,8 @@
 {% block scripts %}
 <script type="text/javascript">
   $('#sel').change(function () {
-    var url = '/modules/'
     var k = $(this).val()
-    url = url + k + '/'
+    url = '/{{firm}}/'+k+ '/modules/'
     document.getElementById("search").action = url
     document.getElementById("sbmt").click()
 });
@@ -40,18 +39,10 @@
                   <select id='sel' name="Room_No" class="form-select form-control">
                   <!-- <option selected>-------------</option> -->
                   <option value="">----------</option>
-                  {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
                     {% for x in pdata.pj %}
                       <option >{{ x }}</option>
                     {% endfor %}
-                  {% else %}
-                    {% for x in pdata.pj %}
-                      {% if x.Short_Name != 'All' %}
-                        <option >{{ x }}</option>
-                      {% else %}
-                      {% endif %}
-                  {% endfor %}
-                  {% endif %}
+                    <option >All</option>
                 </select>
               </div>            
             </div>

@@ -1,0 +1,10 @@
+@media (max-width: 767px) {
+  .skip {
+    display: none;
+  }
+
+  .rt1 {
+    float: left;
+    margin-bottom: 20px;
+  }
+}

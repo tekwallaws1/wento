@@ -1,7 +1,7 @@
 from django.db import models
 from Orders.models import Orders
-from Projects.models import Projects, CompanyDetails
-from UserAccounts.models import Account, Empl_Salaries
+from Projects.models import Projects, CompanyDetails, Bank_Accounts
+from UserAccounts.models import Account, Empl_Salaries 
 
 maincat 			= (('Services', 'Services'), ('Supplies', 'Supplies'), ('Factory', 'Factory'), ('Marketing', 'Marketing'), ('Office', 'Office'), ('Dispatches', 'Dispatches'), ('Others', 'Others'))
 maincat1 			= (('Services', 'Services'), ('Marketing', 'Marketing'), ('Office', 'Office'), ('Salary Advance', 'Salary Advance'), ('Dispatches', 'Dispatches'), ('Others', 'Others'))
@@ -9,7 +9,7 @@ against				= ( ('Travel', 'Travel'), ('Food', 'Food'), ('Lodging', 'Lodging'), (
 
 class Expenses(models.Model):
 	Related_Project		= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL)
-	Related_Company		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
+	RC		            = models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
 	Reference_No		= models.CharField(max_length=20, null=True, blank=True, unique=True, help_text='voucher no')
 	Ref_No				= models.IntegerField(null=True, blank=True) 
 	FY					= models.CharField(max_length=6, null=True, blank=True) 
@@ -53,7 +53,7 @@ class Debit_Amounts(models.Model):
 	paid_to = (('Against Expenses', 'Against Expenses'),('As Advance to Staff', 'As Advance to Staff'), ('Outside Party', 'Outside Party'))
 	pay_type = (('Cash', 'Cash'),('Cheque','Cheque'),('UPI','UPI'), ('Account','Account'))
 	Related_Project		= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL)
-	Related_Company		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
+	RC					= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
 	Voucher_No			= models.IntegerField(null=True, blank=True, help_text='voucher no') 
 	Employ				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL, related_name='ifemploy') 
 	Paid_To 			= models.CharField(max_length=30, choices=paid_to, null=True)
@@ -65,8 +65,8 @@ class Debit_Amounts(models.Model):
 	Amount_to_be_Pay	= models.FloatField(max_length=10, null=True, blank=True, help_text='amount to be pay or billed or claimed amount, if not entered it will take issued amount as billed amount')
 	Issued_Amount		= models.FloatField(max_length=10, null=True, help_text='issued amount against billed/claimed amount')
 	Issued_Date 		= models.DateField(null=True, blank=True, help_text='amount issued date')
-	Payment_Mode 		= models.CharField(max_length=30, choices=pay_type, null=True)
-	Cheque_Details 		= models.CharField(max_length=60, null=True, blank=True, help_text='cheque no and date if available, example 2358455221, 25-12-2022')
+	Account_Name 		= models.ForeignKey(Bank_Accounts, null=True, on_delete=models.SET_NULL)
+	Reference_No 		= models.CharField(max_length=60, null=True, blank=True, help_text='cheque number/transaction number etc if available')
 	Purpose	    		= models.TextField(max_length=500, null=True, blank=True, help_text='description of purpose/reason to issue amount')
 	Approved_By			= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL, related_name='amountapprovedby')
 	Issued_By			= models.ForeignKey(Account, null=True, on_delete=models.SET_NULL, related_name='issuedamountby')
@@ -98,19 +98,25 @@ class Salary_Advances(models.Model):
 
 
 class Attendance(models.Model):
+	RC					= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
 	Name 				= models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='attender')
 	Date                = models.DateField(null=True)
 	Start_Time 			= models.TimeField(null=True, blank=True)
 	End_Time 			= models.TimeField(null=True, blank=True) 
 	Total_Hours 		= models.FloatField(max_length=5, null=True, blank=True)
+	OT 					= models.FloatField(default=0, max_length=5, null=True, blank=True)
 	Day_Status 			= models.CharField(max_length=20, default='Present', null=True, blank=True, choices=(('Present', 'Present'), ('Absent', 'Absent'), ('Leave', 'Leave'), ('Half Day', 'Half Day'), ('Permission', 'Permission'), ('On Duty', 'On Duty'), ('Tour', 'Tour')))
 	Sales_Order			= models.ForeignKey(Orders, null=True, blank=True, on_delete=models.SET_NULL)
 	Issued_By			= models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='attendanceissuedby')
 	Is_Manual           = models.BooleanField(default=True, help_text='generated maunaully or automatically')
+	Is_Extra_Day		= models.BooleanField(default=False, help_text='tru if holiday work as ot')
+	Is_No_Sunday	    = models.BooleanField(default=False, help_text='generated maunaully or automatically')
+
 	def __str__(self):
 		return str(self.Name)+'-'+str(self.Date)+'-'+str(self.Start_Time)+'-'+str(self.End_Time)+'-'+str(self.Day_Status)
 
 class Monthatnd(models.Model):
+	RC					= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Name 				= models.ForeignKey(Account, on_delete=models.CASCADE, null=True)
 	Month	 			= models.DateField(null=True, blank=True)	
 	Presents 			= models.FloatField(max_length=4, null=True, blank=True)
@@ -124,6 +130,7 @@ class Monthatnd(models.Model):
 		return str(self.Name)+'-'+str(self.Presents)
 
 class DeclareDayAs(models.Model):
+	RC					= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
 	Date	 			= models.DateField(null=True, blank=True)
 	Declare_Day_As 		= models.CharField(max_length=30, default='Holiday', null=True, choices=(('Holiday', 'Holiday'), ('Half Day', 'Half Day'), ('Working Day', 'Working Day')))
 	Occassion 			= models.CharField(max_length=30, null=True, blank=True, help_text='reason for holiday/half day/workingday')
@@ -133,6 +140,7 @@ class DeclareDayAs(models.Model):
 		return str(self.Date)+'-'+str(self.Declare_Day_As)+'-'+str(self.Occassion)
 
 class Working_Days(models.Model):
+	RC					= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
 	Month	 			= models.DateField(null=True, blank=True)
 	Working_Days 		= models.FloatField(max_length=4, null=True, blank=True)
 
@@ -140,13 +148,15 @@ class Working_Days(models.Model):
 		return str(self.Month)+'-'+str(self.Working_Days)
 
 class Monthly_Salaries(models.Model):
+	RC						= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
 	Name 					= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL)
-	Month	 				= models.DateField(null=True, blank=True)	
-	Issued_Salary 			= models.IntegerField(null=True, blank=True, help_text='issued salary or net salary for this month')
+	Month	 				= models.DateField(null=True, blank=True)
+	Issued_Days 			= models.FloatField(default=0, max_length=5, null=True, blank=True)
+	Issued_Salary 			= models.IntegerField(default=0, null=True, blank=True, help_text='issued salary or net salary for this month')
 	Issued_Date 			= models.DateField(null=True, help_text='salary issued date')
-	Presents 				= models.FloatField(max_length=5, null=True, blank=True)
-	LOP 					= models.FloatField(max_length=10, null=True, blank=True, help_text='loss of pay if eligible')
-	OT_Amount 				= models.IntegerField(null=True, blank=True, help_text='over time amount if eligible')
+	LOP 					= models.FloatField(default=0, max_length=10, null=True, blank=True, help_text='loss of pay if eligible')
+	OT_Amount 				= models.IntegerField(default=0, null=True, blank=True, help_text='over time amount if eligible')
+	OT_Hours 				= models.FloatField(default=0, max_length=5, null=True, blank=True, help_text='over time hours if eligible')
 	PF						= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PF employee share 12% of basic if eligible')
 	ESI 					= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='3.25% employer on gross')
 	Professional_Tax 		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PT deductions if eligible, <15K 0, 15-20K 150, >15K 200 of gross')
@@ -156,11 +166,15 @@ class Monthly_Salaries(models.Model):
 	Issued_Status			= models.BooleanField(default=True, help_text='issued status')
 	Automatic				= models.BooleanField(default=True)
 	Last_Updated_Date	    = models.DateField(null=True, blank=True)
+	Actual_Net_Salary 		= models.IntegerField(null=True, blank=True)
+	Expenses 				= models.FloatField(max_length=10, default=0, null=True, blank=True)
+
 
 	def __str__(self):
 		return str(self.Name.Name)+'-'+str(self.Issued_Date)+'-'+str(self.Issued_Salary)
 
 class Month_Sal_Exp(models.Model):
+	RC					= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
 	Month	 				= models.DateField(null=True, blank=True)	
 	Issued_Salareis 		= models.IntegerField(null=True, blank=True, help_text='total issued salaries')
 	Pending_Salaries 		= models.IntegerField(null=True, blank=True, help_text='pending salaries')

@@ -7,7 +7,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"> 
-    <title>GPR-PRoMan</title>
+    <title>Prakom-Pro</title>
     
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.css">
@@ -21,7 +21,7 @@
   <body>
     <br><br>
     <!-- <button onclick="Convert_HTML_To_PDF();">Convert HTML to PDF</button> -->
-    <button type="button"  onclick="location.href='/{{pdata.pj}}/purchaseslist/Inprogress/'" class="btn2 btn2-info">PO's List</button>
+    <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Inprogress/'" class="btn2 btn2-info">PO's List</button>
       <button type="button"  id="btnTest" onclick="href='javascript:generatePDF()'" class="btn2 btn2-primary">Download</button>
     {% if po.Lock_Status == 1 %}
       <button type="button" ht='unlock it for edit/change the po' id='hidelockbutton' data-toggle="modal" data-target="#unlockPasswordModal" onclick="javascript:fnc('unlockpo')" class="btn2 btn2-danger">Unlock PO</button>
@@ -58,7 +58,7 @@
     <script>var hide1=1; var hide2=1; var hide3=1;</script>
 
     <div id="po" class="print">
-      <img  class="invlogo" style="position: absolute; width:100px; height: 100px; margin-left: 25px;" src="{% static 'img/logo-mini.png' %}">
+      <img  class="invlogo" style="position: absolute; width:100px; height: 100px; margin-left: 25px;" src="{% static 'img/logo-name.png' %}">
       <div class="row d-flex justify-content-center text-center" style="font-size:13px; font-weight: 600; color:black;">
         <a class="ahr" ht="Change PO-From-Address" data-toggle="modal" data-target="#editPOModal" onclick="javascript:fnc('companyaddress')">
         <span style="font-size:25px; font-weight: 600; color: #db1309">{{po.PO_From.Company_Name}}</span>
@@ -382,7 +382,7 @@
         <div class="modal-body">
           <div class="template-demo">
             <button type="button" data-toggle="modal" data-target="#TCModal" class="btn btn-sm btn-primary mb-2">Edit T&C</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/delete/po_tc/'+{{po.id}}+'/'" class="btn btn-sm btn-danger mb-2">Delete T&C</button>            
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/delete/po_tc/'+{{po.id}}+'/'" class="btn btn-sm btn-danger mb-2">Delete T&C</button>            
           </div>
         </div>
       </div>
@@ -435,8 +435,8 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button" onclick="location.href='/{{pdata.pj}}/po/edit/'+{{po.id}}+'/'+getid+'/msg/'" class="btn btn-sm btn-primary mb-2">Update Item</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/delete/poitem/'+{{po.id}}+'/'+getid+'/'" class="btn btn-sm btn-danger mb-2">Delete Item</button>            
+            <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/po/edit/'+{{po.id}}+'/'+getid+'/msg/'" class="btn btn-sm btn-primary mb-2">Update Item</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/delete/poitem/'+{{po.id}}+'/'+getid+'/'" class="btn btn-sm btn-danger mb-2">Delete Item</button>            
           </div>
         </div>
       </div>
@@ -450,7 +450,7 @@
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Item Update Form</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.href='/{{pdata.pj}}/po/edit/'+{{po.id}}+'/'+'itemid/msg/'">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" onclick="location.href='/{{firm}}/{{pdata.pj}}/po/edit/'+{{po.id}}+'/'+'itemid/msg/'">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
@@ -462,7 +462,7 @@
                 {% for field in form_item %}
                     <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
                     {% if field.label != 'Quantity' %}
-                      <a title="add new item to products (after add new product add price details also" target="_blank" href="/{{pdata.pj}}/addproduct/create/1/"><i class="fas fa-square-plus float-right" style="color:purple; padding-bottom:-20px;"></i></a>
+                      <a title="add new item to products (after add new product add price details also" target="_blank" href="/{{firm}}/{{pdata.pj}}/productsform/Products/create/1/"><i class="fas fa-square-plus float-right" style="color:purple; padding-bottom:-20px;"></i></a>
                     {% endif %}
                     {{ field}}
                   {% for error in field.errors %}
@@ -482,7 +482,7 @@
 
   <script type="text/javascript">  
     function fnc(tag) {
-      document.getElementById("po_edit_action").action = '/{{pdata.pj}}/po_edit/edit/'+{{po.id}}+'/';
+      document.getElementById("po_edit_action").action = '/{{firm}}/{{pdata.pj}}/po_edit/edit/'+{{po.id}}+'/';
 
       if ( tag == 'companyaddress' ) {document.getElementById("pofrom").style.display = 'block';}
       else {document.getElementById("pofrom").style.display = 'none';};
@@ -502,25 +502,25 @@
       // if ( tag == 'tc' ) {document.getElementById('tc').style.display = 'block';}
       // else {document.getElementById("tc").style.display = 'none';};
       
-      if ( tag == 'addnewitem' ) {document.getElementById("itemaction").action = '/{{pdata.pj}}/create/poitem/'+{{po.id}}+'/'+tag+'/';}
+      if ( tag == 'addnewitem' ) {document.getElementById("itemaction").action = '/{{firm}}/{{pdata.pj}}/create/poitem/'+{{po.id}}+'/'+tag+'/';}
 
-      if ( tag == 'addtc' ) {document.getElementById("tcaction").action = '/{{pdata.pj}}/create/po_tc/'+{{po.id}}+'/';}
+      if ( tag == 'addtc' ) {document.getElementById("tcaction").action = '/{{firm}}/{{pdata.pj}}/create/po_tc/'+{{po.id}}+'/';}
     }
 
       function edittc(id){
         getid = id;
-        document.getElementById("tcaction").action = '/{{pdata.pj}}/edit/po_tc/'+{{po.id}}+'/';}
+        document.getElementById("tcaction").action = '/{{firm}}/{{pdata.pj}}/edit/po_tc/'+{{po.id}}+'/';}
 
       function edititem(id) {getid = id;}
 
       function validatepoepswd(pswd) { 
         if ( pswd == 'sse123') {
-          document.getElementById("unlockpoaction").action = '/{{pdata.pj}}/po_edit/edit/'+{{po.id}}+'/';
+          document.getElementById("unlockpoaction").action = '/{{firm}}/{{pdata.pj}}/po_edit/edit/'+{{po.id}}+'/';
           document.getElementById("unlocksubmit").click();}
         else { alert('Password did not matched. Please Try Again')}
         }
       function deletepo(tag){
-        if (tag=='sse123') {location.href='/{{pdata.pj}}/po_edit/delete/'+{{po.id}}+'/' }
+        if (tag=='sse123') {location.href='/{{firm}}/{{pdata.pj}}/po_edit/delete/'+{{po.id}}+'/' }
           else { alert('Password did not matched. Please Try Again')}
       }
 
@@ -556,7 +556,7 @@
           }}).save();
         
         setTimeout(func, 1000);
-        function func() {location.href='/{{pdata.pj}}/po/edit/'+{{po.id}}+'/itemid/msg/'}
+        function func() {location.href='/{{firm}}/{{pdata.pj}}/po/edit/'+{{po.id}}+'/itemid/msg/'}
     }
     document.getElementById('btnTest').onclick = test;
   </script>
@@ -579,13 +579,13 @@
             // type:'warning',
             confirmButtonText: 'OK',
           }).then((result) => {
-  if (result.value) {location.href='/{{pdata.pj}}/po/edit/'+{{po.id}}+'/itemid/msg/';}})
+  if (result.value) {location.href='/{{firm}}/{{pdata.pj}}/po/edit/'+{{po.id}}+'/itemid/msg/';}})
       }) };
 
-      if ('{{fnc}}' == 'create') {location.href='/{{pdata.pj}}/po/edit/'+{{po.id}}+'/itemid/msg/'};
+      if ('{{fnc}}' == 'create') {location.href='/{{firm}}/{{pdata.pj}}/po/edit/'+{{po.id}}+'/itemid/msg/'};
      if ('{{item_id}}' != 'itemid') {
       document.getElementById('itemidclick').click(); 
-      document.getElementById("itemaction").action = '/{{pdata.pj}}/edit/poitem/'+{{po.id}}+'/'+{{item_id}}+'/';}
+      document.getElementById("itemaction").action = '/{{firm}}/{{pdata.pj}}/edit/poitem/'+{{po.id}}+'/'+{{item_id}}+'/';}
     }
   </script>
 

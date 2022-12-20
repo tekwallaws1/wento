@@ -13,7 +13,7 @@
 {% block scripts %} 
   <script src="{% static 'js/filterdate.js' %}"></script>
   <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS --> 
-  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <script src="{% static 'js/datatables/datatables.js' %}"></script> 
   <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
   <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
   <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
@@ -29,8 +29,8 @@
   function editpo(po_id, is_manual, is_nopo) {
     poid = po_id;
     
-    if(is_manual == 'True' || is_nopo == 'True') {editurl = '/{{pdata.pj}}/purchasesform/edit_manually/'+poid+'/'; }
-    else { editurl = '/{{pdata.pj}}/po/edit/'+poid+'/itemid/msg/'; }
+    if(is_manual == 'True' || is_nopo == 'True') {editurl = '/{{firm}}/{{pdata.pj}}/purchasesform/edit_manually/'+poid+'/'; }
+    else { editurl = '/{{firm}}/{{pdata.pj}}/po/edit/'+poid+'/itemid/msg/'; }
   };
 
   function edit() {
@@ -48,12 +48,12 @@
   };
 
   function hidedomore() {
-    document.getElementById('selectvendorformaction').action = '/{{pdata.pj}}/po/create/1/itemid/msg/'
+    document.getElementById('selectvendorformaction').action = '/{{firm}}/{{pdata.pj}}/po/create/1/itemid/msg/'
     $("#doMoreModal .close").click()
     // $('#doMoreModal').modal('hide');
 }
   function hidepoedit() {
-    document.getElementById('paymentformaction').action = '/{{pdata.pj}}/popaymentsform/'+poid+'/'
+    document.getElementById('paymentformaction').action = '/{{firm}}/{{pdata.pj}}/popaymentsform/'+poid+'/'
     $("#editPOModal .close").click()
   }
 
@@ -70,7 +70,7 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/purchasesform/delete/'+poid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/purchasesform/delete/'+poid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -151,7 +151,7 @@
   <div style="float:right">
     {% if status == 'Total'%}
       <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-      <button type="button" onclick="location.href='/{{pdata.pj}}/purchaseslist/Total/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Total/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% endif %}
   </div>
   <div style="clear:both"></div>
@@ -324,7 +324,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for x, y, z, c, delivery in tableset %}
+            {% for x, y, z, c, delivery, pd in tableset %}
                {% if x.Final_Status == 1 %}
                 <tr class="customtr1" >
                   <!-- <tr> -->
@@ -347,7 +347,10 @@
                   <br><span class='hlt5'>PO Date: </span>{{x.PO_Date|date:'d M Y'}}
                   {% if x.Attach %}<a class="ahr" ht='click here to download copy' href="{{x.Attach.url}}" target="_blank"><br><span class='hlt5'>Download PO: </span><i class="fas fa fa-download"></i></a>{% endif %}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
-                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}</a>
+                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>
+                  {% else %}
+                    {% if pd > 100 %}<br><span class="hlt3">PO Pending: </span>₹ {{pd|floatformat:0|intcomma}}{% endif %}
+                  {% endif %}</a>
                 </td>
 
                 <td style="white-space:normal;">
@@ -387,7 +390,7 @@
                   <a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}', '{{x.Is_Manual}}', '{{x.Is_No_PO}}')">
                   {% if delivery %}
                     {% for p in delivery %}
-                      <a class="ahr" ht='edit delivery details' target="_blank" onclick="location.href='/{{pdata.pj}}/podeliveryform/edit/{{x.id}}/{{p.id}}/'">
+                      <a class="ahr" ht='edit delivery details' target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/podeliveryform/edit/{{x.id}}/{{p.id}}/'">
                       <span class="hlt5">Delivered Date: </span>{{p.Delivery_Date|date:'d M Y'}}
                       {% if p.Is_Delivered_Fully == 1 %}
                         <br><span class="hlt2">All Material Received</span>
@@ -434,7 +437,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for x, y, z, c, delivery in tableset %}
+            {% for x, y, z, c, delivery, pd in tableset %}
               <tr>
           
                 <td >{{forloop.counter}}</td>
@@ -451,7 +454,11 @@
                   <br><span class='hlt5'>PO No: </span>{{x.PO_No}}
                   <br><span class='hlt5'>PO Date: </span>{{x.PO_Date|date:'d M Y'}}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
-                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}</a>
+                  {% if x.Attach %}<a class="ahr" ht='click here to download copy' href="{{x.Attach.url}}" target="_blank"><br><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
+                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>
+                  {% else %}
+                    {% if pd > 100 %}<br><span class="hlt3">PO Pending: </span>₹ {{pd|floatformat:0|intcomma}}{% endif %}
+                  {% endif %}</a>
                 </td>
 
                 <td style="white-space:normal;">  
@@ -491,7 +498,7 @@
                   <a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}', '{{x.Is_Manual}}', '{{x.Is_No_PO}}')">
                   {% if delivery %}
                     {% for p in delivery %}
-                      <a class="ahr" ht='edit delivery details' target="_blank" onclick="location.href='/{{pdata.pj}}/podeliveryform/edit/{{x.id}}/{{p.id}}/'">
+                      <a class="ahr" ht='edit delivery details' target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/podeliveryform/edit/{{x.id}}/{{p.id}}/'">
                       <span class="hlt5">Delivered Date: </span>{{p.Delivery_Date|date:'d M Y'}}
                       {% if p.Is_Delivered_Fully == 1 %}
                         <br><span class="hlt2">All Material Received</span>
@@ -536,7 +543,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for x, y, z, c, delivery in tableset %}
+            {% for x, y, z, c, delivery, pd in tableset %}
               <tr>
 
                 <td >{{forloop.counter}}</td>
@@ -553,7 +560,11 @@
                   <br><span class='hlt5'>PO No: </span>{{x.PO_No}}
                   <br><span class='hlt5'>PO Date: </span>{{x.PO_Date|date:'d M Y'}}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
-                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}</a>
+                  {% if x.Attach %}<a class="ahr" ht='click here to download copy' href="{{x.Attach.url}}" target="_blank"><br><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
+                  {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>
+                  {% else %}
+                    {% if pd > 100 %}<br><span class="hlt3">PO Pending: </span>₹ {{pd|floatformat:0|intcomma}}{% endif %}
+                  {% endif %}</a>
                 </td>
 
                 <td style="white-space:normal;">
@@ -593,7 +604,7 @@
                   <a class="ahr" ht="open/edit/delete PO Primary Details" data-toggle="modal" data-target="#editPOModal" onclick="javascript:editpo('{{x.id}}', '{{x.Is_Manual}}', '{{x.Is_No_PO}}')">
                   {% if delivery %}
                     {% for p in delivery %}
-                      <a class="ahr" ht='edit delivery details' target="_blank" onclick="location.href='/{{pdata.pj}}/podeliveryform/edit/{{x.id}}/{{p.id}}/'">
+                      <a class="ahr" ht='edit delivery details' target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/podeliveryform/edit/{{x.id}}/{{p.id}}/'">
                       <span class="hlt5">Delivered Date: </span>{{p.Delivery_Date|date:'d M Y'}}
                       {% if p.Is_Delivered_Fully == 1 %}
                         <br><span class="hlt2">All Material Received</span>
@@ -654,11 +665,12 @@
                 </td>
 
                 <td style="white-space:normal;">
-                  <a class="ahr" ht='open/edit/delete PO Copy' target="_blank" onclick="location.href='/{{pdata.pj}}/po/edit/{{x.id}}/itemid/msg/'">
+                  <a class="ahr" ht='open/edit/delete PO Copy' target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/po/edit/{{x.id}}/itemid/msg/'">
                   <span class="hlt2">PO Value: ₹ {{x.PO_Value|floatformat:0|intcomma}}</span>
                   <br><span class='hlt5'>PO No: </span>{{x.PO_No}}
                   <br><span class='hlt5'>PO Date: </span>{{x.PO_Date|date:'d M Y'}}
                   {% if x.user.Nick_Name %}<br><span class='hlt5'>Followup By: </span>{{x.user.Nick_Name}}{% endif %}
+                  {% if x.Attach %}<a class="ahr" ht='click here to download copy' href="{{x.Attach.url}}" target="_blank"><br><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
                   {% if x.Final_Status == 1 %}<br><span class="hlt2">Order/PO Closed</span>{% endif %}</a>
                 </td>
 
@@ -714,16 +726,18 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  data-toggle="modal" data-target="#selectVendorModal" class="btn btn-sm btn-danger" ht="generate new PO" onclick="hidedomore()">Generate Online PO</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/po/create_manually/1/itemid/msg/'" class="btn btn-sm btn-primary" ht="add PO manually" onclick="hidedomore()">Add Manual PO</button>
+            {% if proj != 'All' %}
+              <button type="button"  data-toggle="modal" data-target="#selectVendorModal" class="btn btn-sm btn-danger" ht="generate new PO" onclick="hidedomore()">Generate Online PO</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/po/create_manually/1/itemid/msg/'" class="btn btn-sm btn-primary" ht="add PO manually" onclick="hidedomore()">Add Manual PO</button>
+            {% endif %}
 
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/purchaseslist/Inprogress/'" class="btn btn-sm btn-info" ht="inprogress PO's maens PO not delivered/vendor payment not paid fully or both">Inprogress PO's</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Inprogress/'" class="btn btn-sm btn-info" ht="inprogress PO's maens PO not delivered/vendor payment not paid fully or both">Inprogress PO's</button>
             
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/purchaseslist/Closed/'" class="btn btn-sm btn-success" ht="Closed PO's maens PO delivered and vendor payments paid fully">Closed PO's</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Closed/'" class="btn btn-sm btn-success" ht="Closed PO's maens PO delivered and vendor payments paid fully">Closed PO's</button>
 
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/purchaseslist/Total/'" class="btn btn-sm btn-dark" ht="all issued PO's i.e closed and inprogress">All PO's</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Total/'" class="btn btn-sm btn-dark" ht="all issued PO's i.e closed and inprogress">All PO's</button>
 
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/purchaseslist/Incomplete/'" class="btn btn-sm btn-warning" ht="not issued to vendor, just draft copies">PO Draft Copies</button>          
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Incomplete/'" class="btn btn-sm btn-warning" ht="not issued to vendor, just draft copies">PO Draft Copies</button>          
           </div>
         </div>
       </div>
@@ -749,7 +763,7 @@
                   {% if field.label == 'Vendor' or field.label == 'Purchase Details' %}
                     {% if field.label == 'Vendor' %}
                       <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
-                      <a title="add new vendor" target="_blank" href="/{{pdata.pj}}/vendorform/create/1/"><i class="fas fa-square-plus " style="color:purple; padding-bottom:-20px;"></i></a>
+                      <a title="add new vendor" target="_blank" href="/{{firm}}/{{pdata.pj}}/vendorform/create/1/"><i class="fas fa-square-plus " style="color:purple; padding-bottom:-20px;"></i></a>
                     {{ field}}
                     {% endif %}
                     {% if field.label == 'Purchase Details' %}
@@ -818,13 +832,13 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button" targt="_blank" onclick="location.href='/{{pdata.pj}}/purchasesform/edit/'+poid+'/'" class="btn btn-sm btn-danger">Update PO Status</button>
+            <button type="button" targt="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/purchasesform/edit/'+poid+'/'" class="btn btn-sm btn-danger">Update PO Status</button>
 
             <button type="button" targt="_blank" onclick="edit()" class="btn btn-sm btn-primary">Edit PO</button>
             <!-- <button type="button"  data-toggle="modal" data-target="#deletePOModal" class="btn btn-sm btn-warning">Delete PO</button> -->
 
             <button type="button" onclick="hidepoedit()" data-toggle="modal" data-target="#addPaymentModal" class="btn btn-sm btn-info">Add Payment</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/podeliveryform/create/'+poid+'/1/'" class="btn btn-sm btn-success">Add Delivery Details</button>     
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/podeliveryform/create/'+poid+'/1/'" class="btn btn-sm btn-success">Add Delivery Details</button>     
           </div>
         </div>
       </div>
@@ -843,8 +857,8 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button   onclick="location.href='/{{pdata.pj}}/vendorinvoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Vendor Invoices</button>
-            <button   onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/'" type="button" class="btn btn-sm btn-success">Vendor Payments</button>          
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorinvoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Vendor Invoices</button>
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/'" type="button" class="btn btn-sm btn-success">Vendor Payments</button>          
           </div>
         </div>
       </div>

@@ -13,7 +13,7 @@
 {% endblock %} 
 
 {% block scripts %}
-  <script src="{% static 'js/filterdate.js' %}"></script>
+  <script src="{% static 'js/filterdate.js' %}"></script> 
   <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
   <script src="{% static 'js/datatables/datatables.js' %}"></script>
   <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
@@ -30,9 +30,26 @@
     function rid(tid) {getid = tid}
     function validate1(p) {
       if(   document.getElementById("activitypswd1").value == "sse123" ){
-          url = '/{{pdata.pj}}/companyform/delete/'+getid+'/'
+          url = '/{{firm}}/{{pdata.pj}}/companyform/delete/'+getid+'/'
           location.href=url;}
       else{alert( "Incorrect Activity Password, Please Try Again" );}}
+  
+  {% if messages %}
+    {% for msg in messages %}
+      {% if msg.tags == 'error' %}
+        <script>
+          $('.widget-content .message', function () {
+          swal({
+              title: 'Error Alert !',
+              text: '{{msg}}',
+              padding: '2em'
+            })
+        })          
+        </script>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
   </script>
 
 <!-- Data Tables Export Script -->
@@ -86,7 +103,7 @@
 <div>
   <div style="float:left">
     <div class="page-header">
-      <button type="button"  onclick="location.href='/{{pdata.pj}}/companyform/create/1/'" class="btn btn-sm btn-primary mb-4"><i class="mdi mdi-plus btn-icon-append"></i>Register New Company</button>
+      <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/companyform/create/1/'" class="btn btn-sm btn-primary mb-4"><i class="mdi mdi-plus btn-icon-append"></i>Register New Company</button>
     </div>
   </div>
   <div style="float:right">     
@@ -127,8 +144,8 @@
             </td>
 
             <td>
-              <a class="mdi mdi-border-color bs-tooltip" title="Update" href="/{{pdata.pj}}/companyform/edit/{{x.id}}/"></a>&emsp;  
-              <a class="mdi mdi-content-copy bs-tooltip" title="Copy Data" href="/{{pdata.pj}}/companyform/copy/{{x.id}}/"></a>&emsp;
+              <a class="mdi mdi-border-color bs-tooltip" title="Update" href="/{{firm}}/{{pdata.pj}}/companyform/edit/{{x.id}}/"></a>&emsp;  
+              <a class="mdi mdi-content-copy bs-tooltip" title="Copy Data" href="/{{firm}}/{{pdata.pj}}/companyform/copy/{{x.id}}/"></a>&emsp;
               <a style="cursor:pointer" class="mdi mdi-delete" title="Delete" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}')"></a>
             </td>
           </tr>

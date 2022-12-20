@@ -14,12 +14,19 @@
               {% csrf_token %}
               <div class="form-group">
                 {% for field in form %}
-                  {% if field.label != 'Issued Salary'  %}
-                    <label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                {% if mode == 'presents' %}
+                  {% if field.label == 'Presents' or  field.label == 'OT Hours'  %}
+                    <label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                  {% else %}
+                    <div style="display:none"><label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}</div>
                   {% endif %}
-                  {% if field.label == 'Issued Salary'  %}
-                    <label>Payable Salary</label>{{ field}} 
+                {% else %}
+                  {% if field.label == 'PF' or  field.label == 'ESI' or  field.label == 'TDS' or field.label == 'Other Deductions' or  field.label == 'Salary Advance' or field.label == 'Professional Tax' %}
+                    <label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                  {% else %}
+                    <div style="display:none"><label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}</div>
                   {% endif %}
+                {% endif %}
                   {% for error in field.errors %}
                     <p style="color: red; margin-top: -20px">{{ error }}</p>
                   {% endfor %}

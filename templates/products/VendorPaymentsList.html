@@ -32,20 +32,20 @@
 
 function fncsbmt(){
   var vendor = $("#sel").val();
-  document.getElementById('vendoraction').action = '/{{pdata.pj}}/vendorpaymentslist/Paid/'+vendor+'/';
+  document.getElementById('vendoraction').action = '/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Paid/'+vendor+'/';
 }
   
 
 
-  function rid(tid, xid) {getid = tid; getxid = xid;}
+  function rid(tid, cell) {getid = tid; phone = cell;}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/vendorpaymentsform/delete/'+getid+'/' 
+        url = '/{{firm}}/{{pdata.pj}}/vendorpaymentsform/delete/'+getid+'/' 
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
   function selectmode(tag){
-    document.getElementById('paymentaction').action =  '/{{pdata.pj}}/vendorpaymentsform/create/1/'
+    document.getElementById('paymentaction').action =  '/{{firm}}/{{pdata.pj}}/vendorpaymentsform/create/1/'
     if (tag=='againstpo') {document.getElementById('pono').style.display='block';}
     else {document.getElementById('pono').style.display='none';}
     if (tag=='againstinvoice') {document.getElementById('invoiceno').style.display='block';}
@@ -106,17 +106,17 @@ function fncsbmt(){
     var tagName = style.getElementsByTagName('sz');
     for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
     $('row:first c', sheet).attr('s', '2')
-    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' );  //wrap text
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' );  $('row c[r^="E"]', sheet).attr( 's', '55' ); $('row c[r^="F"]', sheet).attr( 's', '55' );//wrap text
     var col = $('col', sheet);
     // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
-    $(col[1]).attr('width', 45); $(col[2]).attr('width', 25); $(col[3]).attr('width', 20); }; 
+    $(col[1]).attr('width', 45);  $(col[2]).attr('width', 30); $(col[3]).attr('width', 25); $(col[4]).attr('width', 20); $(col[5]).attr('width', 20);};  
   //--End--//
 
-  var cl = [0,  1, 2, 3]
-  var wdths = ['4%', '50%', '26%', '20%'];
+  var cl = [0,  1, 2, 3, 4, 5]
+  var wdths = ['4%', '30%', '18%', '18%', '15%', '15%'];
   var ort = 'portrait'; //landscape
   
-  var msgTop = 'Total Billings  {{total_billed|floatformat:0|intcomma}} | Total Paid  {{total_paid|floatformat:0|intcomma}} | Due Payments  {{total_due|floatformat:0|intcomma}}'
+  var msgTop = 'Total Billings  {{total_billed|floatformat:0|intcomma}} | Paid Payments Against Billed  {{total_paid|floatformat:0|intcomma}} | Due Payments  {{total_due|floatformat:0|intcomma}} {% if advance %} | Over Paid Payments {{advance|floatformat:0|intcomma}}{% endif %}'
     var title = '{{pdata.pj}} - {{status}} Payments List';
     var filename = '{{pdata.pj}}-{{status}}Payments_{{table.first.Payment_Date|date:'dMy'}}to{{table.last.Payment_Date|date:'dMy'}}'
 
@@ -167,9 +167,9 @@ function fncsbmt(){
     <button type="button" data-toggle='modal', data-target="#MorePagesModal" class="btn btn-sm btn-danger mb-4" >More Pages</button>
     
 <!--     {% if status == 'Due' %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/'" class="btn btn-sm btn-success mb-4" ht="paid payments against vendor billed or unbilled PO's">Paid Payments</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/'" class="btn btn-sm btn-success mb-4" ht="paid payments against vendor billed or unbilled PO's">Paid Payments</button>
     {% else %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Due/vendflt/'" class="btn btn-sm  btn-success mb-4" ht="due payments against billed PO's">Due Payments</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Due/vendflt/'" class="btn btn-sm  btn-success mb-4" ht="due payments against billed PO's">Due Payments</button>
     {% endif %}  -->
     <!-- &emsp;<button type="button"  onclick="location.href=''" class="btn btn-sm  btn-info mb-4">Dash Board</button> -->
   </div>
@@ -177,9 +177,9 @@ function fncsbmt(){
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
     &nbsp;&nbsp;&nbsp;
     {% if status == 'Due' %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Due/vendflt/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Due/vendflt/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% else %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% endif %}
   </div>
   <div style="clear:both"></div>
@@ -259,7 +259,59 @@ function fncsbmt(){
   </div>
 
 <div class="row">
-  <div class="col-xl-4 col-md-6 mb-4">
+{% if advance %}
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-primary shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Billings</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{total_billed|floatformat:0|intcomma}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6 mb-4">
+    <div class="card border-left-success shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Paid Payments Againts Billed</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">
+            ₹ {{total_paid|floatformat:0|intcomma}}
+          </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6 mb-4"> 
+    <div class="card border-left-danger shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments</div>
+            <div class="h6 mb-0 font-weight-bold text-blue-1000">₹ {{total_due|floatformat:0|intcomma}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-3 col-md-6 mb-4"> 
+    <div class="card border-left-info shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Over Paid Payments</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">{{advance|floatformat:0|intcomma}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% else %}
+<div class="col-xl-4 col-md-6 mb-4">
     <div class="card border-left-primary shadow h-100 py-2">
       <div class="card-body2">
         <div class="row no-gutters align-items-center">
@@ -276,9 +328,9 @@ function fncsbmt(){
       <div class="card-body2">
         <div class="row no-gutters align-items-center">
           <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Paid Amounts</div>
+            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Paid Payments Againts Billed</div>
             <div class="h6 mb-0 font-weight-bold text-gray-800">
-            ₹ {{total_paid|floatformat:0|intcomma}} {% if advance > 0 %} <span style="color:voilet; font-size:15px;">(Paid As Advance {{advance|floatformat:0|intcomma}})</span>{% endif %}
+            ₹ {{total_paid|floatformat:0|intcomma}} {% if advance > 100 %} <span style="color:voilet; font-size:15px;">(Paid As Advance {{advance|floatformat:0|intcomma}})</span>{% endif %}
           </div>
           </div>
         </div>
@@ -286,114 +338,21 @@ function fncsbmt(){
     </div>
   </div>
   <div class="col-xl-4 col-md-6 mb-4"> 
-    <div class="card border-left-dark shadow h-100 py-2">
+    <div class="card border-left-danger shadow h-100 py-2">
       <div class="card-body2">
         <div class="row no-gutters align-items-center">
           <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments</div>
+            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments</div>
             <div class="h6 mb-0 font-weight-bold text-blue-1000">₹ {{total_due|floatformat:0|intcomma}}</div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <!-- <div class="col-xl-3 col-md-6 mb-4"> 
-    <div class="card border-left-info shadow h-100 py-2">
-      <div class="card-body2">
-        <div class="row no-gutters align-items-center">
-          <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Paid Advances</div>
-            <div class="h6 mb-0 font-weight-bold text-gray-1000">₹ {{total_advances|floatformat:0|intcomma}}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div> -->
+{% endif %}
 </div>
   
-<!-- {% if status == 'Due' %}
-  <div class="row">
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-primary shadow h-100 py-2">
-        <div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Billed PO's</div>
-              <br><div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-20px; font-size:13px;">Over Due Payments</div>
-              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{pc.t_due_overdue|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-success shadow h-100 py-2">
-        <div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Billed PO's</div>
-              <br><div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-20px; font-size:13px;">COMING DUE PAYMENTS</div>
-              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{pc.t_due_coming|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-xl-4 col-md-6 mb-4"> 
-      <div class="card border-left-dark shadow h-100 py-2">
-        <div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Due Payments</div>
-              <br><div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-20px; font-size:13px;">Over Due and Coming Due</div>
-              <div class="h6 mb-0 font-weight-bold text-blue-1000">₹ {{pc.t_due_all|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-{% else %}
-  <div class="row">
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-primary shadow h-100 py-2">
-        <a ht="all paid vendor payments against billed PO's"><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Paid Payments Against Billed PO's</div>
-              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{billed_rec|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div></a>
-      </div>
-    </div>
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-info shadow h-100 py-2">
-        <a ht="paid advance vendor payments against unbilled PO's"><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Paid Advances Against Unbilled PO's</div>
-              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{pc.total_balance_as_advance|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div></a>
-      </div>
-    </div>
-    <div class="col-xl-4 col-md-6 mb-4">
-      <div class="card border-left-info shadow h-100 py-2">
-        <a ht="total paid vendor payments against billed and  advances against unbilled PO's"><div class="card-body2">
-          <div class="row no-gutters align-items-center">
-            <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Paid Vendor Payments</div>
-              <div class="h6 mb-0 mr-3 font-weight-bold text-blue-1000">₹ {{total_rec|floatformat:0|intcomma}}</div>
-            </div>
-          </div>
-        </div></a>
-      </div>
-    </div>
-  </div>
 
-{% endif %} -->
 
 {% if status == 'Paid' %}
 <!-- Payments List -->
@@ -406,8 +365,10 @@ function fncsbmt(){
           <tr>
             <th>#</th>
             <th>Vendor Details</th>
+            <th>Payment Against</th>
             <th>Payment Date</th>
             <th>Paid Amount</th>
+            <th>Transaction Details</th>
           </tr>
         </thead>
         <tbody>
@@ -416,19 +377,40 @@ function fncsbmt(){
             <td >{{forloop.counter}}</td>
 
             <td style="white-space:normal;">
-              {{x.PO_No.Vendor.Supplier_Name}}
+              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {% if x.PO_No.Vendor_Contact %}{{x.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{x.PO_No.Vendor.Phone_Number_1}}{% endif %})">{{x.PO_No.Vendor.Supplier_Name}}</a>
               <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Vendor.Phone_Number_1}}'>{{x.PO_No.Vendor.Phone_Number_1}}</a>
             </td>
 
             <td style="white-space:normal;">
-              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {{x.id}})">
+              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {% if x.PO_No.Vendor_Contact %}{{x.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{x.PO_No.Vendor.Phone_Number_1}}{% endif %})">
+                {% if x.Invoice_No %}<span class="hlt5">Invoice No</span>
+                <br>{{ x.Invoice_No.Invoice_No }}, ₹ {{x.Invoice_No.Invoice_Amount|floatformat:0|intcomma}}{% endif %}
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {% if x.PO_No.Vendor_Contact %}{{x.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{x.PO_No.Vendor.Phone_Number_1}}{% endif %})">
                 {{x.Payment_Date|date:'d M y'}}
               </a>
             </td>
 
             <td style="white-space:normal;">
-              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {{x.id}})">
+              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {% if x.PO_No.Vendor_Contact %}{{x.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{x.PO_No.Vendor.Phone_Number_1}}{% endif %})">
                 ₹ {{x.Paid_Amount|floatformat:0|intcomma}}
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{x.id}}, {% if x.PO_No.Vendor_Contact %}{{x.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{x.PO_No.Vendor.Phone_Number_1}}{% endif %})">
+                {% if x.Account_Name.Account_Type == 'CASH' %}
+                  CASH
+                {% elif x.Account_Name.Account_Type == 'UPI' %}
+                  {{x.Account_Name.Bank_Name}}
+                  <br>UPI {{x.Account_Name.Account_No}}
+                {% else %}
+                  {{x.Account_Name.Bank_Name}}
+                  {% if x.Reference_No %}<br>{{x.Reference_No}}{% endif %}
+                {% endif %}
               </a>
             </td>
 
@@ -610,10 +592,11 @@ function fncsbmt(){
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <!-- <button type="button"  onclick="location.href='/{{pdata.pj}}/popaymentsform/'+poid+'/'" class="btn btn-sm btn-success">Add New Payment</button> -->
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/vendorpaymentsform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit Payment Details</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/vendorpaymentsform/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy Payment Details</button>
-            <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning">Delete Payment Details</button>            
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/popaymentsform/'+poid+'/'" class="btn btn-sm btn-success">Add New Payment</button> -->
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentsform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit Payment Details</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentsform/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy Payment Details</button>
+            <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning">Delete Payment Details</button>
+            <button type="button" onclick="location.reload(); location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentreceipt/'+getid+'/'+phone+'/status/'" class="btn btn-sm btn-info request-callback" id="myButton">Send Receipt</button>            
           </div>
         </div>
       </div>
@@ -715,6 +698,8 @@ function fncsbmt(){
                   </div>
                   <div >
                     <label for="{{ field.label }}">Paid Amount{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_payments.Paid_Amount }}
+                    <label for="{{ field.label }}">Paid Through{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_payments.Account_Name }}
+                    <label for="{{ field.label }}">Reference No{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_payments.Reference_No }}
                     <label for="{{ field.label }}">Payment Date{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_payments.Payment_Date }}
                     <label for="{{ field.label }}">Next Commitment Date{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form_payments.Next_Commitment_Date }}
                   </div>
@@ -738,8 +723,8 @@ function fncsbmt(){
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button   onclick="location.href='/{{pdata.pj}}/purchaseslist/Total/'" type="button" class="btn btn-sm btn-info">PO's to Vendor</button>
-            <button   onclick="location.href='/{{pdata.pj}}/vendorinvoiceslist/Issued/'" type="button" class="btn btn-sm btn-success">Vendor Invoices</button>         
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Total/'" type="button" class="btn btn-sm btn-info">PO's to Vendor</button>
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorinvoiceslist/Issued/'" type="button" class="btn btn-sm btn-success">Vendor Invoices</button>         
           </div>
         </div>
       </div>

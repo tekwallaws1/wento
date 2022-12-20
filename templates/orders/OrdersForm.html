@@ -14,22 +14,29 @@
               {% csrf_token %}
               <div class="form-group">
                 {% for field in form %}
-                  {% if field.label != 'Status' and field.label != 'Attach' and field.label != 'PO Status' and field.label != 'Customer Name' and field.label != 'Order Reference Person' %}
+                  {% if field.label != 'Status' and field.label != 'Attach' and field.label != 'PO Status' and field.label != 'Customer Name' and field.label != 'Order Reference Person' and field.label != 'PO No' and field.label != 'User' %}
                     <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
+                  {% endif %}
+                  {% if field.label == 'User' %}
+                    <label for="{{ field.label }}">Marketing Excecutive{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
                   {% endif %}
                   {% if field.label == 'Customer Name' %}
                     <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
-                    <a title="add new customer" target="_blank" href="/{{pdata.pj}}/customerform/create/1/"><i class="fas fa-lg fa-square-plus float-right" style="color:purple"></i></a>{{ field}}
+                    <a title="add new customer" target="_blank" href="/{{firm}}/{{pdata.pj}}/customerform/create/1/"><i class="fas fa-lg fa-square-plus float-right" style="color:purple"></i></a>{{ field}}
                   {% endif %}
                   {% if field.label == 'Order Reference Person' %}
                     <label for="{{ field.label }}">Customer Contact/Reference Person{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
-                    <a title="add conact person name" target="_blank" href="/{{pdata.pj}}/customercontactform/create/1/"><i class="fas fa-lg fa-square-plus float-right" style="color:purple"></i></a>{{ field}}
+                    <a title="add conact person name" target="_blank" href="/{{firm}}/{{pdata.pj}}/customercontactform/create/1/"><i class="fas fa-lg fa-square-plus float-right" style="color:purple"></i></a>{{ field}}
+                  {% endif %}
+                  {% if field.label == 'PO No' %}
+                    <label for="{{ field.label }}">Internal Order Ref. No{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
                   {% endif %}
                   {% for error in field.errors %}
                     <p style="color: red; margin-top: -20px">{{ error }}</p>
                   {% endfor %}
                 {% endfor %}  
               </div>
+              
               <div class="form-group">
                 {% for field in form %}
                   {% if field.label ==  'Attach' %}

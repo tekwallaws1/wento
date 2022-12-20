@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script type="text/javascript">
+      window.onload = function () {
+        if ('{{fnc}}'=='edit') {
+            var selectBoxs = document.getElementById("id_UPI_Account");    
+            var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+            if (sv != '---------'){
+              document.getElementById('selectupi').style.display='block'}
+            else{ document.getElementById('selectupi').style.display='none'; document.getElementById('refno').style.display='none'; }
+        } }
+  
+  function changeFunc1() {
+    var selectBoxs = document.getElementById("id_Payment_Account");    
+    var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+    if (sv == 'UPI'){
+      document.getElementById('selectupi').style.display='block'; document.getElementById('refno').style.display='none';}
+    else{ document.getElementById('selectupi').style.display='none';  document.getElementById('refno').style.display='block';}   
+    }
+    </script>
+{% endblock %} <!-- For Scripts -->
+
+{% block content %}
+<div class="col-12">
+  <div class="card">
+    <div class="card-body">
+        <h4 class="card-title d-inline-block">Received Orders Quick Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+              {% for field in form1 %}
+                <div class="col-md-4">
+                  <div class="form-group">
+                    <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}   
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+            <hr style="margin-bottom: 30px;">
+            <div class="row">
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label>Internal Order Reference No.<span style="color: red">**</span></label>{{form2.PO_No}}    
+                </div>
+              </div>
+              {% for field in form2 %}
+                {% if field.label != 'Attach' and field.label != 'PO No' and field.label != 'User' %}
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}   
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label for="{{ field.label }}">Marketing Excecutive{% if field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form2.user }}    
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label style="color:#32a852;">attach below if any oder copy</label>{{form2.Attach}}    
+                </div>
+              </div>
+            </div>
+
+            <hr style="margin-bottom: 30px;">
+            <div class="row">
+              {% for field in form3 %}
+                {% if field.label != 'Attach' %}
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}   
+                    </div>
+                  </div>
+                {% endif %}
+              {% endfor %}
+              <div class="col-md-4">
+                <div class="form-group">
+                  <label style="color:#32a852;">attach below if any bill copy</label>{{form3.Attach}}    
+                </div>
+              </div>
+            </div>
+
+            <hr style="margin-bottom: 30px;">
+            <div class="row">
+              {% for field in form4 %}
+                  <div class="col-md-4">
+                    <div class="form-group">
+                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}   
+                    </div>
+                  </div>
+              {% endfor %}
+            </div>
+
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}  
+ 

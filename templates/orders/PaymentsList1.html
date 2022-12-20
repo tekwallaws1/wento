@@ -28,12 +28,12 @@
   function rid(tid, xid) {getid = tid; getxid = xid;}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/paymentsform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/paymentsform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
   function selectmode(tag){
-    document.getElementById('paymentaction').action =  '/{{pdata.pj}}/paymentsform/create/1/'
+    document.getElementById('paymentaction').action =  '/{{firm}}/{{pdata.pj}}/paymentsform/create/1/'
     if (tag=='againstorder') {document.getElementById('orderno').style.display='block';}
     else {document.getElementById('orderno').style.display='none';}
     if (tag=='againstinvoice') {document.getElementById('invoiceno').style.display='block';}
@@ -122,9 +122,9 @@
     <button type="button" data-toggle="modal" data-target="#paymentsAgainstModal" class="btn btn-sm btn-primary mb-4" ht="add received payment details order wise/bill wise">Add New Payment</button>
     
     {% if status == 'Due' %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/paymentslist/Received/'" class="btn btn-sm btn-success mb-4" ht="received payments against billed or unbilled orders">Received Payments</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentslist/Received/'" class="btn btn-sm btn-success mb-4" ht="received payments against billed or unbilled orders">Received Payments</button>
     {% else %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/paymentslist/Due/'" class="btn btn-sm  btn-success mb-4" ht="due payments against billed orders">Due Payments</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentslist/Due/'" class="btn btn-sm  btn-success mb-4" ht="due payments against billed orders">Due Payments</button>
     {% endif %} 
     <!-- &emsp;<button type="button"  onclick="location.href=''" class="btn btn-sm  btn-info mb-4">Dash Board</button> -->
    &emsp;&emsp;
@@ -135,9 +135,9 @@
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
     &nbsp;&nbsp;&nbsp;
     {% if status == 'Due' %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/paymentslist/Due/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentslist/Due/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% else %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/paymentslist/Received/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentslist/Received/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% endif %}
   </div>
   <div style="clear:both"></div>
@@ -361,7 +361,7 @@
             <td style="white-space:normal;">
               {% if z %}
                 {% for p in z %}
-                  <a class="ahr" ht="open invoice" target="_blank"  onclick="location.href='/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
+                  <a class="ahr" ht="open invoice" target="_blank"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
                     <span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
                     <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} | {% if p.Invoice_Amount != p.Due_Amount %}<span class='hlt5'>Received Amount: </span>₹ {{p.Due_Amount|mul:-1|add:p.Invoice_Amount|floatformat:0|intcomma}}{% else %}<span class='hlt3'>No Payments Received</span>{% endif %}
                   {% if p.Due_Amount > 0  %}
@@ -409,9 +409,9 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/orderspaymentsform/'+getxid+'/'" class="btn btn-sm btn-success mb-4">Add New Payment</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/paymentsform/edit/'+getid+'/'" class="btn btn-sm btn-primary mb-4">Edit Payment Details</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/paymentsform/copy/'+getid+'/'" class="btn btn-sm btn-danger mb-4">Copy Payment Details</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderspaymentsform/'+getxid+'/'" class="btn btn-sm btn-success mb-4">Add New Payment</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentsform/edit/'+getid+'/'" class="btn btn-sm btn-primary mb-4">Edit Payment Details</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentsform/copy/'+getid+'/'" class="btn btn-sm btn-danger mb-4">Copy Payment Details</button>
             <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning mb-4">Delete Payment Details</button>            
           </div>
         </div>
@@ -599,8 +599,8 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button   onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
-            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>          
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>          
           </div>
         </div>
       </div>

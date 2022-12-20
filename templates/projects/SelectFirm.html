@@ -1,0 +1,53 @@
+{% extends 'base1.html' %}
+{% load static %}
+
+{% block scripts %}
+<script type="text/javascript">
+  $('#sel').change(function () {
+    var url = '/selectproject/'
+    var k = $(this).val()
+    url =  k + url
+    document.getElementById("search").action = url
+    document.getElementById("sbmt").click()
+});
+</script>
+
+{% endblock %}
+
+{% block content %}
+  <div class="row justify-content-center">
+  <div class="col-md-8 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body"> 
+        <h4 class="card-title d-inline-block" style="margin-bottom: 30px;">Welcome {{user.first_name}} !</h4>
+        <br>
+          <form class="forms-sample" id='search' action='' method="POST">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                  <label style="color:blue; font-size: 16px;">Please Select Company</label>
+                  <select id='sel' name="Room_No" class="form-select form-control">
+                  <!-- <option selected>-------------</option> -->
+                  <option value="">----------</option>
+                  {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
+                    {% for x in firm.fm %}
+                      <option >{{ x.Short_Name }}</option>
+                    {% endfor %}
+                  {% else %}
+                    {% for x in firm.fm %}
+                      {% if x.Short_Name != 'All' %}
+                        <option >{{ x }}</option>
+                      {% else %}
+                      {% endif %}
+                  {% endfor %}
+                  {% endif %}
+                </select>
+              </div>            
+            </div>
+          <button type="submit" id="sbmt" class="btn2 btn2-sm btn2-primary" style="margin-top: 10px; display: none;">Next</button>     
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

@@ -40,7 +40,7 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/debitform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/debitform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -113,12 +113,12 @@
 
 <div>
   <div style="float:left">
-    <button type="button"  onclick="location.href='/{{pdata.pj}}/debitform/create/1/'" class="btn btn-sm btn-danger" ht="claim expenses" >Debit Form</button>
+    <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/debitform/create/1/'" class="btn btn-sm btn-danger" ht="claim expenses" >Debit Form</button>
   </div>
 
   <div style="float:right">
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-    <button type="button" onclick="location.href='/{{pdata.pj}}/debitlist/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/debitlist/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
   </div>
   <div style="clear:both"></div>
 </div>
@@ -447,10 +447,10 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/debitform/edit/'+getid+'/'" class="btn btn-sm btn-primary ">Edit</button>
-            <!-- <button type="button"  onclick="location.href='/{{pdata.pj}}/debitform/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy Order</button> -->
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/debitform/edit/'+getid+'/'" class="btn btn-sm btn-primary ">Edit</button>
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/debitform/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy Order</button> -->
             <button type="button"  data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-danger">Delete</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/debitreceipt/'+getid+'/'" class="btn btn-sm btn-success">Download Receipt</button>   
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/debitreceipt/'+getid+'/'" class="btn btn-sm btn-success">Download Receipt</button>   
           </div>
         </div>
       </div>

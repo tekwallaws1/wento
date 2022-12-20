@@ -28,12 +28,12 @@
   function rid(tid, xid) {getid = tid; getxid = xid;}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/vendorpaymentsform/delete/'+getid+'/' 
+        url = '/{{firm}}/{{pdata.pj}}/vendorpaymentsform/delete/'+getid+'/' 
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
   function selectmode(tag){
-    document.getElementById('paymentaction').action =  '/{{pdata.pj}}/vendorpaymentsform/create/1/'
+    document.getElementById('paymentaction').action =  '/{{firm}}/{{pdata.pj}}/vendorpaymentsform/create/1/'
     if (tag=='againstpo') {document.getElementById('pono').style.display='block';}
     else {document.getElementById('pono').style.display='none';}
     if (tag=='againstinvoice') {document.getElementById('invoiceno').style.display='block';}
@@ -111,9 +111,9 @@
     <button type="button" data-toggle="modal" data-target="#paymentsAgainstModal" class="btn btn-sm btn-primary mb-4" ht="add paid payment to vendor by PO wise/vendor issued bill wise">Add New Payment</button>
     
     {% if status == 'Due' %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Paid/'" class="btn btn-sm btn-success mb-4" ht="paid payments against vendor billed or unbilled PO's">Paid Payments</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Paid/'" class="btn btn-sm btn-success mb-4" ht="paid payments against vendor billed or unbilled PO's">Paid Payments</button>
     {% else %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Due/'" class="btn btn-sm  btn-success mb-4" ht="due payments against billed PO's">Due Payments</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Due/'" class="btn btn-sm  btn-success mb-4" ht="due payments against billed PO's">Due Payments</button>
     {% endif %} 
     <!-- &emsp;<button type="button"  onclick="location.href=''" class="btn btn-sm  btn-info mb-4">Dash Board</button> -->
   </div>
@@ -121,9 +121,9 @@
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
     &nbsp;&nbsp;&nbsp;
     {% if status == 'Due' %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Due/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Due/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% else %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/vendorpaymentslist/Paid/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Paid/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% endif %}
   </div>
   <div style="clear:both"></div>
@@ -471,9 +471,9 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <!-- <button type="button"  onclick="location.href='/{{pdata.pj}}/popaymentsform/'+poid+'/'" class="btn btn-sm btn-success">Add New Payment</button> -->
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/vendorpaymentsform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit Payment Details</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/vendorpaymentsform/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy Payment Details</button>
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/popaymentsform/'+poid+'/'" class="btn btn-sm btn-success">Add New Payment</button> -->
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentsform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit Payment Details</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/vendorpaymentsform/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy Payment Details</button>
             <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning">Delete Payment Details</button>            
           </div>
         </div>

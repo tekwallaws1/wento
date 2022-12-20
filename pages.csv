@@ -1,0 +1,46 @@
+Mode,Category,Page
+"1,2",HR,Manage Users
+"1,2",HR,Employs Details
+"1,2",HR,Salaries Master Data
+"1,2",HR,Salary Revisions
+"1,2",HR,Monthly Salaries
+"1,2",HR,Daily Attendance
+1,HR,Monthly Attendance
+1,HR,Employ Wise Attendance
+"1,2",HR,Holidays Details
+"1,2",Contact Management,Customer Contact Management
+"1,2",Contact Management,Vendor Contact Management
+"1,2",Contact Management,My Company Details
+"1,2",Contact Management,My Company Devisions
+1,Expenses,List of Expenses
+1,Expenses,Summery of Expenses
+1,Expenses,Expenses Approval Requests
+"1,2",Expenses,Issued Expenses Debits List
+1,Sales,Received Orders Dashboard
+"1,2",Sales,Received Orders
+"1,2",Sales,Received Orders Work Progress
+"1,2",Sales,Received Payments
+1,Sales,Customer Wise Statement
+1,Sales,Customer Ledger
+1,Sales,Customer Invoices List
+1,Sales,View Invoice Copy
+2,Sales,Generate/Edit Online Customer Invoice
+1,Sales,Customer Quotations
+2,Sales,Generate/Edit Online Customer Quotation
+1,Purchases,Purchase Orders Dashboard
+"1,2",Purchases,Vendor Purchase Orders
+"1,2",Purchases,Vendor POs Progress
+"1,2",Purchases,Vendor Payments
+1,Purchases,Vendor Wise Statement
+1,Purchases,Vendor Ledger
+1,Purchases,View Vendor PO Copy
+2,Purchases,Generate/Edit Vendor PO Online
+2,Purchases,Register Vendor Invoice
+1,Purchases,Vendor Invoices List
+2,Purchases,Register Vendor Quotes
+1,Purchases, Vendor Quotes List
+"1,2",Products,Product Details
+"1,2",Products,Inventory
+"1,2",Products,Stock Movement
+1,GST,Input GST
+1,GST,Output GST

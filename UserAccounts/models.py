@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 import os
 from django.conf import settings
+from Projects.models import CompanyDetails, Projects 
 
 class Account(models.Model):
 	Name					= models.CharField(max_length=30, null=True, help_text='full name of the employee including sir name')
@@ -20,6 +21,10 @@ class Account(models.Model):
 	Status					= models.BooleanField(default=True, help_text='unmark if he is not active/leave organisation')
 	ds						= models.BooleanField(default=True)
 	Sr_No					= models.IntegerField(blank=True, unique=True, null=True, help_text='employee id only serial number')
+	RC                 		= models.ManyToManyField(CompanyDetails, null=True, blank=True)
+	Is_Super_Admin			= models.BooleanField(default=False)
+	Related_Project			= models.ManyToManyField(Projects, null=True, blank=True)
+	Only_Their_Works		= models.BooleanField(default=False) 		
 
 	class Meta:
 		ordering = ['Sr_No']
@@ -87,28 +92,13 @@ class EMP_End_Dtls(models.Model):
 	def __str__(self):
 		return str(self.Employee)+'-'+str(self.Releaving_Date)
 
-class Permissions(models.Model):
-	user 					= models.ForeignKey(User, null=True, blank=True, on_delete=models.CASCADE)
-	Admin					= models.BooleanField(default=False, help_text='Admin Permissions - All Access')
-	Main_Dashboard			= models.BooleanField(default=False, help_text='Orders, Payments and Its Statestics View Permissions')
-	Proposals_Dashboard		= models.BooleanField(default=False, help_text='Proposal Dashboard View Permissions')
-	Expenses_Dashboard		= models.BooleanField(default=False, help_text='Expenses Dashboard View Permissions')
-
-	Create					= models.BooleanField(default=False, help_text='Create Permissions for Selected Dashboards')
-	Edit					= models.BooleanField(default=False, help_text='Edit Permissions for Selected Dashboards')
-	Delete					= models.BooleanField(default=False, help_text='Delete Permissions for Selected Dashboards')
-	# Only_Expenses			= models.BooleanField(default=False, help_text='Give perrmission to only expenses entry and see')
-
-	def __str__(self):
-		return str(self.user.username)+'-'+str(self.Admin)
-
 class Empl_Salaries(models.Model):
 	Employ_Name 			= models.ForeignKey(Account, null=True, unique=True, on_delete=models.SET_NULL)
-	Gross_Salary 			= models.IntegerField( null=True, help_text='gross salary or CTC')
-	Basic		 			= models.IntegerField( null=True, help_text='basic salary as per govt norms')
-	HRA						= models.FloatField(max_length=10, null=True, blank=True, help_text='house rent allowance, 40% of basic')
-	Other_Allowances 		= models.FloatField(max_length=10, null=True, blank=True, help_text='other allowances')
-	Net_Salary 				= models.IntegerField(null=True, blank=True, help_text='you can give it or we will calculate')
+	Gross_Salary 			= models.IntegerField(default=0, null=True, help_text='gross salary or CTC')
+	Basic		 			= models.IntegerField(default=0, null=True, help_text='basic salary as per govt norms')
+	HRA						= models.FloatField(default=0, max_length=10, null=True, blank=True, help_text='house rent allowance, 40% of basic')
+	Other_Allowances 		= models.FloatField(default=0, max_length=10, null=True, blank=True, help_text='other allowances')
+	Net_Salary 				= models.IntegerField( default=0, null=True, blank=True, help_text='you can give it or we will calculate')
 	PF_Amount 				= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='total 4% of gross, 0.75% employee, 3.25% employer')
 	ESI_Amount 				= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='total 24% of basic, 12% employee, 12% employer')
 	Professional_Tax 		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='PT deductions if eligible, <15K 0, 15-20K 150, >15K 200 of gross')
@@ -141,3 +131,41 @@ class Empl_Salary_Revisions(models.Model):
 
 	def __str__(self):
 		return str(self.Employ_Name)+'-'+str(self.Effective_From)+'-'+str(self.Revised_Gross)
+
+class Page_Modes(models.Model):
+	Mode 					= models.CharField(max_length=20, null=True, blank=True)
+
+	def __str__(self):
+		return str(self.Mode)
+
+
+class Pages(models.Model):
+	pg_cat = (('HR', 'HR'), ('Contact Management', 'Contact Management'), ('Expenses', 'Expenses'), ('Products', 'Products'), ('Purchases', 'Purchases'), ('Sales', 'Sales'), ('GST', 'GST')) 
+	Mode					= models.ManyToManyField(Page_Modes, null=True, blank=True) 			
+	Category 				= models.CharField(max_length=30, null=True, blank=True, choices=pg_cat)
+	Page 					= models.CharField(max_length=100, null=True, blank=True)
+
+	def __str__(self):
+		return str(self.Category)+'-'+str(self.Page)
+
+class Page_Permissions(models.Model):
+	user					= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL, related_name='Permissions_account') 
+	RC                 		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
+	Related_Project			= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL) 		
+	Date 					= models.DateField(null=True, blank=True)
+	View_Permissions        = models.ManyToManyField(Pages, null=True, blank=True, related_name='view', limit_choices_to=models.Q(Mode__Mode__in = ['View']))
+	Edit_Permissions        = models.ManyToManyField(Pages, null=True, blank=True, related_name='edit', limit_choices_to=models.Q(Mode__Mode__in = ['Edit']))
+	Is_Admin             	= models.BooleanField(default=False)
+	Given_By				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL, related_name='approved_account') 
+
+	def __str__(self):
+		return str(self.user)
+
+
+class UPI_Accounts(models.Model):
+	UPI_Holder_Name 	= models.CharField(max_length=50, null=True, blank=True, help_text='UPI Holder Name')
+	UPI_Mobile_Number 	= models.CharField(max_length=20, null=True, blank=True, help_text='UPI Linked Mobile Number')
+	user				= models.ForeignKey('Account', null=True, blank=True, on_delete=models.SET_NULL, related_name='upiacnt') 
+
+	def __str__(self):
+		return str(self.UPI_Holder_Name)+'-'+str(self.UPI_Mobile_Number)

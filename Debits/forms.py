@@ -43,7 +43,7 @@ class IssuedAmountsForm(forms.ModelForm):
 	class Meta:
 		model = Debit_Amounts
 		fields = ['Paid_To','Expenses','Issued_To','Party_Name','Related_To','Against','Amount_to_be_Pay','Issued_Amount','Issued_Date',
-		'Payment_Mode','Cheque_Details','Purpose','Approved_By','Issued_By','Attach']
+		'Account_Name','Reference_No','Purpose','Approved_By','Issued_By','Attach']
 
 	def clean(self): 
 	    cleaned_data = self.cleaned_data
@@ -64,7 +64,7 @@ class IssuedAmountsForm(forms.ModelForm):
 class AttendanceForm(forms.ModelForm):
 	class Meta:
 		model = Attendance
-		exclude = ['Total_Hours', 'Issued_By', 'Is_Manual']
+		exclude = ['Total_Hours', 'Issued_By', 'Is_Manual', 'Is_Extra_Day', 'Is_No_Sunday', 'OT', 'RC']
 		widgets = {'Date': widgets.DateInput(attrs={'type': 'date'}), 'Start_Time': widgets.TimeInput(attrs={'type': 'time'}), 'End_Time': widgets.TimeInput(attrs={'type': 'time'})}
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -76,7 +76,7 @@ class AttendanceForm(forms.ModelForm):
 class AttendanceForm1(forms.ModelForm):
 	class Meta:
 		model = Attendance
-		exclude = ['Total_Hours', 'Issued_By', 'Is_Manual']
+		exclude = ['Total_Hours', 'Issued_By', 'Is_Manual', 'Is_Extra_Day', 'Is_No_Sunday', 'OT', 'RC']
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		for _, value in self.fields.items():
@@ -87,7 +87,7 @@ class AttendanceForm1(forms.ModelForm):
 class DeclareDayAsForm(forms.ModelForm):	
 	class Meta:
 		model = DeclareDayAs
-		exclude = ['Lock_Status']
+		exclude = ['Lock_Status', 'RC']
 		widgets = {'Date': widgets.DateInput(attrs={'type': 'date'})}
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -99,7 +99,7 @@ class DeclareDayAsForm(forms.ModelForm):
 class EmployMonthlySalaryForm(forms.ModelForm):	
 	class Meta:
 		model = Monthly_Salaries
-		fields = ['Presents', 'Issued_Salary', 'LOP', 'OT_Amount', 'PF', 'ESI', 'TDS', 'Other_Deductions', 'Salary_Advance']
+		fields = ['Issued_Days', 'Issued_Salary', 'LOP', 'OT_Hours', 'OT_Amount', 'PF', 'ESI', 'TDS', 'Other_Deductions', 'Salary_Advance', 'Expenses']
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		for _, value in self.fields.items():

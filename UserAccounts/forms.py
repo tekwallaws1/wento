@@ -8,14 +8,17 @@ from django.forms import DateTimeField, DateTimeInput
 class SignUpForm(UserCreationForm):
     # first_name      = forms.CharField(max_length=20, required=True, help_text='First Name')
     # last_name       = forms.CharField(max_length=20, required=False, help_text='Last Name')
-    email = forms.EmailField(max_length=254, required=False, widget=forms.TextInput(attrs={'placeholder': 'Ener a Vaild Email Address'}))
+    # email = forms.EmailField(max_length=254, required=False, widget=forms.TextInput(attrs={'placeholder': 'Ener a Vaild Email Address'}))
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password1', 'password2')
-        help_texts = {
-                'email': ('enter valid email address'),
-        }
+        # fields = ('username', 'email', 'password1', 'password2')
+        # help_texts = {
+        #         'email': ('enter valid email address'),
+        # }
+
+        fields = ('username',  'password1', 'password2')
+        
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -31,7 +34,22 @@ class SignUpForm(UserCreationForm):
 class AccountForm(forms.ModelForm):    
     class Meta:
         model = Account
-        exclude = ['user', 'ds']
+        exclude = ['user', 'ds', 'Is_Super_Admin', 'Sr_No']
+        widgets = {'Joining_Date': widgets.DateInput(attrs={'type': 'date'})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for _, value in self.fields.items():
+            value.widget.attrs['placeholder'] = value.help_text
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control mb-4'
+            })
+
+class AccountForm1(forms.ModelForm):    
+    class Meta:
+        model = Account
+        exclude = ['user', 'ds', 'Joining_Date', 'Email', 'Status', 'RC', 'Is_Super_Admin', 'Sr_No']
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -44,7 +62,7 @@ class AccountForm(forms.ModelForm):
 
 class PermissionsForm(forms.ModelForm):    
     class Meta:
-        model = Permissions
+        model = Page_Permissions
         exclude = ['user']
 
     def __init__(self, *args, **kwargs):
@@ -59,7 +77,7 @@ class PermissionsForm(forms.ModelForm):
 class EmployesForm(forms.ModelForm):
     class Meta:
         model = Account
-        exclude = ['user','Support','ds', 'Status', 'Sr_No']    
+        exclude = ['user', 'ds', 'Status', 'RC', 'Sr_No', 'Is_Super_Admin']    
         widgets = {'Joining_Date': widgets.DateInput(attrs={'type': 'date'})}
 
     def __init__(self, *args, **kwargs):
@@ -73,7 +91,8 @@ class EmployesForm(forms.ModelForm):
 class EmployesForm1(forms.ModelForm):
     class Meta:
         model = Account
-        exclude = ['user','Support','ds', 'Sr_No']    
+        exclude = ['user', 'ds', 'RC', 'Sr_No', 'Is_Super_Admin']
+        widgets = {'Joining_Date': widgets.DateInput(attrs={'type': 'date'})}    
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -97,6 +116,7 @@ class EmployesBankForm(forms.ModelForm):
             self.fields[field].widget.attrs.update({
                 'class': 'form-control mb-4'
             })
+
 class EmployesBankForm1(forms.ModelForm):
     class Meta:
         model = EMP_Bank_Dtls
@@ -167,3 +187,70 @@ class EmplSalRevisionsForm(forms.ModelForm):
             self.fields[field].widget.attrs.update({
                 'class': 'form-control mb-4'
             })
+
+
+class PagePermissionsForm(forms.ModelForm): 
+    class Meta:
+        model = Page_Permissions
+        exclude = ['Given_By', 'user',  'Date', 'Related_Project']
+
+    def __init__(self, *args, **kwargs):
+        forms.ModelForm.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
+        for _, value in self.fields.items():
+            value.widget.attrs['placeholder'] = value.help_text
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({'class': 'form-control mb-4'})
+
+    View_Permissions = forms.ModelMultipleChoiceField(queryset=Pages.objects.filter(Mode__Mode='View').order_by('Category'), widget=forms.CheckboxSelectMultiple, required=False)
+    Edit_Permissions = forms.ModelMultipleChoiceField(queryset=Pages.objects.filter(Mode__Mode='Edit').order_by('Category'), widget=forms.CheckboxSelectMultiple, required=False)        
+    
+    def __init__(self, *args, **kwargs):
+      forms.ModelForm.__init__(self, *args, **kwargs)
+
+    # def __init__(self, *args, **kwargs):
+    #   firm = kwargs.pop('fm')
+    #   if firm:
+    #       # super().__init__(*args, **kwargs)   #yu can use this also   
+    #       forms.ModelForm.__init__(self, *args, **kwargs)
+    #       self.fields['View_Permissions'].queryset = Pages.objects.filter(RC__Short_Name=firm, Mode__Mode='View').order_by('Related_Project')
+    #       self.fields['Edit_Permissions'].queryset = Pages.objects.filter(RC__Short_Name=firm, Mode__Mode='Edit').order_by('Related_Project')
+
+    # def __init__(self,  fm=None, *args, **kwargs):
+    #   super().__init__(*args, **kwargs)      
+    #   # forms.ModelForm.__init__(self, *args, **kwargs)
+    #   self.fields['View_Permissions'].queryset =Pages.objects.filter(RC__Short_Name=fm, Mode__Mode='View')
+
+    #   self.fields["Related_Project"].widget = CheckboxSelectMultiple()
+    #   self.fields["Related_Project"].queryset = Projects.objects.all()
+
+
+class PagePermissionsFormCopy(forms.ModelForm): 
+    class Meta:
+        model = Page_Permissions
+        exclude = ['Given_By',  'Date', 'Related_Project']
+
+    View_Permissions = forms.ModelMultipleChoiceField(
+        queryset=Pages.objects.all(),
+        widget=forms.CheckboxSelectMultiple
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for _, value in self.fields.items():
+            value.widget.attrs['placeholder'] = value.help_text
+        for field in self.fields:
+            self.fields[field].widget.attrs.update({
+                'class': 'form-control mb-4'
+            })
+
+    View_Permissions = forms.ModelMultipleChoiceField(queryset=Pages.objects.filter(Mode__Mode='View').order_by('Category'), widget=forms.CheckboxSelectMultiple, required=False)
+    Edit_Permissions = forms.ModelMultipleChoiceField(queryset=Pages.objects.filter(Mode__Mode='Edit').order_by('Category'), widget=forms.CheckboxSelectMultiple, required=False)        
+    
+    # def __init__(self, *args, **kwargs):
+    #   firm = kwargs.pop('fm')
+    #   if firm:
+    #       # super().__init__(*args, **kwargs)   #yu can use this also   
+    #       forms.ModelForm.__init__(self, *args, **kwargs)
+    #       self.fields['View_Permissions'].queryset = Pages.objects.filter(RC__Short_Name=firm, Mode__Mode='View').order_by('Related_Project')
+    #       self.fields['Edit_Permissions'].queryset = Pages.objects.filter(RC__Short_Name=firm, Mode__Mode='Edit').order_by('Related_Project')

@@ -25,7 +25,7 @@ class OrdersFilter(django_filters.FilterSet):
 	class Meta:
 		model 	= Orders
 		fields = ['user', 'Customer_Name', 
-		'Payment_Status__user', 'Work_Status__user', 'Is_Billed', 'Final_Status']
+		'Payment_Status__user', 'Work_Status__user', 'Is_Billed', 'Final_Status', 'PO_No']
 
 
 class PaymentsFilter(django_filters.FilterSet):
@@ -40,7 +40,7 @@ class PaymentsFilter(django_filters.FilterSet):
 
 	class Meta:
 		model 	= Payment_Status
-		fields = ['user', 'Order_No', 'Order_No__Customer_Name']
+		fields = ['user', 'Order_No', 'Order_No__Customer_Name', 'Account_Name']
 
 class PaymentsFilter1(django_filters.FilterSet):
 	def __init__(self, *args, **kwargs):
@@ -54,7 +54,7 @@ class PaymentsFilter1(django_filters.FilterSet):
 
 	class Meta:
 		model 	= Payment_Status
-		fields = ['user', 'Order_No__Customer_Name']
+		fields = ['user', 'Order_No__Customer_Name', 'Account_Name']
 
 
 class WorksFilter(django_filters.FilterSet):

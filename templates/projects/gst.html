@@ -40,14 +40,14 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/purchasesform/delete/'+poid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/purchasesform/delete/'+poid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
   function getdt(){
       var dt = $("#getdate").val();
       if ( dt == '' ){dt = 'month'} 
-      document.getElementById('formaction').action='/{{pdata.pj}}/gst/{{cat}}/'+dt+'/'}
+      document.getElementById('formaction').action='/{{firm}}/{{pdata.pj}}/gst/{{cat}}/'+dt+'/'}
 </script>
 
 <!-- Data Tables Export Script -->
@@ -125,15 +125,15 @@
 <div>
   <div style="float:left">
     {% if cat == 'Input' %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/gst/Output/month/'" class="btn btn-sm btn-primary">Output GST</button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/gst/Output/month/'" class="btn btn-sm btn-primary">Output GST</button>
     {% else %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/gst/Input/month/'" class="btn btn-sm btn-primary">Input GST</button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/gst/Input/month/'" class="btn btn-sm btn-primary">Input GST</button>
     {% endif %}
   </div>
 
   <div style="float:right">
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-    <button type="button" onclick="location.href='/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
   </div>
   <div style="clear:both"></div>
 </div>

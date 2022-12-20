@@ -45,4 +45,4 @@ class DebitFilter(django_filters.FilterSet):
 
 	class Meta:
 		model 	= Debit_Amounts
-		fields = ['Employ','Issued_By','Approved_By','Payment_Mode']
+		fields = ['Employ','Issued_By','Approved_By','Account_Name']

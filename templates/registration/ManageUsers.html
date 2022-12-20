@@ -7,24 +7,32 @@
 
 {% block scripts %}
 <script type="text/javascript">
-  function rid(tid) {getid = tid}
+  function editemp1(tid) {getid = tid;}
+  function fnchide(){$('#editModal1 .close').click()}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/editusers/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/pagepermissionsform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
+    // function validate2(p) {
+    // if(   document.getElementById("activitypswd1").value == "sse123" ){
+    //     url = '/{{firm}}/{{pdata.pj}}/editusers/delete/'+getid+'/'
+    //     location.href=url;}
+    // else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
 </script>
 <!-- Data Tables Export Script -->
 
 {% endblock %} <!-- For Scripts --> 
 
 
-{% block content %}
+{% block content %} 
 <div class="page-header">
-  <h3 class="page-title">Manage Users</h3>
+  <h3 class="page-title">Permissions List</h3>
 </div>
 
-<div><button type="button"  onclick="location.href='{% url 'signup' %}'" class="btn btn-sm   btn-primary mb-4">+ Add User</button></div>
+<!-- <div><button type="button"  onclick="location.href='{% url 'signup' %}'" class="btn btn-sm   btn-primary mb-4">+ Add User/SignUp</button></div> -->
+<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employesform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="register new employee here">Add New Employ/User</button>
 
 <!-- Users List List -->
   <div class="card">
@@ -41,7 +49,7 @@
           </tr>
         </thead>
         <tbody>
-          {% for x, y in data %}
+          {% for x, pv, pe in data %}
           <tr>
             <td style="width: 5%;">{{forloop.counter}}</td>
             <td style="width: 5%;" class="py-1">
@@ -51,41 +59,46 @@
                 <img src="/media/employes/sss-logo.png/" alt="image" />
               {% endif %}
             </td>
-            <td>{{x.Name}}<br>
+            <td><a class="ahr" ht="edit user details" data-toggle="modal" data-target="#editModal1" onclick="javascript:editemp1('{{x.id}}')">{{x.Name}}<br>
                 username: {{x.user.username}}<br>                
-                Created On: {{x.user.date_joined|date:'d M Y'}}<br><br>
-              <a class="mdi mdi-border-color" title="Edit User" href="/{{pdata.pj}}/editusers/editaccount/{{x.id}}/"></a>&nbsp;&nbsp;
-              <a style="cursor:pointer" class="mdi mdi-delete" title="Delete User" data-toggle="modal" data-target="#exampleModal11"  onclick="javascript:rid('{{x.id}}')"></a>
-            
-            <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content" id="modal-reload">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Proposal/Quote</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                          </button>
-                        </div>
-                        <div class="modal-body">
-                            <form class="forms-sample">
-                              <div class="form-group">
-                                  <label for="exampleInputPassword1">Password</label>
-                                  <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
-                                  <input type="button" class="btn1 btn1-primary hit" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
-                                </div> 
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                </div></td>
+                Created On: {{x.user.date_joined|date:'d M Y'}}</a>
+            </td>
   
             {% if x.user.is_active == 0 %}
-             <td><button type="button"  onclick="location.href='/{{pdata.pj}}/editusers/edit/{{x.id}}/'" class="btn1 btn1-primary">Activate User</button></td>
+             <td><button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/editusers/activate/{{x.id}}/'" class="btn1 btn1-primary">Activate User</button></td>
             {% else %}
-              <td>{% for p in y %}
-                    {{p}}<br>
-                  {% endfor %}
-                  <br><button type="button"  onclick="location.href='/{{pdata.pj}}/editusers/edit/{{x.id}}/'" class="btn1 btn1-primary">Edit Permissions</button></td>
+              <td>
+                <a class="ahr" ht="edit permissions" data-toggle="modal" data-target="#editModal1" onclick="javascript:editemp1('{{x.id}}')">
+                {% if pv == 'all' and pe == 'all' %}
+                  <span class="hlt2">Admin User - All Permissions Granted</span>
+                {% elif pv or pe %}
+                  {% if pv %}
+                    <span class="hlt5">View Permissions</span><br>
+                    {% if pv != 'all' %}
+                      {% for v in pv %}
+                        {{v}}<br>
+                      {% endfor %}
+                    {% else %}
+                      <span class="hlt2">All View Permissions Granted</span><br>
+                    {% endif %}
+                  {% endif %}
+                  {% if pe %}
+                    <br><span class="hlt5">Edit Permissions</span><br>
+                    {% if pe != 'all' %}
+                      {% for e in pe %}
+                        {{e}}<br>
+                      {% endfor %}
+                    {% else %}
+                      <span class="hlt2">All Edit Permissions Granted</span><br>
+                    {% endif %}
+                  {% endif %}
+                  
+                {% elif pv == None and pe == None %}
+                 <span class="hlt3">No Permissions Allocated</span>
+                {% else %}
+                {% endif %}
+                </a>
+              </td>
             {% endif %}
 
             <td>{% if x.Designation %}{{x.Designation}}<br>{% endif %}
@@ -97,6 +110,72 @@
           {% endfor %} 
         </tbody>
       </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="deleteUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete User</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form class="forms-sample">
+              <div class="form-group">
+                  <label for="exampleInputPassword1">Password</label>
+                  <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
+                  <input type="button" class="btn1 btn1-primary hit" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
+                </div> 
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade text-left" id="deletePRM" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete User Permissions</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form class="forms-sample">
+              <div class="form-group">
+                  <label for="exampleInputPassword1">Password</label>
+                  <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd2"><br/>
+                  <input type="button" class="btn1 btn1-primary hit" value="Submit"  onclick="javascript:validate2('{{x.id}}')" />
+                </div> 
+          </form>
+        </div>
+      </div>
+    </div>
+</div>
+
+  <div class="modal fade text-left" id="editModal1" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/editusers/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit User Details</button> -->
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/pagepermissionsform/edit/'+getid+'/'" class="btn btn-sm btn-info">Add/Edit Permissions</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/pagepermissionsform/copy/'+getid+'/'" class="btn btn-sm btn-success">Copy Permissions</button>
+            <button type="button"  onclick="javascript:fnchide()" data-toggle="modal" data-target="#deletePRM" class="btn btn-sm btn-warning">Delete Permissions</button>
+            <!-- <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#deleteUser" class="btn btn-sm btn-danger">Delete User</button> -->            
+          </div>
+        </div>
       </div>
     </div>
   </div>

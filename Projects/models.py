@@ -20,6 +20,7 @@ codes = (("37","Andhra Pradesh"),("36","Telangana"),("33","Tamil Nadu"),("29","K
 
 class CompanyDetails(models.Model):
 	Company_Name 			= models.CharField(max_length=50, null=True)
+	Short_Name				= models.CharField(max_length=25, null=True, unique=True, help_text='Nick Name or Short Name of Project')
 	Address_Line_1			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 1')
 	Address_Line_2			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 2')
 	Pin_Code				= models.CharField(max_length=6, blank=True, null=True, help_text='pin code')
@@ -41,8 +42,9 @@ class CompanyDetails(models.Model):
 		return str(self.Company_Name)+'-'+str(self.Address_Line_1)+'-'+str(self.Address_Line_2)+'-'+str(self.State)
 
 class Projects(models.Model):
+	RC                  		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Project_Name 				= models.CharField(max_length=50, null=True, unique=True, help_text='Project Name Such as Rooftop, Solar Pumps')
-	Short_Name					= models.CharField(max_length=15, null=True, unique=True, help_text='Nick Name or Short Name of Project')
+	Short_Name					= models.CharField(max_length=25, null=True, unique=True, help_text='Nick Name or Short Name of Project')
 	user 						= models.ForeignKey(User, null=True, blank=True, on_delete=models.SET_NULL) #backend
 	Date 						= models.DateField(null=True, blank=True, help_text='Project Creation Date')
 	Status						= models.CharField(max_length=15, null=True, choices=(('Active','Active'), ('Not Active', 'Not Active')))
@@ -52,8 +54,10 @@ class Projects(models.Model):
 		return str(self.Short_Name)
 
 class CustDt(models.Model):
+	RC                 		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Customer_Name 			= models.CharField(max_length=50, null=True, help_text='Customer/Company Name')
-	Short_Name 				= models.CharField(max_length=15, null=True, help_text='Give Short Name for Customer, Max 15 Characters')
+	Short_Name 				= models.CharField(max_length=25, null=True, help_text='Give Short Name for Customer, Max 25 Characters')
+	Customer_Type 			= models.CharField(max_length=50, null=True, choices=(('Regular Customer', 'Regular Customer'), ('One Time Customer', 'One Time Customer')))
 	Address_Line_1			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 1')
 	Address_Line_2			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 2')
 	Pin_Code				= models.CharField(max_length=6, blank=True, null=True, help_text='pin code')
@@ -84,8 +88,9 @@ class CustDt(models.Model):
 		return str(self.Customer_Name)+'-'+str(self.Address_Line_1)+'-'+str(self.Address_Line_2)+'-'+str(self.State)+'-'+str(self.Address_Type)
 
 class VendDt(models.Model):
+	RC                 		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Supplier_Name 			= models.CharField(max_length=50, null=True, help_text='Vendor/Supplier Name')
-	Short_Name 				= models.CharField(max_length=15, null=True, help_text='Give Short Name for Supplier, Max 15 Characters')
+	Short_Name 				= models.CharField(max_length=25, null=True, help_text='Give Short Name for Supplier, Max 25 Characters')
 	Address_Line_1			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 1')
 	Address_Line_2			= models.CharField(max_length=70, blank=True, null=True, help_text='Address Line 2')
 	Pin_Code				= models.CharField(max_length=6, blank=True, null=True, help_text='pin code')
@@ -146,18 +151,21 @@ class VendContDt(models.Model):
 
 
 class Bank_Accounts(models.Model):
-	Related_Company 		= models.ForeignKey(CompanyDetails, null=True, on_delete=models.SET_NULL)
-	Account_No 				= models.CharField(max_length=40, null=True, help_text='Bank Account Number')
-	Bank_Name 				= models.CharField(max_length=30, null=True, help_text='Bank Name')
+	RC                 		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
+	Account_Type 			= models.CharField(max_length=40, null=True, choices=(('Company', 'Company'), ('UPI', 'UPI'), ('CASH', 'CASH')))
+	Account_No 				= models.CharField(max_length=40, null=True, help_text='Bank Account Number/UPI Phone Number')
+	Balance     			= models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+	Bank_Name 				= models.CharField(max_length=30, null=True, help_text='Bank Name/UPI Holder Name')
 	Branch 					= models.CharField(max_length=40, null=True, blank=True, help_text='bank branch details')
 	IFSC_Code 				= models.CharField(max_length=11, null=True, blank=True, help_text='bank IFSC code')
-	Account_Type			= models.CharField(max_length=40, null=True, choices=(('CC', 'CC'), ('Current', 'Current')))
 	Status					= models.BooleanField(default=True, help_text='active status')
 
 	def __str__(self):
-		return str(self.Related_Company.Company_Name)+'-'+str(self.Account_No)+'-'+str(self.Bank_Name)+'-'+str(self.Account_Type)
+		# return (str(self.RC.Company_Name) if self.RC != None else str(self.RC)) +'-'+str(self.Account_No)+'-'+str(self.Bank_Name)+'-'+str(self.Account_Type)
+		return str(self.Bank_Name)+'-'+str(self.Account_Type)+'-'+str(self.Account_No)
 
 class No_Formats(models.Model):
+	RC                 		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	No_Format_Related_To	= models.CharField(max_length=20, null=True, choices=(('Invoice', 'Invoice'), ('Proforma Invoice', 'Proforma Invoice'), ('PO', 'PO'), ('DC', 'DC'), ('Expenses Voucher', 'Expenses Voucher')))
 	No_Format 				= models.CharField(max_length=30, null=True, unique=True, help_text='excluding financial year and sequence number such as PS/AP/Service/ etc..')
 
@@ -165,6 +173,7 @@ class No_Formats(models.Model):
 		return str(self.No_Format)
 
 class Customer_Ledger(models.Model):
+	RC                 		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Related_Project			= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL, help_text='leave empty if product meant for many projects') 		
 	Date 					= models.DateField(null=True, blank=True)
 	Partner					= models.CharField(max_length=100, null=True, blank=True)
@@ -182,6 +191,7 @@ class Customer_Ledger(models.Model):
 		return str(self.Date)+('-Credit-'+str(self.Credit)) if self.Credit != None else str(self.Date)+('-Debit-'+str(self.Debit))
 
 class Vendor_Ledger(models.Model):
+	RC                 		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Related_Project			= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL, help_text='leave empty if product meant for many projects') 		
 	Date 					= models.DateField(null=True, blank=True)
 	Partner					= models.CharField(max_length=100, null=True, blank=True)
@@ -189,7 +199,7 @@ class Vendor_Ledger(models.Model):
 	# Voucher_No 			= models.IntegerField(null=True, unique=True, blank=True)
 	Debit     				= models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 	Credit     				= models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-	Bal_Customer     		= models.DecimalField(default=0, max_digits=12, decimal_places=2, null=True, blank=True)
+	Bal_Vendor     			= models.DecimalField(default=0, max_digits=12, decimal_places=2, null=True, blank=True)
 	Bal_All     			= models.DecimalField(default=0, max_digits=12, decimal_places=2, null=True, blank=True)
 	Lock_Status             = models.BooleanField(default=True)
 	Row_ID                  = models.IntegerField(null=True, blank=True)

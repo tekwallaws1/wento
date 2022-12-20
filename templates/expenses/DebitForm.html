@@ -104,9 +104,9 @@
                   {% endif %}
                 </div>                
                 
-                <label for="id_Payment_Mode">Payment Type{% if form.Payment_Mode.field.required %} <span style="color: red">**</span> {% endif %}</label><div onchange="changeFunc2()">{{form.Payment_Mode}}</div>
-                <div id="cheq" style="display:none">
-                  <label>Cheque Details</label>{{form.Cheque_Details}}
+                <label for="id_Payment_Mode">Payment Through{% if form.Account_Name.field.required %} <span style="color: red">**</span> {% endif %}</label><div onchange="changeFunc2()">{{form.Account_Name}}</div>
+                <div id="cheq">
+                  <label>Reference No.</label>{{form.Reference_No}}
                 </div>
     
                 <label>Issued By{% if form.Issued_By.field.required %}<span style="color: red">**</span>{% endif %}</label>{{form.Issued_By}}

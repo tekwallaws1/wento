@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %}  
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+{% endblock %} 
+
+{% block scripts %}
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
+  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
+  <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
+  <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script>
+
+<script type="text/javascript">
+
+function fncsbmt(){
+  var customer = $("#sel").val();
+  document.getElementById('customeraction').action = '/{{firm}}/{{pdata.pj}}/paymentslist/Received/'+customer+'/';
+}
+
+  function rid(tid, xid) {getid = tid; getxid = xid;}
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/{{firm}}/{{pdata.pj}}/paymentsform/delete/'+getid+'/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
+  function selectmode(tag){
+    document.getElementById('paymentaction').action =  '/{{firm}}/{{pdata.pj}}/paymentsform/create/1/'
+    if (tag=='againstorder') {document.getElementById('orderno').style.display='block';}
+    else {document.getElementById('orderno').style.display='none';}
+    if (tag=='againstinvoice') {document.getElementById('invoiceno').style.display='block';}
+    else {document.getElementById('invoiceno').style.display='none';}}
+
+  function fnchide(){document.getElementById('exampleModal11').style.display='none';}
+  
+</script>
+
+<script type="text/javascript">
+  document.getElementById("popup").click();
+    function unauth(){
+    $('.widget-content .message', function () {
+        swal({title: 'Un Authorisation Alert !',text: 'Sorry! You Can Not Access This Page. Need Authorisation To Access This Page',padding: '2em'})}) }
+</script>
+
+<!-- Data Tables Export Script -->
+<script src="{% static 'js/datatablesexport.js' %}"></script>
+<script type="text/javascript">
+  // Datatables Excel Formating Before Export//
+  var customexcel = function( xlsx ) {
+  var sheet = xlsx.xl.worksheets['sheet1.xml'];
+  var style = xlsx.xl['styles.xml'];
+  var tagName = style.getElementsByTagName('sz');
+  for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+  $('row:first c', sheet).attr('s', '2')
+  $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); $('row c[r^="F"]', sheet).attr( 's', '55' ); $('row c[r^="G"]', sheet).attr( 's', '55' ); $('row c[r^="H"]', sheet).attr( 's', '55' );//wrap text
+  var col = $('col', sheet);
+  // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
+  $(col[1]).attr('width', 10); $(col[2]).attr('width', 35); $(col[3]).attr('width', 20); $(col[4]).attr('width', 15); $(col[5]).attr('width', 15); $(col[6]).attr('width', 15); $(col[7]).attr('width', 15);}; 
+//--End--//
+  {% if heads.ca == 1 %}
+    var cl = [0,  1, 2, 3, 4, 5];
+    var wdths = ['3%', '49%', '12%', '12%', '12%', '12%'];
+  {% else %}
+    var cl = [0,  1, 2, 3, 4];
+    var wdths = ['3%', '49%', '16%', '16%', '16%'];
+  {% endif %}
+
+  var ort = 'portrait'; //landscape
+
+  var msgTop = 'Total Vendor Billing {{heads.tb|floatformat:0|intcomma}} | Total Paid {{heads.tp|floatformat:0|intcomma}} | Total Due  {{heads.td|floatformat:0|intcomma}}{% if heads.ta > 100 %} | Over Paid/Advance Payments {{heads.ta|floatformat:0|intcomma}}{% endif %}';
+  var title = '{{pdata.pj}}-Vendor Wise Statement';
+  var filename = '{{pdata.pj}}_Vendor_Wise_Statement'
+
+// Datatables Customise PDF Before Export//
+var pdf_custom = function ( doc ) {
+  doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+  doc.pageMargins = [40,60,20,30];
+  doc['footer']= footer1;
+  doc['header']= header1;
+  var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+  objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+  objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+  objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+  doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+  // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+{text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+};
+
+//--End--//
+</script>
+
+<!-- Data Tables Export Script -->
+<script type="text/javascript">
+$('#ledger').DataTable( {
+autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
+buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
+    
+  {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
+
+  {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
+
+  {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
+</script>
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+
+{% if request.user.username == 'praveen' %}
+<!-- ######### -->
+
+<div class="page-header">
+  <h3 class="page-title">{{pdata.pj.Short_Name}} - Vendor Wise Statement</h3>
+</div>
+
+<!-- <div>
+  <div style="float:left">
+    <button type="button" data-toggle='modal', data-target="#MorePagesModal" class="btn btn-sm btn-danger mb-4" >More Pages</button>
+  </div>
+  <div style="float:right">
+    <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+    &nbsp;&nbsp;&nbsp;
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/customerledger/mode/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+  </div>
+  <div style="clear:both"></div>
+</div> -->
+
+<div class="row">
+  {% if heads.ta > 100 %}
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="total billing" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-3">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Billing</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.tb|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <a ht="toatl receivd payments towards billed" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Paid Payments</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.tp|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="due payments towards billed invoices" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Due Payments</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.td|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="payment that received more than billing against some particular customers" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Over Paid/Advance Payments</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.ta|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="total billing" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-3">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Billing</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.tb|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <a ht="toatl receivd payments towards billed" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Paid Payments</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.tp|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="due payments towards billed invoices" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Due Payments</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.td|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+   {% endif %} 
+  </div>
+
+<!-- Payments List -->
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="ledger">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Supplier/Vendor Name</th>
+            <th>Total Billing</th>
+            <th>Total Paid</th>
+            <th>Due Amount</th>
+            {% if heads.ca == 1 %}
+            <th>Advances Remaining</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for c, b, p, d, a in data %}
+          {% if d == 0 %}
+            <tr class="customtr1">
+          {% elif  d and d == b %}
+            <tr class="customtr2">
+          {% else %}
+            <tr>
+          {% endif %}
+            <td >{{forloop.counter}}</td>
+
+            <td style="white-space:normal; width: 25%;">
+              {{c.Supplier_Name}}
+              <br>{% if c.GST_No %}{{c.GST_No}}{% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {% if b %}₹ {{b|floatformat:0|intcomma}}{% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {% if p %}₹ {{p|floatformat:0|intcomma}}{% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {% if d != None  %}{% if d > 100  %}₹ {{d|floatformat:0|intcomma}}{% else %}₹ 0{% endif %}{% endif %}
+            </td>
+            
+            {% if heads.ca == 1 %}
+              {% if a > 10 %}
+                <td style="white-space:normal; background:violet;">₹ {{a|floatformat:0|intcomma}}</td>
+              {% else %}
+                <td style="white-space:normal;">{% if a > 10 %} ₹ {{a|floatformat:0|intcomma}} {% endif %}</td>
+              {% endif %}
+            {% endif %}
+
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+{% else %}
+<!-- ######### -->
+<button type="button" id="popup" style="display:none" onclick="unauth()"></button>
+{% endif %}
+
+{% endblock %}
+ 

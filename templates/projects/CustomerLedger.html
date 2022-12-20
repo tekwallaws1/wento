@@ -28,18 +28,18 @@
 
 function fncsbmt(){
   var customer = $("#sel").val();
-  document.getElementById('customeraction').action = '/{{pdata.pj}}/paymentslist/Received/'+customer+'/';
+  document.getElementById('customeraction').action = '/{{firm}}/{{pdata.pj}}/paymentslist/Received/'+customer+'/';
 }
 
   function rid(tid, xid) {getid = tid; getxid = xid;}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/paymentsform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/paymentsform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
   function selectmode(tag){
-    document.getElementById('paymentaction').action =  '/{{pdata.pj}}/paymentsform/create/1/'
+    document.getElementById('paymentaction').action =  '/{{firm}}/{{pdata.pj}}/paymentsform/create/1/'
     if (tag=='againstorder') {document.getElementById('orderno').style.display='block';}
     else {document.getElementById('orderno').style.display='none';}
     if (tag=='againstinvoice') {document.getElementById('invoiceno').style.display='block';}
@@ -135,7 +135,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
   <div style="float:right">
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
     &nbsp;&nbsp;&nbsp;
-    <button type="button" onclick="location.href='/{{pdata.pj}}/customerledger/mode/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/customerledger/mode/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
   </div>
   <div style="clear:both"></div>
 </div>
@@ -332,9 +332,9 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button   onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
-            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button>          
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" type="button" class="btn btn-sm btn-info">Customer Invoices</button>
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button>          
           </div>
         </div>
       </div>

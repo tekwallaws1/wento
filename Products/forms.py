@@ -56,7 +56,7 @@ class POForm(forms.ModelForm):
 class ManualPurchasesForm(forms.ModelForm):
 	class Meta:
 		model = Purchases
-		fields = ['PO_From','Vendor','Vendor_Contact','Purchase_Details','PO_No','PO_Date',
+		fields = ['Vendor','Vendor_Contact','Purchase_Details','PO_No','PO_Date',
 		'PO_Value','GST_Amount','Delivery_Date','Warranty','Warranty_In', 'Attach', 'Final_Status']
 	
 		widgets = {'Delivery_Date': widgets.DateInput(attrs={'type': 'date'}), 'PO_Date': widgets.DateInput(attrs={'type': 'date'})}
@@ -84,7 +84,7 @@ class ManualPurchasesForm(forms.ModelForm):
 class ManualPurchasesForm1(forms.ModelForm):
 	class Meta:
 		model = Purchases
-		fields = ['PO_From','Vendor','Vendor_Contact','Purchase_Details','PO_No','PO_Date',
+		fields = ['Vendor','Vendor_Contact','Purchase_Details','PO_No','PO_Date',
 		'PO_Value','GST_Amount','Delivery_Date','Warranty','Warranty_In', 'Attach', 'Final_Status']
 	
 	def __init__(self, *args, **kwargs):
@@ -141,7 +141,7 @@ class PODeliveryForm1(forms.ModelForm):
 class POPaymentsForm(forms.ModelForm):	
 	class Meta:
 		model = Vendor_Payment_Status
-		fields = ['Paid_Amount', 'Payment_Date', 'Next_Commitment_Date', 'PO_No']
+		fields = ['Paid_Amount', 'Account_Name', 'Reference_No', 'Payment_Date', 'Next_Commitment_Date', 'PO_No']
 		widgets = {
             'Payment_Date': widgets.DateInput(attrs={'type': 'datetime-local'}),
             'Next_Commitment_Date': widgets.DateInput(attrs={'type': 'date'})
@@ -166,7 +166,7 @@ class POPaymentsForm(forms.ModelForm):
 class VendorPaymentForm(forms.ModelForm):	
 	class Meta:
 		model = Vendor_Payment_Status
-		fields = ['PO_No', 'Invoice_No', 'Paid_Amount', 'Payment_Date', 'Next_Commitment_Date']
+		fields = ['PO_No', 'Invoice_No', 'Paid_Amount', 'Account_Name', 'Reference_No', 'Payment_Date', 'Next_Commitment_Date']
 		widgets = {'Payment_Date': widgets.DateInput(attrs={'type': 'datetime-local'}),'Next_Commitment_Date': widgets.DateInput(attrs={'type': 'date'})}
 
 	def clean(self): 
@@ -187,7 +187,7 @@ class VendorPaymentForm(forms.ModelForm):
 class VendorPaymentForm1(forms.ModelForm):	
 	class Meta:
 		model = Vendor_Payment_Status
-		fields = ['PO_No', 'Invoice_No', 'Paid_Amount', 'Payment_Date', 'Next_Commitment_Date']
+		fields = ['PO_No', 'Invoice_No', 'Paid_Amount', 'Account_Name', 'Reference_No', 'Payment_Date', 'Next_Commitment_Date']
 		# widgets = {'Payment_Date': widgets.DateInput(attrs={'type': 'datetime-local'}),'Next_Commitment_Date': widgets.DateInput(attrs={'type': 'date'})}
 
 	def clean(self): 
@@ -291,7 +291,7 @@ class VendorInvoicesForm1(forms.ModelForm):
 class ProductsForm(forms.ModelForm):
 	class Meta:
 		model = Products
-		exclude = ['user', 'Stock']
+		exclude = ['user', 'Stock', 'RC']
 		widgets = {'Active_From': widgets.DateInput(attrs={'type': 'date'})}
 
 	def __init__(self, *args, **kwargs):
@@ -310,7 +310,7 @@ class ProductsForm(forms.ModelForm):
 class ProductsForm1(forms.ModelForm):
 	class Meta:
 		model = Products
-		exclude = ['user', 'Stock']
+		exclude = ['user', 'Stock', 'RC']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

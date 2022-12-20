@@ -33,7 +33,7 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/emplsalrevisionform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/emplsalrevisionform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
@@ -107,10 +107,10 @@
     <h3 class="page-title">Employes Salaries Revisions</h3>
   </div>
   <div style="float:right">
-    <button type="button" onclick="location.href='/{{pdata.pj}}/emplsalrevisionform/create/1/'" class="btn btn-sm btn-primary" ht="revision form">Salary Revision Form</button>
-    <button type="button" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'" class="btn btn-sm btn-info" ht="employ salaries">Employ Salaries</button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/emplsalrevisionform/create/1/'" class="btn btn-sm btn-primary" ht="revision form">Salary Revision Form</button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalarieslist/active/'" class="btn btn-sm btn-info" ht="employ salaries">Employ Salaries</button>
     <!-- <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-      <button type="button" onclick="location.href='/{{pdata.pj}}/employeslist/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button> -->
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button> -->
   </div>
   <div style="clear:both"></div>
 </div>
@@ -201,7 +201,7 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/emplsalrevisionform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/emplsalrevisionform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit</button>
             <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-danger">Delete</button>            
           </div>
         </div>

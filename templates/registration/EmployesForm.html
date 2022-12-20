@@ -14,22 +14,23 @@
               {% csrf_token %}
                 <div class="form-group">
                   {% for field in form %}
-                    {% if field.label != 'Attach' and field.label != 'Status' %}
+                    {% if field.label != 'Upload Photo' and field.label != 'Status' and field.label != 'Only Their Works' %}
                       <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
-                    {% endif %}
-                    {% if field.label ==  'Attach' %}
-                      <label style="color:#32a852;">attach photo below</label>{{field}} 
                     {% endif %}
                     {% for error in field.errors %}
                       <p style="color: red; margin-top: -20px">{{ error }}</p>
                     {% endfor %}
                   {% endfor %}  
                 </div>
+                <label style="color:#32a852;">upload employ photo if required/available</label>{{form.Upload_Photo}} 
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label">{{ form.Only_Their_Works }} mark if want to restrict him/her to make visiable only thier works/entries</label>
+                </div>
                 {% if fnc == 'edit' %}
                   <div class="form-check form-check-flat form-check-primary">
                     <label class="form-check-label">{{ form.Status }} unmark if employ left company</label>
                   </div>
-                  {% endif %}
+                {% endif %}
             </div>
           <button type="submit" class="btn btn-primary">Submit</button>
         </form>

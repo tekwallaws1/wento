@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 class OrdersForm(forms.ModelForm):	
 	class Meta:
 		model = Orders
-		exclude = ['ds', 'user', 'Related_Project', 'Add_Product', 'Order_No', 'Work_Status', 
+		exclude = ['ds', 'RC', 'Related_Project', 'Add_Product', 'Order_No', 'Work_Status', 
 		'Payment_Status',  'Final_Status', 'Billing_Status', 'Can_Gen_Invoice', 'Is_Billed', 'FY', 'Order_No_1']
 
 	def clean(self): 
@@ -32,7 +32,7 @@ class OrdersForm(forms.ModelForm):
 class OrdersEmptyForm(forms.ModelForm):	
 	class Meta:
 		model = Orders
-		exclude = ['ds', 'user', 'Related_Project', 'Add_Product', 'Order_No', 'Work_Status', 
+		exclude = ['ds', 'RC', 'Related_Project', 'Add_Product', 'Order_No', 'Work_Status', 
 		'Payment_Status',  'Final_Status', 'Billing_Status', 'Can_Gen_Invoice', 'Is_Billed', 'FY', 'Order_No_1']
 		widgets = {
             'Order_Received_Date': widgets.DateInput(attrs={'type': 'datetime-local'})
@@ -231,7 +231,7 @@ class ManualInvoicesForm(forms.ModelForm):
 	class Meta:
 		model = Invoices
 		# exclude = ['user']
-		fields = ['Billing_From', 'Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Attach']
+		fields = ['Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Attach']
 		widgets = {'Invoice_Date': widgets.DateInput(attrs={'type': 'datetime-local'})}
 
 	def clean(self):
@@ -258,7 +258,7 @@ class ManualInvoicesForm1(forms.ModelForm):
 	class Meta:
 		model = Invoices
 		# exclude = ['user']
-		fields = ['Billing_From', 'Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Attach']
+		fields = ['Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Attach']
 
 	def clean(self):
 	    cleaned_data = self.cleaned_data
@@ -282,7 +282,7 @@ class ManualInvoicesForm1(forms.ModelForm):
 class BilledItemsForm(forms.ModelForm):	
 	class Meta:
 		model = Billed_Items
-		exclude = ['user', 'Invoice_No']
+		exclude = ['user', 'Invoice_No', 'RC']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -326,6 +326,102 @@ class InvoiceTCForm(forms.ModelForm):
 	class Meta:
 		model = Terms_Conditions
 		exclude = ['Invoice_No']
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })
+
+class OrdersFormQ(forms.ModelForm):	
+	class Meta:
+		model = Orders
+		fields = ['user', 'PO_No', 'Order_Details', 'Order_Value', 'Order_Received_Date', 'Attach']
+		widgets = {'Order_Received_Date': widgets.DateInput(attrs={'type': 'datetime-local'})}
+
+	def clean(self): 
+	    cleaned_data = self.cleaned_data
+	    if not cleaned_data.get('Order_Received_Date'):
+	    	cleaned_data['Order_Received_Date'] = datetime.now()
+	    if not cleaned_data.get('Credit_Days'):
+	    	cleaned_data['Credit_Days'] = 0
+	    return cleaned_data
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })
+
+class InvoicesFormQ(forms.ModelForm):
+	class Meta:
+		model = Invoices
+		# exclude = ['user']
+		fields = ['Invoice_No','Invoice_Date','Invoice_Amount', 'Attach']
+		widgets = {'Invoice_Date': widgets.DateInput(attrs={'type': 'datetime-local'})}
+
+	def clean(self):
+	    cleaned_data = self.cleaned_data
+	    f1 = cleaned_data.get('Invoice_Date')
+	    f2 = cleaned_data.get('Last_Update')
+	    if not f1:
+	        cleaned_data['Invoice_Date'] = datetime.now()
+	    if not f2:
+	    	cleaned_data['Last_Update'] = date.today()
+	    return cleaned_data	
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })
+
+class PaymentsFormQ(forms.ModelForm):	
+	class Meta:
+		model = Payment_Status
+		fields = ['Received_Amount', 'Payment_Date', 'Account_Name', 'Reference_No']
+		widgets = {
+            'Payment_Date': widgets.DateInput(attrs={'type': 'datetime-local'})
+        }
+
+	def clean(self):
+	    cleaned_data = self.cleaned_data
+	    f1 = cleaned_data.get('Payment_Date') # this is not None if user left the <input/> empty
+	    if not f1:
+	        cleaned_data['Payment_Date'] = datetime.now()
+	    return cleaned_data
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():
+			value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields:
+			self.fields[field].widget.attrs.update({
+	            'class': 'form-control mb-4'
+	        })
+
+
+class ManualQuotesForm(forms.ModelForm):	
+	class Meta:
+		model = Manual_Quotes
+		exclude = exclude = ['ds', 'user', 'RC', 'Related_Project']
+		widgets = {'Date': widgets.DateInput(attrs={'type': 'datetime-local'})}
+
+	def clean(self):
+	    cleaned_data = self.cleaned_data
+	    f1 = cleaned_data.get('Date') # this is not None if user left the <input/> empty
+	    if not f1:
+	        cleaned_data['Date'] = datetime.now()
+	    return cleaned_data
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)

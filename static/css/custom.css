@@ -1415,6 +1415,10 @@ input[type="button"].btn2-block {
     .table-striped>tbody>tr.customtr1:nth-child(even)>td {
     background-color: #9fedc5;}
 
+.table-striped>tbody>tr.customtr2:nth-child(odd)>td,
+    .table-striped>tbody>tr.customtr2:nth-child(even)>td {
+    background-color: #fa6f05;}
+
 
 a:hover {
   cursor:pointer;

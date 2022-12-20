@@ -7,6 +7,7 @@ from UserAccounts.models import *
 uom = (('No','Nos'), ('Set', 'Sets'), ('Kg', 'Kgs'), ('Mtr', 'Mtrs'), ('Ltr', 'Ltrs'), ('Bag', 'Bags'))
 
 class Products(models.Model):
+	RC                  = models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Product_Name 		= models.TextField(max_length=1000, null=True, unique=True, help_text='product name and its description')
 	Product_Type		= models.CharField(max_length=30, null=True, blank=True, choices=(('Finished Goods', 'Finished Goods'), ('Services', 'Services'), ('Raw Material', 'Raw Material')))
 	Make 		 		= models.CharField(max_length=50, null=True, blank=True, help_text='product make - optional')
@@ -62,6 +63,7 @@ class Product_Price(models.Model):
 		return str(self.Product_Name.Product_Name)+'-'+str(self.Unit_Price)
 
 class Purchase_TC(models.Model): 
+	RC                   = models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Terms_and_Condition1 = models.CharField(max_length=100, null=True, blank=True, help_text='optional')
 	Terms_and_Condition2 = models.CharField(max_length=100, null=True, blank=True, help_text='optional')
 	Terms_and_Condition3 = models.CharField(max_length=100, null=True, blank=True, help_text='optional')
@@ -117,9 +119,11 @@ class Copy_PO_Items(models.Model):
 class Vendor_Payment_Status(models.Model):
 	PO_No 				= models.ForeignKey('Purchases', null=True, blank=True, on_delete=models.CASCADE)
 	Invoice_No 			= models.ForeignKey('Vendor_Invoices', null=True, blank=True, on_delete=models.SET_NULL)
-	Paid_Amount			= models.FloatField(max_length=20, null=True, blank=True, help_text='received payment against this order')
+	Paid_Amount			= models.FloatField(default=0, max_length=20, null=True, blank=True, help_text='received payment against this order')
 	Payment_Type 		= models.CharField(max_length=20, null=True, blank=True, choices=(('Due', 'Due'), ('Advance', 'Advance')))
 	Payment_Date 		= models.DateTimeField(blank=True, null=True, help_text='payment received date')
+	Account_Name 		= models.ForeignKey(Bank_Accounts, null=True, on_delete=models.SET_NULL)
+	Reference_No 		= models.CharField(max_length=30, null=True, blank=True, help_text='transaction no/UPI mobile number/cheque no')
 	As_Advance_Amount	= models.FloatField(max_length=20, null=True, blank=True, help_text='If any as advance after clear all bills')
 	Next_Commitment_Date= models.DateField(blank=True, null=True, help_text='specify if any next payment commitment date')
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL) 
@@ -127,8 +131,9 @@ class Vendor_Payment_Status(models.Model):
 	def __str__(self):
 		return str(self.PO_No)+'-'+str(self.Paid_Amount)+'-'+str(self.Payment_Date)
 
-class Purchases(models.Model): 
+class Purchases(models.Model):
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL)
+	RC                  = models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Related_Project		= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL, help_text='leave empty if product meant for many projects') 		
 	Purchase_Details   	= models.TextField(max_length=1000, null=True, blank=True, help_text='overall PO short description')
 	Order 		        = models.ForeignKey('Orders.Orders', null=True, blank=True, on_delete=models.SET_NULL)
@@ -189,6 +194,8 @@ class Vendor_Invoices(models.Model):
 	Last_Update 		= models.DateField(blank=True, null=True)
 	Set_For_Returns		= models.BooleanField(default=True)
 	Amended_GST_Returns_Date = models.DateField(blank=True, null=True, help_text='returns month/date, by default its invoice date')
+	Adjusted_Amount     = models.FloatField(max_length=10, default=0, blank=True, null=True, help_text='payment against another invoice if exceed, excess amount adjusted to this')	
+	Roundoff = models.FloatField(default=0, max_length=5, blank=True, null=True)	
 
 	def __str__(self):
 		return (str(self.PO_No.Vendor.Short_Name) if self.PO_No.Vendor.Supplier_Name != None else None) +'-'+str(self.Invoice_No)+'-Billed '+str(self.Invoice_Amount)
@@ -217,7 +224,7 @@ class Quotes(models.Model):
 	Quote_No 			= models.CharField(max_length=30, blank=True, null=True, unique=True, help_text='Quote No') #backend
 	Date 				= models.DateField(blank=True, null=True, help_text='quote date')
 
-	Quote_To			= models.ForeignKey(CustContDt, null=True, blank=True, on_delete=models.SET_NULL)
+	Quote_To			= models.ForeignKey(CustDt, null=True, blank=True, on_delete=models.SET_NULL, limit_choices_to=models.Q(Address_Type__in = ['Billing']))
 	#or
 	Firm_Name 			= models.CharField(max_length=50, null=True, blank=True, help_text='quote to company, company name if available')
 	Reference_Person 	= models.CharField(max_length=50, null=True, blank=True, help_text='Contact Person Name')
@@ -270,6 +277,7 @@ class Copy_Quote_Items(models.Model):
 		return str(self.Quote_No)+'-'+str(self.Item_Description)
 
 class Quote_TC_Default(models.Model):
+	RC                  = models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Taxes 				= models.CharField(max_length=50,  blank=True, null=True, help_text='Ex: GST @ 18% (As Applicable)')
 	Payment_Terms 		= models.CharField(max_length=150, blank=True, null=True, help_text='Payment terms and conditions')
 	Delivery_Terms 		= models.CharField(max_length=150, blank=True, null=True, help_text='delivery details and terms')

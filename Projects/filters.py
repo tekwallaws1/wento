@@ -37,4 +37,16 @@ class CustomerLedgerFilter(django_filters.FilterSet):
 	customer 	= CharFilter(field_name='Partner', lookup_expr='icontains')	
 	class Meta:
 		model 	= Customer_Ledger
+		fields = ['Date']
+
+class VendorLedgerFilter(django_filters.FilterSet):
+	def __init__(self, *args, **kwargs):
+			super().__init__(*args, **kwargs)
+			for field in self.form.fields:
+				self.form.fields[field].widget.attrs.update({'class': 'form-control'})
+	from_date 	= DateFilter(field_name='Date', lookup_expr='gte')
+	to_date 	= DateFilter(field_name='Date', lookup_expr='lte')
+	vendor 	= CharFilter(field_name='Partner', lookup_expr='icontains')	
+	class Meta:
+		model 	= Vendor_Ledger
 		fields = ['Date'] 

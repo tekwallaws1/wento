@@ -6,25 +6,10 @@
 
 {% endblock %} 
 
-{% block scripts %}
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    
-    
-    <script>
-    // This code activates flatpickr on fields with the 'datetimefield' class when the document has loaded
-    window.addEventListener("DOMContentLoaded", function () {
-        flatpickr(".datetimefield", {
-            enableTime: true,
-            enableSeconds: true,
-            dateFormat: "Y-m-d H:i:S",
-        });
-    });
-</script>
-{% endblock %} <!-- For Scripts -->
 
 {% block content %}
 <div class="row justify-content-center">
-  <div class="col-md-6 grid-margin stretch-card">
+  <div class="col-md-6 grid-margin stretch-card"> 
     <div class="card">
       <div class="card-body">
         <h4 class="card-title d-inline-block">Vendor Payments Form</h4>
@@ -33,14 +18,16 @@
           <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="form-group">
-              <div style="display:none;">
+              <div >
                 <label for="{{ field.label }}">PO Details{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form.PO_No }}
               </div>
-              <div style="display:none;">
+              <div >
                 <label for="{{ field.label }}">Invoice Details{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form.Invoice_No }}
               </div>
               <div >
                 <label for="{{ field.label }}">Paid Amount{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form.Paid_Amount }}
+                <label for="{{ field.label }}">Paid Through{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form.Account_Name }}
+                <label for="{{ field.label }}">Reference No{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form.Reference_No }}
                 <label for="{{ field.label }}">Payment Date{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form.Payment_Date }}
                 <label for="{{ field.label }}">Next Commitment Date{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ form.Next_Commitment_Date }}
               </div>

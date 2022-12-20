@@ -25,7 +25,14 @@
   <script src="{% static 'js/tableexport.js' %}"></script>
 
 <script type="text/javascript">
-  function editemp1(tid) {getid = tid;}
+  function editemp1(tid, username) {
+    getid = tid;
+    if (username == 'None') {
+        document.getElementById('hideusr').style.display='block';
+    }
+    else {document.getElementById('hideusr').style.display='none';}
+    
+  }
 
   function editemp2(tid, rid) {
       getid = tid; eid = rid;
@@ -61,17 +68,17 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/employesform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/employesform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
   function validate2(p) {
     if(   document.getElementById("activitypswd2").value == "sse123" ){
-        url = '/{{pdata.pj}}/employesbankform/delete/'+getid+'/1/'
+        url = '/{{firm}}/{{pdata.pj}}/employesbankform/delete/'+getid+'/1/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
   function validate3(p) {
     if(   document.getElementById("activitypswd3").value == "sse123" ){
-        url = '/{{pdata.pj}}/employesprsnlform/delete/'+getid+'/1/'
+        url = '/{{firm}}/{{pdata.pj}}/employesprsnlform/delete/'+getid+'/1/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -145,16 +152,16 @@
 
 <div>
   <div style="float:left">
-    <button type="button" onclick="location.href='/{{pdata.pj}}/employesform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="register new employee here">Add New Employ</button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employesform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="register new employee here">Add New Employ</button>
     {% if status == 'active' %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/employeslist/old/'" class="btn btn-sm btn-danger mb-4" ht="list of old employes who are not active or not in company">Old Employes List</button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/old/'" class="btn btn-sm btn-danger mb-4" ht="list of old employes who are not active or not in company">Old Employes List</button>
     {% else %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/employeslist/active/'" class="btn btn-sm btn-success mb-4" ht="list of active employes">Active Employes List</button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/active/'" class="btn btn-sm btn-success mb-4" ht="list of active employes">Active Employes List</button>
     {% endif %}
   </div>
   <div style="float:right">
     <!-- <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-      <button type="button" onclick="location.href='/{{pdata.pj}}/employeslist/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button> -->
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button> -->
   </div>
   <div style="clear:both"></div>
 </div>
@@ -189,7 +196,7 @@
             </td>
 
             <td style="white-space:normal;">
-              <a class="ahr" ht="update employee details" data-toggle="modal" data-target="#editModal1" onclick="javascript:editemp1('{{x.id}}')">
+              <a class="ahr" ht="update employee details" data-toggle="modal" data-target="#editModal1" onclick="javascript:editemp1('{{x.id}}','{{x.user}}')">
                 {{x.Name}}
                 {% if x.Designation %}<br><span class="hlt5">Designation: </span>{{ x.Designation }}{% endif %}
                 {% if x.Employee_Id %}<br><span class="hlt5">Employee ID: </span>{{ x.Employee_Id }}{% endif %}
@@ -260,9 +267,13 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/employesform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit Employee</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/employesform/copy/'+getid+'/'" class="btn btn-sm btn-info">Copy Employee</button>
-            <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal1" class="btn btn-sm btn-danger">Delete Employee</button>            
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesform/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit Employee</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesform/copy/'+getid+'/'" class="btn btn-sm btn-info">Copy Employee</button>
+            <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal1" class="btn btn-sm btn-danger">Delete Employee</button>
+            <div class="template-demo" style="display:none;" id='hideusr'>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/signup1/'+getid+'/'" class="btn btn-sm btn-primary">Create Username</button>        
+          </div>
+
           </div>
         </div>
       </div>
@@ -280,12 +291,9 @@
         </div>
         <div class="modal-body">
           <div class="template-demo" style="display:none;" id='show_or_hide1'>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/employesbankform/edit/'+getid+'/1/'" class="btn btn-sm btn-primary">Edit Bank Details</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/employesbankform/copy/'+getid+'/1/'" class="btn btn-sm btn-info">Copy Bank Details</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesbankform/edit/'+getid+'/1/'" class="btn btn-sm btn-primary">Edit Bank Details</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesbankform/copy/'+getid+'/1/'" class="btn btn-sm btn-info">Copy Bank Details</button>
             <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal2" class="btn btn-sm btn-danger">Delete</button>            
-          </div>
-          <div class="template-demo" style="display:none;" id='show_or_hide2'>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/employesbankform/create/1/'+eid+'/'" class="btn btn-sm btn-primary">+ Add Bank Details</button>        
           </div>
         </div>
       </div>
@@ -303,11 +311,11 @@
         </div>
         <div class="modal-body">
           <div class="template-demo" style="display:none;" id='show_or_hide3'>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/employesprsnlform/edit/'+getid+'/1/'" class="btn btn-sm btn-primary">Edit Personal Details</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesprsnlform/edit/'+getid+'/1/'" class="btn btn-sm btn-primary">Edit Personal Details</button>
             <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal3" class="btn btn-sm btn-danger">Delete</button>            
           </div>
           <div class="template-demo" style="display:none;" id='show_or_hide4'>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/employesprsnlform/create/1/'+eid+'/'" class="btn btn-sm btn-primary">+ Add Personal Details</button>        
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesprsnlform/create/1/'+eid+'/'" class="btn btn-sm btn-primary">+ Add Personal Details</button>        
           </div>
         </div>
       </div>

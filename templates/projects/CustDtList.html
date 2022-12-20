@@ -24,17 +24,36 @@
 
 <script src="{% static 'js/datatablesexport.js' %}"></script>
 <script type="text/javascript">
-  function rid(tid) {getid = tid}
+  function custdtedit(tid) {cid1 = tid;}
+  function contedit(tid) {cid2 = tid;}
+  function hide() {$("#CustDtEditModal .close").click(); $("#CustContDtEditModal .close").click()}
+
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/customerform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/customerform/delete/'+cid1+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
     function validate2(k) {
     if(   document.getElementById("activitypswd2").value == "sse123" ){
-        url = '/{{pdata.pj}}/customercontactform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/customercontactform/delete/'+cid2+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
+  {% if messages %}
+    {% for msg in messages %}
+      {% if msg.tags == 'error' %}
+        <script>
+          $('.widget-content .message', function () {
+          swal({
+              title: 'Error Alert !',
+              text: '{{msg}}',
+              padding: '2em'
+            })
+        })          
+        </script>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
 </script>
 
 <script type="text/javascript">
@@ -43,27 +62,40 @@
     var sheet = xlsx.xl.worksheets['sheet1.xml'];
     var style = xlsx.xl['styles.xml'];
     var tagName = style.getElementsByTagName('sz');
-    for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")} //font size of sheet
-    // $('row c', sheet).attr( 's', '25' ); //border for entire sheet, issue: if border comes header bold text become normal and text wrap also going
-    $('row:first c', sheet).attr('s', '2')//.attr('s', '32'); //first row become ('s', '2') bold, ('s', '32')-background gray
-    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' );//wrap text
+    for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+    $('row:first c', sheet).attr('s', '2')
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );$('row c[r^="F"]', sheet).attr( 's', '55' );  $('row c[r^="G"]', sheet).attr( 's', '55' ); //wrap text
     var col = $('col', sheet);
     // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
-    $(col[1]).attr('width', 20); $(col[2]).attr('width', 30); $(col[3]).attr('width', 20);};
+    $(col[1]).attr('width', 25); $(col[2]).attr('width', 35); $(col[3]).attr('width', 35); }; 
   //--End--//
 
+            
   var cl = [0,  1, 2, 3]
+  var wdths = ['4%', '26%', '35%', '35%'];
+  
+   var msgTop = ''
+  var title = '{{firm}}-Customers List';
+  var filename = '{{firm}}-CustomersList';
+  var ort = 'portrait';
 
   // Datatables Customise PDF Before Export//
   var pdf_custom = function ( doc ) {
-    doc.content[1].table.widths = ['4%', '32%', '32%', '32%']; doc.content[0].text = doc.content[0].text.trim();
-    doc.pageMargins = [40,20,20,30];
+    doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+    doc.pageMargins = [40,60,20,30];
+    // doc.content[1].margin = [ 0, 50, 0, 50 ]
     doc['footer']= footer1;
+    doc['header']= header1;
     var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
     objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
     objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
     objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
-    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header;};
+    doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+    // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+  doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+  {text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+  };
+
   //--End--//
 </script>
 
@@ -73,63 +105,35 @@
   autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
   buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       
-    {extend: 'excel', title: 'SSE - Customers List', filename: 'SSE_Customers', text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}},},
+    {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
 
-    {extend: 'pdf', title: 'SSE - Customers List', filename: 'SSE_Customers', pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom,},
+    {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
 
-    {extend: 'print',title: 'SSE - Customers List',filename: 'SSE_Customers', exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"',},]}, } );
+    {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
 </script>
 {% endblock %} <!-- For Scripts -->
 
 
 {% block content %}
-<div class="page-header">
+<!-- <div class="page-header">
   <h3 class="page-title">Customers List</h3>
-</div>
+</div> -->
 
 <div>
   <div style="float:left">
-    <button type="button"  onclick="location.href='/{{pdata.pj}}/customerform/create/1/'" class="btn btn-sm btn-primary mb-4">+ Add Customer</button>&emsp;
-    <button type="button"  onclick="location.href='/{{pdata.pj}}/customercontactform/create/1/'" class="btn btn-sm btn-info mb-4">+ Add Contact Person</button>
+    
+    <h3 class="page-title">Customers List</h3>
+    <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customercontactform/create/1/'" class="btn btn-sm btn-info mb-4">+ Add Contact Person</button> -->
   </div>
   <div style="float:right">
-    <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+    <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customerform/create/1/'" class="btn btn-sm btn-primary mb-2">+ Add New Customer</button>&emsp;
+    <!-- <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
     &nbsp;&nbsp;&nbsp;
-    <button type="button" onclick="location.href='/{{pdata.pj}}/customerslist/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/customerslist/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button> -->
   </div>
   <div style="clear:both"></div>
 </div>
 
-<!--Filter/Serch History Form-->
-  <div id="addEventsModal" class="modal animated fadeIn"> 
-    <div class="modal-dialog modal-dialog-centered">                            
-      <!-- Modal content -->
-      <div class="card modal-content">
-        <div class="modal-body">
-          <span id="discard" data-dismiss="modal" class="close">&times;</span>
-          <div class="add-edit-event-box">
-            <div class="add-edit-event-content">
-              <div class="add-event-title edit-event-title"></div>
-                <h5 class="modal-title">Search Data by Applying Filter</h5>
-                <form class="">
-                  <div class="row">
-                    <div class="col-md-6 col-sm-6 col-12">
-                      <label style="font-weight: 200; color: black; font-size: 13px;">Related Project</label>
-                        {{ filter_data.form.Related_Project}}
-                    </div>
-                    <div class="col-md-6 col-sm-6 col-12" style="margin-top:20px;">
-                      <button type="submit"  id="add-e" class="btn btn-primary mb-4">Apply Filters</button>
-                      <!-- <button id="add-e" class="btn">Add Task</button> -->
-                      <button id="edit-event" class="btn"></button>
-                    </div>
-                  </div>    
-                </form>
-              </div>
-            </div>
-        </div>
-      </div>
-    </div>
-  </div>
   
 <!-- Customers List -->
   <div class="card">
@@ -151,39 +155,32 @@
               <td style="white-space: normal;width:4%;">{{forloop.counter}}</td>
 
               <td style="white-space: normal;width:32%;">
-                {{x.Customer_Name}}
-                <!-- <br>{{x.Short_Name}} -->
-                <br><br><a class="mdi mdi-border-color" title="Edit Data"  href="/{{pdata.pj}}/customerform/edit/{{x.id}}/"></a>&nbsp;&nbsp;
-                <a class="mdi mdi-content-copy" title="Duplicate Data" href="/{{pdata.pj}}/customerform/copy/{{x.id}}/"></a>&nbsp;&nbsp;
-                <a class="mdi mdi-delete" title="Delete Data" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}')" style="cursor:pointer"></a>       
+                <a class="ahr" ht="edit or update customer details" data-toggle="modal" data-target="#CustDtEditModal" onclick="custdtedit('{{x.id}}')">{{x.Customer_Name}}</a>    
               </td>
               <td style="white-space: normal;width:32%;">
-                {% if x.Address_Line_1 %}{{x.Address_Line_1}},{% endif %}
-                {% if x.Address_Line_2 %}<br>{{x.Address_Line_2}},{% endif %}
-                {% if x.State %}<br>{{x.State}}.{% endif %}
-                {% if x.GST_No %}<br>GSTIN: {{x.GST_No}}{% endif %}
+                <a class="ahr" ht="edit or update customer details" data-toggle="modal" data-target="#CustDtEditModal" onclick="custdtedit('{{x.id}}')">
+                  {% if x.Address_Line_1 %}{{x.Address_Line_1}},{% endif %}
+                  {% if x.Address_Line_2 %}<br>{{x.Address_Line_2}},{% endif %}
+                  {% if x.State %}<br>{{x.State}}.{% endif %}
+                  {% if x.GST_No %}<br>GSTIN: {{x.GST_No}}{% endif %}</a>
                 <br><br><i class="mdi mdi-phone"></i>&nbsp;<a href='tel:{{x.Phone_Number_1}}'>{{x.Phone_Number_1}}</a>&emsp;<a href="https://wa.me/{{x.Phone_Number_1}}?text=Hi">--Chat--<i class="mdi mdi-whatsapp"></i></a>
                 {% if x.Phone_Number_2 %}<br><i class="mdi mdi-phone"></i>&nbsp;<a href='tel:{{x.Phone_Number_2}}'>{{x.Phone_Number_2}}</a>&emsp;<a href="https://wa.me/{{x.Phone_Number_2}}?text=Hi">--Chat--<i class="mdi mdi-whatsapp"></i></a>{% endif %}
                 {% if x.Email %}<br><i class="mdi mdi-email-outline"></i>&nbsp;<a href="mailto:{{x.Email}}">{{x.Email}}</a>{% endif %}
                 {% if x.Website %}<br><i class="mdi mdi-search-web"></i>&nbsp;<a href="http://{{x.Website}}/" target="_blank">{{x.Website}}</a>{% endif %}
                 {% if x.Attach_Doc %}<br><a class="mdi mdi-attachment bs-tooltip" title="Attachment" href="{{x.Attach_Doc.url}}" target="_blank"></a> Docs Attached{% endif %}
-                {% if x.Office_Type %}<br><br>{{x.Office_Type}} Office{% endif %}
+                {% if x.Address_Type %}<br><br>{{x.Address_Type}} Office{% endif %}
               </td>
 
               <td style="white-space: normal;width:32%;">
                 {% for k in y %}
-                {{k.Contact_Person}}
-                <br><i class="mdi mdi-phone"></i>&nbsp;<a href='tel:{{k.Phone_Number_1}}'>{{k.Phone_Number_1}}</a>&emsp;<a href="https://wa.me/{{k.Phone_Number_1}}?text=Hi">--Chat--<i class="mdi mdi-whatsapp"></i></a>
-                {% if k.Phone_Number_2 %}<br><i class="mdi mdi-phone"></i>&nbsp;<a href='tel:{{k.Phone_Number_2}}'>{{k.Phone_Number_2}}</a>&emsp;<a href="https://wa.me/{{k.Phone_Number_2}}?text=Hi">--Chat--<i class="mdi mdi-whatsapp"></i></a>{% endif %}
-                {% if k.Email %}<br><i class="mdi mdi-email-outline"></i>&nbsp;<a href="mailto:{{k.Email}}">{{k.Email}}</a>{% endif %}
-                {% if k.Designation %}<br>Designation: {{k.Designation}}{% endif %}
-                {% if k.Department %}<br>Department: {{k.Department}}{% endif %}
-                {% if k.Other_Info %}<br>Other Info: {{k.Other_Info}}{% endif %}
-                <br>
-                <a class="mdi mdi-border-color" title="Edit Data"  href="/{{pdata.pj}}/customercontactform/edit/{{k.id}}/"></a>&nbsp;&nbsp;
-                <a class="mdi mdi-content-copy" title="Duplicate Data" href="/{{pdata.pj}}/customercontactform/copy/{{k.id}}/"></a>&nbsp;&nbsp;
-                <a class="mdi mdi-delete" title="Delete Data" data-toggle="modal" data-target="#exampleModal12" onclick="javascript:rid('{{k.id}}')" style="cursor:pointer"></a>
-                <br><br>
+                  <a class="ahr" ht="edit or update contact details" data-toggle="modal" data-target="#CustContDtEditModal" onclick="contedit('{{k.id}}')">{{k.Contact_Person}}</a> 
+                  <br><br><i class="mdi mdi-phone"></i>&nbsp;<a href='tel:{{k.Phone_Number_1}}'>{{k.Phone_Number_1}}</a>&emsp;<a href="https://wa.me/{{k.Phone_Number_1}}?text=Hi">--Chat--<i class="mdi mdi-whatsapp"></i></a>
+                  {% if k.Phone_Number_2 %}<br><i class="mdi mdi-phone"></i>&nbsp;<a href='tel:{{k.Phone_Number_2}}'>{{k.Phone_Number_2}}</a>&emsp;<a href="https://wa.me/{{k.Phone_Number_2}}?text=Hi">--Chat--<i class="mdi mdi-whatsapp"></i></a>{% endif %}
+                  {% if k.Email %}<br><i class="mdi mdi-email-outline"></i>&nbsp;<a href="mailto:{{k.Email}}">{{k.Email}}</a>{% endif %}
+                  {% if k.Designation %}<br>Designation: {{k.Designation}}{% endif %}
+                  {% if k.Department %}<br>Department: {{k.Department}}{% endif %}
+                  {% if k.Other_Info %}<br>Other Info: {{k.Other_Info}}{% endif %}
+                  <br><br>
                 {% endfor %}
               </td>
             </tr>
@@ -194,7 +191,7 @@
     </div>
   </div>
 
-  <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade text-left" id="CustDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">
@@ -208,7 +205,7 @@
             <div class="form-group">
               <label for="exampleInputPassword1">Password</label>
               <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd1"><br/>
-              <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
+              <input type="button" class="btn btn-danger" value="Submit"  onclick="javascript:validate1('{{x.id}}')" />
             </div> 
           </form>
         </div>
@@ -216,7 +213,7 @@
     </div>
   </div>
 
-  <div class="modal fade text-left" id="exampleModal12" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade text-left" id="ContDeleteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">
@@ -230,12 +227,54 @@
             <div class="form-group">
               <label for="exampleInputPassword1">Password</label>
               <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd2"><br/>
-              <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate2('{{k.id}}')" />
+              <input type="button" class="btn btn-danger" value="Submit"  onclick="javascript:validate2('{{k.id}}')" />
             </div> 
           </form>
         </div>
       </div>
     </div>
   </div>
+
+<div class="modal fade text-left" id="CustDtEditModal" tabindex="-1" role="dialog" aria-labelledby="CustDtEditModal" aria-hidden="true">
+  <div class="modal-dialog" role="document" style="width:350px;%">
+    <div class="modal-content" id="modal-reload">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Customer Details Action Window</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="template-demo">
+          <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customerform/edit/'+cid1+'/'" class="btn btn-sm btn-primary ">Edit</button>
+          <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customerform/copy/'+cid1+'/'" class="btn btn-sm btn-info ">Copy</button>
+          <button type="button"  data-toggle="modal" data-target="#CustDeleteModal" class="btn btn-sm btn-danger" onclick="hide()">Delete</button>
+          <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customercontactform/create/'+cid1+'/'" class="btn btn-sm btn-success">Add Contact Person</button>           
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade text-left" id="CustContDtEditModal" tabindex="-1" role="dialog" aria-labelledby="CustContDtEditModal" aria-hidden="true">
+  <div class="modal-dialog" role="document" style="width:350px;%">
+    <div class="modal-content" id="modal-reload">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Contact Details Action Window</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="template-demo">
+          <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customercontactform/edit/'+cid2+'/'" class="btn btn-sm btn-primary ">Edit</button>
+          <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customercontactform/copy/'+cid2+'/'" class="btn btn-sm btn-info ">Copy</button> -->
+          <button type="button"  data-toggle="modal" data-target="#ContDeleteModal" class="btn btn-sm btn-danger" onclick="hide()">Delete</button>          
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
  

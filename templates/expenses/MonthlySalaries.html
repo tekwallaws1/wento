@@ -28,16 +28,16 @@
 
   window.onload = function () {if ('{{mode}}' == 'select'){$('#selectMonth').modal('show')}}
 
-  function edit(e_id) {getid = e_id;}
+   function edit(m, e) {mnt = m; empl = e;}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/monthlysalaries/{{month|date:'Y-m'}}/delete/'
+        url = '/{{firm}}/{{pdata.pj}}/monthlysalaries/{{month|date:'Y-m'}}/delete/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
   function validate2(p) {
     if(   document.getElementById("activitypswd2").value == "sse123" ){
-        url = '/{{pdata.pj}}/monthlysalaries/{{month}}/regen/'
+        url = '/{{firm}}/{{pdata.pj}}/monthlysalaries/{{month}}/regen/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
     
@@ -45,17 +45,17 @@
     function getdt(){
       var dt = $("#getdate").val();
       if ( dt == '' ){dt = 'month'} 
-      document.getElementById('formaction').action='/{{pdata.pj}}/monthlysalaries/'+dt+'/get/'}
+      document.getElementById('formaction').action='/{{firm}}/{{pdata.pj}}/monthlysalaries/'+dt+'/get/'}
 
     function autosalmonth(){
       var dt = $("#getmonth").val();
       if ( dt == '' ){dt = 'month'} 
-      document.getElementById('gensalaction').action='/{{pdata.pj}}/monthlysalaries/'+dt+'/gen/'}
+      document.getElementById('gensalaction').action='/{{firm}}/{{pdata.pj}}/monthlysalaries/'+dt+'/gen/'}
 
   function select(){
       var dt = $("#selectmonth").val();
       if ( dt == '' ){dt = 'month'} 
-      document.getElementById('getsalaction').action='/{{pdata.pj}}/monthlysalaries/'+dt+'/get/'}
+      document.getElementById('getsalaction').action='/{{firm}}/{{pdata.pj}}/monthlysalaries/'+dt+'/get/'}
 
      function fnchide() {$("#doMoreModal .close").click()}
 
@@ -161,50 +161,50 @@
             <td>{{forloop.counter}}</td>
             
             <td style="white-space:normal;">
-              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
                 {{x.Name.Name}}
                 {% if x.Name.Employee_Id %}<br><span class="hlt5">Employee ID: </span>{{  x.Name.Employee_Id }}{% endif %}
               </a>
             </td>
 
             <td style="white-space:normal;">
-              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
                {{x.Presents}}
               </a>
             </td>
 
-            <td style="white-space:normal;">
-              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+            <td style="white-space:normal; background: #a3bce6;">
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
                 {{x.Issued_Salary|floatformat:0|intcomma}}
               </a>
             </td>
 
             <!-- <td style="white-space:normal;">
-              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+              <a class="ahr" ht="update salary details" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
                 {{x.LOP|floatformat:0|intcomma}}
               </a>
             </td> -->
 
             <td style="white-space:normal;">
-              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
                 {{x.PF|floatformat:0|intcomma}}
               </a>
             </td>
 
             <td style="white-space:normal;">
-              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
                 {{x.ESI|floatformat:0|intcomma}}
               </a>
             </td>
 
             <td style="white-space:normal;">
-              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
-                {{x.OT_Amount|floatformat:0|intcomma}}
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
+               {% if x.OT_Amount > 0 %} {{x.OT_Amount|floatformat:0|intcomma}} ({{x.OT_Hours}} Hrs) {% endif %}
               </a>
             </td>
 
             <td style="white-space:normal;">
-              <a class="ahr" ht="update salary details" onclick="location.href='/{{pdata.pj}}/monthlysalariesedit/{{month}}/{{x.id}}'">
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
                 {{x.Salary_Advance|floatformat:0|intcomma}} 
               </a>
             </td>
@@ -330,13 +330,33 @@
             <button type="button" data-toggle="modal" data-target="#reGenModal" class="btn btn-sm btn-danger" ht="by clicking current salaries will be deleted and generated again" onclick="fnchide()">Regenerate Salaries</button>
             <button type="button" data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-warning" ht="by clicking this it will delete all salaries for selected month" onclick="fnchide()">Delete Salaries</button>
 
-            <button class="btn btn-sm btn-primary" onclick="location.href='/{{pdata.pj}}/orderwisesalaries/{{month}}/get/'">Order Wise Salaries</button>
-            <button class="btn btn-sm btn-info" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
-            <button class="btn btn-sm btn-danger" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
-            <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/employeslist/'">Employes List</button>
-            <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
-            <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
-            <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+            <button class="btn btn-sm btn-primary" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderwisesalaries/{{month}}/get/'">Order Wise Salaries</button>
+            <button class="btn btn-sm btn-info" onclick="location.href='/{{firm}}/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
+            <button class="btn btn-sm btn-danger" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
+            <button class="btn btn-sm btn-dark" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/'">Employes List</button>
+            <button class="btn btn-sm btn-success" onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
+            <button class="btn btn-sm btn-secondary" onclick="location.href='/{{firm}}/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+            <button class="btn btn-sm btn-warning" onclick="location.href='/{{firm}}/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- more pages -->
+  <div class="modal fade text-left" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button type="button" class="btn btn-sm btn-primary" ht="update salary by edit presents, when using this it will calculate other things automatically" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlysalariesedit/'+mnt+'/'+empl+'/presents/'">Change No. of Presents</button>
+            <button type="button" type="button" class="btn btn-sm btn-danger" ht="custom edit PF, ESI, and other deductions" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlysalariesedit/'+mnt+'/'+empl+'/ded/'">Edit Deductions</button>
           </div>
         </div>
       </div>

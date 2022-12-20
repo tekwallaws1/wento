@@ -35,7 +35,7 @@
   function edit(tid) {getid = tid;}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/holidaysform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/holidaysform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
   
@@ -44,7 +44,7 @@
   function getdt(){
     var dt = $("#getdate").val();
     if ( dt == '' ){dt = 'year'} 
-    document.getElementById('formaction').action='/{{pdata.pj}}/holidayslist/'+dt+'/'}
+    document.getElementById('formaction').action='/{{firm}}/{{pdata.pj}}/holidayslist/'+dt+'/'}
 </script>
 
 <!-- Data Tables Export Script -->
@@ -112,7 +112,7 @@
     <h3 class="page-title">Holidays/Extra Work Days List&emsp;
       <span style="color:blue;">{{year}}</span>
     </h3>
-    <button type="button"  onclick="location.href='/{{pdata.pj}}/holidaysform/create/1/'" class="btn btn-sm btn-primary ">Add Holiday/Work Day</button>
+    <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/holidaysform/create/1/'" class="btn btn-sm btn-primary ">Add Holiday/Work Day</button>
     <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger" ht="select category">Do More</button>
     <div>
     <form class="forms-sample" action="" id='formaction' method="POST" >
@@ -203,7 +203,7 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/holidaysform/edit/'+getid+'/'" class="btn btn-sm btn-primary ">Edit</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/holidaysform/edit/'+getid+'/'" class="btn btn-sm btn-primary ">Edit</button>
             <button type="button"  data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-danger" onclick="fnchide()">Delete</button>  
           </div>
         </div>
@@ -223,13 +223,13 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button class="btn btn-sm btn-primary" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
-            <button class="btn btn-sm btn-info" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
+            <button class="btn btn-sm btn-primary" onclick="location.href='/{{firm}}/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
+            <button class="btn btn-sm btn-info" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
             {% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
-              <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/employeslist/active/'">Employes List</button>
-              <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
-              <button class="btn btn-sm btn-danger" onclick="location.href='/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
-              <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+              <button class="btn btn-sm btn-warning" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/active/'">Employes List</button>
+              <button class="btn btn-sm btn-success" onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalarieslist/active/'">Salaries Master Data</button>
+              <button class="btn btn-sm btn-danger" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
+              <button class="btn btn-sm btn-secondary" onclick="location.href='/{{firm}}/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
             {% endif %}
           </div>
         </div>

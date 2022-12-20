@@ -39,7 +39,7 @@
   }
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/productsform/{{status}}/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/productsform/{{status}}/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -114,11 +114,11 @@
     
     
     {% if status == 'Services' %}
-    <button type="button" onclick="location.href='/{{pdata.pj}}/productsform/Services/create/1/'" class="btn btn-sm btn-info mb-4" ht="add new service">+ Add New Service</button>
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/productslist/Products/'" class="btn btn-sm btn-success mb-4" ht="list of services">Products List</button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/productsform/Services/create/1/'" class="btn btn-sm btn-info mb-4" ht="add new service">+ Add New Service</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/productslist/Products/'" class="btn btn-sm btn-success mb-4" ht="list of services">Products List</button>
     {% else %}
-    <button type="button" onclick="location.href='/{{pdata.pj}}/productsform/Products/create/1/'" class="btn btn-sm btn-primary mb-4" ht="add new product">+ Add New Product</button>
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/productslist/Services/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Services List</button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/productsform/Products/create/1/'" class="btn btn-sm btn-primary mb-4" ht="add new product">+ Add New Product</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/productslist/Services/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Services List</button>
     {% endif %}
   </div>
 
@@ -126,9 +126,9 @@
     <!-- {% if status == 'Products' or status == 'Services' %}
       <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>&emsp;
       {% if status == 'Services' %}
-        <button type="button" onclick="location.href='/{{pdata.pj}}/productslist/Services/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+        <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/productslist/Services/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
       {% else %}
-        <button type="button" onclick="location.href='/{{pdata.pj}}/productslist/Products/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+        <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/productslist/Products/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
       {% endif %}
     {% endif %} -->
   </div>
@@ -365,12 +365,12 @@
         </div>
         <div class="modal-body">
             {% if status == 'Products' %}
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/productsform/Products/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit</button>
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/productsform/Products/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/productsform/Products/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/productsform/Products/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy</button>
               <button type="button"  data-toggle="modal" data-target="#exampleModal12" onclick="hide()" class="btn btn-sm btn-warning">Delete</button>
             {% else %}
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/productsform/Services/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit</button>
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/productsform/Services/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/productsform/Services/edit/'+getid+'/'" class="btn btn-sm btn-primary">Edit</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/productsform/Services/copy/'+getid+'/'" class="btn btn-sm btn-danger">Copy</button>
               <button type="button"  data-toggle="modal" data-target="#exampleModal12" onclick="hide()" class="btn btn-sm btn-warning">Delete</button>
             {% endif %}       
         </div>

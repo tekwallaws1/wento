@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts %}
+<script type="text/javascript">
+
+  $('#select_all').change(function() {
+  var checkboxes = $(this).closest('form').find(':checkbox');
+  checkboxes.prop('checked', $(this).is(':checked'));
+});
+
+  $(document).ready(function() {
+  $('#checkall1').click(function() {
+    var checked = $(this).prop('checked');
+    $('#checkboxes1').find('input:checkbox').prop('checked', checked);
+  });
+})
+
+  $(document).ready(function() {
+  $('#checkall2').click(function() {
+    var checked = $(this).prop('checked');
+    $('#checkboxes2').find('input:checkbox').prop('checked', checked);
+  });
+})
+</script>
+
+
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Page Permissions Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+        <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label" style="color:#32a852; font-weight: bold">{{ form.Is_Admin }}mark to get access as admin (all permissions for all pages)</label>
+                </div>
+                <div style="display:none">{{ form.RC }}</div>
+                <br>
+                <div style="color: blue; font-style:italic;font-weight: bold;">Or Select Below for Individual Permissions</div><br>
+                {% for field in form %}
+                  {% if field.label == 'View permissions' %}
+                  <div style=" font-weight:bold">View Permissions 
+                    <span for="checkall1" style="font-weight:bold; font-size:13px; float:right"><span style="margin-left: 5px; color:green">Select</span>/<span style="color:red">Deselect</span> All</span><input type="checkbox" style="float:right" id="checkall1" /></div>
+                    <div style="margin-bottom:10px;"></div>
+                    <div id="checkboxes1">
+                      {% for x in field %}
+                        {{ x }}<br>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                  <div style="margin-bottom:10px;"></div>
+                  {% if field.label == 'Edit permissions' %}
+                  <div style=" font-weight:bold">Edit Permissions 
+                    <span for="checkall2" style="font-weight:bold; font-size:13px; float:right"><span style="margin-left: 5px; color:green">Select</span>/<span style="color:red">Deselect</span> All</span><input type="checkbox" style="float:right" id="checkall2" /></div>
+                    <div style="margin-bottom:10px;"></div>
+                    <div id="checkboxes2">
+                      {% for x in field %}
+                        {{ x }} <br>
+                      {% endfor %}
+                    </div>
+                  {% endif %}                
+                {% endfor %}  
+              </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+          <!-- <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label" style="color:#32a852;">{{ form.Is_Admin }}mark to get access as admin (all permissions for all pages)</label>
+                </div>
+                <div style="display:none">{{ form.RC }}</div>
+                <br>
+                <div style="color: blue; font-style:italic;font-weight: bold;">Or Select Below for Individual Permissions</div><br>
+                {% for field in form %}
+                  {% if field.label != 'Is Admin' and field.label != 'RC' %}
+                    <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field }} 
+                  {% endif %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}  
+              </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form> -->
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

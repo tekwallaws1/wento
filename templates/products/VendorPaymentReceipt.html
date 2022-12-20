@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+{% load static %}
+{% load humanize %}
+{% load mathfilters %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <!--  This file has been downloaded from bootdey.com @bootdey on twitter -->
+    <!--  All snippets are MIT license http://bootdey.com/license -->
+    <title>tekWall</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'website/assets/images/logo-circle.png' %}"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.css">
+</head>
+<body>
+    
+<div class="col-md-12">  
+
+ <div class="row">
+    {% if user.is_authenticated %}
+        <div class="prehead col-xs-10 col-sm-10 col-md-6 col-xs-offset-1 col-sm-offset-1 col-md-offset-3">
+            <button  type="button" class="btn btn-danger" data-toggle='modal', data-target="#shareModal"><i class="fas fa-lg fa-share-nodes"></i> Share Receipt</button>
+        </div>
+    {% endif %}
+        
+        <div class="receipt-main col-xs-10 col-sm-10 col-md-6 col-xs-offset-1 col-sm-offset-1 col-md-offset-3">
+            
+
+            
+            <div class="row">
+
+                <div class="receipt-header">
+                    <div class="col-xs-6 col-sm-6 col-md-6">
+                        <div class="receipt-left">
+                            <img class="img-responsive" alt="iamgurdeeposahan" src="{% static 'img/prakom-logo.png' %}" style="width: 200px; border-radius: 43px;">
+                        </div>
+                    </div>
+                    <div class="col-xs-6 col-sm-6 col-md-6 text-right">
+                        <div class="receipt-right">
+                            <p style="font-weight:bold;">Hyderabad, Telangana</p>
+                            <!-- <p>Suraram, Hyderabad <i class="fa fa-phone"></i></p>
+                            <p>Telangana, India<i class="fa fa-envelope-o"></i></p> -->
+                            <p><i class="mdi mdi-email-outline"></i>&nbsp;<a href="mailto:{{x.Email}}">info@prakom.in</a></p>
+                            <p><i class="mdi mdi-phone"></i>&nbsp;<a href='tel:{{x.Phone_Number_2}}'>9676844055</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="receipt-header receipt-header-mid">
+                    <div class="col-xs-8 col-sm-8 col-md-8 text-left">
+                        <div class="receipt-right">
+                            <h5>To, <br>M/s. {{cpay.PO_No.Vendor.Supplier_Name}}</h5>
+                            <p><b>Mobile :</b> <i class="mdi mdi-phone"></i>&nbsp;<a href='tel:{% if cpay.PO_No.Vendor_Contact.Phone_Number_1 and  cpay.PO_No.Vendor_Contact.Phone_Number_1 %}{{cpay.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{cpay.PO_No.Vendor.Phone_Number_1}}{% endif %}'>{% if cpay.PO_No.Vendor_Contact.Phone_Number_1 and  cpay.PO_No.Vendor_Contact.Phone_Number_1 %}{{cpay.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{cpay.PO_No.Vendor.Phone_Number_1}}{% endif %}</a></p>
+                            <p><b>{{cpay.PO_No.Vendor.State}}.</p>
+                            <!-- {% if cpay %}
+                            <p><b>Email :</b> <i class="mdi mdi-email-outline"></i>&nbsp;<a href='mailto:{{x.Phone_Number_2}}'>customer@gmail.com</a></p>
+                            {% endif %} -->
+                            <!-- {% if cpay %}
+                            <p><b>Address :</b> Hyderabad, Telangana</p>
+                            {% endif %} -->
+                        </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-4 col-md-4">
+                        <div class="receipt-left">
+                            {% if cpay.Invoice_No %}
+                                <h5>Invoice No.<br>#{{cpay.Invoice_No.Invoice_No}}
+                                    {% if cpay.Invoice_No.Attach %}
+                                        <br><br><a class="ahr" ht='click here to download copy' href="{{cpay.Invoice_No.Attach.url}}" target="_blank">Download <i class="fas fa fa-download"></i></a>
+                                    {% endif %}
+                                    
+                                </h5>
+                            {% else %}
+                                <h5>Order No.<br>#{{cpay.PO_No.PO_No}}</h5>
+                            {% endif %}
+
+                            
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- <h5 style="color: rgb(140, 140, 140);">Thanks for Payment.!</h5> -->
+            
+            <div>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Payment Date</th>
+                            <th>Paid Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for x in pays %}
+                        <tr>
+                            <td class="col-md-9">{{x.Payment_Date|date:'d M Y'}}</td>
+                            <td class="col-md-3 text-right">₹ {{x.Paid_Amount|floatformat:0|intcomma}}</td>
+                        </tr>
+                        {% endfor %}
+
+                        
+                        
+
+                        <tr>
+                            <td class="text-left">
+                            <p>
+                                <strong>Payable Amount</strong>
+                            </p>
+                            <p>
+                                <strong>Total Paid Amount</strong>
+                            </p>
+                            <!-- <p>
+                                <strong>Balance Due: </strong>
+                            </p> -->
+                            </td>
+                            <td class="text-right">
+                            <p>
+                                <strong>{% if cpay.Invoice_No %}₹ {{cpay.Invoice_No.Invoice_Amount|floatformat:0|intcomma}}{% else %}₹ {{cpay.PO_No.PO_Value|floatformat:0|intcomma}}{% endif %}</strong>
+                            </p>
+                            <p>
+                                <strong>₹ {{tpay|floatformat:0|intcomma}}</strong>
+                            </p>
+                            <!-- <p>
+                                <strong><i class="fa fa-inr"></i> 5,000</strong>
+                            </p> -->
+                            </td>
+                        </tr>
+                        {%  if tdue > 10 %}
+                        <tr>                           
+                            <td class="text-left"><h2><strong>Due Amount </strong></h2></td>
+                            <td class="text-right text-danger"><h2><strong>₹ {{tdue|floatformat:0|intcomma}}</strong></h2></td>
+                        </tr>
+                        {% else %}
+                        <td colspan="2"><h4><strong>Payment Cleared</strong></h4></td>
+                        
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div>
+              <div style="float:left;">
+                <!-- <input style="display:none" type="text" value="967684405" id="myInput">
+                <button class="btn btn-primary" onclick="myFunction()">Copy UPI Number to Pay Due</button> -->
+                <!-- <h5 style="color: rgb(140, 140, 140);">Thanks for Payment.!</h5> -->
+              </div>
+              <div style="float:right">
+                <div class="receipt-left">
+                            <img class="img-responsive" src="{% static 'img/prakom-stamp.png' %}" style="width: 50%; float: right; margin-top:-30px; margin-right: -40px;">
+                        </div>
+                
+              </div>
+              <div style="clear:both"></div>
+            </div>
+
+        </div>    
+    </div>
+</div>
+
+  <div class="modal fade text-left" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:500px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Share Receipt to Below WhatsApp Numbers</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <a
+                href="https://wa.me/{% if cpay.PO_No.Vendor_Contact and  cpay.PO_No.Vendor_Contact.Phone_Number_1 %}{{cpay.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{cpay.PO_No.Vendor.Phone_Number_1}}{% endif %}?
+                text=*M/s. {{cpay.PO_No.Vendor.Supplier_Name}}*
+                %0APaid Amount *{{cpay.Paid_Amount|floatformat:0|intcomma}}*
+                %0ADate: {{cpay.Payment_Date|date:'d M Y'}}
+                %0ATotal Payable Amount {% if cpay.Invoice_No %}₹ {{cpay.Invoice_No.Invoice_Amount|floatformat:0|intcomma}}{% else %}₹ {{cpay.PO_No.PO_Value|floatformat:0|intcomma}}{% endif %}
+                {%  if tdue > 10 %}%0A*Due Amount ₹ {{tdue|floatformat:0|intcomma}}*{% else %}_Total Payment Paid_{% endif %}
+                %0AClick below link for more details and receipt
+                %0Ahttps://www.tekwallorg.com/{{firm}}/{{pdata.pj}}/vendorpaymentreceipt/{{cpay.id}}/{% if cpay.PO_No.Vendor_Contact and  cpay.PO_No.Vendor_Contact.Phone_Number_1 %}{{cpay.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{cpay.PO_No.Vendor.Phone_Number_1}}{% endif %}/status/" 
+                target="_blank"><button style="color: black;"  class="btn btn-sm btn-info">Vendor/Supplier</button></a>
+            
+            <!-- {% if cpay.PO_No.user and cpay.PO_No.user.Phone_Number %}
+                <a style="color: black;" 
+                    href="https://wa.me/{{cpay.PO_No.user.Phone_Number}}?
+                    text=Payment To *M/s. {{cpay.PO_No.Vendor.Supplier_Name}}*
+                    %0APaid Amount *{{cpay.Paid_Amount|floatformat:0|intcomma}}*
+                    %0ADate: {{cpay.Payment_Date|date:'D M Y'}}
+                    %0ATotal Payable Amount {% if cpay.Invoice_No %}₹ {{cpay.Invoice_No.Invoice_Amount|floatformat:0|intcomma}}{% else %}{{cpay.PO_No.PO_Value|floatformat:0|intcomma}}{% endif %}
+                    {%  if tdue > 10 %}%0A*Due Amount ₹ {{tdue|floatformat:0|intcomma}}*{% else %}_Total Payment Paid_{% endif %}
+                    %0AClick below link for more details and receipt
+                    %0Ahttps://www.tekwallorg.com/{{firm}}/{{pdata.pj}}/vendorpaymentreceipt/{{cpay.id}}/{% if cpay.PO_No.Vendor_Contact.Phone_Number_1 %}{{cpay.PO_No.Vendor_Contact.Phone_Number_1}}{% else %}{{cpay.PO_No.Vendor.Phone_Number_1}}{% endif %}/status/" 
+                    target="_blank"><button style="color: black;"  class="btn btn-sm btn-primary">Marketing</button></a>
+            {% endif %}  -->      
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function myFunction() {
+      // Get the text field
+      var copyText = document.getElementById("myInput");
+
+      // Select the text field
+      copyText.select();
+      copyText.setSelectionRange(0, 99999); // For mobile devices
+
+      // Copy the text inside the text field
+      navigator.clipboard.writeText(copyText.value);
+      
+      // Alert the copied text
+      alert("Copied the text: " + copyText.value);
+    }
+</script>
+
+<style type="text/css">
+
+body{
+background:#eee;
+
+}
+.text-danger strong {
+            color: #9f181c;
+        }
+        .prehead {
+            padding: 20px 0px !important;
+            margin-bottom: -50px;
+            color: #333333;
+            font-family: open sans;
+        }
+        .receipt-main {
+            background: #ffffff none repeat scroll 0 0;
+            border-bottom: 12px solid #333333;
+            border-top: 12px solid #9f181c;
+            margin-top: 50px;
+            margin-bottom: 50px;
+            padding: 40px 30px !important;
+            position: relative;
+            box-shadow: 0 1px 21px #acacac;
+            color: #333333;
+            font-family: open sans;
+        }
+        .receipt-main p {
+            color: #333333;
+            font-family: open sans;
+            line-height: 1.42857;
+        }
+        .receipt-footer h1 {
+            font-size: 15px;
+            font-weight: 400 !important;
+            margin: 0 !important;
+        }
+        .receipt-main::after {
+            background: #414143 none repeat scroll 0 0;
+            content: "";
+            height: 5px;
+            left: 0;
+            position: absolute;
+            right: 0;
+            top: -13px;
+        }
+        .receipt-main thead {
+            background: #414143 none repeat scroll 0 0;
+        }
+        .receipt-main thead th {
+            color:#fff;
+        }
+        .receipt-right h5 {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0 0 7px 0;
+        }
+        .receipt-right p {
+            font-size: 12px;
+            margin: 0px;
+        }
+        .receipt-right p i {
+            text-align: center;
+            width: 18px;
+        }
+        .receipt-main td {
+            padding: 9px 20px !important;
+        }
+        .receipt-main th {
+            padding: 8px 10px !important;
+        }
+        .receipt-main td {
+            font-size: 13px;
+            font-weight: initial !important;
+        }
+        .receipt-main td p:last-child {
+            margin: 0;
+            padding: 0;
+        }   
+        .receipt-main td h2 {
+            font-size: 20px;
+            font-weight: 900;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .receipt-header-mid .receipt-left h1 {
+            font-weight: 100;
+            margin: 34px 0 0;
+            text-align: right;
+            text-transform: uppercase;
+        }
+        .receipt-header-mid {
+            margin: 24px 0;
+            overflow: hidden;
+        }
+        
+        #container {
+            background-color: #dcdcdc;
+        }
+
+        @media (max-width: 1200px) {
+          .receipt-main {
+            background: #ffffff none repeat scroll 0 0;
+            border-bottom: 12px solid #333333;
+            border-top: 12px solid #9f181c;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            margin-left: 5px;
+            margin-right: 5px;
+            padding: 40px 30px !important;
+            width: 98%;
+            position: relative;
+            box-shadow: 0 1px 21px #acacac;
+            color: #333333;
+            font-family: open sans;
+        }
+            .prehead {
+            margin-bottom: -10px;
+            margin-left: 10px;
+        }
+        }
+</style>
+
+<script type="text/javascript">
+
+</script>
+</body>
+</html>

@@ -1,0 +1,467 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+{% load mathfilters %}  
+
+{% block css %}
+  <link rel="stylesheet" href="{% static 'css/filterdate.css' %}">
+  <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+{% endblock %} 
+
+{% block scripts %}
+  <script src="{% static 'js/filterdate.js' %}"></script>
+  <!-- BEGIN PAGE LEVEL CUSTOM SCRIPTS -->
+  <script src="{% static 'js/datatables/datatables.js' %}"></script>
+  <!-- NOTE TO Use Copy CSV Excel PDF Print Options You Must Include These Files  -->
+  <script src="{% static 'js/datatables/dataTables.buttons.min.js' %}"></script>
+  <script src="{% static 'js/datatables/jszip.min.js' %}"></script>    
+  <script src="{% static 'js/datatables/buttons.html5.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.print.min.js' %}"></script>
+  <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
+  <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
+  <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script>
+
+<script type="text/javascript">
+
+function fncsbmt(){
+  var Vendor = $("#sel").val();
+  document.getElementById('Vendoraction').action = '/{{firm}}/{{pdata.pj}}/paymentslist/Received/'+Vendor+'/';
+}
+
+  function rid(tid, xid) {getid = tid; getxid = xid;}
+  function validate1(p) {
+    if(   document.getElementById("activitypswd1").value == "sse123" ){
+        url = '/{{firm}}/{{pdata.pj}}/paymentsform/delete/'+getid+'/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
+  function selectmode(tag){
+    document.getElementById('paymentaction').action =  '/{{firm}}/{{pdata.pj}}/paymentsform/create/1/'
+    if (tag=='againstorder') {document.getElementById('orderno').style.display='block';}
+    else {document.getElementById('orderno').style.display='none';}
+    if (tag=='againstinvoice') {document.getElementById('invoiceno').style.display='block';}
+    else {document.getElementById('invoiceno').style.display='none';}}
+
+  function fnchide(){document.getElementById('exampleModal11').style.display='none';}
+  
+</script>
+
+<script type="text/javascript">
+  document.getElementById("popup").click();
+    function unauth(){
+    $('.widget-content .message', function () {
+        swal({title: 'Un Authorisation Alert !',text: 'Sorry! You Can Not Access This Page. Need Authorisation To Access This Page',padding: '2em'})}) }
+</script>
+
+<!-- Data Tables Export Script -->
+<script src="{% static 'js/datatablesexport.js' %}"></script>
+<script type="text/javascript">
+  // Datatables Excel Formating Before Export//
+  var customexcel = function( xlsx ) {
+  var sheet = xlsx.xl.worksheets['sheet1.xml'];
+  var style = xlsx.xl['styles.xml'];
+  var tagName = style.getElementsByTagName('sz');
+  for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+  $('row:first c', sheet).attr('s', '2')
+  $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); $('row c[r^="F"]', sheet).attr( 's', '55' ); $('row c[r^="G"]', sheet).attr( 's', '55' ); $('row c[r^="H"]', sheet).attr( 's', '55' );//wrap text
+  var col = $('col', sheet);
+  // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
+  $(col[1]).attr('width', 10); $(col[2]).attr('width', 35); $(col[3]).attr('width', 20); $(col[4]).attr('width', 15); $(col[5]).attr('width', 15); $(col[6]).attr('width', 15); $(col[7]).attr('width', 15);}; 
+//--End--//
+
+{% if vendflt == 0 %}
+  var cl = [0,  1, 2, 3, 4, 5, 6, 7];
+  var wdths = ['3%', '10%', '20%', '18%', '10%', '12%', '12%', '15%'];
+{% else %}
+  var cl = [0,  1, 2, 3, 4, 5, 6];
+  var wdths = ['3%', '10%', '24%', '20%', '14%', '14%', '15%'];
+{% endif %}
+
+var ort = 'portrait'; //landscape
+
+var msgTop = 'Date: , Credit: {{tsales|floatformat:'0'|intcomma}}, Debits: {{tpurch|add:texp|floatformat:'0'|intcomma}}'
+  var title = 'Daily Finance Flow Book';
+  var filename = 'DailyFinanceFlowBook'
+
+// Datatables Customise PDF Before Export//
+var pdf_custom = function ( doc ) {
+  doc.content[1].table.widths = wdths; doc.content[0].text = doc.content[0].text.trim();
+  doc.pageMargins = [40,60,20,30];
+  doc['footer']= footer1;
+  doc['header']= header1;
+  var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+  objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+  objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+  objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+  doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+  // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+{text: msgTop, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+};
+
+//--End--//
+</script>
+
+<script type="text/javascript">
+  // Datatables Excel Formating Before Export//
+  var customexce8 = function( xlsx ) {
+  var sheet1 = xlsx.xl.worksheets['sheet1.xml'];
+  var style1 = xlsx.xl['styles.xml'];
+  var tagName = style1.getElementsByTagName('sz');
+  for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
+  $('row:first c', sheet1).attr('s', '2')
+  $('row c[r^="B"]', sheet1).attr( 's', '55' ); $('row c[r^="C"]', sheet1).attr( 's', '55' );$('row c[r^="D"]', sheet1).attr( 's', '55' ); $('row c[r^="E"]', sheet1).attr( 's', '55' ); $('row c[r^="F"]', sheet1).attr( 's', '55' ); $('row c[r^="G"]', sheet1).attr( 's', '55' ); $('row c[r^="H"]', sheet1).attr( 's', '55' );//wrap text
+  var col = $('col', sheet1);
+  // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
+  $(col[1]).attr('width', 10); $(col[2]).attr('width', 35); $(col[3]).attr('width', 20); $(col[4]).attr('width', 15); $(col[5]).attr('width', 15); $(col[6]).attr('width', 15); $(col[7]).attr('width', 15);}; 
+//--End--//
+
+  var cl1 = [0,  1, 2, 3, 4, 5];
+  var wdths1 = ['3%', '10%', '20%', '18%', '10%', '12%'];
+
+var ort = 'portrait'; //landscape
+
+  var msgTop1 = ''
+  var title1 = 'Daily Finance Flow Book - Bank Wise';
+  var filename1 = 'DailyFinanceFlowBookBankWise'
+
+// Datatables Customise PDF Before Export//
+var pdf_custom1 = function ( doc ) {
+  doc.content[1].table.widths = wdths1; doc.content[0].text = doc.content[0].text.trim();
+  doc.pageMargins = [40,60,20,30];
+  doc['footer']= footer1;
+  doc['header']= header1;
+  var objLayout = {};objLayout['hLineWidth'] = function(i) { return .5; };
+  objLayout['vLineWidth'] = function(i) { return .5; };objLayout['hLineColor'] = function(i) { return '#aaa'; };
+  objLayout['vLineColor'] = function(i) { return '#aaa'; };objLayout['paddingLeft'] = function(i) { return 5; };
+  objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
+  doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
+  // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
+doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+{text: msgTop1, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
+};
+
+//--End--//
+</script>
+
+<!-- Data Tables Export Script -->
+<script type="text/javascript">
+$('#daybook').DataTable( {
+autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
+buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
+    
+  {extend: 'excel', title: title, filename: filename, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop, },
+
+  {extend: 'pdf', title: title, filename: filename, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom, orientation:ort, },
+
+  {extend: 'print',title: title, filename: filename, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop },]}, } );
+</script>
+
+<script type="text/javascript">
+$('#banks').DataTable( {
+autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
+buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
+    
+  {extend: 'excel', title: title1, filename: filename1, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel8, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop1, },
+
+  {extend: 'pdf', title: title1, filename: filename1, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom1, orientation:ort, messageTop: msgTop1,},
+
+  {extend: 'print',title: title1, filename: filename1, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop1 },]}, } );
+</script>
+{% endblock %} <!-- For Scripts -->
+
+
+{% block content %}
+
+<div class="page-header">
+  <h3 class="page-title">
+    Daily Finance Flow Book - 
+    {% if sDate == eDate %}
+      {{sDate|date:'d M y'}}
+    {% else %}
+      {{sDate|date:'d M y'}} to {{eDate|date:'d M y'}}
+    {% endif %}
+  </h3>
+</div>
+
+<div>
+  <div style="float:left; margin-bottom:20px;">
+    <button class="btn1 btn1-success" onclick="location.href='/{{firm}}/{{pdata.pj}}/dailyfinancemovement/today/status/'">Today</button>
+    <button class="btn1 btn1-secondary" onclick="location.href='/{{firm}}/{{pdata.pj}}/dailyfinancemovement/Yesterday/status/'">Yesterday</button>
+    <button class="btn1 btn1-primary" onclick="location.href='/{{firm}}/{{pdata.pj}}/dailyfinancemovement/Week/status/'">Week</button>
+    <button class="btn1 btn1-danger" onclick="location.href='/{{firm}}/{{pdata.pj}}/dailyfinancemovement/Month/status/'">Month</button>
+    <button class="btn1 btn1-dark" onclick="location.href='/{{firm}}/{{pdata.pj}}/dailyfinancemovement/Year/status/'">Year</button>
+    <button type="button" id="myBtn" class="btn1 btn1-primary">Custom Dates<i class="mdi mdi-filter btn-icon-append"></i></button>
+  </div>
+  <!-- <div style="float:right">
+    <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
+    &nbsp;&nbsp;&nbsp;
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/dailyfinancemovement/today/status/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+  </div> -->
+  <div style="clear:both"></div>
+</div>
+
+  
+  <!--Filter/Serch History Form-->
+  <div id="addEventsModal" class="modal animated fadeIn"> 
+    <div class="modal-dialog modal-dialog-centered">                            
+      <!-- Modal content -->
+      <div class="card modal-content">
+        <div class="modal-body">
+          <span id="discard" data-dismiss="modal" class="close">&times;</span>
+          <div class="add-edit-event-box">
+            <div class="add-edit-event-content">
+              <div class="add-event-title edit-event-title"></div>
+                <h5 class="modal-title">Search Data by Applying Filter</h5>
+                  <form class="" method="GET">
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
+                          <input type="date" name="from_date" class="form-control">
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
+                          <input type="date" name="to_date" class="form-control">
+                        </div>
+                      </div>                                           
+                      <div class="" style=" float:left; margin-left: 10px; margin-top:20px;">
+                        <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                        <!-- <button id="add-e" class="btn">Add Task</button> -->
+                        <button id="edit-event" class="btn"></button>
+                      </div>
+                    </div>   
+                  </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<div class="row">
+  <div class="col-xl-6 col-md-6 mb-4">
+    <div class="card border-left-dark shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Credits - ₹ {{tcredits.c_bank|add:tcredits.c_upi|add:tcredits.c_cash|floatformat:'0'|intcomma}}</div>
+            <div class="h6 mb-0 font-weight-bold text-blue-1000">
+              Bank ₹ {{tcredits.c_bank|floatformat:'0'|intcomma}} | UPI ₹ {{tcredits.c_upi|floatformat:'0'|intcomma}} | Cash ₹ {{tcredits.c_cash|floatformat:'0'|intcomma}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-6 col-md-6 mb-4"> 
+    <div class="card border-left-dark shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Debits - ₹ {{tdebits.d_bank|add:tdebits.d_upi|add:tdebits.d_cash|floatformat:'0'|intcomma}}</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">
+              Bank ₹ {{tdebits.d_bank|floatformat:'0'|intcomma}} | UPI ₹ {{tdebits.d_upi|floatformat:'0'|intcomma}} | Cash ₹ {{tdebits.d_cash|floatformat:'0'|intcomma}}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Payments List -->
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="banks">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Account Name</th>
+            <th>Credit</th>
+            <th>Debit</th>
+            <th>Current Balance</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b, c, d in data1 %}
+          <tr>
+            <td >{{forloop.counter}}</td>
+
+            <td style="white-space:normal; width: 20%;">
+              {% if sDate == eDate %}
+                {{sDate|date:'d M y'}}
+              {% else %}
+                {{sDate|date:'d M y'}} to {{eDate|date:'d M y'}}
+              {% endif %}
+            </td>
+
+            
+            <td style="white-space:normal; width: 25%;">
+              {% if b.Account_Type == 'CASH' %}
+                  Direct Cash
+              {% elif b.Account_Type == 'UPI' %}
+                {{b.Bank_Name}}
+                <br>UPI {{b.Account_No}}
+              {% else %}
+                {{b.Bank_Name}}
+                <br>A/c {{b.Account_No}}
+              {% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {{c|floatformat:'0'|intcomma}}
+            </td>
+
+            <td style="white-space:normal;">
+              {{d|floatformat:'0'|intcomma}}
+            </td>
+
+            <td style="white-space:normal;">
+              -
+            </td>
+
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+
+<!-- Payments List -->
+  <div class="card" style="margin-top:25px;">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="daybook">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Date</th>
+            <th>Party Name</th>
+            <th>Reference No</th>
+            <th>Credit</th>
+            <th>Debit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d, c, r in data %}
+          <tr>
+            <td style="white-space:normal; width: 3%;">{{forloop.counter}}</td>
+
+            <td style="white-space:normal; width: 10%;">
+              {{d|date:'d M y'}}
+            </td>
+
+            <td style="white-space:normal; width: 25%;">
+              {% if c == 'Received' %}
+                {{r.Order_No.Customer_Name.Customer_Name}}
+              {% elif c == 'Paid' %}
+                {{r.PO_No.Vendor.Supplier_Name}}
+              {% else %}
+                {% if r.Party_Name %}
+                  {{r.Party_Name}}
+                  {% if r.Related_To %}<br>{{r.Related_To}}{% endif %}
+                {% else %}
+                  <span class="hlt5">Staff: </span>{{r.Employ.Name}}
+                  {% if r.Related_To %}<br>{{r.Related_To}}{% endif %}
+                {% endif %}
+              {% endif %}
+            </td>
+
+            <td style="white-space:normal; width: 25%;">
+              
+              {% if c == 'Received' %}
+                {% if r.Invoice_No %}
+                  {{r.Invoice_No.Invoice_No}}
+                {% else %}
+                  {{r.Order_No.PO_No}}
+                {% endif %}
+              
+              {% elif c == 'Paid' %}
+                {% if r.Invoice_No %}
+                  {{r.Invoice_No.Invoice_No}}
+                {% else %}
+                  {% if r.PO_No.PO_No %}{{r.PO_No.PO_No}}{% endif %}
+                {% endif %}
+              {% else %}
+                {{Voucher_No}}
+              {% endif %}
+
+              {% if r.Account_Name.Account_Type == 'CASH' %}
+                  <span class="hlt3"><br>CASH</span>
+              {% elif r.Account_Name.Account_Type == 'UPI' %}
+                <span class="hlt2" style="font-style:normal"><br>{{r.Account_Name.Bank_Name}}
+                <br>UPI {{r.Account_Name.Account_No}}</span>
+              {% else %}
+                <span class="hlt5"><br>{{r.Account_Name.Bank_Name}}
+                {% if r.Reference_No %}<br>{{r.Reference_No}}{% endif %}</span>
+              {% endif %}
+
+            </td>
+            
+            <td style="white-space:normal;">
+              {% if c == 'Received' %}
+                {{r.Received_Amount|floatformat:'0'|intcomma}}
+              {% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {% if c != 'Received' %}
+                {% if c == 'Paid' %}
+                  {{r.Paid_Amount|floatformat:'0'|intcomma}}
+                {% else %}
+                  {{r.Issued_Amount|floatformat:'0'|intcomma}}
+                {% endif %}
+              {% endif %}
+            </td>
+
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+
+<div class="modal fade text-left" id="selectVendorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document" >
+    <div class="modal-content" id="modal-reload">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Select Vendor</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">   
+        <form class="forms-sample" id='Vendoraction' action='' method="POST">
+          <div class="form-group mb-4">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="id_Supplier_Name" style="color:green; font-size: 14px;">Select Vendor</label>
+                <select id='sel' name="vendor" class="form-select form-control">
+                <!-- <option selected>-------------</option> -->
+                <option value="">----------</option>
+                  {% for x in vendors %}
+                    <option >{{ x.Supplier_Name }}</option>
+                  {% endfor %}
+              </select>
+            </div>            
+          </div>
+        <button type="submit" onclick="fncsbmt()" class="btn btn-primary" >Submit</button>     
+      </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+ 

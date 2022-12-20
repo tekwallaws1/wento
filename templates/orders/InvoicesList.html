@@ -48,12 +48,12 @@
 
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/ordersform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/ordersform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
   function geninvoice() {
-    document.getElementById('invformaction').action = '/{{pdata.pj}}/invoice/create/1/1/itemid/msg/'
+    document.getElementById('invformaction').action = '/{{firm}}/{{pdata.pj}}/invoice/create/1/1/itemid/msg/'
   }
 </script>
 
@@ -77,7 +77,7 @@
   var wdths = ['4%', '25%', '25%', '46%'];
   var ort = 'portrait'; //landscape
   
-   if ('{{status}}' == 'Issued' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}} | Total Received {{total_rec|floatformat:0|intcomma}} | Total Due  {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}} \n Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} | Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}}';}
+   if ('{{status}}' == 'Issued' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}} | Total Received {{total_rec|floatformat:0|intcomma}} | Total Due  {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}} \n Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} | Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}} {% if advance %} | Over Received Payments {{advance|floatformat:0|intcomma}}{% endif %}';}
     else { var msgTop = ''};
     var title = '{{pdata.pj}} - {{status}} Invoices List';
     var filename = '{{pdata.pj}}-{{status}}InvoicesList_{{table.first.Invoice_Date|date:'dMy'}}to{{table.last.Invoice_Date|date:'dMy'}}'
@@ -125,14 +125,14 @@
   <div style="float:left">
     <button type="button" data-toggle="modal" data-target="#genInvoiceModal" onclick="javascript:geninvoice()" class="btn btn-sm btn-primary mb-4" ht="generate invoice against order">Generate Invoice</button>
     {% if status == 'Issued' %}
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/invoiceslist/Proforma/'" class="btn btn-sm btn-success mb-4" ht="proforma invoices list">Proforma Invoices</button>
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/invoiceslist/Incomplete/'" class="btn btn-sm btn-info mb-4" ht="not issued or confirmed">Invoice Draft Copies</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Proforma/'" class="btn btn-sm btn-success mb-4" ht="proforma invoices list">Proforma Invoices</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Incomplete/'" class="btn btn-sm btn-info mb-4" ht="not issued or confirmed">Invoice Draft Copies</button>
     {% elif status == 'Proforma' %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm  btn-success mb-4" ht='confirmed/issued invoices'>Issued Invoices</button>
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/invoiceslist/Incomplete/'" class="btn btn-sm btn-info mb-4" ht="not issued or confirmed">Invoice Draft Copies</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm  btn-success mb-4" ht='confirmed/issued invoices'>Issued Invoices</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Incomplete/'" class="btn btn-sm btn-info mb-4" ht="not issued or confirmed">Invoice Draft Copies</button>
     {% else %}
-      &emsp;<button type="button" onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm btn-success mb-4" ht="confirmed/issued invoices">Issued Invoices</button>
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/invoiceslist/Proforma/'" class="btn btn-sm  btn-info mb-4" ht="proforma invoices list">Proforma Invoices</button>
+      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm btn-success mb-4" ht="confirmed/issued invoices">Issued Invoices</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Proforma/'" class="btn btn-sm  btn-info mb-4" ht="proforma invoices list">Proforma Invoices</button>
     {% endif %}
 
     &emsp;&emsp;
@@ -143,7 +143,7 @@
     {% if status == 'Issued' %}
       <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
       &nbsp;&nbsp;&nbsp;
-      <button type="button" onclick="location.href='/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% endif %}
   </div>
   <div style="clear:both"></div>
@@ -229,73 +229,138 @@
 {% if request.user.username == 'praveen' %}
 <!-- ######### -->
                 
-{% if status == 'Issued' %}
-  <div class="row"> 
-  <div class="col-xl-3 col-md-6 mb-4">
-    <div class="card border-left-dark shadow h-100 py-2">
-      <a ht="total issued invoices i.e due and cleared" ><div class="card-body2">
-        <div class="row no-gutters align-items-center">
-          <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Billing - {{count.tbc}}</div>
-            <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_billing|floatformat:0|intcomma}}</div>
-          </div>
-        </div>
-      </div></a>
-    </div>
-  </div>
-  <div class="col-xl-3 col-md-6 mb-4">
-    <div class="card border-left-primary shadow h-100 py-2">
-      <a ht="toatl payment cleared invoices" ><div class="card-body2">
-        <div class="row no-gutters align-items-center">
-          <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Payment Status</div>
-            <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">Received ₹ {{total_rec|floatformat:0|intcomma}}
-              <br>
-              Due&nbsp; ₹ {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}}
+<div class="row">
+  {% if advance > 100 %}
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="total billing" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-3">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Billing - {{count.tbc}}</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_billing|floatformat:0|intcomma}}</div>
             </div>
           </div>
-        </div>
-      </div></a>
+        </div></a>
+      </div>
     </div>
-  </div>
-  <div class="col-xl-2 col-md-6 mb-4">
-    <div class="card border-left-info shadow h-100 py-2">
-      <a ht="payment not yet started" ><div class="card-body2">
-        <div class="row no-gutters align-items-center">
-          <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Full Due Bills  - {{count.fdc}}</div>
-            <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|floatformat:0|intcomma}}</div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <a ht="toatl receivd payments towards billed" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Payments Against Billed</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{total_rec|floatformat:0|intcomma}}
+              </div>
+            </div>
           </div>
-        </div>
-      </div></a>
+        </div></a>
+      </div>
     </div>
-  </div>
-  <div class="col-xl-2 col-md-6 mb-4">
-    <div class="card border-left-success shadow h-100 py-2">
-      <a ht="payment started but not cleared fully" ><div class="card-body2">
-        <div class="row no-gutters align-items-center">
-          <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Partial Due Bills - {{count.pdc}}</div>
-            <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.part_due_inv|floatformat:0|intcomma}}</div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="due payments towards billed invoices" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}}
+              </div>
+            </div>
           </div>
-        </div>
-      </div></a>
+        </div></a>
+      </div>
     </div>
-  </div>
-  <div class="col-xl-2 col-md-6 mb-4">
-    <div class="card border-left-danger shadow h-100 py-2">
-      <a ht="toatl payment cleared invoices" ><div class="card-body2">
-        <div class="row no-gutters align-items-center">
-          <div class="col mr-2">
-            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Cleared Bills - {{count.fcc}}</div>
-            <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_clear_inv|floatformat:0|intcomma}}</div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="payment that received more than billing against some particular customers" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Over Recived Payments</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{advance|floatformat:0|intcomma}}</div>
+            </div>
           </div>
-        </div>
-      </div></a>
+        </div></a>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="total billing" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-3">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Billing - {{count.tbc}}</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.total_billing|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <a ht="toatl received payments towards billed" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Payments Against Billed</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{total_rec|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="due payments towards billed invoices" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}}
+              </div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+   {% endif %} 
+  </div>
+
+    <div class="row"> 
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <a ht="payment not yet started" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Full Due Bills  - {{count.fdc}}</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.full_due_inv|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <a ht="payment started but not cleared fully" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Partial Due Bills - {{count.pdc}}</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{heads.part_due_inv|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <a ht="toatl payment cleared invoices" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Cleared Bills - {{count.fcc}}</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.full_clear_inv|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
     </div>
   </div>
-</div>
-{% endif %}
 
 <!-- ######### -->
 {% endif %}
@@ -342,9 +407,9 @@
             <td style="white-space:normal;">
                 {% for p in y %}
                   {% if p.Is_Manual == 0 %}
-                    <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
+                    <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
                   {% else %}
-                    <a class="ahr" ht="edit invoice" onclick="location.href='/{{pdata.pj}}/inv_edit/edit_manually/{{p.id}}/'">
+                    <a class="ahr" ht="edit invoice" onclick="location.href='/{{firm}}/{{pdata.pj}}/inv_edit/edit_manually/{{p.id}}/'">
                   {% endif %}
                     <span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
                     <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} | {% if p.Invoice_Amount != p.Due_Amount %}<span class='hlt5'>Received Amount: </span>₹ {{p.Due_Amount|mul:-1|add:p.Invoice_Amount|floatformat:0|intcomma}}{% else %}<span class='hlt3'>No Payments Received</span>{% endif %}
@@ -366,9 +431,9 @@
               <td style="white-space:normal;">
                 {% for p in y %}
                   {% if p.Is_Manual == 0 %}
-                    <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
+                    <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
                   {% else %}
-                    <a class="ahr" ht="edit invoice" onclick="location.href='/{{pdata.pj}}/inv_edit/edit_manually/{{p.id}}/'">
+                    <a class="ahr" ht="edit invoice" onclick="location.href='/{{firm}}/{{pdata.pj}}/inv_edit/edit_manually/{{p.id}}/'">
                   {% endif %}
                     <span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
                     <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} 
@@ -424,7 +489,7 @@
 
             <td style="white-space:normal;">
               {% for p in y %}
-                <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
+                <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
                   <span class='hlt5'>PI No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
                   <br><span class='hlt5'>PI Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}}
               {% endfor %}
@@ -475,7 +540,7 @@
 
             <td style="white-space:normal;">
               {% for p in y %}
-                <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
+                <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
                   <br><span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
                   <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}}
               {% endfor %}
@@ -516,7 +581,7 @@
     <div class="modal-dialog" role="document" >
       <div class="modal-content" id="modal-reload">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Select Vendor Form</h5>
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Select Order</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" >
             <span aria-hidden="true">&times;</span>
           </button>
@@ -558,9 +623,9 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button   onclick="location.href='/{{pdata.pj}}/paymentslist/Received/custflt/'" type="button" class="btn btn-sm btn-info">Customer Payments</button>
-            <button   onclick="location.href='/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button>          
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentslist/Received/custflt/'" type="button" class="btn btn-sm btn-info">Customer Payments</button>
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button> -->          
           </div>
         </div>
       </div>

@@ -95,7 +95,7 @@
 <!-- <div>
   <div style="float:left">
     {% if apr != 'approvalreq' %}
-      <button type="button"  onclick="location.href='/{{pdata.pj}}/expensesform/create/1/'" class="btn btn-sm btn-danger" ht="claim expenses" >Claim Form</button>
+      <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/expensesform/create/1/'" class="btn btn-sm btn-danger" ht="claim expenses" >Claim Form</button>
     {% else %}
       <h3 class="page-title">{{pdata.pj.Short_Name}} - Expenses Approval Requests to {{request.user.first_name}}</h3>
     {% endif %}
@@ -103,7 +103,7 @@
 
   <div style="float:right">
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-    <button type="button" onclick="location.href='/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/expenseslist/{{apr}}/expid/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
   </div>
   <div style="clear:both"></div>
 </div> -->

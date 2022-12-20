@@ -31,13 +31,13 @@
   function edit(e_id) {getid = e_id;}
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/monthlysalaries/{{month|date:'Y-m'}}/delete/'
+        url = '/{{firm}}/{{pdata.pj}}/monthlysalaries/{{month|date:'Y-m'}}/delete/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
   function validate2(p) {
     if(   document.getElementById("activitypswd2").value == "sse123" ){
-        url = '/{{pdata.pj}}/monthlysalaries/{{month}}/regen/'
+        url = '/{{firm}}/{{pdata.pj}}/monthlysalaries/{{month}}/regen/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
     
@@ -45,17 +45,17 @@
     function getdt(){
       var dt = $("#getdate").val();
       if ( dt == '' ){dt = 'month'} 
-      document.getElementById('formaction').action='/{{pdata.pj}}/orderwisesalaries/'+dt+'/get/'}
+      document.getElementById('formaction').action='/{{firm}}/{{pdata.pj}}/orderwisesalaries/'+dt+'/get/'}
 
     function autosalmonth(){
       var dt = $("#getmonth").val();
       if ( dt == '' ){dt = 'month'} 
-      document.getElementById('gensalaction').action='/{{pdata.pj}}/orderwisesalaries/'+dt+'/get/'}
+      document.getElementById('gensalaction').action='/{{firm}}/{{pdata.pj}}/orderwisesalaries/'+dt+'/get/'}
 
   function select(){
       var dt = $("#selectmonth").val();
       if ( dt == '' ){dt = 'month'} 
-      document.getElementById('getsalaction').action='/{{pdata.pj}}/orderwisesalaries/'+dt+'/get/'}
+      document.getElementById('getsalaction').action='/{{firm}}/{{pdata.pj}}/orderwisesalaries/'+dt+'/get/'}
 
      function fnchide() {$("#doMoreModal .close").click()}
 
@@ -286,13 +286,13 @@
             <button type="button" data-toggle="modal" data-target="#reGenModal" class="btn btn-sm btn-danger" ht="by clicking current salaries will be deleted and generated again" onclick="fnchide()">Regenerate Salaries</button>
             <button type="button" data-toggle="modal" data-target="#deleteModal" class="btn btn-sm btn-warning" ht="by clicking this it will delete all salaries for selected month" onclick="fnchide()">Delete Salaries</button>
 
-            <button class="btn btn-sm btn-info" onclick="location.href='/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
-            <button class="btn btn-sm btn-danger" onclick="location.href='/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
-            <button class="btn btn-sm btn-primary" onclick="location.href='/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
-            <button class="btn btn-sm btn-dark" onclick="location.href='/{{pdata.pj}}/employeslist/'">Employes List</button>
-            <button class="btn btn-sm btn-success" onclick="location.href='/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
-            <button class="btn btn-sm btn-secondary" onclick="location.href='/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
-            <button class="btn btn-sm btn-warning" onclick="location.href='/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
+            <button class="btn btn-sm btn-info" onclick="location.href='/{{firm}}/{{pdata.pj}}/daywiseattendancelist/day/'">Day Wise Attendance</button>
+            <button class="btn btn-sm btn-danger" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthwiseattendancelist/month/'">Montly Attendance</button>
+            <button class="btn btn-sm btn-primary" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
+            <button class="btn btn-sm btn-dark" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/'">Employes List</button>
+            <button class="btn btn-sm btn-success" onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalarieslist/'">Salaries Master Data</button>
+            <button class="btn btn-sm btn-secondary" onclick="location.href='/{{firm}}/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>
+            <button class="btn btn-sm btn-warning" onclick="location.href='/{{firm}}/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
           </div>
         </div>
       </div>

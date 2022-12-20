@@ -29,7 +29,7 @@
   function hide() { $("#exampleModal11 .close").click() }
   function validate1(p) {
     if(   document.getElementById("activitypswd1").value == "sse123" ){
-        url = '/{{pdata.pj}}/workform/delete/'+getid+'/'
+        url = '/{{firm}}/{{pdata.pj}}/workform/delete/'+getid+'/'
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 </script>
@@ -100,16 +100,16 @@
 <div>
 
   <div style="float:left">
-    <button type="button"  onclick="location.href='/{{pdata.pj}}/workform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="add your work progress for particular order">Add Work Progress</button>
+    <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/workform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="add your work progress for particular order">Add Work Progress</button>
     {% if status == 'Delivered' %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/worklist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="works under progress but not completed">Inprogress Works</button>
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/worklist/Pending/'" class="btn btn-sm btn-info mb-4" ht="order confirmed but work not yet started">Not Started Works</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/worklist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="works under progress but not completed">Inprogress Works</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/worklist/Pending/'" class="btn btn-sm btn-info mb-4" ht="order confirmed but work not yet started">Not Started Works</button>
     {% elif status == 'Inprogress' %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/worklist/Delivered/'" class="btn btn-sm btn-success mb-4" ht="delivered products/works">Delivered Works</button>
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/worklist/Pending/'" class="btn btn-sm btn-info mb-4" ht="order confirmed but work not yet started">Not Started Works</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/worklist/Delivered/'" class="btn btn-sm btn-success mb-4" ht="delivered products/works">Delivered Works</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/worklist/Pending/'" class="btn btn-sm btn-info mb-4" ht="order confirmed but work not yet started">Not Started Works</button>
     {% else %}
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/worklist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="works under progress but not completed">Inprogress Works</button>
-      &emsp;<button type="button"  onclick="location.href='/{{pdata.pj}}/worklist/Delivered/'" class="btn btn-sm btn-info mb-4" ht="delivered products/works">Delivered Works</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/worklist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="works under progress but not completed">Inprogress Works</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/worklist/Delivered/'" class="btn btn-sm btn-info mb-4" ht="delivered products/works">Delivered Works</button>
     {% endif %} 
   </div>
 
@@ -117,11 +117,11 @@
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
     &nbsp;&nbsp;&nbsp;
     {% if status == 'Delivered' %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/worklist/Delivered/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/worklist/Delivered/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% elif status == 'Inprogress' %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/worklist/Inprogress/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/worklist/Inprogress/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% else %}
-      <button type="button" onclick="location.href='/{{pdata.pj}}/worklist/Pending/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/worklist/Pending/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
     {% endif %}
   </div>
   <div style="clear:both"></div>
@@ -391,12 +391,12 @@
         <div class="modal-body">
           <div class="template-demo">
             {% if status != 'Pending' %}
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-success mb-4">Add Work Progress</button>
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/workform/edit/'+getid+'/'" class="btn btn-sm btn-primary mb-4">Edit Work Details</button>
-              <button type="button"  onclick="location.href='/{{pdata.pj}}/workform/copy/'+getid+'/'" class="btn btn-sm btn-danger mb-4">Copy Work Details</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-success mb-4">Add Work Progress</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/workform/edit/'+getid+'/'" class="btn btn-sm btn-primary mb-4">Edit Work Details</button>
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/workform/copy/'+getid+'/'" class="btn btn-sm btn-danger mb-4">Copy Work Details</button>
               <button type="button" onclick="hide()"  data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning mb-4">Delete Work Details</button> 
             {% else %}
-            <button type="button"  onclick="location.href='/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-primary mb-4">Add Work Progress</button>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/ordersworkform/'+getid+'/'" class="btn btn-sm btn-primary mb-4">Add Work Progress</button>
             {% endif %}          
           </div>
         </div>

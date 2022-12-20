@@ -21,7 +21,8 @@
         <h4 class="card-title mb-0">{{pdata.pj.Project_Name}}</h4>
       </div>
       <div style="float:right">
-        <button type="button" onclick="location.href='/'"  class="btn btn-sm  btn-primary mb-4" >Change Work Area/Division</button>     
+        <button type="button" onclick="location.href='/{{firm}}/selectproject/'"  class="btn btn-sm  btn-primary mb-4" >Change Project</button>
+        <button type="button" onclick="location.href='/'"  class="btn btn-sm  btn-info mb-4" >Change Company</button>     
       </div>
       <div style="clear:both"></div>
     </div>
@@ -32,14 +33,14 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-chart-column"></i></div>
                     <div >
                         <div class="mbt">Dashboards</div>
-                        <a href="/{{pdata.pj}}/salesdb/All/"><div class="mb">Received Orders</div></a>
-                        <a href="/{{pdata.pj}}/purchasesdb/All/"><div class="mb">Purchases</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/salesdb/All/"><div class="mb">Received Orders</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/purchasesdb/All/"><div class="mb">Purchases</div></a>
                     </div>
                 </div>
             </div>
         </div>
         <!-- <div class="col-xl-3 col-lg-6 " data-toggle="dropdown">
-            <a href="/{{pdata.pj}}/proposalsdashboard/"><div class="card l-bg-cherry">
+            <a href="/{{firm}}/{{pdata.pj}}/proposalsdashboard/"><div class="card l-bg-cherry">
                 <div class="card-statistic-3 p-4">
                     <div class="card-icon card-icon-large" ><i class="fas fa-handshake-angle"></i></div>
                     <div class="mb-4">
@@ -62,8 +63,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-shopping-cart"></i></div>
                     <div >
                         <div class="mbt">Orders</div>
-                        <a href="/{{pdata.pj}}/orderslist/Inprogress/"><div class="mb">Received Orders</div></a>
-                        <a href="/{{pdata.pj}}/purchaseslist/Total/"><div class="mb">Purchases</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/"><div class="mb">Received Orders</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/purchaseslist/Total/"><div class="mb">Purchases</div></a>
                     </div>
                 </div>
             </div>
@@ -75,8 +76,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-file-invoice"></i></div>
                     <div >
                         <div class="mbt">Billing</div>
-                        <a href="/{{pdata.pj}}/invoiceslist/Issued/"><div class="mb">Received Orders Billing</div></a>
-                        <a href="/{{pdata.pj}}/vendorinvoiceslist/Issued/"><div class="mb">Vendor Billing</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/"><div class="mb">Received Orders Billing</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/vendorinvoiceslist/Issued/"><div class="mb">Vendor Billing</div></a>
                     </div>
                 </div>
             </div>
@@ -88,8 +89,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-wallet"></i></div>
                     <div >
                         <div class="mbt">Payments</div>
-                        <a href="/{{pdata.pj}}/paymentslist/Received/custflt/"><div class="mb">Customer Payments</div></a>
-                        <a href="/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/"><div class="mb">Vendor Payments</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/paymentslist/Received/custflt/"><div class="mb">Customer Payments</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/vendorpaymentslist/Paid/vendflt/"><div class="mb">Vendor Payments</div></a>
                     </div>
                  </div>
             </div>
@@ -103,8 +104,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-coins"></i></div>
                     <div >
                         <div class="mbt">Expenses</div>
-                        <a href="/{{pdata.pj}}/expenseslist/apr/expid/"><div class="mb">Expenses List</div></a>
-                        <a href="/{{pdata.pj}}/expensesform/create/1/"><div class="mb">Claim Form</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/expenseslist/apr/expid/"><div class="mb">Expenses List</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/expensesform/create/1/"><div class="mb">Claim Form</div></a>
                     </div>
                 </div>
             </div>
@@ -115,8 +116,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-cash-register"></i></div>
                     <div >
                         <div class="mbt">Payroll</div>
-                        <a href="/{{pdata.pj}}/daywiseattendancelist/day/"><div class="mb">Attendance</div></a>
-                        <a href="/{{pdata.pj}}/employsalarieslist/"><div class="mb">Employ Salaries</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/daywiseattendancelist/day/"><div class="mb">Attendance</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/employsalarieslist/active/"><div class="mb">Employ Salaries</div></a>
                     </div>
                 </div>
             </div>
@@ -127,8 +128,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-laptop-file"></i></div>
                     <div >
                         <div class="mbt">Work Progress</div>
-                        <a href="/{{pdata.pj}}/worklist/Inprogress/"><div class="mb">Received Orders Progress</div></a>
-                        <a href="/{{pdata.pj}}/purchaseslist/Total/"><div class="mb">PO's Progress</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/worklist/Inprogress/"><div class="mb">Received Orders Progress</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/purchaseslist/Total/"><div class="mb">PO's Progress</div></a>
                     </div>
                 </div>
             </div></a>
@@ -139,8 +140,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-boxes-stacked"></i></div>
                     <div >
                         <div class="mbt">Products/Services</div>
-                        <a href="/{{pdata.pj}}/productslist/Products/"><div class="mb">Products</div></a>
-                        <a href="/{{pdata.pj}}/productslist/Services/"><div class="mb">Services</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/productslist/Products/"><div class="mb">Products</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/productslist/Services/"><div class="mb">Services</div></a>
                     </div>
                 </div>
             </div>
@@ -166,8 +167,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-warehouse"></i></div>
                     <div >
                         <div class="mbt">Quotations</div>
-                        <a href="/{{pdata.pj}}/genquote/create/1/itemid/msg/"><div class="mb">Generate Quotation</div></a>
-                        <a href="/{{pdata.pj}}/quotationslist/all/"><div class="mb">Quotations List</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/genquote/create/1/itemid/msg/"><div class="mb">Generate Quotation</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/quotationslist/all/"><div class="mb">Quotations List</div></a>
                     </div>
                 </div>
             </div>
@@ -179,8 +180,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-address-card"></i></div>
                     <div >
                         <div class="mbt">Contacts</div>
-                        <a href="/{{pdata.pj}}/customerslist/"><div class="mb">Customer Contacts</div></a>
-                        <a href="/{{pdata.pj}}/vendorslist/"><div class="mb">Vendor Contacts</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/customerslist/"><div class="mb">Customer Contacts</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/vendorslist/"><div class="mb">Vendor Contacts</div></a>
                     </div>
                 </div>
             </div>
@@ -203,8 +204,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-gears"></i></div>
                     <div >
                         <div class="mbt">Settings</div>
-                        <a href="/{{pdata.pj}}/userslist/"><div class="mb">Reg. Companies</div></a>
-                        <a href="/{{pdata.pj}}/userslist/"><div class="mb">Manage Users</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/companylist/"><div class="mb">Reg. Companies</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/userslist/"><div class="mb">Manage Users</div></a>
                     </div>
                 </div>
             </div></a>
@@ -229,8 +230,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-coins"></i></div>
                     <div >
                         <div class="mbt">Expenses</div>
-                        <a href="/{{pdata.pj}}/expenseslist/apr/expid/"><div class="mb">Expenses List</div></a>
-                        <a href="/{{pdata.pj}}/expensesform/create/1/"><div class="mb">Claim Form</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/expenseslist/apr/expid/"><div class="mb">Expenses List</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/expensesform/create/1/"><div class="mb">Claim Form</div></a>
                     </div>
                 </div>
             </div>
@@ -241,8 +242,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-cash-register"></i></div>
                     <div >
                         <div class="mbt">Attendance</div>
-                        <a href="/{{pdata.pj}}/daywiseattendancelist/day/"><div class="mb">Day Wise Attendance</div></a>
-                        <a href="/{{pdata.pj}}/monthwiseattendancelist/day/"><div class="mb">Month Wise Attendance</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/daywiseattendancelist/day/"><div class="mb">Day Wise Attendance</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/monthwiseattendancelist/day/"><div class="mb">Month Wise Attendance</div></a>
                     </div>
                 </div>
             </div>
