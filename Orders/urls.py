@@ -39,4 +39,8 @@ urlpatterns = [
 
     path('<firm>/<proj>/paymentreceipt/<pid>/<cell>/<status>/', views.Payment_Receipt, name='paymentreceipt'),
 
+    path('<firm>/<proj>/dispatchesform/<fnc>/<rid>/', views.Dispatches_Form, name='dispatchesform'),
+    path('<firm>/<proj>/installationsform/<fnc>/<rid>/', views.Installations_Form, name='installationsform'),
+    path('<firm>/<proj>/dispatcheslist/<status>/', views.Dispatches_List, name='dispatcheslist'),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

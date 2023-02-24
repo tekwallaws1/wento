@@ -8,6 +8,11 @@
   <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
+  <style>
+    .tr1 tr:last-child {
+    border: transparent;
+}
+    </style>
 {% endblock %} 
 
 {% block scripts %}
@@ -85,11 +90,16 @@ function fncsbmt(){
   $(col[1]).attr('width', 45);  $(col[2]).attr('width', 30); $(col[3]).attr('width', 25); $(col[4]).attr('width', 20); $(col[4]).attr('width', 20);};  
 //--End--//
 
-var cl = [0, 1, 2, 3, 4, 5]
-var wdths = ['4%', '30%', '18%', '19%', '14%', '15%'];
+// var cl = [0, 1, 2, 3, 4, 5]
+// var wdths = ['4%', '30%', '50%', '19%', '14%', '15%'];
+var cl = [0, 1, 2, 3]
+var wdths = ['4%', '25%', '21%', '50%'];
 var ort = 'portrait'; //landscape
-
-var msgTop = 'Total Billings  {{total_billed|floatformat:0|intcomma}} | Total Received  {{total_received|floatformat:0|intcomma}} | Due Payments  {{total_due|floatformat:0|intcomma}} {% if advance %} | Over Received Payments {{advance|floatformat:0|intcomma}}{% endif %}'
+if ('{{flt}}'==0){
+var msgTop = 'Total Billings  {{total_billed|floatformat:0|intcomma}} | Total Received  {{total_received|floatformat:0|intcomma}} | Due Payments  {{total_due|floatformat:0|intcomma}} {% if advance %} | Advance Payments {{advance|floatformat:0|intcomma}}{% endif %}' }
+else {
+  var msgTop = 'Total Received  {{total_received|floatformat:0|intcomma}} {% if advance %} | Advance Payments {{advance|floatformat:0|intcomma}}{% endif %}'
+}
   var title = '{{firm}}-{{pdata.pj}}-{{status}} Payments List';
   var filename = '{{firm}}-{{pdata.pj}}-{{status}}Payments_{{table.first.Payment_Date|date:'dMy'}}to{{table.last.Payment_Date|date:'dMy'}}'
 
@@ -128,8 +138,6 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
 
 
 {% block content %}
-{% if request.user.username != 'fhdujff' %}
-<!-- ######### -->
 
 <div class="page-header">
   <h3 class="page-title">{{firm}}-{{pdata.pj.Short_Name}} - {{status}} Payments List</h3>
@@ -211,14 +219,10 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
 
                       <div class="col-md-6 col-sm-6 col-12">
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Payment Account</label>
-                        {{ filter_data.form.Payment_Account}}
+                        {{ filter_data.form.Account_Name}}
                       </div>
-                      <div class="col-md-6 col-sm-6 col-12">
-                        <label style=" font-weight: 200; color: black; font-size: 13px;">UPI Account</label>
-                        {{ filter_data.form.UPI_Account}}
-                      </div>
-
-                      <div class="" style=" float:left; margin-left: 10px; margin-top:20px;">
+                      
+                      <div class="" style=" float:left; margin-left: 10px; margin-top:25px;">
                         <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
                         <!-- <button id="add-e" class="btn">Add Task</button> -->
                         <button id="edit-event" class="btn"></button>
@@ -232,6 +236,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
     </div>
   </div>
 
+{% if flt == 0 %}
 <div class="row">
   {% if advance > 100 %}
     <div class="col-xl-3 col-md-6 mb-4">
@@ -251,7 +256,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
         <div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Payments Againts Billed</div>
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Received Againts Billed</div>
               <div class="h6 mb-0 font-weight-bold text-gray-800">
                 ₹ {{total_received|floatformat:0|intcomma}}
               </div>
@@ -265,7 +270,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
         <div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments Againts Billed</div>
+              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Againts Billed</div>
               <div class="h6 mb-0 font-weight-bold text-blue-1000">₹ {{total_due|floatformat:0|intcomma}}</div>
             </div>
           </div>
@@ -277,7 +282,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
         <div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Advanced Payments</div>
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Advances</div>
                <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{advance|floatformat:0|intcomma}}</div>
             </div>
           </div>
@@ -302,7 +307,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
         <div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Received Payments Againts Billed</div>
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Received Againts Billed</div>
               <div class="h6 mb-0 font-weight-bold text-gray-800">
                 ₹ {{total_received|floatformat:0|intcomma}}
               </div>
@@ -316,20 +321,48 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
         <div class="card-body2">
           <div class="row no-gutters align-items-center">
             <div class="col mr-2">
-              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Payments Against Billed</div>
+              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Due Against Billed</div>
               <div class="h6 mb-0 font-weight-bold text-blue-1000">₹ {{total_due|floatformat:0|intcomma}}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
-    
 {% endif %}
 </div>
+{% else %}
+<div class="row">
+    <div class="col-xl-4 col-md-6 mb-4">
+      <div class="card border-left-primary shadow h-100 py-2">
+        <div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-primary text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Received Amount Against Billing</div>
+              <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{total_received|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% if advance > 100 %}
+      <div class="col-xl-3 col-md-6 mb-4"> 
+        <div class="card border-left-info shadow h-100 py-2">
+          <div class="card-body2">
+            <div class="row no-gutters align-items-center">
+              <div class="col mr-2">
+                <div class="text-xs font-weight-bold text-info text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Advances</div>
+                 <div class="h6 mb-0 font-weight-bold text-gray-800">₹ {{advance|floatformat:0|intcomma}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+{% endif %}
 
-{% if status == 'Received' %}
 <!-- Payments List -->
-  <div class="card">
+<!--   <div class="card">
     <div class="card-body2">
       <div class="table-responsive mb-4 mt-4">
       <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="{{status}}">
@@ -393,7 +426,119 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       </table>
       </div>
     </div>
+  </div> -->
+
+{% if flt == 0 %}
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="{{status}}">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Customer Details</th>
+            <th>Billing Details</th>
+            <th>Payment Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for x, p in dataset %}
+          <tr>
+            <td >{{forloop.counter}}</td>
+
+            <td style="white-space:normal;">
+              {% if x.Invoice_No %}
+                {{x.Order.Customer_Name.Customer_Name}}
+                <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Order.Customer_Name.Phone_Number_1}}'>{{x.Order.Customer_Name.Phone_Number_1}}
+              {% else %}
+                {{p.last.Order_No.Customer_Name.Customer_Name}}
+                <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{p.last.Order_No.Customer_Name.Phone_Number_1}}'>{{p.last.Order_No.Customer_Name.Phone_Number_1}}
+              {% endif %}
+            </td>
+
+            <td style="white-space:normal;">
+              {% if x.Invoice_No %}
+                  <span class="hlt5">Bill: </span>{{ x.Invoice_No }}
+                  <br><span class="hlt5">Billed: </span>₹ {{x.Invoice_Amount|floatformat:0|intcomma}}
+                  <br><span class="hlt5">Received: </span>₹ {{x.Invoice_Amount|sub:x.Due_Amount|floatformat:0|intcomma}}
+                  {% if x.Due_Amount > 10 %}
+                    <br><span class="hlt3">Due: ₹ {{x.Due_Amount|floatformat:0|intcomma}}</span>
+                  {% else %}
+                    <br><span class="hlt2">Total Payment Done</span>
+                    {% if x.Adjusted_Amount > 0 %}<br><span class="hlt3">Adjusted Amount: </span>{{ x.Adjusted_Amount|floatformat:0|intcomma }}{% endif %}
+                  {% endif %}
+                  
+              {% else %}
+                <span class="hlt5">Order No</span>
+                <br>{{ p.last.Order_No.PO_No }}, ₹ {{p.last.Order_No.Order_Value|floatformat:0|intcomma}}
+              {% endif %}
+            </td>
+
+            <td style="white-space:normal; width:40%">
+              {% for k in p %}
+                <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{k.id}}, {% if k.Order_No.Order_Reference_Person %}{{k.Order_No.Order_Reference_Person.Phone_Number_1}}{% else %}{{k.Order_No.Customer_Name.Phone_Number_1}}{% endif %})">
+                  
+                  <span style="float: left;">₹ {{k.Received_Amount|floatformat:0|intcomma}}&emsp;&emsp;</span><span style="float: left;">{{k.Payment_Date|date:'d M y'}}/{% if k.Account_Name.Account_Type == 'CASH' %}CASH{% elif k.Account_Name.Account_Type == 'UPI' %}{{k.Account_Name.Bank_Name}}-UPI {{k.Account_Name.Account_No}}{% else %}{{k.Account_Name.Bank_Name}}{% if k.Reference_No %}-{{k.Reference_No}}{% endif %}{% endif %}
+                  </span> 
+                </a>
+                <br>
+              {% endfor %}
+            </td>     
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
   </div>
+{% else %}
+  <div class="card">
+    <div class="card-body2">
+      <div class="table-responsive mb-4 mt-4">
+      <table class="table table-bordered table-striped wrap" cellspacing="0" style="width: 100%"  id="{{status}}">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Customer Details</th>
+            <th>Billing Details</th>
+            <th>Payment Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in table %}
+          <tr>
+            <td >{{forloop.counter}}</td>
+
+            <td style="white-space:normal;">
+              {{p.Order_No.Customer_Name.Customer_Name}}
+              <br><br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{p.Order_No.Customer_Name.Phone_Number_1}}'>{{p.Order_No.Customer_Name.Phone_Number_1}}
+            </td>
+
+            <td style="white-space:normal;">
+              {% if p.Invoice_No %}
+                <span class="hlt5">Bill No</span>
+                <br>{{ p.Invoice_No.Invoice_No }}
+              {% else %}
+                <span class="hlt5">Order No</span>
+                <br>{{ p.Order_No.PO_No }}, ₹ {{p.Order_No.Order_Value|floatformat:0|intcomma}}
+              {% endif %}
+            </td>
+
+            <td style="white-space:normal; width:40%">
+              <a class="ahr" ht="edit payment details" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid({{p.id}}, {% if p.Order_No.Order_Reference_Person %}{{p.Order_No.Order_Reference_Person.Phone_Number_1}}{% else %}{{p.Order_No.Customer_Name.Phone_Number_1}}{% endif %})">
+                
+                <span style="float: left;">₹ {{p.Received_Amount|floatformat:0|intcomma}}&emsp;&emsp;</span><span style="float: left;">{{p.Payment_Date|date:'d M y'}}/{% if p.Account_Name.Account_Type == 'CASH' %}CASH{% elif p.Account_Name.Account_Type == 'UPI' %}{{p.Account_Name.Bank_Name}}-UPI {{p.Account_Name.Account_No}}{% else %}{{p.Account_Name.Bank_Name}}{% if p.Reference_No %}-{{p.Reference_No}}{% endif %}{% endif %}
+                </span> 
+              </a>
+            </td>     
+          </tr>
+          {% endfor %} 
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+{% endif %}
 
   <div class="modal fade text-left" id="exampleModal11" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document" style="width:250px;%">
@@ -406,9 +551,9 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderspaymentsform/'+getxid+'/'" class="btn btn-sm btn-success ">Add New Payment</button>
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderspaymentsform/'+getxid+'/'" class="btn btn-sm btn-success ">Add New Payment</button> -->
             <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentsform/edit/'+getid+'/'" class="btn btn-sm btn-primary ">Edit Payment Details</button>
-            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentsform/copy/'+getid+'/'" class="btn btn-sm btn-danger ">Copy Payment Details</button>
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentsform/copy/'+getid+'/'" class="btn btn-sm btn-danger ">Copy Payment Details</button> -->
             <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal12" class="btn btn-sm btn-warning ">Delete Payment Details</button>
             <button type="button" onclick="location.reload(); location.href='/{{firm}}/{{pdata.pj}}/paymentreceipt/'+getid+'/'+phone+'/status/'" class="btn btn-sm btn-info request-callback" id="myButton">Send Receipt</button>
             <!-- <a target="_blank" href='/{{firm}}/{{pdata.pj}}/paymentreceipt/'+getid+'/'+phone+'/status/'><button class="btn btn-sm btn-info">Send Receipt</button></a>  -->        
@@ -439,7 +584,6 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       </div>
     </div>
   </div>
-  {% endif %}
 
 
   <div class="modal fade text-left" id="paymentsAgainstModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -453,7 +597,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
           </div>
           <div class="modal-body">
             <div class="template-demo">
-              <button type="button" data-toggle="modal" data-target="#paymentsFormModal" class="btn btn-sm btn-primary mb-2" onclick="javascript:selectmode('againstorder')">Against Work Order</button>
+              <!-- <button type="button" data-toggle="modal" data-target="#paymentsFormModal" class="btn btn-sm btn-primary mb-2" onclick="javascript:selectmode('againstorder')">Against Work Order</button> -->
               <button type="button" data-toggle="modal" data-target="#paymentsFormModal" class="btn btn-sm btn-info mb-2" onclick="javascript:selectmode('againstinvoice')">Against Bill</button>                         
             </div>
           </div>
@@ -496,10 +640,6 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
         </div>
       </div>
     </div>
-{% else %}
-<!-- ######### -->
-<button type="button" id="popup" style="display:none" onclick="unauth()"></button>
-{% endif %}
 
 <!-- more pages -->
   <div class="modal fade text-left" id="MorePagesModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -541,7 +681,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
                   <!-- <option selected>-------------</option> -->
                   <option value="">----------</option>
                     {% for x in customers %}
-                      <option >{{ x.Customer_Name }}</option>
+                      <option >{{ x }}</option>
                     {% endfor %}
                 </select>
               </div>            

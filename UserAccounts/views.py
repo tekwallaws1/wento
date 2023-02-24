@@ -21,14 +21,14 @@ def get_errors(request, formerrors):
 
 def update_salary_breaking(request, sid):
 	p = Empl_Salaries.objects.get(id=sid)
-	if p.Basic and p.Basic <= 0:
-		if p.ESI_Amount and p.ESI_Eligibility == 1:
-			p.ESI_Amount = p.Basic*0.0075 
+	if p.Basic > 0:
+		if p.ESI_Eligibility == 1:
+			p.ESI_Amount = p.Basic*0.0075
 		else:
 			p.ESI_Amount = 0
-		if p.PF_Amount:	
+		if p.PF_Eligibility == 1:	
 			pf_per = 0.12 if p.Is_Providing_PF_Employer_Share == True else 0.24
-			p.PF_Amount = p.Basic*pf_per if p.PF_Eligibility == True else 0
+			p.PF_Amount = p.Basic*pf_per
 		else:
 			p.PF_Amount = 0
 
@@ -143,7 +143,7 @@ def Signup_Form1(request, firm, proj, aid):
 			usr.RC.add(*CompanyDetails.objects.filter(Status=1, ds=1))
 			usr.save()
 			messages.success(request, 'Credentials for the selected employ has been generated')
-			return redirect('/'+str(firm)+'/'+str(pdata['pj'])+'/employeslist/active/')
+			return redirect('/'+str(firm)+'/'+str(pdata['pj'])+'/employeslist/Permanent/')
 		else:
 			return render(request, 'registration/Signup1.html', {'form': form, 'firm':firm, 'pdata':pdata})
 	else:
@@ -162,6 +162,7 @@ def Manage_User(request, firm, proj):
 	# 			cretae.RC.add(*(CompanyDetails.objects.all()))
 	# return HttpResponse('k')
 	# if permissions(request, 'Manage Users', 'View', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
+	if permissions(request, 'Permissions', 'View', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
 	pdata = projectname(request, proj)
 	# fields = [field.name for field in Permissions._meta.get_fields()][2:] #exclude id and user and get balance fields
 	perm_v, perm_e= [], []
@@ -198,7 +199,7 @@ def Manage_User(request, firm, proj):
 
 @login_required
 def Edit_User(request, firm, proj, fnc, var):
-	if permissions(request, 'Manage Users', 'Edit', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
+	if permissions(request, 'Employs Details', 'Edit', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
 	pdata = projectname(request, proj)
 	acnt = get_object_or_404(Account, id=var)
 	user = get_object_or_404(User, username=acnt.user.username)
@@ -234,7 +235,7 @@ def Edit_User(request, firm, proj, fnc, var):
 def Employes_Form(request, firm, proj, fnc, eid):
 	if permissions(request, 'Employs Details', 'Edit', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
 	pdata = projectname(request, proj)
-	url = '/'+str(firm)+'/'+str(pdata['pj'])+'/employeslist/active/'
+	url = '/'+str(firm)+'/'+str(pdata['pj'])+'/employeslist/Permanent/'
 	if fnc == 'edit':
 		if request.method == 'POST':
 			form = EmployesForm1(request.POST, request.FILES, instance=get_object_or_404(Account, id=eid))
@@ -295,7 +296,7 @@ def Employes_Form(request, firm, proj, fnc, eid):
 def Employes_Bank_Form(request, firm, proj, fnc, bid, eid):
 	if permissions(request, 'Employs Details', 'Edit', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
 	pdata = projectname(request, proj)
-	url = '/'+str(firm)+'/'+str(pdata['pj'])+'/employeslist/active/'
+	url = '/'+str(firm)+'/'+str(pdata['pj'])+'/employeslist/Permanent/'
 	if fnc == 'edit':
 		if request.method == 'POST':
 			form = EmployesBankForm(request.POST, request.FILES, instance=get_object_or_404(EMP_Bank_Dtls, id=bid))
@@ -344,7 +345,7 @@ def Employes_Bank_Form(request, firm, proj, fnc, bid, eid):
 def Employes_Prsnl_Form(request, firm, proj, fnc, pid, eid):
 	if permissions(request, 'Employs Details', 'Edit', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
 	pdata = projectname(request, proj)
-	url = '/'+str(firm)+'/'+str(pdata['pj'])+'/employeslist/active/'
+	url = '/'+str(firm)+'/'+str(pdata['pj'])+'/employeslist/Permanent/'
 	if fnc == 'edit':
 		if request.method == 'POST':
 			form = EmployesPrsnlForm1(request.POST, request.FILES, instance=get_object_or_404(EMP_More_Dtls, id=pid))
@@ -389,8 +390,8 @@ def Employes_Prsnl_Form(request, firm, proj, fnc, pid, eid):
 def Employes_List(request, firm, proj, status):
 	if permissions(request, 'Employs Details', 'View', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
 	pdata = projectname(request, proj)
-	if status == 'active':
-		emp_ofcl = Account.objects.filter(RC__Short_Name=firm, Status=1, ds=1).order_by('Sr_No')
+	if status != 'Inactive':
+		emp_ofcl = Account.objects.filter(RC__Short_Name=firm, Status=1,  Relationship='Permanent').order_by('Sr_No') if status == 'Permanent' else Account.objects.filter(RC__Short_Name=firm, Status=1, Relationship='Contract').order_by('Sr_No')
 	else:
 		emp_ofcl = Account.objects.filter(RC__Short_Name=firm, Status=0).order_by('Sr_No')
 		
@@ -596,7 +597,7 @@ def permissions_updt(request, firm, proj, inst, fnc):
 
 @login_required
 def Page_Permissions_Form(request, firm, proj, fnc, eid):
-	if permissions(request, 'Manage Users', 'Edit', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
+	if permissions(request, 'Permissions', 'Edit', firm, proj, Account.objects.get(user=request.user)) != 1: return HttpResponse(na_message) 
 	pdata = projectname(request, proj)
 	ac = Account.objects.filter(id=eid).last()
 	pm = Page_Permissions.objects.filter(RC__Short_Name=firm, user=ac).last()

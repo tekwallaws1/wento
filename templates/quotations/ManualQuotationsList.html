@@ -85,14 +85,14 @@
     var tagName = style.getElementsByTagName('sz');
     for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
     $('row:first c', sheet).attr('s', '2')
-    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' );   //wrap text
+    $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' );  //wrap text
     var col = $('col', sheet);
     // col.each(function () {$(this).attr('width', 20);}); //for all columns widths     
-    $(col[1]).attr('width', 40); $(col[2]).attr('width', 25); $(col[3]).attr('width', 15);  }; 
+    $(col[1]).attr('width', 40); $(col[2]).attr('width', 25); $(col[3]).attr('width', 15); $(col[4]).attr('width', 25); }; 
   //--End--//
 
-  var cl = [0,  1, 2, 3]
-  var wdths = ['4%', '50%', '30%', '16%'];
+  var cl = [0,  1, 2, 3, 4]
+  var wdths = ['4%', '30%', '25%', '16%', '25%'];
   
     var msgTop = ''
     var title = "{{pdata.pj}} - {% if status == 'active' %} Issued Quotations List {% else %} Quotations Draft Copies {% endif %}";
@@ -145,14 +145,93 @@
     <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger mb-4" ht="select category">Do More</button>
   </div>
 
-  <!-- <div style="float:right">
+  <div style="float:right">
     <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4" ht="search your required data">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
-    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/purchaseslist/Total/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
-  </div> -->
+    <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/manualquoteslist/active/'" class="btn btn-sm  btn-info mb-4" ht="clear all searched data">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button>
+  </div>
   <div style="clear:both"></div>
 </div>
 
+<!--Filter/Serch History Form-->
+  <div id="addEventsModal" class="modal animated fadeIn"> 
+    <div class="modal-dialog modal-dialog-centered">                            
+      <!-- Modal content -->
+      <div class="card modal-content">
+        <div class="modal-body">
+          <span id="discard" data-dismiss="modal" class="close">&times;</span>
+          <div class="add-edit-event-box">
+            <div class="add-edit-event-content">
+              <div class="add-event-title edit-event-title"></div>
+                <h5 class="modal-title">Search Data by Applying Filter</h5>
+                  <form class="" method="GET">
+                    <div class="row">
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
+                          <input type="date" name="from_date" class="form-control">
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
+                          <input type="date" name="to_date" class="form-control">
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Marketing Excecutive</label>
+                          {{ filter_data.form.user}}
+                        </div>
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Processed As Orders</label>
+                          {{ filter_data.form.Convert_As_Order}}
+                        </div>
+                      </div>                                         
+                      <div class="" style=" float:left; margin-left: 10px; margin-top:20px;">
+                        <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
+                        <!-- <button id="add-e" class="btn">Add Task</button> -->
+                        <button id="edit-event" class="btn"></button>
+                      </div>
+                    </div>   
+                  </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
+<div class="row">
+  <div class="col-xl-6 col-md-6 mb-4">
+    <div class="card border-left-dark shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Credits</div>
+            <div class="h6 mb-0 font-weight-bold text-blue-1000">
+              <!-- Bank ₹ {{tcredits.c_bank|floatformat:'0'|intcomma}} | UPI ₹ {{tcredits.c_upi|floatformat:'0'|intcomma}} | Cash ₹ {{tcredits.c_cash|floatformat:'0'|intcomma}} -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-xl-6 col-md-6 mb-4"> 
+    <div class="card border-left-dark shadow h-100 py-2">
+      <div class="card-body2">
+        <div class="row no-gutters align-items-center">
+          <div class="col mr-2">
+            <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Total Debits</div>
+            <div class="h6 mb-0 font-weight-bold text-gray-800">
+              <!-- Bank ₹ {{tdebits.d_bank|floatformat:'0'|intcomma}} | UPI ₹ {{tdebits.d_upi|floatformat:'0'|intcomma}} | Cash ₹ {{tdebits.d_cash|floatformat:'0'|intcomma}} --></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- PO's List -->
 <div class="card">
@@ -165,11 +244,16 @@
           <th>Quote To</th>
           <th>Quote No. and Date</th>
           <th>Quot Value</th>
+          <th>Followup By</th>
         </tr>
       </thead>
       <tbody>
         {% for x in table %}
+          {% if x.Convert_As_Order == 1 %}
+          <tr class="customtr1">
+          {% else %}
           <tr>
+          {% endif %}
             <td>{{forloop.counter}}</td>
 
             <td style="white-space:normal;">
@@ -187,7 +271,11 @@
 
             <td style="white-space:normal;">                  
               <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/manualquoteform/edit/'+{{x.id}}+'/'">₹ {{x.Quote_Value|floatformat:0|intcomma}}</a>
-            </td>      
+            </td>
+            <td style="white-space:normal;">                  
+              <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/manualquoteform/edit/'+{{x.id}}+'/'">{{x.user.Name}}
+                <br><span class="hlt5">Branch: </span>{{x.Related_Project.Short_Name}}</a>
+            </td>     
           </tr>
       {% endfor %} 
       </tbody>

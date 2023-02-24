@@ -286,7 +286,7 @@ def paymentdelete(request, ordid, invid, dlt_amount):
 	if pay:			
 		inv_due_agnst_pay(request, 'edit', pay.id)
 	else:
-		pay = Vendor_Payment_Status.objects.filter(PO_No__Vendor=PO_No.Vendor, PO_No__Related_Project=proj).last()
+		pay = Vendor_Payment_Status.objects.filter(PO_No__Vendor=order.Vendor, PO_No__Related_Project=proj).last()
 		if pay:			
 			inv_due_agnst_pay(request, 'edid', pay.id)
 
@@ -373,11 +373,11 @@ def update_delivery_status(request, poid, did):
 	po.Delivery_Update = dl
 	po.save()
 
-def check_no_po(request, invid, pdata):
+def check_no_po(request, invid, pdata, firm):
 	vdi = Vendor_Invoices.objects.get(id=invid)
 	if vdi.Against == 'No PO':
-		fd = Purchases.objects.create(Related_Project=pdata['pj'], Purchase_Details=vdi.Invoice_Description or None, Vendor=vdi.Vendor or None, 
-			PO_Date=date.today(), PO_Value=vdi.Invoice_Amount, GST_Amount=vdi.GST_Amount,  Is_Billed=1, Is_No_PO=1, FY=get_financial_year(str(date.today())))
+		fd = Purchases.objects.create(Related_Project=pdata['pj'], RC=CompanyDetails.objects.filter(Short_Name=firm).last(), PO_From=CompanyDetails.objects.filter(Short_Name=firm).last(), Purchase_Details=vdi.Invoice_Description or None, Vendor=vdi.Vendor or None, 
+			PO_Date=date.today(), PO_Value=vdi.Invoice_Amount, GST_Amount=vdi.GST_Amount, Lock_Status=1,  Is_Billed=1, Is_No_PO=1, FY=get_financial_year(str(date.today())), user=Account.objects.get(user=request.user))
 
 		last_poid = Purchases.objects.filter(Is_No_PO=1).order_by('-id')
 		last_poid = last_poid[1] if len(last_poid) > 1 else None

@@ -72,17 +72,13 @@ function fncsbmt(){
   $(col[1]).attr('width', 10); $(col[2]).attr('width', 35); $(col[3]).attr('width', 20); $(col[4]).attr('width', 15); $(col[5]).attr('width', 15); $(col[6]).attr('width', 15); $(col[7]).attr('width', 15);}; 
 //--End--//
 
-{% if vendflt == 0 %}
-  var cl = [0,  1, 2, 3, 4, 5, 6, 7];
-  var wdths = ['3%', '10%', '20%', '18%', '10%', '12%', '12%', '15%'];
-{% else %}
-  var cl = [0,  1, 2, 3, 4, 5, 6];
-  var wdths = ['3%', '10%', '24%', '20%', '14%', '14%', '15%'];
-{% endif %}
+  var cl = [0,  1, 2, 3, 4, 5];
+  var wdths = ['3%', '20%', '30%', '25%', '11%', '11%'];
+
 
 var ort = 'portrait'; //landscape
 
-var msgTop = 'Date: , Credit: {{tsales|floatformat:'0'|intcomma}}, Debits: {{tpurch|add:texp|floatformat:'0'|intcomma}}'
+var msgTop = 'Total Credit: {{tsales|floatformat:'0'|intcomma}}, Total Debit: {{tpurch|add:texp|floatformat:'0'|intcomma}}'
   var title = 'Daily Finance Flow Book';
   var filename = 'DailyFinanceFlowBook'
 
@@ -107,7 +103,7 @@ doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alig
 
 <script type="text/javascript">
   // Datatables Excel Formating Before Export//
-  var customexce8 = function( xlsx ) {
+  var customexcel1 = function( xlsx ) {
   var sheet1 = xlsx.xl.worksheets['sheet1.xml'];
   var style1 = xlsx.xl['styles.xml'];
   var tagName = style1.getElementsByTagName('sz');
@@ -120,12 +116,12 @@ doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alig
 //--End--//
 
   var cl1 = [0,  1, 2, 3, 4, 5];
-  var wdths1 = ['3%', '10%', '20%', '18%', '10%', '12%'];
+  var wdths1 = ['3%', '20%', '32%', '15%', '15%', '15%'];
 
 var ort = 'portrait'; //landscape
 
   var msgTop1 = ''
-  var title1 = 'Daily Finance Flow Book - Bank Wise';
+  var title1 = 'Daily Finance Flow Book - Bank Accounts Wise';
   var filename1 = 'DailyFinanceFlowBookBankWise'
 
 // Datatables Customise PDF Before Export//
@@ -140,7 +136,7 @@ var pdf_custom1 = function ( doc ) {
   objLayout['paddingRight'] = function(i) { return 5; };doc.content[1].layout = objLayout;      
   doc.defaultStyle.fontSize = 9;doc.styles.title.fontSize = 13;doc.styles.title.messageTop = 15;doc.defaultStyle.alignment = 'left'; doc.styles.tableHeader = table_header; 
   // doc.content[1].table.widths =Array(doc.content[1].table.body[0].length + 1).join('*').split('');
-doc.content.splice(0, 1,{text: [{text: title+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
+doc.content.splice(0, 1,{text: [{text: title1+'\n\n',bold: true,fontSize: 12,alignment: 'center',},
 {text: msgTop1, bold: true, fontSize: 9.5, alignment: 'left',}],margin: [0, -30, 0, 12],});
 };
 
@@ -165,12 +161,110 @@ $('#banks').DataTable( {
 autoWidth: false, dom: 'lBfrtip', "oLanguage": olg, "stripeClasses": [],"lengthMenu": lmenu,"pageLength": 20,
 buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
     
-  {extend: 'excel', title: title1, filename: filename1, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel8, exportOptions: {columns: cl, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop1, },
+  {extend: 'excel', title: title1, filename: filename1, text:'', titleAttr: 'Download as Excel', className: 'custom-btn1 mdi mdi-file-excel', customize: customexcel1, exportOptions: {columns: cl1, format: _format, rows : {search:'applied'}}, orientation:ort, messageTop: msgTop1, },
 
-  {extend: 'pdf', title: title1, filename: filename1, pageSize: 'A4', exportOptions: { columns: cl, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom1, orientation:ort, messageTop: msgTop1,},
+  {extend: 'pdf', title: title1, filename: filename1, pageSize: 'A4', exportOptions: { columns: cl1, format:  _format, rows : {search:'applied'}}, text:'', titleAttr: 'Download as PDF', className: 'custom-btn1 mdi mdi-file-pdf', customize: pdf_custom1, orientation:ort, messageTop: msgTop1,},
 
-  {extend: 'print',title: title1, filename: filename1, exportOptions: {columns: cl, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop1 },]}, } );
+  {extend: 'print',title: title1, filename: filename1, exportOptions: {columns: cl1, format: formatprint, stripHtml: false, rows : {search:'applied'}},text:'',titleAttr: 'Print',className: 'custom-btn1 mdi mdi-printer style="color:blue"', orientation:ort, messageTop: msgTop1 },]}, } );
 </script>
+
+
+<script>
+    var options5 = {
+      series: [{
+        name: 'Received Orders ₹' + {{t_orders|safe}}.reduce((pv, cv) => pv + cv, 0) ,
+        type: 'column',
+        data: {{t_orders|safe}}}, 
+        {
+        name: 'Billed ₹' + {{t_billed|safe}}.reduce((pv, cv) => pv + cv, 0),
+        type: 'column', 
+        data: {{t_billed|safe}}}, 
+        {
+        name: 'Unbilled ₹' + {{t_unbilled|safe}}.reduce((pv, cv) => pv + cv, 0),
+        type: 'column',
+        data: {{t_unbilled|safe}},
+        stacked: false}, 
+        {
+        name: 'Due Pay.₹' + {{t_due_pay|safe}}.reduce((pv, cv) => pv + cv, 0),
+        type: 'area',
+        data: {{t_due_pay|safe}},
+        stacked: false},
+        {
+        name: 'Received Pay.₹' + {{t_rec_pay|safe}}.reduce((pv, cv) => pv + cv, 0),
+        type: 'column',
+        data: {{t_rec_pay|safe}},
+        stacked: false}],
+  
+      chart: {
+        height: 350,
+        //type: 'line',
+        stacked: false,
+        toolbar: {
+          show: true,
+          tools: {
+              download: true,
+              selection: false,
+              zoom: true,
+              zoomin: false,
+              zoomout: false,
+              pan: false,
+              reset: true},}},
+      grid: {
+        show: true,
+        // padding: {
+        //   left: 30,
+        //   right: 30}
+        },
+      stroke: {
+        width: [0, 2, 3, 3, 0],
+        curve: 'smooth'},
+      plotOptions: {
+        bar: {
+          columnWidth: '70%',
+          endingShape: 'rounded',}},
+      fill: {
+        type: ["gradient", "solid", "solid", "gradient", "gradient"],
+        opacity: [1, 1, 1, 1, 1],
+        gradient: {
+          inverseColors: false,
+          shade: 'light',
+          type: "vertical",
+          opacityFrom: 0.85,
+          opacityTo: 0.85,
+          stops: [0, 100, 100, 100, 100]}},
+      labels: {{customers_list|safe}},
+      markers: {size: 0},
+      xaxis: {
+        labels: {
+        show: true,
+        rotate: -45,
+        rotateAlways: true,
+        // minHeight: 60,
+        // maxHeight: 180,
+        style: {colors: ""}}},
+      yaxis: {min: 0,},
+      legend: {
+        position: 'top',
+        horizontalAlign: 'left',
+        fontFamily: 'ubuntu-medium',
+        fontSize: '13px',},
+      custseries: [{name: 'Orders'}, {name: 'Billed'}, {name: 'Unbilled'}, {name: 'Due'}, {name: 'Paid'}],
+      tooltip: {
+        shared: true,
+        // theme: "dark",
+        intersect: false,
+
+      y: {
+        formatter: function(value, { series, custseries, seriesIndex, dataPointIndex, w }) {
+          return  w.config.custseries[seriesIndex].name + ":  " + value},
+        title: {
+          formatter: function (seriesName) {
+            return ''}}}
+      }};
+    var chart = new ApexCharts(document.querySelector("#salesandpaymentsdb"), options5);
+    chart.render();   
+  </script>
+
 {% endblock %} <!-- For Scripts -->
 
 
@@ -185,6 +279,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       {{sDate|date:'d M y'}} to {{eDate|date:'d M y'}}
     {% endif %}
   </h3>
+  <h5 class="float-right text-gary">Total Available Balance As on Today: ₹ {{t_bal|floatformat:'0'|intcomma}}</h5>
 </div>
 
 <div>
@@ -229,7 +324,18 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
                           <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
                           <input type="date" name="to_date" class="form-control">
                         </div>
-                      </div>                                           
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Bank Account</label>
+                          <select  name="bnk" class="form-select form-control">
+                            <option value="">----------</option>
+                              {% for x in banks %}
+                                <option value="{{x.id}}">{{ x }}</option>
+                              {% endfor %}
+                          </select>
+                        </div>
+                      </div>                                          
                       <div class="" style=" float:left; margin-left: 10px; margin-top:20px;">
                         <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
                         <!-- <button id="add-e" class="btn">Add Task</button> -->
@@ -274,6 +380,20 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
   </div>
 </div>
 
+<!-- <div class="row" style="margin-bottom:-20px"> 
+  <div class="col-xl-12 col-lg-7">
+    <div class="card shadow mb-4">
+      <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+        <h7 class="m-1 font-weight-bold ">Debits Vs Credits</h7>
+      </div>                         
+      <div class="card-body1">
+        <div id="salesandpaymentsdb"></div>   
+      </div>
+    </div>
+  </div>
+</div> -->
+
+{% if fltbnk == None %}
 <!-- Payments List -->
   <div class="card">
     <div class="card-body2">
@@ -292,7 +412,7 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
         <tbody>
           {% for b, c, d in data1 %}
           <tr>
-            <td >{{forloop.counter}}</td>
+            <td>{{forloop.counter}}</td>
 
             <td style="white-space:normal; width: 20%;">
               {% if sDate == eDate %}
@@ -324,17 +444,29 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
             </td>
 
             <td style="white-space:normal;">
-              -
+               {% if dur == 'today' %}
+                  {{b.Closing_Balance|floatformat:'0'|intcomma}}
+                {% else %}
+                  -
+                {% endif %}
             </td>
 
           </tr>
-          {% endfor %} 
+          {% endfor %}
+<!--           <tr>
+            <td>#</td>
+            <td><span class="font-weight-bold">Total</span></td>
+            <td>₹ {{tcredits.c_bank|add:tcredits.c_upi|add:tcredits.c_cash|floatformat:'0'|intcomma}}</td>
+            <td></td>
+            <td></td>
+            <td></td>
+          </tr> --> 
         </tbody>
       </table>
       </div>
     </div>
   </div>
-
+{% endif %}
 
 <!-- Payments List -->
   <div class="card" style="margin-top:25px;">
@@ -352,12 +484,16 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
           </tr>
         </thead>
         <tbody>
-          {% for d, c, r in data %}
+          {% for c, r in data %}
           <tr>
-            <td style="white-space:normal; width: 3%;">{{forloop.counter}}</td>
+            <td  style="white-space:normal; width: 3%;">{{forloop.counter}}</td>
 
             <td style="white-space:normal; width: 10%;">
-              {{d|date:'d M y'}}
+              {% if c == 'Received' or c == 'Paid' %}
+                {{r.Payment_Date|date:'d M y'}}
+              {% else %}
+                {{r.Issued_Date|date:'d M y'}}
+              {% endif %}
             </td>
 
             <td style="white-space:normal; width: 25%;">

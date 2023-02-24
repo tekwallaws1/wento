@@ -1475,3 +1475,8 @@ a:hover {
 
 .hlt5 {color: #077d25}
 .italic {font-style: italic;}
+
+@media (max-width: 575.98px) {
+  
+    .mobilehideimg {
+    display:none; } }

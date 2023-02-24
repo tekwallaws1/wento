@@ -121,7 +121,6 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
 
 
 {% block content %}
-{% if request.user.username == 'praveen' %}
 <!-- ######### -->
 
 <div class="page-header">
@@ -315,10 +314,6 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
     </div>
   </div>
 
-{% else %}
-<!-- ######### -->
-<button type="button" id="popup" style="display:none" onclick="unauth()"></button>
-{% endif %}
 
 <!-- more pages -->
   <div class="modal fade text-left" id="MorePagesModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

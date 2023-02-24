@@ -18,12 +18,21 @@
               {% csrf_token %}
               <div class="form-group">
                 {% for field in form %}
-                      <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
+                  {% if field.label != 'User' and field.label != 'Convert As Order' %}
+                    <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>
                     {{ field}}
+                  {% endif %}
+                  {% if field.label == 'User' %}
+                    <label for="{{ field.label }}">Marketing Excecutive{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
+                  {% endif %}
                   {% for error in field.errors %}
                     <p style="color: red; margin-top: -20px">{{ error }}</p>
                   {% endfor %}
                 {% endfor %}
+                <div class="form-check form-check-flat form-check-primary">
+                <label class="form-check-label">{{ form.Convert_As_Order }} mark if want to convert as order</label>
+              </div>
+                
               </div>
            </div>
           <button type="submit" class="btn btn-primary">Submit</button>    

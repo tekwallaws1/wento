@@ -127,7 +127,7 @@
   <div style="clear:both"></div>
 </div>
 
-  <!--Filter/Serch History Form-->
+<!--Filter/Serch History Form-->
   <div id="addEventsModal" class="modal animated fadeIn"> 
     <div class="modal-dialog modal-dialog-centered">                            
       <!-- Modal content -->
@@ -140,31 +140,62 @@
                 <h5 class="modal-title">Search Data by Applying Filter</h5>
                   <form class="">
                     <div class="row">
-                      <!-- <div class="col-md-6 col-sm-6 col-12">
-                        <div class="form-group start-date">
+                      <div class="col-md-6 col-sm-6 col-12">
                           <label style=" font-weight: 200; color: black; font-size: 13px;">From Date</label>
                           <input type="date" name="from_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
+                          <input type="date" name="to_date" class="form-control">
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12">
+                        <div class="form-group start-date">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Order Value From</label>
+                          <input  name="from_value" class="form-control">
                         </div>
                       </div>
                       <div class="col-md-6 col-sm-6 col-12">
                         <div class="form-group start-date">
-                          <label style="font-weight: 200; color: black; font-size: 13px;">To Date</label>
-                          <input type="date" name="to_date" class="form-control">
+                          <label style="font-weight: 200; color: black; font-size: 13px;">Order Value To</label>
+                          <input  name="to_value" class="form-control">
                         </div>
+                      </div>
+                      <!-- <div class="col-md-6 col-sm-6 col-12">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Product Delivery Status</label>
+                        {{ filter_data.form.Final_Work_Status}}
                       </div> -->
                       <!-- <div class="col-md-6 col-sm-6 col-12">
-                        <label style=" font-weight: 200; color: black; font-size: 13px;">Order No</label>
-                        {{ filter_data.form.Work_Status__Order_No}}
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Payment Cleared Orders</label>
+                        {{ filter_data.form.Final_Payment_Status}}
                       </div> -->
-                      <div class="col-md-6 col-sm-6 col-12">
+                      <div class="col-md-6 col-sm-6 col-12 ">
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Customer Name</label>
                         {{ filter_data.form.Customer_Name}}
                       </div>
+                      <div class="col-md-6 col-sm-6 col-12 ">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Order Follow Up By</label>
+                        {{ filter_data.form.user}}
+                      </div>
                       <!-- <div class="col-md-6 col-sm-6 col-12 mt-4">
-                        <label style=" font-weight: 200; color: black; font-size: 13px;">Follow Up By</label>
-                        {{ filter_data.form.Work_Status__user}}
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Product Details</label>
+                        {{ filter_data.form.Add_Product__Product_Description}}
                       </div> -->
-                      <div style=" float:left; margin-left: 10px; margin-top: 20px;">
+                      
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Billing Status</label>
+                        {{ filter_data.form.Is_Billed}}
+                      </div>
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Closed Orders</label>
+                        {{ filter_data.form.Final_Status}}
+                      </div>
+
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Order/Bill No</label>
+                        {{ filter_data.form.PO_No}}
+                      </div>
+                     
+                      <div style="float:left; margin-left: 10px; margin-top:47px;" style="">
                         <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
                         <!-- <button id="add-e" class="btn">Add Task</button> -->
                         <button id="edit-event" class="btn"></button>
@@ -313,7 +344,7 @@
             </td>
 
             <td style="white-space:normal;">
-              {% if x.Order_No %}<br><span class="hlt5">Order No: </span> {{x.Order_No}}{% endif %}
+              {% if x.Order_No %}<br><span class="hlt5">Order No: </span> {{x.PO_No}}{% endif %}
               {% if x.Order_Received_Date %}<br><span class="hlt5">Received Date: </span> {{x.Order_Received_Date|date:'d M Y'}}{% endif %}
               {% if x.Order_Details %}<br><span class="hlt5">Order Details: </span> {{x.Order_Details}}{% endif %}
               {% if x.user.Nick_Name %}<br><span class="hlt5">Followup By: </span> {{x.user.Nick_Name}}{% endif %}

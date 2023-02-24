@@ -3,9 +3,9 @@ from Orders.models import Orders
 from Projects.models import Projects, CompanyDetails, Bank_Accounts
 from UserAccounts.models import Account, Empl_Salaries 
 
-maincat 			= (('Services', 'Services'), ('Supplies', 'Supplies'), ('Factory', 'Factory'), ('Marketing', 'Marketing'), ('Office', 'Office'), ('Dispatches', 'Dispatches'), ('Others', 'Others'))
-maincat1 			= (('Services', 'Services'), ('Marketing', 'Marketing'), ('Office', 'Office'), ('Salary Advance', 'Salary Advance'), ('Dispatches', 'Dispatches'), ('Others', 'Others'))
-against				= ( ('Travel', 'Travel'), ('Food', 'Food'), ('Lodging', 'Lodging'), ('Fuel', 'Fuel'), ('Repair', 'Repair'), ('Transportation', 'Transportation'), ('Recharges', 'Recharges'), ('Stationery', 'Stationery'), ('General Purchase', 'General Purchase'), ('Miscellaneous', 'Miscellaneous'))
+maincat 			= (('Services', 'Services'), ('Supplies', 'Supplies'), ('Factory', 'Factory'), ('Marketing', 'Marketing'), ('Office', 'Office'), ('Dispatches', 'Dispatches'), ('EMI', 'EMI'), ('Others', 'Others'))
+maincat1 			= (('Services', 'Services'), ('Marketing', 'Marketing'), ('Office', 'Office'), ('Salary Advance', 'Salary Advance'), ('Dispatches', 'Dispatches'), ('EMI', 'EMI'), ('Others', 'Others'))
+against				= ( ('Travel', 'Travel'), ('Food', 'Food'), ('Lodging', 'Lodging'), ('Fuel', 'Fuel'), ('Repair', 'Repair'), ('Transportation', 'Transportation'), ('Recharges', 'Recharges'), ('Stationery', 'Stationery'), ('General Purchase', 'General Purchase'), ('Miscellaneous', 'Miscellaneous'), ('Advances', 'Advances'))
 
 class Expenses(models.Model):
 	Related_Project		= models.ForeignKey(Projects, null=True, blank=True, on_delete=models.SET_NULL)
@@ -105,7 +105,7 @@ class Attendance(models.Model):
 	End_Time 			= models.TimeField(null=True, blank=True) 
 	Total_Hours 		= models.FloatField(max_length=5, null=True, blank=True)
 	OT 					= models.FloatField(default=0, max_length=5, null=True, blank=True)
-	Day_Status 			= models.CharField(max_length=20, default='Present', null=True, blank=True, choices=(('Present', 'Present'), ('Absent', 'Absent'), ('Leave', 'Leave'), ('Half Day', 'Half Day'), ('Permission', 'Permission'), ('On Duty', 'On Duty'), ('Tour', 'Tour')))
+	Day_Status 			= models.CharField(max_length=20, default='Present', null=True, blank=True, choices=(('Present', 'Present'), ('Absent', 'Absent'), ('Leave', 'Leave'), ('Half Day', 'Half Day'), ('Permission', 'Permission'), ('Tour', 'Tour')))
 	Sales_Order			= models.ForeignKey(Orders, null=True, blank=True, on_delete=models.SET_NULL)
 	Issued_By			= models.ForeignKey(Account, on_delete=models.SET_NULL, null=True, related_name='attendanceissuedby')
 	Is_Manual           = models.BooleanField(default=True, help_text='generated maunaully or automatically')
@@ -150,6 +150,7 @@ class Working_Days(models.Model):
 class Monthly_Salaries(models.Model):
 	RC						= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
 	Name 					= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL)
+	Gross_Salary 			= models.IntegerField(default=0, null=True, blank=True, help_text='master gross salary')
 	Month	 				= models.DateField(null=True, blank=True)
 	Issued_Days 			= models.FloatField(default=0, max_length=5, null=True, blank=True)
 	Issued_Salary 			= models.IntegerField(default=0, null=True, blank=True, help_text='issued salary or net salary for this month')
@@ -163,6 +164,9 @@ class Monthly_Salaries(models.Model):
 	TDS 					= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='TDS/income tax deductions if eligible')
 	Other_Deductions 		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='other deductions')
 	Salary_Advance			= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='advances with employes')
+	Deducted_Advance		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='deducted advances')
+	Special_Allowance		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='added special allowances if any')
+	Tour_Allowance			= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='per day tour allowances')
 	Issued_Status			= models.BooleanField(default=True, help_text='issued status')
 	Automatic				= models.BooleanField(default=True)
 	Last_Updated_Date	    = models.DateField(null=True, blank=True)
@@ -174,7 +178,7 @@ class Monthly_Salaries(models.Model):
 		return str(self.Name.Name)+'-'+str(self.Issued_Date)+'-'+str(self.Issued_Salary)
 
 class Month_Sal_Exp(models.Model):
-	RC					= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
+	RC						= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL) 	
 	Month	 				= models.DateField(null=True, blank=True)	
 	Issued_Salareis 		= models.IntegerField(null=True, blank=True, help_text='total issued salaries')
 	Pending_Salaries 		= models.IntegerField(null=True, blank=True, help_text='pending salaries')

@@ -9,14 +9,14 @@ states = (("Andhra Pradesh","Andhra Pradesh"),("Telangana","Telangana"),("Tamil 
 	("Jammu & Kashmir ","Jammu & Kashmir "),("Jharkhand","Jharkhand"),("Arunachal Pradesh ","Arunachal Pradesh "),("Assam","Assam"),("Bihar","Bihar"),
 	("Madhya Pradesh","Madhya Pradesh"),("Manipur","Manipur"),("Meghalaya","Meghalaya"),("Mizoram","Mizoram"),("Nagaland","Nagaland"),("Orissa","Orissa"),
 	("Sikkim","Sikkim"),("Tripura","Tripura"),("Uttar Pradesh","Uttar Pradesh"),("Uttarakhand","Uttarakhand"),("Andaman & Nicobar Islands","Andaman & Nicobar Islands"),
-	("Chandigarh","Chandigarh"),("Dadra & Nagar Haveli","Dadra & Nagar Haveli"),("Daman & Diu","Daman & Diu"),("Lakshadweep","Lakshadweep"),("Puducherry","Puducherry"))
+	("Chandigarh","Chandigarh"),("Dadra & Nagar Haveli","Dadra & Nagar Haveli"),("Daman & Diu","Daman & Diu"),("Lakshadweep","Lakshadweep"),("Puducherry","Puducherry"),("Other Country","Other Country"))
 
 codes = (("37","Andhra Pradesh"),("36","Telangana"),("33","Tamil Nadu"),("29","Karnataka"),("27","Maharashtra"),("32","Kerala"),
 	("22","Chhattisgarh"),("07","Delhi"),("30","Goa"),("24","Gujarat"),("03","Punjab"),("08","Rajasthan"),("06","Haryana"),("19","West Bengal"),("02","Himachal Pradesh"),
 	("01 ","Jammu & Kashmir "),("20","Jharkhand"),("12 ","Arunachal Pradesh "),("18","Assam"),("10","Bihar"),
 	("23","Madhya Pradesh"),("14","Manipur"),("17","Meghalaya"),("15","Mizoram"),("13","Nagaland"),("21","Orissa"),
 	("11","Sikkim"),("16","Tripura"),("09","Uttar Pradesh"),("05","Uttarakhand"),("35","Andaman & Nicobar Islands"),
-	("04","Chandigarh"),("26","Dadra & Nagar Haveli"),("25","Daman & Diu"),("31","Lakshadweep"),("34","Puducherry"))
+	("04","Chandigarh"),("26","Dadra & Nagar Haveli"),("25","Daman & Diu"),("31","Lakshadweep"),("34","Puducherry"), ("99","Other Country"))
 
 class CompanyDetails(models.Model):
 	Company_Name 			= models.CharField(max_length=50, null=True)
@@ -123,7 +123,7 @@ class VendDt(models.Model):
 
 class CustContDt(models.Model):
 	Customer_Name 			= models.ForeignKey(CustDt, null=True, blank=True, on_delete=models.SET_NULL)
-	Contact_Person 			= models.CharField(max_length=30, null=True, help_text='Contact Person Name')
+	Contact_Person 			= models.CharField(max_length=50, null=True, help_text='Contact Person Name')
 	Phone_Number_1 			= models.CharField(max_length=20, null=True, help_text='Main Contact Phone Number')
 	Phone_Number_2 			= models.CharField(max_length=20, null=True, blank=True, help_text='Optional/Alternative Phone Number')
 	Email 					= models.EmailField(max_length=50, null=True, blank=True, help_text='Contact Person Email')
@@ -137,7 +137,7 @@ class CustContDt(models.Model):
 
 class VendContDt(models.Model):
 	Supplier_Name 			= models.ForeignKey(VendDt, null=True, on_delete=models.SET_NULL)
-	Contact_Person 			= models.CharField(max_length=30, null=True, help_text='Contact Person Name')
+	Contact_Person 			= models.CharField(max_length=50, null=True, help_text='Contact Person Name')
 	Phone_Number_1 			= models.CharField(max_length=20, null=True, help_text='Main Contact Phone Number')
 	Phone_Number_2 			= models.CharField(max_length=20, null=True, blank=True, help_text='Optional/Alternative Phone Number')
 	Email 					= models.EmailField(max_length=50, null=True, blank=True, help_text='Contact Person Email')
@@ -154,11 +154,13 @@ class Bank_Accounts(models.Model):
 	RC                 		= models.ForeignKey(CompanyDetails, null=True, blank=True, on_delete=models.SET_NULL)
 	Account_Type 			= models.CharField(max_length=40, null=True, choices=(('Company', 'Company'), ('UPI', 'UPI'), ('CASH', 'CASH')))
 	Account_No 				= models.CharField(max_length=40, null=True, help_text='Bank Account Number/UPI Phone Number')
-	Balance     			= models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 	Bank_Name 				= models.CharField(max_length=30, null=True, help_text='Bank Name/UPI Holder Name')
 	Branch 					= models.CharField(max_length=40, null=True, blank=True, help_text='bank branch details')
 	IFSC_Code 				= models.CharField(max_length=11, null=True, blank=True, help_text='bank IFSC code')
 	Status					= models.BooleanField(default=True, help_text='active status')
+	Opening_Balance     	= models.DecimalField(default=0, max_digits=10, decimal_places=2, null=True, blank=True)
+	Utilized_Balance     	= models.DecimalField(default=0, max_digits=10, decimal_places=2, null=True, blank=True)
+	Closing_Balance     	= models.DecimalField(default=0, max_digits=10, decimal_places=2, null=True, blank=True)
 
 	def __str__(self):
 		# return (str(self.RC.Company_Name) if self.RC != None else str(self.RC)) +'-'+str(self.Account_No)+'-'+str(self.Bank_Name)+'-'+str(self.Account_Type)

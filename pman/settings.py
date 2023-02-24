@@ -27,7 +27,7 @@ SECRET_KEY = 'c_t1jqgyw#$o2a8)yk*lqoj7zlp1)#hvk_$^(0d@3&@29zvcn^'
 DEBUG = True
 
 #ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['*', 'gpreprojects.com', 'www.gpreprojects.com', '139.59.78.229']
+ALLOWED_HOSTS = ['*', 'prakom.com', 'www.prakom.com', '64.227.160.215']
 
 
 # Application definition
@@ -110,7 +110,8 @@ WSGI_APPLICATION = 'pman.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / 'db1.sqlite3'),
+        'NAME': str(BASE_DIR / 'wento1.sqlite3'),
+        # 'NAME': str(BASE_DIR / 'db1.sqlite3'),
     }
  }
 

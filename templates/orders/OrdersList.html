@@ -22,7 +22,7 @@
   <script src="{% static 'js/datatables/buttons.flash.min.js' %}"></script>
   <script src="{% static 'js/datatables/pdfmake.min.js' %}"></script>
   <script src="{% static 'js/datatables/vfs_fonts.js' %}"></script>
-  <script src="{% static 'js/tableexport.js' %}"></script>
+  <script src="{% static 'js/tableexport.js' %}"></script> 
  
 <script type="text/javascript">
 
@@ -85,7 +85,7 @@
   var customexcel = function( xlsx ) {
     var sheet = xlsx.xl.worksheets['sheet1.xml'];
     var style = xlsx.xl['styles.xml'];
-    var tagName = style.getElementsByTagName('sz');
+    var tagName = style.getElementsByTagName('sz'); 
     for (i = 0; i < tagName.length; i++) {tagName[i].setAttribute("val", "10")}
     $('row:first c', sheet).attr('s', '2')
     $('row c[r^="B"]', sheet).attr( 's', '55' ); $('row c[r^="C"]', sheet).attr( 's', '55' );$('row c[r^="D"]', sheet).attr( 's', '55' ); $('row c[r^="E"]', sheet).attr( 's', '55' ); $('row c[r^="F"]', sheet).attr( 's', '55' ); //wrap text
@@ -151,13 +151,13 @@
     <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/salesquickform/create/1/'" class="btn btn-sm btn-danger mb-4" ht="Create New Quick Order">Quick Form</button>
     {% if status == 'Total' %}
       &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
-      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button>
+      <!-- &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button> -->
     {% elif status == 'Inprogress' %}
       &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-success mb-4">All Orders</button>
-      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button>
+      <!-- &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Pipeline/'" class="btn btn-sm btn-info mb-4" ht="not confirmed or expected orders">Pipeline Orders</button> -->
     {% else %}
-      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
-      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-info mb-4">All Orders</button>
+      <!-- &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" class="btn btn-sm btn-success mb-4" ht="Inprogress Orders Means Product Not Delivered or Payment Not Received Fully or Both">Inprogress Orders</button>
+      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Total/'" class="btn btn-sm  btn-info mb-4">All Orders</button> -->
     {% endif %}
 
     &emsp;&emsp;
@@ -236,13 +236,13 @@
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Billing Status</label>
                         {{ filter_data.form.Is_Billed}}
                       </div>
-                      <div class="col-md-6 col-sm-6 col-12 mt-4" {% if request.user.username != 'praveen' %}style="pointer-events: none;"{% endif %}>
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
                         <label style=" font-weight: 200; color: black; font-size: 13px;">Closed Orders</label>
                         {{ filter_data.form.Final_Status}}
                       </div>
 
                       <div class="col-md-6 col-sm-6 col-12 mt-4">
-                        <label style=" font-weight: 200; color: black; font-size: 13px;">Billing Status</label>
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Order/Bill No</label>
                         {{ filter_data.form.PO_No}}
                       </div>
                      
@@ -361,7 +361,7 @@
             </tr>
           </thead>
           <tbody>
-            {% for x, y, z, c, pd in tableset %}
+            {% for x, y, z, c, pd, ad, clr in tableset %}
               {% if x.Order_Type == 'Confirmed' %} 
                {% if x.Final_Status == 1 %}
                 <tr class="customtr1" >
@@ -391,7 +391,9 @@
 
                 <td style="white-space:normal;">
                   <a class="ahr" ht="orders, works and payments edit/update options" data-toggle="modal" data-target="#exampleModal11" onclick="javascript:rid('{{x.id}}', '{{x.Can_Gen_Invoice}}', {{y}}, {{x.Order_Value}})">
-                  {% if x.Order_Details %}{{x.Order_Details}}{% endif %}</a>
+                  {% if x.Order_Details %}{{x.Order_Details}}{% endif %}
+                  <br><span class="hlt5">Branch: </span>{{x.Related_Project.Short_Name}}
+                  </a>
                 </td>
 
                 <td style="white-space:normal; width: 21%;">
@@ -424,16 +426,17 @@
                     <span class='hlt5'><br>Billing Amount: </span>₹ {{y|floatformat:0|intcomma}}
                     {% if z != 0 %}
                       <span class='hlt5'><br>Received Amount: </span>₹ {{z|floatformat:0|intcomma}}
+                      {% if ad > 0 %}<span class='hlt3'><br>Adjusted Amount: </span>₹ {{ad|floatformat:0|intcomma}}{% endif %}
                       {% if z > y %}
                         <br><span class='hlt2'>Balance as Advance: </span>₹ {{y|mul:-1|add:z|floatformat:0|intcomma}}
                       {% endif %}
                     {% else %}
                       <br><span class="hlt3">No Payments Started Yet</span>
                     {% endif %}
-                    {% if y != z %}
-                      {% if z < y %}
-                        <span class='hlt3' style="font-weight:bold"><br>Due Amount: </span><span style="font-weight:bold;">₹ {{z|mul:-1|add:y|floatformat:0|intcomma}}</span>
-                      {% endif %}
+                    {% if clr == 0 %}
+                      <!-- {% if z < y %} -->
+                        <span class='hlt3' style="font-weight:bold"><br>Due Amount: </span><span style="font-weight:bold;">₹ {{z|mul:-1|add:y|sub:ad|floatformat:0|intcomma}}</span>
+                      <!-- {% endif %} -->
                     {% else %}
                       <br><span class="hlt2">Payments Done Against Issued Bills</span>
                     {% endif %}
@@ -569,10 +572,11 @@
               <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/orderspaymentsform/'+getid+'/'" class="btn btn-sm btn-success">Update Payment Status</button>
               
               <br><button type="button" id='hidebillbutton' target='_blank' style="display:none"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/create/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-dark">Gen Online Invoice</button>
-              <button type="button" id='showbillbutton' style="display:none"  onclick="javascript:alertpopup()" class="btn btn-sm btn-dark">Generate Invoice</button>
+              <!-- <button type="button" id='showbillbutton' style="display:none"  onclick="javascript:alertpopup()" class="btn btn-sm btn-dark">Generate Invoice</button> -->
 
-              <button type="button" id='hidebillbutton1' style="display:none"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/create_manually/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-primary">Add Invoice Manually</button>           
-              <button type="button" id='showbillbutton1' style="display:none"  onclick="alertpopup()"  class="btn btn-sm btn-primary">Add Invoice Manually</button>  
+              <button type="button" id='hidebillbutton1'   onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/create_manually/1/'+getid+'/itemid/msg/'" class="btn btn-sm btn-primary">Add Invoice Manually</button>           
+              <!-- <button type="button" id='showbillbutton1' style="display:none"  onclick="alertpopup()"  class="btn btn-sm btn-primary">Add Invoice Manually</button> -->
+              <!-- <button type="button" id='showbillbutton1' style="display:block;"   class="btn btn-sm btn-primary">Add Invoice Manually</button>  --> 
             {% endif %}       
           </div>
         </div>

@@ -12963,7 +12963,8 @@ dl {
     -moz-transition: width 0.25s ease, background 0.25s ease;
     -ms-transition: width 0.25s ease, background 0.25s ease;
     background: #fff;
-    width: 260px;
+    width: 180px;
+    /*width: 260px;*/
     height: 70px; }
     @media (max-width: 991px) {
       .navbar .navbar-brand-wrapper {
@@ -12998,7 +12999,8 @@ dl {
     color: #9c9fa6;
     padding-left: 24px;
     padding-right: 24px;
-    width: calc(100% - 260px);
+    width: calc(100% - 180px);
+   /* width: calc(100% - 260px);*/
     height: 70px; }
     @media (max-width: 991px) {
       .navbar .navbar-menu-wrapper {
@@ -13331,7 +13333,8 @@ dl {
   background: #ffffff;
   font-family: "ubuntu-regular", sans-serif;
   padding: 0;
-  width: 260px;
+  width: 180px;
+  /*width: 260px;*/
   z-index: 11;
   transition: width 0.25s ease, background 0.25s ease;
   -webkit-transition: width 0.25s ease, background 0.25s ease;
@@ -13347,7 +13350,7 @@ dl {
     flex-direction: column;
     margin-bottom: 60px; }
     .sidebar .nav .nav-item {
-      padding: 0 2.25rem;
+      padding: 0 1.25rem;
       -webkit-transition-duration: 0.25s;
       transition-duration: 0.25s;
       transition-property: background;
@@ -13362,8 +13365,12 @@ dl {
         -ms-flex-align: center;
         align-items: center;
         white-space: nowrap;
-        padding: 1.125rem 0 1.125rem 0;
-        color: #3e4b5b;
+        /*padding: 1.125rem 0 1.125rem 0;*/
+        padding: 0.5rem 0 0.5rem 0;
+        font-size: 0.8rem;
+        /*font size for icons*/
+        /*color: #3e4b5b;*/
+        color: #0e094f;
         -webkit-transition-duration: 0.45s;
         transition-duration: 0.45s;
         transition-property: color;
@@ -13383,7 +13390,9 @@ dl {
           .sidebar .nav .nav-item .nav-link i.menu-arrow {
             font: normal normal normal 24px/1 "Material Design Icons";
             line-height: 1;
-            font-size: 1.125rem;
+            font-size: 0rem;
+            /*font-size: 1.125rem;*/
+            /*hide arrows*/
             margin-left: auto;
             color: #9e9da0; }
             .rtl .sidebar .nav .nav-item .nav-link i.menu-arrow {
@@ -13399,10 +13408,13 @@ dl {
                 margin-left: 0;
                 margin-right: .25rem; }
         .sidebar .nav .nav-item .nav-link .menu-title {
-          color: inherit;
+          color: #0e094f;
           display: inline-block;
-          font-size: 0.875rem;
-          line-height: 1;
+          /*font-size: 0.875rem;*/
+          font-size: 0.75rem;
+          /*sidebar fontsize*/
+          line-height: 2;
+          font-weight: 600;
           vertical-align: middle; }
         .sidebar .nav .nav-item .nav-link .badge {
           margin-right: auto;
@@ -13412,10 +13424,13 @@ dl {
       .sidebar .nav .nav-item.active {
         background: #ffffff; }
         .sidebar .nav .nav-item.active > .nav-link .menu-title {
-          color: #b66dff;
+          color: red;
+          /*color: #b66dff;*/
           font-family: "ubuntu-medium", sans-serif; }
         .sidebar .nav .nav-item.active > .nav-link i {
-          color: #b66dff; }
+          color: red;
+          /*color: #b66dff;*/
+        }
       .sidebar .nav .nav-item:hover {
         background: #fcfcfc; }
       .sidebar .nav .nav-item.nav-profile .nav-link {
@@ -13425,7 +13440,8 @@ dl {
         padding: 1.25rem 0; }
         .sidebar .nav .nav-item.nav-profile .nav-link .nav-profile-image {
           width: 44px;
-          height: 44px; }
+          height: 44px; 
+        }
           .sidebar .nav .nav-item.nav-profile .nav-link .nav-profile-image img {
             width: 44px;
             height: 44px;
@@ -13461,10 +13477,13 @@ dl {
         padding: 0; }
         .sidebar .nav.sub-menu .nav-item .nav-link {
           color: #888;
-          padding: 0.75rem 2rem 0.75rem 2rem;
+          /*padding: 0.75rem 2rem 0.75rem 2rem;*/
+          padding: 0.35rem 1rem 0.35rem 1rem;
           position: relative;
-          font-size: 0.8125rem;
-          line-height: 1;
+          font-size: 0.75rem;
+          /*font-size: 0.8125rem;*/
+          line-height: 1.25;
+          /*line-height: 1;*/
           height: auto;
           border-top: 0; }
           .sidebar .nav.sub-menu .nav-item .nav-link:before {
@@ -13482,7 +13501,9 @@ dl {
               left: auto;
               right: 0; }
           .sidebar .nav.sub-menu .nav-item .nav-link.active {
-            color: #b66dff;
+            color: red;
+            font-weight: 600;
+            /*color: #b66dff;*/
             background: transparent; }
           .sidebar .nav.sub-menu .nav-item .nav-link:hover {
             color: #555555; }
@@ -13646,7 +13667,8 @@ dl {
 .main-panel {
   -webkit-transition: width 0.25s ease, margin 0.25s ease;
   transition: width 0.25s ease, margin 0.25s ease;
-  width: calc(100% - 260px);
+  width: calc(100% - 180px);
+  /*width: calc(100% - 260px);*/
   min-height: calc(100vh - 70px);
   display: -webkit-box;
   display: -ms-flexbox;

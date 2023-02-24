@@ -10,8 +10,6 @@ from .models import *
 @admin.register(Page_Permissions)
 @admin.register(Pages)
 @admin.register(Page_Modes)
-@admin.register(UPI_Accounts)
-
 
 class AccountsAdmin(ImportExportModelAdmin):
 	pass

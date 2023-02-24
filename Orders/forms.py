@@ -9,8 +9,8 @@ from django.shortcuts import get_object_or_404
 class OrdersForm(forms.ModelForm):	
 	class Meta:
 		model = Orders
-		exclude = ['ds', 'RC', 'Related_Project', 'Add_Product', 'Order_No', 'Work_Status', 
-		'Payment_Status',  'Final_Status', 'Billing_Status', 'Can_Gen_Invoice', 'Is_Billed', 'FY', 'Order_No_1']
+		exclude = ['ds', 'RC', 'Related_Project', 'Add_Product', 'Order_No', 'Work_Status', 'Order_Type', 'Order_Reference_Person', 'Quote',
+		'Payment_Status',  'Final_Status', 'Billing_Status', 'Can_Gen_Invoice', 'Is_Billed', 'FY', 'Order_No_1', 'DSP_Status', 'INST_Status']
 
 	def clean(self): 
 	    cleaned_data = self.cleaned_data
@@ -32,8 +32,8 @@ class OrdersForm(forms.ModelForm):
 class OrdersEmptyForm(forms.ModelForm):	
 	class Meta:
 		model = Orders
-		exclude = ['ds', 'RC', 'Related_Project', 'Add_Product', 'Order_No', 'Work_Status', 
-		'Payment_Status',  'Final_Status', 'Billing_Status', 'Can_Gen_Invoice', 'Is_Billed', 'FY', 'Order_No_1']
+		exclude = ['ds', 'RC', 'Related_Project', 'Add_Product', 'Order_No', 'Work_Status', 'Order_Type', 'Order_Reference_Person', 'Quote',
+		'Payment_Status',  'Final_Status', 'Billing_Status', 'Can_Gen_Invoice', 'Is_Billed', 'FY', 'Order_No_1', 'DSP_Status', 'INST_Status']
 		widgets = {
             'Order_Received_Date': widgets.DateInput(attrs={'type': 'datetime-local'})
         }
@@ -49,7 +49,7 @@ class OrdersEmptyForm(forms.ModelForm):
 class OrdersPaymentsForm(forms.ModelForm):	
 	class Meta:
 		model = Payment_Status
-		exclude = ['user', 'As_Advance_Amount', 'Order_No', 'Invoice_No', 'user', 'Payment_Type']
+		exclude = ['user', 'As_Advance_Amount', 'Order_No', 'Invoice_No', 'user', 'Payment_Type', 'Adjusted_Amount']
 		widgets = {
             'Payment_Date': widgets.DateInput(attrs={'type': 'datetime-local'}),
             'Next_Commitment_Date': widgets.DateInput(attrs={'type': 'date'})
@@ -75,7 +75,7 @@ class OrdersPaymentsForm(forms.ModelForm):
 class PaymentsEmptyForm(forms.ModelForm):
 	class Meta:
 		model = Payment_Status
-		exclude = ['user', 'As_Advance_Amount', 'Payment_Type']
+		exclude = ['user', 'As_Advance_Amount', 'Payment_Type', 'Adjusted_Amount']
 		widgets = {'Payment_Date': widgets.DateInput(attrs={'type': 'datetime-local'}),'Next_Commitment_Date': widgets.DateInput(attrs={'type': 'date'})}
 	
 	def __str__(self):
@@ -93,7 +93,7 @@ class PaymentsEmptyForm(forms.ModelForm):
 class PaymentsForm(forms.ModelForm):
 	class Meta:
 		model = Payment_Status
-		exclude = ['user', 'As_Advance_Amount', 'Payment_Type']
+		exclude = ['user', 'As_Advance_Amount', 'Payment_Type', 'Order_No', 'Adjusted_Amount']
 		
 		def __init__(self, *args, **kwargs):
 			self.fields['Payment_Date'].widget.attrs.update(
@@ -189,7 +189,7 @@ class InvoicesForm(forms.ModelForm):
 		model = Invoices
 		# exclude = ['user']
 		fields = ['Billing_From', 'Billing_To', 'Shipping_To', 'Bank_Details', 'Invoice_No', 'Invoice_Date', 
-		'Credit_Days', 'GST_Reverse_Charges', 'Lock_Status', 'Is_Proforma', 'Invoice_No_Format', 'Set_For_Returns', 'Payment_Terms']
+		'Credit_Days', 'GST_Reverse_Charges', 'Lock_Status', 'Is_Proforma', 'Invoice_No_Format', 'Set_For_Returns', 'Payment_Terms', 'Adjusted_Amount']
 
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
@@ -231,7 +231,7 @@ class ManualInvoicesForm(forms.ModelForm):
 	class Meta:
 		model = Invoices
 		# exclude = ['user']
-		fields = ['Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Attach']
+		fields = ['Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Adjusted_Amount', 'Attach']
 		widgets = {'Invoice_Date': widgets.DateInput(attrs={'type': 'datetime-local'})}
 
 	def clean(self):
@@ -258,7 +258,7 @@ class ManualInvoicesForm1(forms.ModelForm):
 	class Meta:
 		model = Invoices
 		# exclude = ['user']
-		fields = ['Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Attach']
+		fields = ['Invoice_No','Invoice_Date','Invoice_Amount','GST_Amount','Credit_Days', 'Adjusted_Amount', 'Attach']
 
 	def clean(self):
 	    cleaned_data = self.cleaned_data
@@ -339,7 +339,7 @@ class InvoiceTCForm(forms.ModelForm):
 class OrdersFormQ(forms.ModelForm):	
 	class Meta:
 		model = Orders
-		fields = ['user', 'PO_No', 'Order_Details', 'Order_Value', 'Order_Received_Date', 'Attach']
+		fields = ['user', 'PO_No', 'Order_Details', 'Order_Value', 'Order_Received_Date', 'Quote', 'Attach']
 		widgets = {'Order_Received_Date': widgets.DateInput(attrs={'type': 'datetime-local'})}
 
 	def clean(self): 
@@ -413,7 +413,7 @@ class PaymentsFormQ(forms.ModelForm):
 class ManualQuotesForm(forms.ModelForm):	
 	class Meta:
 		model = Manual_Quotes
-		exclude = exclude = ['ds', 'user', 'RC', 'Related_Project']
+		exclude = ['ds', 'RC', 'Related_Project']
 		widgets = {'Date': widgets.DateInput(attrs={'type': 'datetime-local'})}
 
 	def clean(self):
@@ -431,3 +431,37 @@ class ManualQuotesForm(forms.ModelForm):
 			self.fields[field].widget.attrs.update({
 	            'class': 'form-control mb-4'
 	        })
+
+
+class DispatchesForm(forms.ModelForm):	
+	class Meta:
+		model = Dispatches
+		exclude = ['Order', 'user', 'Installation_Status', 'Installation_Date', 'Installation_Details', 'Pending_Installation_Work', 'Transport_Mode', 'Vehicle_No', 'LRR_No', 'Vehicle_Type']
+		widgets = {'Dispatch_Date': widgets.DateInput(attrs={'type': 'date'})}
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields: self.fields[field].widget.attrs.update({'class': 'form-control mb-4'})
+
+class DispatchesForm1(forms.ModelForm):	
+	class Meta:
+		model = Dispatches
+		exclude = ['user', 'Installation_Status', 'Installation_Date', 'Installation_Details', 'Pending_Installation_Work', 'Transport_Mode', 'Vehicle_No', 'LRR_No', 'Vehicle_Type']
+		widgets = {'Dispatch_Date': widgets.DateInput(attrs={'type': 'date'})}
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields: self.fields[field].widget.attrs.update({'class': 'form-control mb-4'})
+
+class InstallationsForm(forms.ModelForm):	
+	class Meta:
+		model = Installations
+		exclude = ['Order', 'user']
+		widgets = {'Installation_Date': widgets.DateInput(attrs={'type': 'date'})}
+
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		for _, value in self.fields.items():value.widget.attrs['placeholder'] = value.help_text
+		for field in self.fields: self.fields[field].widget.attrs.update({'class': 'form-control mb-4'})

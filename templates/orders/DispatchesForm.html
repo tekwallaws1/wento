@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts %}
+ <script type="text/javascript">
+
+  window.onload = function () {
+    if ('{{fnc}}'=='edit') {
+      var selectBoxs1 = document.getElementById("id_Dispatch_Status");    
+      var sv1 = selectBoxs1.options[selectBoxs1.selectedIndex].text;
+      if (sv1 == 'Partially Dispatched'){document.getElementById('pending').style.display='block';}
+      else{ document.getElementById('pending').style.display='none';}
+      } 
+  }
+  
+  function changeFunc1() {
+    var selectBoxs = document.getElementById("id_Dispatch_Status");    
+    var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+    if (sv == 'Partially Dispatched'){document.getElementById('pending').style.display='block';}
+    else{ document.getElementById('pending').style.display='none';} }
+
+</script>
+{% endblock %} <!-- For Scripts -->
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Dispatches Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+                {% if fnc == 'createnew' %}
+                    <label>Order<span style="color: red">**</span></label>{{form.Order}}
+                {% endif %}
+
+                <label>Dispatch Date<span style="color: red">**</span></label>{{form.Dispatch_Date}}
+
+                <label for="id_Dispatch_Status">Dispatch Status<span style="color: red">**</span></label><div onchange="changeFunc1()">{{form.Dispatch_Status}}</div>
+
+                <label>Dispatch Details</label>{{form.Dispatch_Details}}
+                <div id="pending" style="display:none"><label>Pending Dispatch Details</label>{{form.Pending_Dispatches}}</div>
+
+                <label>Place of Supply</label>{{form.Place_Of_Supply}}
+                <label style="color:green;">Upload if any dispatch related document available</label>{{form.Attach}}
+
+                {% for field in form %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}  
+              </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

@@ -14,7 +14,7 @@
               {% csrf_token %}
                 <div class="form-group">
                   {% for field in form %}
-                    {% if field.label != 'Upload Photo' and field.label != 'Status' and field.label != 'Only Their Works' %}
+                    {% if field.label != 'Upload Photo' and field.label != 'Status' and field.label != 'Only Their Works' and field.label != 'Is Marketing Excecutive' %}
                       <label for="{{ field.label }}">{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}} 
                     {% endif %}
                     {% for error in field.errors %}
@@ -25,6 +25,9 @@
                 <label style="color:#32a852;">upload employ photo if required/available</label>{{form.Upload_Photo}} 
                 <div class="form-check form-check-flat form-check-primary">
                   <label class="form-check-label">{{ form.Only_Their_Works }} mark if want to restrict him/her to make visiable only thier works/entries</label>
+                </div>
+                <div class="form-check form-check-flat form-check-primary">
+                  <label class="form-check-label">{{ form.Is_Marketing_Excecutive }} mark if he is under marketing</label>
                 </div>
                 {% if fnc == 'edit' %}
                   <div class="form-check form-check-flat form-check-primary">

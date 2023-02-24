@@ -24,6 +24,8 @@ admin.site.register(Payment_Status, Payment_StatusAdmin)
 @admin.register(Terms_Conditions)
 @admin.register(Inv_Adjust_Table)
 @admin.register(Manual_Quotes)
+@admin.register(Dispatches)
+@admin.register(Installations)
 
 class OrdersAdmin(ImportExportModelAdmin):
 	pass

@@ -5,8 +5,8 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Prakom-Pro</title>
-    <link rel="icon" type="image/x-icon" href="{% static 'img/logo-mini.png' %}"/>
+    <title>WENTO</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo-mini1.png' %}"/>
     <!-- plugins:css-->
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <!-- <link rel="stylesheet" href="{% static 'css/vendor.bundle.base.css' %}"> -->
@@ -19,7 +19,8 @@
     {% block css %}{% endblock %}
 
   </head> 
-  <body class="sidebar-icon-only">
+  <body class="">
+  <!-- <body class="sidebar-icon-only"> -->
     <div class="container-scroller">
       <!-- partial:partials/_navbar.html -->
       <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
@@ -30,7 +31,7 @@
   margin-left: -72px;
 
 " > -->
-          <a class="navbar-brand brand-logo" href="/{{firm}}/{{pdata.pj}}/modules/"><img src="{% static 'img/logo-name.png' %}" /></a>
+          <a class="navbar-brand brand-logo" href="/{{firm}}/{{pdata.pj}}/modules/"><img style="width: 65%" src="{% static 'img/logo-name1.png' %}" /></a>
           <!-- <a class="navbar-brand brand-logo" href="{% url 'home' %}"><img src="{% static 'img/logo-name.png' %}" /></a> -->
           <a class="navbar-brand brand-logo-mini" href="/{{firm}}/{{pdata.pj}}/modules/"><img src="{% static 'img/logo-mini.png' %}" alt="logo" /></a>
 
@@ -56,7 +57,8 @@
           </div> --> 
 
           <ul class="navbar-nav navbar-nav-right">
-            <li><span style="font-size: 19px; color: blue; font-weight:bold">{{firm}}</span></li>
+            <!-- <li><span style="font-size: 19px; color: blue; font-weight:bold">{{firm}}</span></li> -->
+            <!-- <li><span class="mobilehideimg" style="font-size: 19px; color: blue; font-weight:bold"><img  style="width:15%; float: right" src="{% static 'img/logo-name2.png' %}" /></span></li> -->
             <li class="nav-item nav-profile dropdown">
               <a class="nav-link dropdown-toggle" id="profileDropdown" href="#" data-toggle="dropdown" aria-expanded="false">
                 <div class="nav-profile-img">
@@ -142,12 +144,11 @@
         <!-- partial:partials/_sidebar.html -->
         <nav class="sidebar sidebar-offcanvas" id="sidebar">
           <ul class="nav">
-            <li class="nav-item nav-profile">
+            <!-- <li class="nav-item nav-profile">
               <a href="#" class="nav-link">
                 <div class="nav-profile-image">
                   <img src="{{profilepic_url}}" alt="profile">
                   <span class="login-status online"></span>
-                  <!--change to offline or busy as needed-->
                 </div>
                 <div class="nav-profile-text d-flex flex-column">
                   <span class="font-weight-bold mb-2">{{name}}</span>
@@ -155,7 +156,7 @@
                 </div>
                 <i class="mdi mdi-bookmark-check text-success nav-profile-badge"></i>
               </a>
-            </li>
+            </li> -->
             <!-- <li class="nav-item">
               <a class="nav-link" href="{% url 'home' %}" >
                 <span class="menu-title">Home</span>
@@ -192,8 +193,9 @@
                   <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/paymentslist/Received/custflt/">Customer Payments</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/salesquickform/create/1/">Quick Form</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/customerwisestatement/var1/">Customer Wise<br>Statement</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/quotationslist/all/">Online Quotes</a></li>
+                  <!-- <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/quotationslist/all/">Online Quotes</a></li> -->
                   <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/manualquoteslist/active/">Manual Quotes</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/dispatcheslist/active/">Dispatches<br>Installations</a></li>
                 </ul>
               </div>
             </li>
@@ -279,7 +281,7 @@
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicgst" aria-expanded="false" aria-controls="ui-basicgst">
-                <span class="menu-title">GST Ruturns</span>
+                <span class="menu-title">GST Returns</span>
                 <i class="menu-arrow"></i>
                 <!-- <i class="mdi mdi mdi-wall menu-icon"></i> -->
                 <i class="fas fa-lg fa-percent"></i>
@@ -302,7 +304,7 @@
               <div class="collapse" id="ui-basicwork">
                 <ul class="nav flex-column sub-menu">
                   <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/worklist/Inprogress/">Work Orders Progress</a></li>
-                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/purchaseslist/Total/">PO's Progress</a></li>
+                  <!-- <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/purchaseslist/Total/">PO's Progress</a></li> -->
                 </ul>
               </div>
             </li>
@@ -321,7 +323,7 @@
               </div>
             </li>
 
-            <li class="nav-item">
+            <!-- <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicinventory" aria-expanded="false" aria-controls="ui-basicinventory">
                 <span class="menu-title">Inventory</span> 
                 <i class="menu-arrow"></i>
@@ -333,7 +335,7 @@
                   <li class="nav-item"> <a class="nav-link" href="#">Movement</a></li>
                 </ul>
               </div>
-            </li>
+            </li> -->
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basicattendance" aria-expanded="false" aria-controls="ui-basicattendance">
@@ -353,14 +355,14 @@
 
             <li class="nav-item">
               <a class="nav-link" data-toggle="collapse" href="#ui-basiccontact" aria-expanded="false" aria-controls="ui-basiccontact">
-                <span class="menu-title">Contact Management</span>
+                <span class="menu-title">Contacts</span>
                 <i class="menu-arrow"></i>
                 <!-- <i class="mdi mdi mdi-contact-mail menu-icon"></i> -->
                 <i class="fas fa-lg fa-address-card"></i>
               </a>
               <div class="collapse" id="ui-basiccontact">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/customerslist/">Customers List</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/customerslist/OneTime/">Customers List</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/vendorslist/">Vendors List</a></li>                  
                 </ul>
               </div>
@@ -374,7 +376,7 @@
               </a>
               <div class="collapse" id="ui-basicempl">
                 <ul class="nav flex-column sub-menu">
-                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/employeslist/active/">List of Employes</a></li>
+                  <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/employeslist/Permanent/">List of Employes</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/employsalarieslist/active/">Employ Salaries</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/monthlysalaries/month/select/">Employ Month<br>Salaries</a></li>
                   <li class="nav-item"> <a class="nav-link" href="/{{firm}}/{{pdata.pj}}/orderwisesalaries/month/select/">Order Wise<br>Salaries</a></li>
@@ -512,7 +514,7 @@
           <!-- partial:partials/_footer.html -->
           <footer class="footer">
             <div class="d-sm-flex justify-content-center justify-content-sm-between">
-              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2021 <a href="#" target="_blank">tekWall</a>. All rights reserved.</span>
+              <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © 2021 <a href="https://www.tekwallorg.com/" target="_blank">tekWall</a>. All rights reserved.</span>
               <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center"><a href="#" target="_blank">tekWall</a> Hyderabad</span>
             </div>
           </footer>

@@ -37,19 +37,19 @@ def projectname1(request, var, firm):
 	return {'pj':pj}
 
 def profiledata(request):
-	if request.user.username:  
-		try:
-			account = Account.objects.filter(user__username = request.user.username, user__is_active = True).last()
+	if request.user.username:
+		account = Account.objects.filter(user__username = request.user.username, user__is_active = True).last()  
+		if account:
 			if account.Upload_Photo:
 				pic_url =  '/media/'+str(account.Upload_Photo)+'/'
 			else:
-				pic_url =  '/media/employes/sss-logo.png/'
+				pic_url =  '/media/employes/logo-mini.png/'
 
 			return {'name':account.Name,'designation':account.Designation, 'profilepic_url':pic_url}
-		except Account.DoesNotExist:
-			return {'name':'Developer', 'designation':'Developer', 'profilepic_url':'/media/employes/sss-logo.png/'}
+		else:
+			return {'name':'Developer', 'designation':'Developer', 'profilepic_url':'/media/employes/logo-mini.png/'}
 	else:
-		return {'designation':'Unknown', 'profilepic_url':'/media/employes/sss-logo.png/'}
+		return {'designation':'Unknown', 'profilepic_url':'/media/employes/logo-mini.png/'}
 
 
 def customer_updateledger(request, cat, fnc, pdata, inst):

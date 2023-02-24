@@ -15,6 +15,7 @@ from Orders.models import *
 from Products.models import *
 from Debits.models import * 
 from .basedata import projectname, projectname1, firmname, customer_updateledger, vendor_updateledger, permissions
+from .fyear import fyr
 
 @login_required
 def Select_Firm(request):
@@ -54,7 +55,7 @@ def CustDt_Form(request, firm, proj, fnc, rid):
 				p.State_Code = p.GST_No[0:2] if p.GST_No != None else None
 				p.save()
 				messages.success(request, "Selected Customer Details Has Been Updated")
-				url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/'
+				url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/OneTime/'
 				return redirect(url)
 			else:
 				return render(request, 'projects/CustDtForm.html', {'form': form, 'pdata':pdata, 'firm':firm})
@@ -72,7 +73,7 @@ def CustDt_Form(request, firm, proj, fnc, rid):
 		else:
 			getdata.delete()
 			messages.success(request, "Selected Customer Details Has Been Deleted")
-		url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/'
+		url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/OneTime/'
 		return redirect(url)
 
 	if request.method ==  'POST': #Create
@@ -81,9 +82,10 @@ def CustDt_Form(request, firm, proj, fnc, rid):
 			p = form.save()
 			p.State_Code = p.GST_No[0:2] if p.GST_No != None else None
 			p.RC = CompanyDetails.objects.filter(Short_Name=firm).last()
+			p.Related_Project = Projects.objects.filter(Short_Name=proj).last()
 			p.save()
 			messages.success(request, "Customer Details Has Been Added")
-			url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/'
+			url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/OneTime/'
 			return redirect(url)
 		else:
 			return render(request, 'projects/CustDtForm.html', {'form': form, 'pdata':pdata, 'firm':firm})
@@ -97,17 +99,21 @@ def CustDt_Form(request, firm, proj, fnc, rid):
 			return render(request, 'projects/CustDtForm.html', {'form': form, 'pdata':pdata, 'firm':firm})
 
 @login_required
-def CustDt_List(request, firm, proj):
+def CustDt_List(request, firm, proj, mode):
 	pdata = projectname(request, proj)
+	plj = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
 	contact_person = []
-	table = CustDt.objects.filter(ds=1, RC__Short_Name=firm)
+	if mode != 'Inactive':
+		table = CustDt.objects.filter(Status=1, RC__Short_Name=firm, Customer_Type='Regular Customer', **plj) if mode == 'Regular' else CustDt.objects.filter(Status=1, RC__Short_Name=firm, Customer_Type='One Time Customer', **plj) 
+	else:
+		table = CustDt.objects.filter(Status=0, RC__Short_Name=firm, **plj)
 	filter_data = CustomerFilter(request.GET, queryset=table)
 	table = filter_data.qs
 	for x in table:
 		p = CustContDt.objects.filter(Customer_Name=x, ds=1)
 		contact_person.append(p if p else None)
 	data = zip(table, contact_person)
-	return render(request, 'projects/CustDtList.html', {'data':data, 'filter_data':filter_data, 'pdata':pdata, 'firm':firm})
+	return render(request, 'projects/CustDtList.html', {'data':data, 'filter_data':filter_data, 'pdata':pdata, 'firm':firm, 'mode':mode})
 
 @login_required
 def CustContDt_Form(request, firm, proj, fnc, rid):
@@ -119,7 +125,7 @@ def CustContDt_Form(request, firm, proj, fnc, rid):
 			if form.is_valid():
 				form.save()
 				messages.success(request, "Selected Customer Contact Details Has Been Updated")
-				url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/'
+				url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/OneTime/'
 				return redirect(url)
 			else:
 				return render(request, 'projects/CustContDtForm.html', {'form': form, 'pdata':pdata, 'firm':firm})
@@ -138,7 +144,7 @@ def CustContDt_Form(request, firm, proj, fnc, rid):
 			getdata.ds = 0
 			getdata.save()
 			messages.success(request, "Selected Customer Contact Details Has Been Send to Recyclebin")
-		url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/'
+		url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/OneTime/'
 		return redirect(url)
 
 	if request.method ==  'POST': #Create
@@ -148,7 +154,7 @@ def CustContDt_Form(request, firm, proj, fnc, rid):
 			p.Customer_Name = CustDt.objects.get(id=rid)
 			p.save()
 			messages.success(request, "Customer Contact Details Has Been Added")
-			url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/'
+			url = '/'+str(firm)+'/'+str(pdata['pj'])+'/customerslist/OneTime/'
 			return redirect(url)
 		else:
 			return render(request, 'projects/CustContDtForm.html', {'form': form, 'pdata':pdata, 'firm':firm})
@@ -449,6 +455,13 @@ def Daily_Finance(request, firm, proj, dur, status):
 	pjl2 = {'PO_No__Related_Project__isnull':False} if proj == 'All' else {'PO_No__Related_Project':pdata['pj']}
 	pjl3 = {'Related_Project__isnull':False} if proj == 'All' else {'Related_Project':pdata['pj']}
 	
+	usr = Account.objects.get(user=request.user)
+	if usr.Only_Their_Works == 1:
+		pjl1 = {'Order_No__Related_Project__isnull':False, 'Order_No__user':usr} if proj == 'All' else {'Order_No__Related_Project':pdata['pj'], 'Order_No__user':usr}
+		pjl2 = {'PO_No__Related_Project__isnull':False, 'user':usr} if proj == 'All' else {'PO_No__Related_Project':pdata['pj'], 'user':usr}
+		pjl3 = {'Related_Project__isnull':False, 'Employ':usr} if proj == 'All' else {'Related_Project':pdata['pj'], 'Employ':usr}
+
+	fltbnk = None
 	if not request.GET:
 		if dur == 'today':
 			sDate, eDate = date.today(), date.today()
@@ -460,10 +473,13 @@ def Daily_Finance(request, firm, proj, dur, status):
 		elif dur == 'Month':
 			sDate, eDate = date(date.today().year, date.today().month, 1), date.today()
 		elif dur == 'Year':
-			sDate, eDate = date(date.today().year, 4, 1), date.today()
+			sDate, eDate = fyr(), date.today()
 		elif dur == 'All':
 			sDate, eDate = date(2000, 4, 1), date.today()
 	else:
+		if request.GET["bnk"]:
+			fltbnk = request.GET["bnk"]
+
 		if request.GET["from_date"] and request.GET["to_date"] :
 			sDate, eDate = datetime.strptime(request.GET["from_date"], "%Y-%m-%d").date(), datetime.strptime(request.GET["to_date"], "%Y-%m-%d").date()
 		elif not request.GET["from_date"] and request.GET["to_date"]:
@@ -471,31 +487,41 @@ def Daily_Finance(request, firm, proj, dur, status):
 		elif request.GET["from_date"] and not request.GET["to_date"]:
 			sDate, eDate = datetime.strptime(request.GET["from_date"], "%Y-%m-%d").date(), datetime.strptime(request.GET["from_date"], "%Y-%m-%d").date()
 		else:
-			return HttpResponse('Error: Please Submit Vaild Dates to Get Data')
+			if not request.GET["bnk"]:
+				return HttpResponse('Error: Please Submit Valid Data')
+			else:
+				sDate, eDate = date.today(), date.today()
 
-	sales = Payment_Status.objects.filter(Order_No__RC__Short_Name=firm, **pjl1, Payment_Date__date__gte=sDate, Payment_Date__date__lte=eDate).order_by('Payment_Date')
-	purch = Vendor_Payment_Status.objects.filter(PO_No__RC__Short_Name=firm, **pjl2, Payment_Date__date__gte=sDate, Payment_Date__date__lte=eDate).order_by('Payment_Date')
-	exp = Debit_Amounts.objects.filter(RC__Short_Name=firm, **pjl3, Issued_Date__gte=sDate, Issued_Date__lte=eDate).order_by('Issued_Date')
+
+	sales = Payment_Status.objects.filter(Order_No__RC__Short_Name=firm,  Payment_Date__date__gte=sDate, Payment_Date__date__lte=eDate).order_by('Payment_Date')
+	purch = Vendor_Payment_Status.objects.filter(PO_No__RC__Short_Name=firm,  Payment_Date__date__gte=sDate, Payment_Date__date__lte=eDate).order_by('Payment_Date')
+	exp = Debit_Amounts.objects.filter(RC__Short_Name=firm,  Issued_Date__gte=sDate, Issued_Date__lte=eDate).order_by('Issued_Date')
+	
+	if fltbnk != None:
+		sales = sales.filter(Account_Name__id=fltbnk)
+		purch = purch.filter(Account_Name__id=fltbnk)
+		exp = exp.filter(Account_Name__id=fltbnk)
+
 
 	dates, cat, receipt = [], [], []
+	sl, pr, ex = [], [], []
 
-	for x in sales:
-		dates.append(x.Payment_Date.date())
-		cat.append('Received')
-		receipt.append(x)
-	for x in purch:
-		dates.append(x.Payment_Date.date())
-		cat.append('Paid')
-		receipt.append(x)
-	for x in exp:
-		dates.append(x.Issued_Date)
-		cat.append('Expenses')
-		receipt.append(x)
-	
-	# if dates:
-	# 	dates, cat, receipt = zip(*sorted(zip(dates, cat, receipt), reverse=True))
-	# else:
-	# 	return render(request, 'projects/DailyFinance.html', {'pdata':pdata, 'firm':firm})
+	dates_list = list(dict.fromkeys([d.date() for d in list(sales.values_list('Payment_Date', flat=True))] + [d.date() for d in list(purch.values_list('Payment_Date', flat=True))] + list(exp.values_list('Issued_Date', flat=True))))
+	dates_list.sort(reverse=True)
+
+	for x in dates_list:
+		if sales.filter(Payment_Date__date=x):
+			for a in sales.filter(Payment_Date__date=x):
+				receipt.append(a)
+				cat.append('Received')
+		if purch.filter(Payment_Date__date=x):
+			for b in purch.filter(Payment_Date__date=x):
+				receipt.append(b)
+				cat.append('Paid')
+		if exp.filter(Issued_Date=x):
+			for c in exp.filter(Issued_Date=x):
+				receipt.append(c)
+				cat.append('Expenses')
 
 	tsales = sum(sales.values_list('Received_Amount', flat=True)) if sales != None else 0
 	tpurch = sum(purch.values_list('Paid_Amount', flat=True)) if sales != None else 0
@@ -527,10 +553,10 @@ def Daily_Finance(request, firm, proj, dur, status):
 	tdebits = {'d_bank':d_bank, 'd_upi':d_upi, 'd_cash':d_cash}
 
 	banks = Bank_Accounts.objects.filter(Status=1, RC__Short_Name=firm).order_by('Account_Type')
-	bk, bk_cr, bk_db = [], [], []
+	bk, bk_cr, bk_db, t_bal = [], [], [], 0
 	for x in banks:
 		bk.append(x)
-		if sales:
+		if sales.filter(Account_Name=x):
 			bk_cr.append(sum(sales.filter(Account_Name=x).values_list('Received_Amount', flat=True))) 
 		else:
 			bk_cr.append(0)
@@ -538,11 +564,17 @@ def Daily_Finance(request, firm, proj, dur, status):
 		pr1 = sum(purch.filter(Account_Name=x).values_list('Paid_Amount', flat=True)) if purch != None else 0
 		ex1 = sum(exp.filter(Account_Name=x).values_list('Issued_Amount', flat=True)) if exp != None else 0
 		bk_db.append((pr1+ex1))
+		
 
-	data = zip(dates, cat, receipt)
+		salest = sum(Payment_Status.objects.filter(Order_No__RC__Short_Name=firm, Account_Name=x).values_list('Received_Amount', flat=True))
+		purcht = sum(Vendor_Payment_Status.objects.filter(PO_No__RC__Short_Name=firm,  Account_Name=x).values_list('Paid_Amount', flat=True))
+		expt = sum(Debit_Amounts.objects.filter(RC__Short_Name=firm,  Account_Name=x).values_list('Issued_Amount', flat=True))
+
+		x.Closing_Balance = int(x.Opening_Balance) + salest  - purcht - expt - int(x.Utilized_Balance)
+		x.save()
+		t_bal = t_bal + x.Closing_Balance
+	
+	data = zip(cat, receipt)
 	data1 = zip(bk, bk_cr, bk_db)
 
-	return render(request, 'projects/DailyFinance.html', {'pdata':pdata, 'firm':firm, 'data':data, 'data1':data1, 'tsales':tsales, 'tpurch':tpurch, 'texp':texp, 'dur':dur, 'sDate':sDate, 'eDate':eDate, 'tcredits':tcredits, 'tdebits':tdebits})
-
-def Website(request):
-	return render(request, 'website/index.html')
+	return render(request, 'projects/DailyFinance.html', {'pdata':pdata, 'firm':firm, 'data':data, 'data1':data1, 'tsales':tsales, 'tpurch':tpurch, 'texp':texp, 'dur':dur, 'sDate':sDate, 'eDate':eDate, 'tcredits':tcredits, 'tdebits':tdebits, 'banks':banks, 'fltbnk':fltbnk, 't_bal':t_bal})

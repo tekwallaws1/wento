@@ -17,7 +17,7 @@ class Orders(models.Model):
 	Order_No 			= models.CharField(max_length=30, blank=True, null=True, unique=True, help_text='internal purpose - order reference number')
 	Order_No_1			= models.IntegerField(default=0, null=True, blank=True) #backend
 	FY 					= models.CharField(max_length=10, blank=True, null=True, help_text='financial year such as 22-23, 23-24 etc..')	
-	Order_Value			= models.FloatField(default=0, max_length=20, null=True, blank=True, help_text='order value or estimated value')
+	Order_Value			= models.FloatField(default=0, max_length=20, null=True,  help_text='order value or estimated value')
 	Order_Type 			= models.CharField(max_length=20, null=True, choices=(('Confirmed', 'Confirmed'), ('Pipeline', 'Pipeline')))
 	Order_Received_Date = models.DateTimeField(blank=True, null=True, help_text='received order date')
 	Order_Reference_Person	= models.ForeignKey(CustContDt, on_delete=models.SET_NULL, blank=True, null=True, help_text='order reference person name')
@@ -32,7 +32,11 @@ class Orders(models.Model):
 	Can_Gen_Invoice		= models.BooleanField(default=True, help_text='False if PO amount less than all onvoices amount') #backend
 	Is_Billed			= models.BooleanField(default=False) #backend
 	Attach				= models.FileField(upload_to='orders/', blank=True, null=True, help_text='attach PO copy if available')
+	Attach_Excels		= models.FileField(upload_to='orders/', blank=True, null=True, help_text='attach excel copy if available')
 	ds					= models.BooleanField(default=True)
+	Quote 				= models.ForeignKey('Manual_Quotes', null=True, blank=True, on_delete=models.SET_NULL)
+	DSP_Status 			= models.CharField(max_length=30, null=True, blank=True, choices=(('Fully Dispatched', 'Fully Dispatched'), ('Partially Dispatched', 'Partially Dispatched')))
+	INST_Status 		= models.CharField(max_length=30, null=True, blank=True, choices=(('Fully Installed', 'Fully Installed'), ('Partially Installed', 'Partially Installed'), ('Not Installed', 'Not Installed')))
 
 	def save(self, *args, **kwargs): #if file updated it will delete old file and replace
 	    try:
@@ -77,7 +81,7 @@ class Work_Status(models.Model):
 class Payment_Status(models.Model):
 	Invoice_No 			= models.ForeignKey('Invoices', null=True, blank=True, on_delete=models.SET_NULL)
 	Order_No 			= models.ForeignKey(Orders, null=True, blank=True, on_delete=models.SET_NULL)
-	Received_Amount		= models.FloatField(default=0, max_length=20, null=True, blank=True, help_text='received payment against this order')
+	Received_Amount		= models.FloatField(default=0, max_length=20, null=True, help_text='received payment against this order')
 	Payment_Type 		= models.CharField(max_length=20, null=True, blank=True, choices=(('Due', 'Due'), ('Advance', 'Advance')))
 	Account_Name 		= models.ForeignKey(Bank_Accounts, null=True, on_delete=models.SET_NULL)
 	Reference_No 		= models.CharField(max_length=30, null=True, blank=True, help_text='transaction no/cheque no')
@@ -85,6 +89,7 @@ class Payment_Status(models.Model):
 	As_Advance_Amount	= models.FloatField(default=0, max_length=20, null=True, blank=True, help_text='If any as advance after clear all bills')
 	Next_Commitment_Date= models.DateField(blank=True, null=True, help_text='specify if any next payment commitment date')
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL) 
+	Adjusted_Amount		= models.FloatField(default=0, max_length=20, null=True, blank=True, help_text='adjusted due payment')
 
 	def __str__(self):
 		return str(self.Order_No)+'-'+str(self.Received_Amount)+'-'+str(self.Payment_Date)
@@ -104,11 +109,11 @@ class Invoices(models.Model):
 	Invoice_No_Format 	= models.ForeignKey(No_Formats, on_delete=models.SET_NULL, null=True, blank=True, limit_choices_to=models.Q(No_Format_Related_To__in = ['Invoice', 'Proforma Invoice']))
 	FY 					= models.CharField(max_length=10, blank=True, null=True, help_text='financial year such as 22-23, 23-24 etc..')
 	Invoice_Date 		= models.DateTimeField(blank=True, null=True, help_text='billed date')
-	Invoice_Amount		= models.FloatField(max_length=20, default=0, null=True, blank=True, help_text='including all taxes')
-	GST_Amount			= models.FloatField(default=0, max_length=10, blank=True, null=True, help_text='only GST Amount')
+	Invoice_Amount		= models.FloatField(max_length=20, default=0, null=True, help_text='including all taxes')
+	GST_Amount			= models.FloatField(default=0, max_length=10,  null=True, help_text='only GST Amount, leave as 0 if no GST')
 	CESS_Amount			= models.FloatField(default=0, max_length=10, blank=True, null=True, help_text='CESS Amount')	
 	GST_Reverse_Charges	= models.BooleanField(default=False, help_text='default nill, if applicable mark it')
-	Credit_Days			= models.IntegerField(default=0, null=True, blank=True, help_text='credit in days such as 0, 15, 30, 60 etc..')
+	Credit_Days			= models.IntegerField(default=0, null=True,  help_text='credit in days such as 0, 15, 30, 60 etc..')
 	Payment_Terms 		= models.CharField(max_length=100, blank=True, null=True,  help_text='payment terms')
 	Payment_Over_Due_Days= models.IntegerField(null=True, blank=True, help_text='overdue in days such as 0, 30 etc..')
 	Payment_Due_Date 	= models.DateField(blank=True, null=True, help_text='payment due date')
@@ -127,6 +132,7 @@ class Invoices(models.Model):
 	ds					= models.BooleanField(default=True)
 	Last_Update 		= models.DateField(blank=True, null=True)
 	Roundoff 			= models.FloatField(default=0, max_length=5, blank=True, null=True)
+	Adjusted_Amount		= models.FloatField(default=0, max_length=20, null=True, blank=True, help_text='adjusted due payment')
 
 	def save(self, *args, **kwargs): #if file updated it will delete old file and replace
 	    try:
@@ -138,7 +144,7 @@ class Invoices(models.Model):
 	    super().save(*args, **kwargs)
 
 	def __str__(self):
-		return str(self.Billing_To.Short_Name)+'-'+str(self.Invoice_No)+'-'+str(self.Invoice_Amount)
+		return str(self.Billing_To.Customer_Name)+'-'+str(self.Invoice_No)+'-'+str(self.Invoice_Amount)
 
 class Billed_Items(models.Model): 
 	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL) 
@@ -217,10 +223,11 @@ class Manual_Quotes(models.Model):
 	Email 				= models.EmailField(max_length=50, null=True, blank=True, help_text='Email')
 	Quote_Short_Description   	= models.CharField(max_length=500, null=True, blank=True, help_text='overall order short description')
 	Quote_No 			= models.CharField(max_length=30, blank=True, null=True, help_text='internal purpose - quote reference number')
-	Quote_Value			= models.FloatField(default=0, max_length=20, null=True, blank=True, help_text='order value or estimated value')
+	Quote_Value			= models.FloatField(default=0, max_length=20, null=True, help_text='order value or estimated value')
 	Date 				= models.DateTimeField(blank=True, null=True, help_text='received order date')
 	Attach				= models.FileField(upload_to='manualquotes/', blank=True, null=True, help_text='attach quote copy if available')
 	ds					= models.BooleanField(default=True)
+	Convert_As_Order	= models.BooleanField(default=False)
 
 	def save(self, *args, **kwargs): #if file updated it will delete old file and replace
 	    try:
@@ -233,3 +240,34 @@ class Manual_Quotes(models.Model):
 
 	def __str__(self):
 		return str(self.Customer_Name)+'-'+str(self.Quote_No)+'-'+str(self.Quote_Value)
+
+
+
+class Dispatches(models.Model): 
+	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL) 
+	Order 		    	= models.ForeignKey(Orders, null=True, on_delete=models.CASCADE)
+	Dispatch_Date 		= models.DateField(null=True, help_text='date of dispatch')
+	Dispatch_Status   	= models.CharField(max_length=30, null=True, choices=(('Fully Dispatched', 'Fully Dispatched'), ('Partially Dispatched', 'Partially Dispatched')))
+	Dispatch_Details   	= models.TextField(max_length=1000, null=True, blank=True, help_text='dispatch details like which material dispatced etc')
+	Pending_Dispatches  = models.TextField(max_length=1000, null=True, blank=True, help_text='optional - specify if any pending material to dispatch')
+	Transport_Mode   	= models.CharField(max_length=20, null=True, blank=True, choices=(('By Road', 'By Road'), ('By Air', 'By Air')))
+	Vehicle_No   		= models.CharField(max_length=20, null=True, blank=True, help_text='vehicle number')
+	Vehicle_Type   		= models.CharField(max_length=20, null=True, blank=True, help_text='truck, bus, train, car etc..')
+	Place_Of_Supply   	= models.CharField(max_length=30, null=True, blank=True, help_text='place of supply')
+	LRR_No   			= models.CharField(max_length=20, null=True, blank=True, help_text='specify if any')
+	Attach				= models.FileField(upload_to='dispatches/', blank=True, null=True, help_text='attach dc or related doc if available')	
+
+	def __str__(self):
+		return str(self.Order)+'-'+str(self.Transport_Mode)
+
+
+class Installations(models.Model): 
+	user				= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL) 
+	Order 		    	= models.ForeignKey(Orders, null=True, blank=True, on_delete=models.CASCADE)
+	Installation_Date 	= models.DateField(null=True, help_text='date of installation')
+	Installation_Status = models.CharField(max_length=30, null=True, choices=(('Fully Installed', 'Fully Installed'), ('Partially Installed', 'Partially Installed')))
+	Installation_Details= models.TextField(max_length=1000, null=True, blank=True, help_text='installation details like which products installed etc..')
+	Pending_Installation_Work  = models.TextField(max_length=1000, null=True, blank=True, help_text='optional - specify if any pending installation')
+
+	def __str__(self):
+		return str(self.Order)+'-'+str(self.Installation_Date)

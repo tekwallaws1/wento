@@ -123,7 +123,7 @@
 
 {% block content %}
   <div class="page-header">
-    <h3 class="page-title">Monthly Salaries {% if month1 != 'month' %}<span style="color:blue;">{{month1|date:'M-Y'}}</span> Working Days: {{wd}}{% endif %}
+    <h3 class="page-title">Monthly Salaries {% if month1 != 'month' %}<span style="color:blue;">{{month1|date:'M-Y'}}</span> Issued Days: {{wd}}{% endif %}
     </h3>
     <!-- <button type="button" data-toggle="modal" data-target="#autoAttendanceModal" class="btn btn-sm btn-primary" ht="by clicking this it will generate auto attendance for selected month excluding attendance entries by manually, it will generate all employes attendance as present and default start and end time, later you can edit employ wise if require">Generate Auto Attendance</button> -->
     <button type="button" data-toggle='modal', data-target="#doMoreModal" class="btn btn-sm btn-danger" ht="select category">Do More</button>
@@ -145,13 +145,16 @@
           <tr>
             <th>#</th>
             <th>Employ Name</th>
-            <th>Days</th>
-            <th>Net Payable</th>
+            <th>Gross<br>Salary</th>
+            <th>Pay<br>Days</th>
             <!-- <th>LOP</th> -->
             <th>PF</th>
             <th>ESI</th>
-            <th>OT</th>
-            <th>Salary Advance</th>
+            <th>OT<br>Hours</th>
+            <th>OT<br>Amount</th>
+            <th>Available<br>Advance</th>
+            <th>Deducted<br>Advance</th>
+            <th>Payable<br>Salary</th>
           </tr>
         </thead>
         <tbody>
@@ -167,15 +170,15 @@
               </a>
             </td>
 
-            <td style="white-space:normal;">
+            <td style="white-space:normal; background: #a3bce6;">
               <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
-               {{x.Presents}}
+                {{x.Gross_Salary|floatformat:0|intcomma}}
               </a>
             </td>
 
-            <td style="white-space:normal; background: #a3bce6;">
+            <td style="white-space:normal;">
               <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
-                {{x.Issued_Salary|floatformat:0|intcomma}}
+                {{x.Issued_Days|floatformat:0|intcomma}}
               </a>
             </td>
 
@@ -199,13 +202,31 @@
 
             <td style="white-space:normal;">
               <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
-               {% if x.OT_Amount > 0 %} {{x.OT_Amount|floatformat:0|intcomma}} ({{x.OT_Hours}} Hrs) {% endif %}
+               {{x.OT_Hours}}
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
+               {% if x.OT_Amount > 0 %} {{x.OT_Amount|floatformat:0|intcomma}}{% endif %}
               </a>
             </td>
 
             <td style="white-space:normal;">
               <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
                 {{x.Salary_Advance|floatformat:0|intcomma}} 
+              </a>
+            </td>
+
+            <td style="white-space:normal;">
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
+                {{x.Deducted_Advance|floatformat:0|intcomma}} 
+              </a>
+            </td>            
+
+            <td style="white-space:normal; background: #a3bce6;">
+              <a class="ahr" ht="update salary details" data-toggle="modal" data-target="#editModal" onclick="edit('{{month}}', '{{x.id}}')">
+                {{x.Issued_Salary|floatformat:0|intcomma}}
               </a>
             </td>
           </tr>

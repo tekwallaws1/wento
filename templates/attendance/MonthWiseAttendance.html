@@ -231,8 +231,8 @@
                 {% if t == 'P' %}
                   <td style="background: #06b85f; width:5%; padding-left: 4px;"><a class="ahr" ht="Present" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlyattendanceedit/{{e.id}}/{{date}}/edit/'">
                   {{t}}
-                  {% if ot >= 1 %}
-                    <br>OT {{ot|floatformat:'0'}}
+                  {% if ot >= 0.25 %}
+                    <br>OT {{ot|floatformat:'1'}}
                   {% endif %}
                   </a></td>
                 {% elif t == 'HD' %}
@@ -266,7 +266,7 @@
                   {% if m.Absents %}<span class="hlt5"> Absents </span>{{m.Absents}}{% endif %}
                 {% endif %}
                 {% if m.Total_OT != 0  %}
-                  <br><span class="hlt5">Extra Hours </span>{{m.Total_OT|floatformat:'0'}}
+                  <br><span class="hlt5">Extra Hours </span>{{m.Total_OT|floatformat:'1'}}
                 {% endif %}
         
               {% endif %}
@@ -445,7 +445,7 @@
             <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#selectEmployModal" onclick="fnchide()">Employ Wise Attendance</button>
             <button class="btn btn-sm btn-warning" onclick="location.href='/{{firm}}/{{pdata.pj}}/holidayslist/year/'">Holiday List</button>
             {% if user.username == 'sdgfhg' or  user.username == '9849203852' or  user.username == '9010654596' %}
-              <button class="btn btn-sm btn-dark" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/active/'">Employes List</button>
+              <button class="btn btn-sm btn-dark" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/Permanent/'">Employes List</button>
               <button class="btn btn-sm btn-success" onclick="location.href='/{{firm}}/{{pdata.pj}}/employsalarieslist/active/'">Salaries Master Data</button>
               <button class="btn btn-sm btn-danger" onclick="location.href='/{{firm}}/{{pdata.pj}}/monthlysalaries/month/select/'">Monthly Salaries</button>
               <button class="btn btn-sm btn-secondary" onclick="location.href='/{{firm}}/{{pdata.pj}}/emplsalrevisions/'">Salary Revisions</button>

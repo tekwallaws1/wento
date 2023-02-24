@@ -240,6 +240,7 @@ class Quotes(models.Model):
 	Thanks_Note 		= models.TextField(max_length=500, blank=True, null=True, help_text='thanks giving text')
 	Quote_Submitted_By 	= models.ForeignKey(Account, null=True, blank=True, on_delete=models.SET_NULL, related_name='sbmby')
 	Lock_Status			= models.BooleanField(default=False, help_text='mark if wnat to lock quote to avoid editing')
+	Quote_No_1 			= models.CharField(max_length=30, blank=True, null=True,  help_text='Quote No') #backend
 
 	def __str__(self):
 		return str(self.Quote_No)+'-'+str(self.Quote_Value)

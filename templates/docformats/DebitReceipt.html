@@ -7,7 +7,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>Prakom-Pro</title>
+    <title>WENTO</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo-mini1.png' %}"/>
     
     <link rel="stylesheet" href="{% static 'css/css/materialdesignicons.min.css' %}">
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
@@ -47,11 +48,11 @@
           <img  class="invlogo" style="position: absolute; width:55px; height: 55px;" src="{% static 'img/logo-mini.png' %}">
 
           <div style="margin-left:65px;">
-            <span style="font-size:20px; font-weight: 600; color: #db1309">{{exp.Related_Company.Company_Name}}</span>
+            <span style="font-size:20px; font-weight: 600; color: #db1309">{{exp.RC.Company_Name}}</span>
             <div style="margin-top:-5px;"></div>
-            <span style="font-size:12px; font-weight: 600">{{exp.Related_Company.Address_Line_1}}</span>
+            <span style="font-size:12px; font-weight: 600">{{exp.RC.Address_Line_1}}</span>
             <div style="margin-top:-5px;"></div>
-            <span style="font-size:12px; font-weight: 600">{{exp.Related_Company.Address_Line_2}}, {{exp.Related_Company.State}}</span><br>
+            <span style="font-size:12px; font-weight: 600">{{exp.RC.Address_Line_2}}, {{exp.RC.State}}</span><br>
           </div>
         </div>
 
@@ -112,7 +113,7 @@
         <table style="width:100%; float: right;  font-size:12px;">
           <tr>
             <th class="th1 th11" style="width: 15%; text-align: left; padding: 5px;">Purpose</th>
-            <th class="td1" style="text-align: left; padding: 5px; font-weight: 600">{{exp.Purpose}}</th>
+            <th class="td1" style="text-align: left; padding: 5px; font-weight: 600">{% if exp.Expenses %}{{exp.Expenses.Purpose}}{% else %}{{exp.Purpose}}{% endif %}</th>
           </tr>
         </table>
 
@@ -121,9 +122,10 @@
         <table style="width:40%; float: left;  font-size:12px;">
           <tr>
             <th class="th1 th11" style="width: 15%; text-align: left; padding: 5px; width:38%">Towards</th>
-            <th class="td1" style="text-align: left; padding: 5px; font-weight: 600">{{exp.Related_To}}</th>
+            <th class="td1" style="text-align: left; padding: 5px; font-weight: 600">{% if exp.Expenses %}{{exp.Expenses.Related_To}}{% else %}{{exp.Related_To}}{% endif %}</th>
           </tr>
         </table>
+
 
       
         <table style="width:60%; float: right; font-size:12px;">

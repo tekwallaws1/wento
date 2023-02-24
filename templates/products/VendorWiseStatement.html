@@ -121,9 +121,6 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
 
 {% block content %}
 
-{% if request.user.username == 'praveen' %}
-<!-- ######### -->
-
 <div class="page-header">
   <h3 class="page-title">{{pdata.pj.Short_Name}} - Vendor Wise Statement</h3>
 </div>
@@ -294,11 +291,6 @@ buttons: {dom: {button: {tag: 'i',className: ''}},buttons: [
       </div>
     </div>
   </div>
-
-{% else %}
-<!-- ######### -->
-<button type="button" id="popup" style="display:none" onclick="unauth()"></button>
-{% endif %}
 
 {% endblock %}
  

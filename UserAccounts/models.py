@@ -24,7 +24,8 @@ class Account(models.Model):
 	RC                 		= models.ManyToManyField(CompanyDetails, null=True, blank=True)
 	Is_Super_Admin			= models.BooleanField(default=False)
 	Related_Project			= models.ManyToManyField(Projects, null=True, blank=True)
-	Only_Their_Works		= models.BooleanField(default=False) 		
+	Only_Their_Works		= models.BooleanField(default=False)
+	Is_Marketing_Excecutive	= models.BooleanField(default=False)		
 
 	class Meta:
 		ordering = ['Sr_No']
@@ -39,7 +40,7 @@ class Account(models.Model):
 	    super().save(*args, **kwargs)
 
 	def __str__(self):
-		return str(self.Name)+'-'+str(self.Employee_Id)
+		return str(self.Name)
 
 class EMP_More_Dtls(models.Model):
 	Employee 			= models.ForeignKey(Account, null=True, on_delete=models.CASCADE)
@@ -96,6 +97,8 @@ class Empl_Salaries(models.Model):
 	Employ_Name 			= models.ForeignKey(Account, null=True, unique=True, on_delete=models.SET_NULL)
 	Gross_Salary 			= models.IntegerField(default=0, null=True, help_text='gross salary or CTC')
 	Basic		 			= models.IntegerField(default=0, null=True, help_text='basic salary as per govt norms')
+	Special_Allowance		= models.FloatField(max_length=10, default=0, null=True, blank=True, help_text='monthly conveyances/allowances such as petrol etc.')
+	Tour_Allowance			= models.FloatField(max_length=10, default=150, null=True, blank=True, help_text='allowed per day tour allowances as per employ designation')
 	HRA						= models.FloatField(default=0, max_length=10, null=True, blank=True, help_text='house rent allowance, 40% of basic')
 	Other_Allowances 		= models.FloatField(default=0, max_length=10, null=True, blank=True, help_text='other allowances')
 	Net_Salary 				= models.IntegerField( default=0, null=True, blank=True, help_text='you can give it or we will calculate')
@@ -160,12 +163,3 @@ class Page_Permissions(models.Model):
 
 	def __str__(self):
 		return str(self.user)
-
-
-class UPI_Accounts(models.Model):
-	UPI_Holder_Name 	= models.CharField(max_length=50, null=True, blank=True, help_text='UPI Holder Name')
-	UPI_Mobile_Number 	= models.CharField(max_length=20, null=True, blank=True, help_text='UPI Linked Mobile Number')
-	user				= models.ForeignKey('Account', null=True, blank=True, on_delete=models.SET_NULL, related_name='upiacnt') 
-
-	def __str__(self):
-		return str(self.UPI_Holder_Name)+'-'+str(self.UPI_Mobile_Number)

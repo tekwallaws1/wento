@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="{% static 'css/style_theme_1.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/dt-global_style.css' %}">
   <link rel="stylesheet" type="text/css" href="{% static 'css/datatables/buttons.dataTables.min.css' %}">
-{% endblock %}  
+{% endblock %}   
 
 {% block scripts %} 
   <script src="{% static 'js/filterdate.js' %}"></script>
@@ -25,6 +25,7 @@
   <script src="{% static 'js/tableexport.js' %}"></script>
 
 <script type="text/javascript">
+  function rid1(tid) {getid = tid}
 
   function rid(tid, can_gen_invoice, billed, ordervalue) {getid = tid;
     if (can_gen_invoice=='False' | ordervalue <= billed){
@@ -52,9 +53,20 @@
         location.href=url;}
     else{alert( "Incorrect Activity Password, Please Try Again" );}}
 
+    function validate2(p) {
+    if(   document.getElementById("activitypswd2").value == "sse123" ){
+        url = '/{{firm}}/{{pdata.pj}}/inv_edit/delete/'+getid+'/'
+        location.href=url;}
+    else{alert( "Incorrect Activity Password, Please Try Again" );}}
+
+
   function geninvoice() {
     document.getElementById('invformaction').action = '/{{firm}}/{{pdata.pj}}/invoice/create/1/1/itemid/msg/'
   }
+  function geninvoice_manually() {
+    document.getElementById('invformaction').action = '/{{firm}}/{{pdata.pj}}/invoice/create_manually/1/'+getid+'/itemid/msg/'
+  }
+
 </script>
 
 <!-- Data Tables Export Script -->
@@ -77,7 +89,7 @@
   var wdths = ['4%', '25%', '25%', '46%'];
   var ort = 'portrait'; //landscape
   
-   if ('{{status}}' == 'Issued' & '{{request.user.username}}' == 'praveen' ) { var msgTop = 'Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}} | Total Received {{total_rec|floatformat:0|intcomma}} | Total Due  {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}} \n Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} | Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}} {% if advance %} | Over Received Payments {{advance|floatformat:0|intcomma}}{% endif %}';}
+   if ('{{status}}' == 'Issued' & '{{request.user.username}}' != 'dfydfutru' ) { var msgTop = 'Total Billing {{count.tbc}}, Value {{heads.total_billing|floatformat:0|intcomma}} | Total Received {{total_rec|floatformat:0|intcomma}} | Total Due  {{heads.full_due_inv|add:heads.part_due_inv|floatformat:0|intcomma}} \n Full Due Invoices {{count.fdc}}, Value {{heads.full_due_inv|floatformat:0|intcomma}}  |  Partial Due Invoices {{count.pdc}}, Value {{heads.part_due_inv|floatformat:0|intcomma}} | Cleared Invoices {{count.fcc}}, Value {{heads.full_clear_inv|floatformat:0|intcomma}} {% if advance %} | Over Received Payments {{advance|floatformat:0|intcomma}}{% endif %}';}
     else { var msgTop = ''};
     var title = '{{pdata.pj}} - {{status}} Invoices List';
     var filename = '{{pdata.pj}}-{{status}}InvoicesList_{{table.first.Invoice_Date|date:'dMy'}}to{{table.last.Invoice_Date|date:'dMy'}}'
@@ -123,19 +135,10 @@
 
 <div>
   <div style="float:left">
-    <button type="button" data-toggle="modal" data-target="#genInvoiceModal" onclick="javascript:geninvoice()" class="btn btn-sm btn-primary mb-4" ht="generate invoice against order">Generate Invoice</button>
-    {% if status == 'Issued' %}
-      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Proforma/'" class="btn btn-sm btn-success mb-4" ht="proforma invoices list">Proforma Invoices</button>
-      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Incomplete/'" class="btn btn-sm btn-info mb-4" ht="not issued or confirmed">Invoice Draft Copies</button>
-    {% elif status == 'Proforma' %}
-      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm  btn-success mb-4" ht='confirmed/issued invoices'>Issued Invoices</button>
-      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Incomplete/'" class="btn btn-sm btn-info mb-4" ht="not issued or confirmed">Invoice Draft Copies</button>
-    {% else %}
-      &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm btn-success mb-4" ht="confirmed/issued invoices">Issued Invoices</button>
-      &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Proforma/'" class="btn btn-sm  btn-info mb-4" ht="proforma invoices list">Proforma Invoices</button>
-    {% endif %}
-
-    &emsp;&emsp;
+    <!-- <button type="button" data-toggle="modal" data-target="#genInvoiceModal" onclick="javascript:geninvoice_manually()" class="btn btn-sm btn-info mb-4" ht="generate invoice against order">Gen Manual Invoice</button> -->
+    <!-- <button type="button" data-toggle="modal" data-target="#genInvoiceModal" onclick="javascript:geninvoice()" class="btn btn-sm btn-primary mb-4" ht="generate invoice against order">Gen Online Invoice</button> -->
+    
+    <!-- &emsp;&emsp; -->
     <button type="button" data-toggle='modal', data-target="#MorePagesModal" class="btn btn-sm btn-danger mb-4" >More Pages</button>
   </div>
 
@@ -191,9 +194,6 @@
                         {{ filter_data.form.Billing_To}}
                       </div>
 
-                     {% if request.user.username == 'praveen' %}
-                      <!-- ######### --> 
-
                       <div class="col-md-6 col-sm-6 col-12 mt-4">
                         <label style="font-weight: 200; color: black; font-size: 13px;">Only Due Invoices</label>
                           <select class="form-control" name="duestatus">
@@ -208,11 +208,12 @@
                             <option value="0">Yes</option>
                           </select>
                       </div>
+                      <div class="col-md-6 col-sm-6 col-12 mt-4">
+                        <label style=" font-weight: 200; color: black; font-size: 13px;">Followup By</label>
+                        {{ filter_data.form.user}}
+                      </div>
 
-                      <!-- ######### -->
-                      {% endif %}
-                     
-                      <div style="float:left; margin-left: 10px; margin-top:20px;" style="">
+                      <div style="float:left; margin-left: 10px; margin-top:48px;" style="">
                         <button type="submit"  id="add-e" class="btn btn-sm btn-primary mb-4">Apply Filters</button>
                         <!-- <button id="add-e" class="btn">Add Task</button> -->
                         <button id="edit-event" class="btn"></button>
@@ -226,7 +227,7 @@
     </div>
   </div>
 
-{% if request.user.username == 'praveen' %}
+{% if request.user.username != 'dfydfutru' %}
 <!-- ######### -->
                 
 <div class="row">
@@ -323,8 +324,8 @@
    {% endif %} 
   </div>
 
-    <div class="row"> 
-    <div class="col-xl-4 col-md-6 mb-4">
+  <div class="row"> 
+    <div class="{% if heads.adjusted > 0 %}col-xl-3{% else %}col-xl-4{% endif %} col-md-6 mb-4">
       <div class="card border-left-danger shadow h-100 py-2">
         <a ht="payment not yet started" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
@@ -336,7 +337,7 @@
         </div></a>
       </div>
     </div>
-    <div class="col-xl-4 col-md-6 mb-4">
+    <div class="{% if heads.adjusted > 0 %}col-xl-3{% else %}col-xl-4{% endif %} col-md-6 mb-4">
       <div class="card border-left-info shadow h-100 py-2">
         <a ht="payment started but not cleared fully" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
@@ -348,7 +349,7 @@
         </div></a>
       </div>
     </div>
-    <div class="col-xl-4 col-md-6 mb-4">
+    <div class="{% if heads.adjusted > 0 %}col-xl-3{% else %}col-xl-4{% endif %} col-md-6 mb-4">
       <div class="card border-left-success shadow h-100 py-2">
         <a ht="toatl payment cleared invoices" ><div class="card-body2">
           <div class="row no-gutters align-items-center">
@@ -360,6 +361,20 @@
         </div></a>
       </div>
     </div>
+    {% if heads.adjusted > 0 %}
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-dark shadow h-100 py-2">
+        <a ht="adjusted or roundoff amount which is not paid" ><div class="card-body2">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-dark text-uppercase mb-1" style="margin-top:-10px; font-size:13px;">Adjusted Amount</div>
+              <div class="h6 mb-0 mr-3 font-weight-bold text-gray-800">₹ {{heads.adjusted|floatformat:0|intcomma}}</div>
+            </div>
+          </div>
+        </div></a>
+      </div>
+    </div>
+    {% endif %}
   </div>
 
 <!-- ######### -->
@@ -401,18 +416,16 @@
               {% if x.user.Nick_Name %}<br>Followup By: {{x.user.Nick_Name}}{% endif %}
             </td>
 
-            {% if request.user.username == 'praveen' %}
-            <!-- ######### -->
-
             <td style="white-space:normal;">
                 {% for p in y %}
                   {% if p.Is_Manual == 0 %}
                     <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
                   {% else %}
-                    <a class="ahr" ht="edit invoice" onclick="location.href='/{{firm}}/{{pdata.pj}}/inv_edit/edit_manually/{{p.id}}/'">
+                    <a class="ahr" ht="edit invoice" data-toggle="modal" data-target="#editManualInvoice" onclick="javascript:rid1('{{p.id}}')">
                   {% endif %}
                     <span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
-                    <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} | {% if p.Invoice_Amount != p.Due_Amount %}<span class='hlt5'>Received Amount: </span>₹ {{p.Due_Amount|mul:-1|add:p.Invoice_Amount|floatformat:0|intcomma}}{% else %}<span class='hlt3'>No Payments Received</span>{% endif %}
+                    <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} | {% if p.Invoice_Amount != p.Due_Amount %}<span class='hlt5'>Received Amount: </span>₹ {{p.Invoice_Amount|sub:p.Due_Amount|sub:p.Adjusted_Amount|floatformat:0|intcomma}}{% else %}<span class='hlt3'>No Payments Received</span>{% endif %}
+                    {% if p.Adjusted_Amount > 0 %}<br><span class="hlt3">Adjusted Amount: </span>{{ p.Adjusted_Amount|floatformat:0|intcomma }}{% endif %}
                   {% if p.Due_Amount > 0  %}
                     <br><span class='hlt3 font-weight-bold'>Due Amount: </span>₹ {{p.Due_Amount|floatformat:0|intcomma}} | <span class='hlt5'>Due Date: </span>{{p.Payment_Due_Date|date:'d M Y'}}{% if p.Payment_Over_Due_Days == 0  %}<span class="hlt2 font-weight-bold">**</span>{% endif %}
                     {% if p.Payment_Over_Due_Days > 0 %}<br><span class='hlt3 font-weight-bold'>Over Due Days: </span>{{p.Payment_Over_Due_Days}}{% endif %}
@@ -425,23 +438,6 @@
                 {% endfor %}
                 {% if due_date == 'True' %}<span class='hlt2 italic font-weight-bold'>**</span>Due Date Not Yet Came{% endif %}
             </td>
-
-            <!-- ######### -->
-            {% else %}
-              <td style="white-space:normal;">
-                {% for p in y %}
-                  {% if p.Is_Manual == 0 %}
-                    <a class="ahr" ht="open/edit invoice" target="_blank"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoice/edit/{{p.id}}/{{p.Order.id}}/itemid/msg/'">
-                  {% else %}
-                    <a class="ahr" ht="edit invoice" onclick="location.href='/{{firm}}/{{pdata.pj}}/inv_edit/edit_manually/{{p.id}}/'">
-                  {% endif %}
-                    <span class='hlt5'>Invoice No: </span>{{p.Invoice_No}}, Date {{p.Invoice_Date|date:'d M Y'}}
-                    <br><span class='hlt5'>Invoice Amount: </span>₹ {{p.Invoice_Amount|floatformat:0|intcomma}} 
-                  {% if p.Attach %}<a class="ahr" ht='click here to download copy' href="{{p.Attach.url}}" target="_blank"><br><span class='hlt5'>Download Copy: </span><i class="fas fa fa-download"></i></a>{% endif %}
-                  <br><br>
-                {% endfor %}
-            </td>            
-            {% endif %}
           
           </tr>
           {% endfor %} 
@@ -623,10 +619,62 @@
         </div>
         <div class="modal-body">
           <div class="template-demo">
-            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentslist/Received/custflt/'" type="button" class="btn btn-sm btn-info">Customer Payments</button>
+            <!-- {% if status == 'Issued' %}
+              <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Proforma/'" class="btn btn-sm btn-primary" ht="proforma invoices list">Proforma Invoices</button>
+              <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Incomplete/'" class="btn btn-sm btn-info" ht="not issued or confirmed">Invoice Draft Copies</button>
+            {% elif status == 'Proforma' %}
+              <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm  btn-primary " ht='confirmed/issued invoices'>Issued Invoices</button>
+              <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Incomplete/'" class="btn btn-sm btn-info" ht="not issued or confirmed">Invoice Draft Copies</button>
+            {% else %}
+              &emsp;<button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Issued/'" class="btn btn-sm btn-primary" ht="confirmed/issued invoices">Issued Invoices</button>
+              &emsp;<button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/invoiceslist/Proforma/'" class="btn btn-sm  btn-info" ht="proforma invoices list">Proforma Invoices</button>
+            {% endif %} -->
+            <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/paymentslist/Received/custflt/'" type="button" class="btn btn-sm btn-warning">Customer Payments</button>
             <button   onclick="location.href='/{{firm}}/{{pdata.pj}}/orderslist/Inprogress/'" type="button" class="btn btn-sm btn-success">Orders List</button>
             <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/quotationslist/all/'" class="btn btn-sm btn-warning">Quotations</button> -->          
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade text-left" id="editManualInvoice" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document" style="width:250px;%">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="template-demo">
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/inv_edit/edit_manually/'+getid+'/'" class="btn btn-sm btn-primary">Edit Invoice</button>
+            <button type="button"  data-toggle="modal" data-target="#deleteManuaInvoice" class="btn btn-sm btn-warning">Delete Invoice</button>  
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="modal fade text-left" id="deleteManuaInvoice" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content" id="modal-reload">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Enter Password Before Delete Data</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form class="forms-sample">
+            <div class="form-group">
+              <label for="exampleInputPassword1">Password</label>
+              <input type="password" class="form-control"  placeholder="Acctivity Password" id="activitypswd2"><br/>
+              <input type="button" class="btn1 btn1-primary" value="Submit"  onclick="javascript:validate2('{{x.id}}')" />
+            </div> 
+          </form>
         </div>
       </div>
     </div>

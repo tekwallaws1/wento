@@ -388,8 +388,36 @@ def del_adv(request, empl, adv):
 		return adv
 
 def working_days(request, firm, dt):
+	# ##########################################
+	# # CASE1 - call when monthly attendance open
+	# # CASE2 - call only when attendance available belongs to that month
+	# sDate = date(dt.year, dt.month, 1)
+	# lastdate = calendar.monthrange(dt.year, dt.month)[1]
+	# if dt.month == date.today().month:
+	# 	eDate = dt
+	# else: 
+	# 	eDate = date(dt.year,  dt.month, lastdate)
+
+	# sundays = len([1 for i in calendar.monthcalendar(sDate.year, sDate.month) if i[6] != 0 and eDate.day>=i[6]])
+	# fullday_holidays = len(DeclareDayAs.objects.filter(RC__Short_Name=firm, Date__gte=sDate).filter(Date__lte=eDate, Declare_Day_As='Holiday')) or 0
+	# halfday_holidays = len(DeclareDayAs.objects.filter(RC__Short_Name=firm, Date__gte=sDate).filter(Date__lte=eDate, Declare_Day_As='Half Day')) or 0
+	# force_work_days = len(DeclareDayAs.objects.filter(RC__Short_Name=firm, Date__gte=sDate).filter(Date__lte=eDate, Declare_Day_As='Working Day')) or 0
+	# total_working_days = int(eDate.day) + force_work_days - sundays - fullday_holidays - (halfday_holidays/2)
+	# workdays = Working_Days.objects.filter(RC__Short_Name=firm, Month__month=eDate.month, Month__year=eDate.year).last()
+	# if workdays:
+	# 	workdays.Working_Days = total_working_days
+	# 	workdays.save()
+	# else:
+	# 	workdays = Working_Days.objects.create(RC=CompanyDetails.objects.filter(Short_Name=firm).last(), Working_Days=total_working_days, Month=eDate)
+	# return total_working_days
+	##########################################
+
+	return calendar.monthrange(dt.year, dt.month)[1]
+
+def working_days1(request, firm, dt):
+	##########################################
 	# CASE1 - call when monthly attendance open
-	# CASE2 - call only when attendance available belongs to that month	
+	# CASE2 - call only when attendance available belongs to that month
 	sDate = date(dt.year, dt.month, 1)
 	lastdate = calendar.monthrange(dt.year, dt.month)[1]
 	if dt.month == date.today().month:
@@ -409,6 +437,7 @@ def working_days(request, firm, dt):
 	else:
 		workdays = Working_Days.objects.create(RC=CompanyDetails.objects.filter(Short_Name=firm).last(), Working_Days=total_working_days, Month=eDate)
 	return total_working_days
+	#########################################
 
 def update_month_atnd(request, firm, pid):
 
@@ -446,23 +475,17 @@ def update_month_atnd(request, firm, pid):
 	y = Attendance.objects.get(id=pid)
 	if y.Date in hds and y.Day_Status == 'Present':
 		if y.Total_Hours:
-			if y.Total_Hours >= 1 and y.Total_Hours <= 5:
-				y.Total_Hours, y.OT = 8, 8
+			if y.Total_Hours >= 0.25:
+				y.OT = y.Total_Hours
 				y.Is_Extra_Day = True
 				y.save()
 				tot = y.Total_Hours
-			elif y.Total_Hours > 5 :
-				y.Total_Hours, y.OT = 12, 12
-				y.Is_Extra_Day = True
-				tot = y.Total_Hours
-				y.save()
-			else:
-				pass
+
 	else:
-		if y.Total_Hours and y.Total_Hours > 9.5:
-			ot = y.Total_Hours-9 
-			roundoff = ot - int(ot)
-			ot = int(ot)+1 if roundoff*10 >= 5 else int(ot)
+		if y.Total_Hours and y.Total_Hours > 8.75:
+			ot = y.Total_Hours-8.5 
+			# roundoff = ot - int(ot)
+			# ot = int(ot)+1 if roundoff*10 >= 5 else int(ot)
 		else:
 			ot = 0
 		y.OT = ot
@@ -1114,7 +1137,7 @@ def MonthWise_Attendance(request, firm, proj, month):
 				s = atnd.filter(Date__day=a).last()
 				if s:
 					if s.Date in hds and s.Day_Status == 'Present':
-						if s.Total_Hours:
+						if s.Total_Hours and s.Total_Hours >= 0.25:
 							# if s.Total_Hours >= 1 and s.Total_Hours <= 5:
 							# 	s.Total_Hours = 8
 							# elif s.Total_Hours > 5 :
@@ -1122,17 +1145,17 @@ def MonthWise_Attendance(request, firm, proj, month):
 							# else:
 							# 	pass
 							# s.save()
-							pass
+							# pass
 							hrs = s.Total_Hours
-						d_atnd.append('OT'+str(int(hrs)))
+						d_atnd.append('OT '+(str(hrs)[:4] if len(str(int(hrs)))>1 else str(hrs)[:3]))
 						ot.append(0)
 					elif s.Day_Status == 'Present':
 						oth = 0
 						d_atnd.append('P')
-						if s.Total_Hours and s.Total_Hours > 9.5:
-							oth = s.Total_Hours-9 
-							roundoff = oth - int(oth)
-							oth = int(oth)+1 if roundoff*10 >= 5 else int(oth)
+						if s.Total_Hours and s.Total_Hours > 8.75:
+							oth = s.OT 
+							# roundoff = oth - int(oth)
+							# oth = int(oth)+1 if roundoff*10 >= 5 else int(oth)
 						else:
 							oth = 0
 						ot.append(oth)
@@ -1171,6 +1194,8 @@ def MonthWise_Attendance(request, firm, proj, month):
 			hf.append(0)
 	data = zip(empl_list, daily_atnd, month_atnd, hf)
 		
+	month1 = month
+		
 	if month.month != date.today().month and month.year <= date.today().year:
 		dates = None
 	else: 
@@ -1179,7 +1204,7 @@ def MonthWise_Attendance(request, firm, proj, month):
 	employes = Account.objects.filter(RC__Short_Name=firm, Status=1, ds=1).order_by('Employee_Id')
 	
 	return render(request, 'attendance/MonthWiseAttendance.html', {'data':data, 'dt_list':dt_list, 'month': month, 'dates':dates, 'firm':firm, 'pdata':pdata, 
-		'filter_data':filter_data, 'workdays':k, 'workhours1':(k*9)+(k*9*0.05), 'workhours2':(k*9)-(k*9*0.05), 'order':orderfilter, 'm':m, 'employes':employes})
+		'filter_data':filter_data, 'workdays':working_days1(request, firm, month1), 'workhours1':(k*9)+(k*9*0.05), 'workhours2':(k*9)-(k*9*0.05), 'order':orderfilter, 'm':m, 'employes':employes})
 
 @login_required
 def DayWise_Attendance(request, firm, proj, day):
@@ -1196,8 +1221,8 @@ def DayWise_Attendance(request, firm, proj, day):
 	od = len(table.filter(Q(Day_Status = 'On Duty')|Q(Day_Status = 'Tour')))
 	ot = []
 	for x in table:
-		if x.Total_Hours and x.Total_Hours > 9.5:
-			ot.append(x.Total_Hours-9)
+		if x.Total_Hours and x.Total_Hours > 8.75:
+			ot.append(x.OT)
 		else:
 			ot.append(None)
 	data = zip(table, ot)
@@ -1352,6 +1377,13 @@ def call_extra_work_days_sal(request, month, a):
 				hrs = hrs + (d.Total_Hours * 1.5) if d.Total_Hours > 4.5 else (hrs + d.Total_Hours)
 	return hrs
 
+def sal_advanaces_update(request, employ):
+	sal_adv = Debit_Amounts.objects.filter(Employ=employ, Related_To='Salary Advance')
+	sal_adv =sum(sal_adv.values_list('Issued_Amount', flat=True)) if sal_adv != None else 0
+	d_adv = Monthly_Salaries.objects.filter(Name=employ, Deducted_Advance__gte=0)
+	d_adv = sum(d_adv.values_list('Deducted_Advance', flat=True)) if d_adv != None else 0
+	return sal_adv-d_adv
+
 
 @login_required
 def Gen_Monthly_Salaries(request, firm, proj, month, mode):
@@ -1396,9 +1428,7 @@ def Gen_Monthly_Salaries(request, firm, proj, month, mode):
 	
 	empls = Account.objects.filter(RC__Short_Name=firm, Status=1, ds=1).order_by('Sr_No')
 	k = calendar.monthrange(month.year, month.month)[1]
-	k = k - sum(1 for week in calendar.monthcalendar(month.year,month.month) if week[-1])
-	# hd = len(DeclareDayAs.objects.filter(RC__Short_Name=firm, Date__month=m, Date__year=month.year, Declare_Day_As='Holiday'))
-	# k = k + hd if hd != None else k
+	# k = k - sum(1 for week in calendar.monthcalendar(month.year,month.month) if week[-1])
 	
 	hds = [] 
 	hdl = DeclareDayAs.objects.filter(RC__Short_Name=firm, Declare_Day_As='Holiday', Date__month=m, Date__year=month.year).order_by('Date')
@@ -1442,6 +1472,7 @@ def Gen_Monthly_Salaries(request, firm, proj, month, mode):
 				atnd = Monthatnd.objects.filter(Name=a, Month__month=m, Month__year=month.year).last()
 				e_sal = Empl_Salaries.objects.filter(Employ_Name=a).last()
 				msal = Monthly_Salaries.objects.filter(Name=a, Month__month=m, Month__year=month.year)
+				datnd = Attendance.objects.filter(Name=a, Date__month=m, Date__year=month.year, Day_Status='Tour')
 				if not msal:
 					if e_sal:
 						if atnd != None:
@@ -1449,24 +1480,30 @@ def Gen_Monthly_Salaries(request, firm, proj, month, mode):
 							# check_holiday_before_after_day(request, a, month, hds)
 							# hds_del = should_del_holidays(request, a, month, hds)
 							atnd = Monthatnd.objects.filter(Name=a, Month__month=m, Month__year=month.year).last()
-							i_wd = atnd.Presents + atnd.Leaves + len(hdl) - empl_absents
-							# i_wd = k - empl_absents 
+							# i_wd = atnd.Presents + atnd.Leaves + len(hdl) - empl_absents
+							i_wd = k - empl_absents 
 							total_ot = atnd.Total_OT
 						else:
 							i_wd, total_ot = k, 0
 
 						i_wd = k if i_wd > k else i_wd
-						# hrs = call_extra_work_days_sal(request, month, a) if e_sal.OT_Eligibility == 1 else 0
-						hrs = 0
-						i_sal = e_sal.Gross_Salary*i_wd/k
-						i_esi, i_pf = e_sal.ESI_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.ESI_Eligibility == 1 else 0 , e_sal.PF_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.PF_Eligibility == 1 else 0
+						i_sal = e_sal.Gross_Salary
+						# i_esi, i_pf = e_sal.ESI_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.ESI_Eligibility == 1 else 0 , e_sal.PF_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.PF_Eligibility == 1 else 0
+						i_esi, i_pf = e_sal.ESI_Amount*i_wd /k if e_sal.ESI_Eligibility == 1 else 0 , e_sal.PF_Amount*i_wd/k if e_sal.PF_Eligibility == 1 else 0
 						i_net = i_sal - i_esi - i_pf - (e_sal.Professional_Tax if e_sal.Professional_Tax != None else 0)
 						i_lop = e_sal.Net_Salary - i_net
 						i_lop = i_lop if i_lop >= 0 else 0
-						i_ot = (((e_sal.Gross_Salary/k/8)*((total_ot+hrs) if total_ot != 0 else 0)) if e_sal.OT_Eligibility == 1 else 0) 
+						i_ot = (((e_sal.Gross_Salary/k/8)*(total_ot if total_ot != 0 else 0)) if e_sal.OT_Eligibility == 1 else 0) 
 						i_net = i_net + i_ot
-						gen_sal = Monthly_Salaries.objects.create(RC=CompanyDetails.objects.filter(Short_Name=firm).last(), Name=a, Month=date(month.year, m, 1), Issued_Days=i_wd, Issued_Salary=int(i_net),
-						PF=int(i_pf), ESI=int(i_esi), OT_Amount=int(i_ot), Professional_Tax=e_sal.Professional_Tax, LOP=int(i_lop), OT_Hours=total_ot, Actual_Net_Salary=e_sal.Gross_Salary)
+						# i_net = i_net + (sal.Expenses if sal.Expenses != None else 0) + (sal.Tour_Allowance if sal.Tour_Allowance != None else 0) + (sal.Special_Allowance if sal.Special_Allowance != None else 0) - (sal.Deducted_Advance if sal.Deducted_Advance != None else 0)
+						i_sp_alw, i_tour_alw, i_sal_adv = 0, 0, 0
+						i_sp_alw*i_wd/k if e_sal == None or e_sal == 0 else 0
+						i_tour_alw = len(datnd)*(e_sal.Tour_Allowance if e_sal.Tour_Allowance != None else 0) if datnd != None else 0
+						i_sal_adv = sal_advanaces_update(request, a)
+
+						gen_sal = Monthly_Salaries.objects.create(RC=CompanyDetails.objects.filter(Short_Name=firm).last(), Name=a, Gross_Salary=i_sal, Month=date(month.year, m, 1), Issued_Days=i_wd, Issued_Salary=int(i_net),
+						PF=int(i_pf), ESI=int(i_esi), OT_Amount=int(i_ot), Professional_Tax=e_sal.Professional_Tax, LOP=int(i_lop), OT_Hours=total_ot, Actual_Net_Salary=e_sal.Gross_Salary, 
+						Special_Allowance=i_sp_alw, Tour_Allowance=i_tour_alw, Salary_Advance=i_sal_adv)
 
 	if mode == 'gen':
 		messages.success(request, 'Requested Month Salaries Has Been Generated')
@@ -1549,28 +1586,37 @@ def sal_manual_edit(request, eid, mode):
 	sal = Monthly_Salaries.objects.get(id=eid)
 	month = sal.Month
 	k = calendar.monthrange(month.year, month.month)[1]
-	k = k - sum(1 for week in calendar.monthcalendar(month.year,month.month) if week[-1])
+	# k = k - sum(1 for week in calendar.monthcalendar(month.year,month.month) if week[-1])
 	atnd = Monthatnd.objects.filter(Name=sal.Name, Month__month=month.month, Month__year=month.year).last()
 	e_sal = Empl_Salaries.objects.filter(Employ_Name=sal.Name).last()
 	i_wd = sal.Issued_Days
 	i_wd = k if i_wd > k else i_wd
 	
-	# hrs = call_extra_work_days_sal(request, month, a) if e_sal.OT_Eligibility == 1 else 0
-	hrs = 0
 	i_sal = e_sal.Gross_Salary*i_wd/k
-	i_esi, i_pf = e_sal.ESI_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.ESI_Eligibility == 1 else 0 , e_sal.PF_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.PF_Eligibility == 1 else 0
+	# i_esi, i_pf = e_sal.ESI_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.ESI_Eligibility == 1 else 0 , e_sal.PF_Amount*(i_wd if i_wd < 26 else 26)/26 if e_sal.PF_Eligibility == 1 else 0
+	i_esi, i_pf = e_sal.ESI_Amount*i_wd/k if e_sal.ESI_Eligibility == 1 else 0 , e_sal.PF_Amount*i_wd/k if e_sal.PF_Eligibility == 1 else 0
 	i_net = i_sal - i_esi - i_pf - (e_sal.Professional_Tax if e_sal.Professional_Tax != None else 0)
 	i_lop = e_sal.Net_Salary - i_net
 	i_lop = i_lop if i_lop >= 0 else 0
-	i_ot = (((e_sal.Gross_Salary/k/8)*((sal.OT_Hours+hrs) if sal.OT_Hours != None else 0)) if e_sal.OT_Eligibility == 1 else 0) 
+	i_ot = (((e_sal.Gross_Salary/k/8)*(sal.OT_Hours if sal.OT_Hours != None else 0)) if e_sal.OT_Eligibility == 1 else 0) 
 	i_net = i_net + i_ot
-	i_net = i_net + sal.Expenses
-
+	
+	sal_deduction = 0
+	if sal.Salary_Advance > 0:
+		if sal.Deducted_Advance > 0: 
+			if sal.Salary_Advance >= sal.Deducted_Advance:
+				sal_deduction = sal.Deducted_Advance
+			else:
+				sal_deduction = sal.Salary_Advance
+				sal.Deducted_Advance = sal.Salary_Advance
+				sal.save()
+	print('1',i_net, sal_deduction)
+	i_net = i_net + (sal.Expenses if sal.Expenses != None else 0) + (sal.Tour_Allowance if sal.Tour_Allowance != None else 0) + (sal.Special_Allowance if sal.Special_Allowance != None else 0) - sal_deduction
+	print('2',i_net, sal_deduction)
 	if mode == 'presents':
-		Monthly_Salaries.objects.filter(id=eid).update(Issued_Salary=int(i_net),
-		PF=int(i_pf), ESI=int(i_esi), OT_Amount=int(i_ot), Professional_Tax=e_sal.Professional_Tax, LOP=int(i_lop), Salary_Advance=0, Automatic=0, Last_Updated_Date=date.today())
+		Monthly_Salaries.objects.filter(id=eid).update(Issued_Salary=int(i_net), PF=int(i_pf), ESI=int(i_esi), OT_Amount=int(i_ot), Professional_Tax=e_sal.Professional_Tax, LOP=int(i_lop), Automatic=0, Last_Updated_Date=date.today())
 	else:
-		issued = i_sal - sal.ESI - sal.PF - sal.Salary_Advance - sal.Other_Deductions - sal.TDS - (e_sal.Professional_Tax if e_sal.Professional_Tax != None else 0) + i_ot
+		issued = i_sal - sal.ESI - sal.PF - sal_deduction - sal.Other_Deductions - sal.TDS - (e_sal.Professional_Tax if e_sal.Professional_Tax != None else 0) + i_ot + (sal.Expenses if sal.Expenses != None else 0) + (sal.Tour_Allowance if sal.Tour_Allowance != None else 0) + (sal.Special_Allowance if sal.Special_Allowance != None else 0)
 		Monthly_Salaries.objects.filter(id=eid).update(Issued_Salary=int(issued), Automatic=0, Last_Updated_Date=date.today())
 
 
@@ -1586,6 +1632,7 @@ def Monthly_Salaries_Edit(request, firm, proj, month, eid, mode):
 		if form.is_valid():
 			p= form.save()
 			sal_manual_edit(request, p.id, mode)
+			print('llkl',p.Salary_Advance, p.Deducted_Advance)
 			messages.success(request, "Details Has Been Updated Successfully")
 			return redirect(url)
 		else:
@@ -1665,7 +1712,7 @@ def Get_Order_Wise_Salaries(request, firm, proj, month, mode):
 
 
 @login_required
-def Employ_Claims(request, proj):
+def Employ_Claims(request, proj, firm):
 	pdata = projectname(request, proj)
 	pjl = {'Related_Project__isnull':False}
 	expns = Expenses.objects.filter(RC__Short_Name=firm).filter(Q(Submitted_By__Status=1)&Q(Submitted_By__ds=1)&Q(Approval_Status=1))

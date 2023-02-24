@@ -29,3 +29,12 @@ def get_fy_date_fy():
 	year_of_date=dt.year
 	financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()
 	return financial_year_start_date
+
+def fyr():
+	dt = date.today()
+	year_of_date=dt.year
+	financial_year_start_date = datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date()
+	if dt<financial_year_start_date:
+		return (datetime.strptime(str(year_of_date-1)+"-04-01","%Y-%m-%d").date())
+	else:
+		return (datetime.strptime(str(year_of_date)+"-04-01","%Y-%m-%d").date())

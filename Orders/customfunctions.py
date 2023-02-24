@@ -160,6 +160,7 @@ def inv_due_agnst_pay(request, mode, pay_id):
 	payment = Payment_Status.objects.get(id=pay_id)
 	payment.user = Account.objects.get(user=request.user)
 	payment.save()
+	payment.Received_Amount = (payment.Received_Amount + payment.Adjusted_Amount) if payment.Adjusted_Amount != None else payment.Received_Amount
 
 	if payment.Invoice_No:
 		inv = Invoices.objects.filter(Invoice_No=payment.Invoice_No.Invoice_No).last()
@@ -194,7 +195,6 @@ def inv_due_agnst_pay(request, mode, pay_id):
 			po = Orders.objects.filter(Order_No=payment.Order_No.Order_No).last()
 			po.Payment_Status = payment
 			po.save()
-			print('create 1')
 			return 1
 		elif dp > 0:
 			inv.Due_Amount = inv.Due_Amount - payment.Received_Amount
@@ -204,7 +204,6 @@ def inv_due_agnst_pay(request, mode, pay_id):
 			po = Orders.objects.filter(Order_No=payment.Order_No.Order_No).last()
 			po.Payment_Status = payment
 			po.save()
-			print('2')
 		elif dn > 0:
 			inv.Due_Amount = 0
 			inv.Payment_Cleared_Date = payment.Payment_Date
@@ -216,12 +215,10 @@ def inv_due_agnst_pay(request, mode, pay_id):
 			po.save()
 			if mode == 'create':
 				adj_invs_dues_p(request, payment, dn)
-				print('ex')
 		else:
 			pass
 
 		if mode == 'edit':
-			print('edit')
 			balance_inv_dues(request, payment.Order_No.Related_Project, payment.Order_No.Customer_Name, payment, inv.id)
 
 	else:
@@ -293,7 +290,7 @@ def balance_inv_dues(request, proj, customer, payment, exclude):
   
 	invs_amnt = sum(invs.values_list('Invoice_Amount', flat=True))
 	invs_due = sum(invs.values_list('Due_Amount', flat=True)) +  sum(invs.values_list('Roundoff', flat=True))
-	pays_total = sum(pays.values_list('Received_Amount', flat=True))
+	pays_total = sum(pays.values_list('Received_Amount', flat=True)) + sum(pays.values_list('Adjusted_Amount', flat=True))
 
 	print(invs_due, invs_amnt - pays_total)
 
@@ -425,14 +422,19 @@ def adjust_payments_to_invoices(request, ordid, invid):
 	inv.Roundoff = 0
 	inv.save()
 	proj = inv.Order.Related_Project
-	
 
 	pays = Payment_Status.objects.filter(Invoice_No=inv)
-	print('due', inv.Invoice_No, inv.Due_Amount)
 	
 	if pays:
+		alstpay = Payment_Status.objects.filter(Invoice_No=inv).last()
+		if inv.Adjusted_Amount and inv.Adjusted_Amount > 0:
+			alstpay.Adjusted_Amount = inv.Adjusted_Amount
+			alstpay.save()
+		else:
+			inv.Adjusted_Amount, alstpay.Adjusted_Amount = 0, 0
+			inv.save()
+			alstpay.save()
 		for x in pays:
-			print(x.Received_Amount)
 			inv_due_agnst_pay(request, 'create', x.id)
 	else:
 		case0 = Payment_Status.objects.filter(Invoice_No=inv).order_by('Payment_Date')
@@ -460,9 +462,7 @@ def balance_inv_dues1(request, customer):
 	if payment:
 		invs_amnt = sum(invs.values_list('Invoice_Amount', flat=True))
 		invs_due = sum(invs.values_list('Due_Amount', flat=True)) +  sum(invs.values_list('Roundoff', flat=True))
-		pays_total = sum(pays.values_list('Received_Amount', flat=True))
-
-		print(invs_due, invs_amnt - pays_total)
+		pays_total = sum(pays.values_list('Received_Amount', flat=True)) + sum(pays.values_list('Adjusted_Amount', flat=True))
 
 		if (invs_amnt == pays_total) or (invs_amnt < pays_total):
 			Invoices.objects.filter(Order__Customer_Name=customer, Lock_Status=1, Due_Amount__gt=0).update(Due_Amount=0, Final_Payment_Status=1, Payment_Cleared_Date=payment.Payment_Date, Payment_Status=payment)

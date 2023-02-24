@@ -37,7 +37,7 @@
     location.href= editurl
   }
 
-
+  function rid1(tid) {getid = tid;}
   function rid(tid, can_gen_invoice, billed, ordervalue) {qid = tid;
     if (can_gen_invoice=='False' | ordervalue <= billed){
       document.getElementById('hidebillbutton').style.display='none';
@@ -174,13 +174,13 @@
 
                 <td style="white-space:normal;">
                   {% if x.Quote_To %}                  
-                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">M/s. {{x.Quote_To.Contact_Person}}
+                    <a class="ahr" ht="edit quote" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:rid1({{x.id}})">M/s. {{x.Quote_To.Contact_Person}}
                       {% if x.Firm_Name %}<br> {{x.Firm_Name}}{% endif %}
                       <br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Quote_To.Phone_Number_1}}'>{{x.Quote_To.Phone_Number_1}}</a>
                       {% if x.Quote_To.Email %}<br><i class="mdi mdi-email-outline"></i>&nbsp;<a href="mailto:{{x.Quote_To.Email}}">{{x.Quote_To.Email}}</a>{% endif %}
                     </a>
                   {% else %}
-                    <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{% if x.Reference_Person %} M/s. {{x.Reference_Person}}{% endif %}
+                    <a class="ahr" ht="edit quote" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:rid1({{x.id}})">{% if x.Reference_Person %} M/s. {{x.Reference_Person}}{% endif %}
                     {% if x.Firm_Name %}<br>{{x.Firm_Name}}{% endif %}</a>
                     {% if x.Phone_Number %}<br><i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Phone_Number}}'>{{x.Phone_Number}}</a>{% endif %}
                     {% if x.Location %}<br>{{x.Location}}{% endif %}
@@ -189,12 +189,12 @@
                 </td>
 
                 <td style="white-space:normal;">
-                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">{{x.Quote_No}}
+                  <a class="ahr" ht="edit quote" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:rid1({{x.id}})">{{x.Quote_No}}
                   <br>{{x.Date|date:'d-M-Y'}}</a>
                 </td>
 
                 <td style="white-space:normal;">                  
-                  <a class="ahr" ht="edit quote" target="_blank" onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+{{x.id}}+'/itemid/msg/'">₹ {{x.Quote_Value|floatformat:0|intcomma}}</a>
+                  <a class="ahr" ht="edit quote" data-toggle="modal" data-target="#editQuoteModal" onclick="javascript:rid1({{x.id}})">₹ {{x.Quote_Value|floatformat:0|intcomma}}</a>
                 </td>      
               </tr>
           {% endfor %} 
@@ -253,6 +253,25 @@
       </div>
     </div>  
   {% endif %}
+
+  <div class="modal fade text-left" id="editQuoteModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document" style="width:250px;%">
+    <div class="modal-content" id="modal-reload">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel" style="font-weight:bold; font-size: 15px;">Action Window</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="template-demo">
+          <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/edit/'+getid+'/itemid/msg/'" class="btn btn-sm btn-info ">Open/Edit</button>
+          <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/genquote/copy/'+getid+'/itemid/msg/'" class="btn btn-sm btn-primary ">Quote Revision (Copy)</button>           
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- #do next, displaying buttons to perform PO related tasks -->
   <div class="modal fade text-left" id="doMoreModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">

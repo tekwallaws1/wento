@@ -75,8 +75,8 @@
   var wdths = ['4%', '26%', '35%', '35%'];
   
    var msgTop = ''
-  var title = '{{firm}}-Customers List';
-  var filename = '{{firm}}-CustomersList';
+  var title = '{{firm}}-{{mode}}-Customers List';
+  var filename = '{{firm}}-{{mode}}-CustomersList';
   var ort = 'portrait';
 
   // Datatables Customise PDF Before Export//
@@ -122,11 +122,17 @@
 <div>
   <div style="float:left">
     
-    <h3 class="page-title">Customers List</h3>
+    <h3 class="page-title">{{mode}} Customers List</h3>
     <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customercontactform/create/1/'" class="btn btn-sm btn-info mb-4">+ Add Contact Person</button> -->
   </div>
   <div style="float:right">
-    <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customerform/create/1/'" class="btn btn-sm btn-primary mb-2">+ Add New Customer</button>&emsp;
+    <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customerform/create/1/'" class="btn btn-sm btn-primary mb-4">+ Add New Customer</button>
+    {% if mode == 'Regular' %}
+      <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customerslist/OneTime/'" class="btn btn-sm btn-info mb-4">One Time Customers</button>
+    {% else %}
+      <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customerslist/Regular/'" class="btn btn-sm btn-info mb-4">Regular Customers</button>
+    {% endif %}
+    <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/customerslist/Inactive/'" class="btn btn-sm btn-danger mb-4">Inactive Customer</button>
     <!-- <button type="button" id="myBtn" class="btn btn-sm  btn-primary mb-4">ApplyFilters<i class="mdi mdi-filter btn-icon-append"></i></button>
     &nbsp;&nbsp;&nbsp;
     <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/customerslist/'" class="btn btn-sm  btn-info mb-4">ClearFilters<i class="mdi mdi-filter-remove btn-icon-append"></i></button> -->

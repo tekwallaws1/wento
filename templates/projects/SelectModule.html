@@ -11,18 +11,17 @@
 
 {% block scripts %}
  
-{% endblock %}
+{% endblock %} 
  
 {% block content %}
-{% if user.username == 'praveen' or  user.username == '9849203852' or  user.username == '9010654596' %}
 <div class="col-md-10 mx-auto">
     <div>
       <div style="float:left">
         <h4 class="card-title mb-0">{{pdata.pj.Project_Name}}</h4>
       </div>
       <div style="float:right">
-        <button type="button" onclick="location.href='/{{firm}}/selectproject/'"  class="btn btn-sm  btn-primary mb-4" >Change Project</button>
-        <button type="button" onclick="location.href='/'"  class="btn btn-sm  btn-info mb-4" >Change Company</button>     
+        <button type="button" onclick="location.href='/{{firm}}/selectproject/'"  class="btn btn-sm  btn-primary mb-4" >Change Branch</button>
+        <!-- <button type="button" onclick="location.href='/'"  class="btn btn-sm  btn-info mb-4" >Change Company</button> -->     
       </div>
       <div style="clear:both"></div>
     </div>
@@ -33,8 +32,8 @@
                     <div class="card-icon card-icon-large" ><i class="fas fa-chart-column"></i></div>
                     <div >
                         <div class="mbt">Dashboards</div>
-                        <a href="/{{firm}}/{{pdata.pj}}/salesdb/All/"><div class="mb">Received Orders</div></a>
-                        <a href="/{{firm}}/{{pdata.pj}}/purchasesdb/All/"><div class="mb">Purchases</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/salesdb/All/"><div class="mb">Orders Dashboard</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/purchasesdb/All/"><div class="mb">Purchases Dashboard</div></a>
                     </div>
                 </div>
             </div>
@@ -162,25 +161,25 @@
             </div>
         </div> -->
         <div class="col-xl-3 col-lg-6">
-            <div class="card l-bg-blue-dark">
+            <div class="card l-bg-cherry">
                 <div class="card-statistic-3 p-4">
                     <div class="card-icon card-icon-large" ><i class="fas fa-warehouse"></i></div>
                     <div >
                         <div class="mbt">Quotations</div>
-                        <a href="/{{firm}}/{{pdata.pj}}/genquote/create/1/itemid/msg/"><div class="mb">Generate Quotation</div></a>
-                        <a href="/{{firm}}/{{pdata.pj}}/quotationslist/all/"><div class="mb">Quotations List</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/manualquoteform/create/1/"><div class="mb">Generate Quotation</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/manualquoteslist/active/"><div class="mb">Quotations & Excels</div></a>
                     </div>
                 </div>
             </div>
-        </div>
+        </div> 
 
         <div class="col-xl-3 col-lg-6">
-            <div class="card l-bg-cherry">
+            <div class="card l-bg-blue-dark">
                 <div class="card-statistic-3 p-4">
                     <div class="card-icon card-icon-large" ><i class="fas fa-address-card"></i></div>
                     <div >
                         <div class="mbt">Contacts</div>
-                        <a href="/{{firm}}/{{pdata.pj}}/customerslist/"><div class="mb">Customer Contacts</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/customerslist/OneTime/"><div class="mb">Customer Contacts</div></a>
                         <a href="/{{firm}}/{{pdata.pj}}/vendorslist/"><div class="mb">Vendor Contacts</div></a>
                     </div>
                 </div>
@@ -205,51 +204,12 @@
                     <div >
                         <div class="mbt">Settings</div>
                         <a href="/{{firm}}/{{pdata.pj}}/companylist/"><div class="mb">Reg. Companies</div></a>
-                        <a href="/{{firm}}/{{pdata.pj}}/userslist/"><div class="mb">Manage Users</div></a>
+                        <a href="/{{firm}}/{{pdata.pj}}/userslist/"><div class="mb">Permissions</div></a>
                     </div>
                 </div>
             </div></a>
         </div>         
     </div>
 </div>
-{% else %}
-<div class="col-md-10 mx-auto">
-    <div>
-      <div style="float:left">
-        <h4 class="card-title mb-0">{{pdata.pj.Project_Name}}</h4>
-      </div>
-      <div style="float:right">
-        <button type="button" onclick="location.href='/'"  class="btn btn-sm  btn-primary mb-4" >Change Work Area/Division</button>     
-      </div>
-      <div style="clear:both"></div>
-    </div>
-    <div class="row ">
-        <div class="col-xl-3 col-lg-6">
-            <div class="card l-bg-cherry">
-                <div class="card-statistic-3 p-4">
-                    <div class="card-icon card-icon-large" ><i class="fas fa-coins"></i></div>
-                    <div >
-                        <div class="mbt">Expenses</div>
-                        <a href="/{{firm}}/{{pdata.pj}}/expenseslist/apr/expid/"><div class="mb">Expenses List</div></a>
-                        <a href="/{{firm}}/{{pdata.pj}}/expensesform/create/1/"><div class="mb">Claim Form</div></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-lg-6">
-            <div class="card l-bg-blue-dark">
-                <div class="card-statistic-3 p-4">
-                    <div class="card-icon card-icon-large" ><i class="fas fa-cash-register"></i></div>
-                    <div >
-                        <div class="mbt">Attendance</div>
-                        <a href="/{{firm}}/{{pdata.pj}}/daywiseattendancelist/day/"><div class="mb">Day Wise Attendance</div></a>
-                        <a href="/{{firm}}/{{pdata.pj}}/monthwiseattendancelist/day/"><div class="mb">Month Wise Attendance</div></a>
-                    </div>
-                </div>
-            </div>
-        </div>   
-    </div>
-</div>
-{% endif %}
 {% endblock %}
 

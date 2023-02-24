@@ -6,7 +6,7 @@
   <div class="col-md-6 grid-margin stretch-card">
     <div class="card">
       <div class="card-body">
-        <h4 class="card-title d-inline-block">Holidays/Extra Working Days Form</h4>
+        <h4 class="card-title d-inline-block">Monthly Salary Edit Form</h4>
         <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
         <br>
           <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
@@ -15,13 +15,13 @@
               <div class="form-group">
                 {% for field in form %}
                 {% if mode == 'presents' %}
-                  {% if field.label == 'Presents' or  field.label == 'OT Hours'  %}
+                  {% if field.label == 'Issued Days' or  field.label == 'OT Hours'  %}
                     <label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
                   {% else %}
                     <div style="display:none"><label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}</div>
                   {% endif %}
                 {% else %}
-                  {% if field.label == 'PF' or  field.label == 'ESI' or  field.label == 'TDS' or field.label == 'Other Deductions' or  field.label == 'Salary Advance' or field.label == 'Professional Tax' %}
+                  {% if field.label == 'PF' or  field.label == 'ESI' or  field.label == 'TDS' or field.label == 'Other Deductions' or  field.label == 'Expenses' or field.label == 'Deducted Advance' or field.label == 'Professional Tax' %}
                     <label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}
                   {% else %}
                     <div style="display:none"><label>{{ field.label }}{% if field.field.required %} <span style="color: red">**</span> {% endif %}</label>{{ field}}</div>

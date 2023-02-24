@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block scripts %}
+ <script type="text/javascript">
+
+  window.onload = function () {
+    if ('{{fnc}}'=='edit') {
+      var selectBoxs = document.getElementById("id_Installation_Status");    
+      var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+      if (sv == 'Partially Installed'){document.getElementById('pending').style.display='block';}
+      else{ document.getElementById('pending').style.display='none';}
+      } 
+  }
+  
+    function changeFunc1() {
+    var selectBoxs = document.getElementById("id_Installation_Status");    
+    var sv = selectBoxs.options[selectBoxs.selectedIndex].text;
+    if (sv == 'Partially Installed'){document.getElementById('pending').style.display='block';}
+    else{ document.getElementById('pending').style.display='none';} }
+
+</script>
+{% endblock %} <!-- For Scripts -->
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6 grid-margin stretch-card">
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title d-inline-block">Installation Form</h4>
+        <div style="color: red; font-style: italic; font-size: 13px;">**Fields are Mandatory</div>
+        <br>
+          <form class="forms-sample" action="" method="POST" enctype="multipart/form-data">
+            <div class="form-group mb-4">
+              {% csrf_token %}
+              <div class="form-group">
+
+                <label>Installation Date<span style="color: red">**</span></label>{{form.Installation_Date}}
+
+                <label for="id_Installation_Status">Installation Status<span style="color: red">**</span></label><div onchange="changeFunc1()">{{form.Installation_Status}}</div>
+
+                <label>Installation Details</label>{{form.Installation_Details}}
+                <div id="pending" style="display:none"><label>Pending Installation Details</label>{{form.Pending_Installation_Work}}</div>
+
+                {% for field in form %}
+                  {% for error in field.errors %}
+                    <p style="color: red; margin-top: -20px">{{ error }}</p>
+                  {% endfor %}
+                {% endfor %}  
+              </div>
+            </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div> 
+{% endblock %}  
+ 

@@ -11,7 +11,7 @@ urlpatterns = [
 
     path('<firm>/<proj>/customerform/<fnc>/<rid>/', views.CustDt_Form, name='custform'),
     path('<firm>/<proj>/customercontactform/<fnc>/<rid>/', views.CustContDt_Form, name='custcontform'),
-    path('<firm>/<proj>/customerslist/', views.CustDt_List, name='custlist'),
+    path('<firm>/<proj>/customerslist/<mode>/', views.CustDt_List, name='custlist'),
 
     path('<firm>/<proj>/vendorform/<fnc>/<rid>/', views.VendDt_Form, name='vendform'),
     path('<firm>/<proj>/vendorcontactform/<fnc>/<rid>/', views.VendContDt_Form, name='vendcontform'),

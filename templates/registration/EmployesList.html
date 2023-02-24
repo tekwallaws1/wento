@@ -104,8 +104,8 @@
   var ort = 'portrait'; //landscape
   
     var msgTop = 'No of Employes - {{count}}'
-    var title = 'Employes List';
-    var filename = 'Employes_List'
+    var title = '{{firm}}-{{status}}-Employes List';
+    var filename = '{{firm}}_{{status}}_Employes_List'
 
   // Datatables Customise PDF Before Export//
   var pdf_custom = function ( doc ) {
@@ -143,20 +143,18 @@
 
 {% block content %}
 <div class="page-header">
-  {% if status == 'active' %}
-    <h3 class="page-title">{{pdata.pj.Short_Name}} - Active Employes List - {{count}}</h3>
-  {% else %}
-    <h3 class="page-title">{{pdata.pj.Short_Name}} - Old Employes List - {{count}}</h3>
-  {% endif %}
+    <h3 class="page-title">{{status}}-Employes List - {{count}}</h3>
 </div>
 
 <div>
   <div style="float:left">
     <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employesform/create/1/'" class="btn btn-sm btn-primary mb-4" ht="register new employee here">Add New Employ</button>
-    {% if status == 'active' %}
-      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/old/'" class="btn btn-sm btn-danger mb-4" ht="list of old employes who are not active or not in company">Old Employes List</button>
+    {% if status == 'Permanent' %}
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/Contract/'" class="btn btn-sm btn-info mb-4" ht="list of contract employs in company">Contract Employes List</button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/Inactive/'" class="btn btn-sm btn-danger mb-4" ht="list of old employes who are not active or not in company">Old/Inactive Employes List</button>
     {% else %}
-      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/active/'" class="btn btn-sm btn-success mb-4" ht="list of active employes">Active Employes List</button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/Permanent/'" class="btn btn-sm btn-success mb-4" ht="list of Permanent employes">Permanent Employes List</button>
+      <button type="button" onclick="location.href='/{{firm}}/{{pdata.pj}}/employeslist/Inactive/'" class="btn btn-sm btn-danger mb-4" ht="list of old employes who are not active or not in company">Old/Inactive Employes List</button>
     {% endif %}
   </div>
   <div style="float:right">
@@ -191,6 +189,8 @@
               <a class="ahr" ht="update employee details" data-toggle="modal" data-target="#editModal1" onclick="javascript:editemp1('{{x.id}}')">
                 {% if x.Upload_Photo %}
                   <img src="/media/{{x.Upload_Photo}}/" alt="image" />
+                {% else %}
+                  <img src="/media/employes/logo-mini.png/" alt="image" />
                 {% endif %}
               </a>
             </td>
@@ -200,12 +200,13 @@
                 {{x.Name}}
                 {% if x.Designation %}<br><span class="hlt5">Designation: </span>{{ x.Designation }}{% endif %}
                 {% if x.Employee_Id %}<br><span class="hlt5">Employee ID: </span>{{ x.Employee_Id }}{% endif %}
+                {% if x.user %}<br><span class="hlt5">Username: </span>{{ x.user.username }}{% endif %}
               </a>
             </td>
 
             <td style="white-space:normal;">
               <i class="mdi mdi-phone"></i>&nbsp;<a class="ahr" ht='click here to call' href='tel:{{x.Phone_Number}}'>{{x.Phone_Number}}</a>
-              <a class="ahr" ht="update employee details" data-toggle="modal" data-target="#editModal1" onclick="javascript:editemp1('{{x.id}}')">             
+              <a class="ahr" ht="update employee details" data-toggle="modal" data-target="#editModal1" onclick="javascript:editemp1('{{x.id}}','{{x.user}}')">             
                 {% if x.Department %}<br><span class="hlt5">Department: </span>{{ x.Department }}{% endif %}
                 {% if x.Email %}<br><i class="mdi mdi-email-outline"></i>&nbsp;{{x.Email}}{% endif %}
                 {% if x.Joining_Date %}<br><span class="hlt5">Date of Joining: </span>{{ x.Joining_Date|date:'d M Y' }}{% endif %}
@@ -292,8 +293,11 @@
         <div class="modal-body">
           <div class="template-demo" style="display:none;" id='show_or_hide1'>
             <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesbankform/edit/'+getid+'/1/'" class="btn btn-sm btn-primary">Edit Bank Details</button>
-            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesbankform/copy/'+getid+'/1/'" class="btn btn-sm btn-info">Copy Bank Details</button>
-            <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal2" class="btn btn-sm btn-danger">Delete</button>            
+            <!-- <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesbankform/copy/'+getid+'/1/'" class="btn btn-sm btn-info">Copy Bank Details</button> -->
+            <button type="button" onclick="javascript:fnchide()" data-toggle="modal" data-target="#exampleModal2" class="btn btn-sm btn-danger">Delete</button>           
+          </div>
+          <div class="template-demo" style="display:none;" id='show_or_hide2'>
+            <button type="button"  onclick="location.href='/{{firm}}/{{pdata.pj}}/employesbankform/create/1/'+eid+'/'" class="btn btn-sm btn-primary">+ Add Bank Details</button>        
           </div>
         </div>
       </div>

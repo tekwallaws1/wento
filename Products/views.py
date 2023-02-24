@@ -432,7 +432,7 @@ def Vendor_Invoice_Form(request, firm, proj, fnc, poid, invid):
 	  form = VendorInvoicesForm(request.POST, request.FILES)
 	  if form.is_valid():
 	    p= form.save()
-	    check_no_po(request, p.id, pdata)
+	    check_no_po(request, p.id, pdata, firm)
 	    p = Vendor_Invoices.objects.get(id=p.id)
 	    updateduedays(request, p.id)
 	    update_vendor_invoice(request, p.id, p.PO_No.id)
@@ -1082,6 +1082,43 @@ def Gen_Quotation(request, firm, proj, fnc, qid, itemid, msg):
 			form = QuotationForm()
 			return render(request, 'quotations/QuotationsForm.html', {'form': form, 'firm':firm, 'pdata':pdata})
 
+	if fnc == 'copy':
+		oqt = Quotes.objects.get(id=qid)
+		qts = Quotes.objects.filter(Quote_No_1=oqt.Quote_No_1)
+		qt = Quotes.objects.get(id=qid)
+		qt.pk = None
+		qt.Quote_No = None
+		qt.Lock_Status = 0
+		qt.save()
+		dqt = Quotes.objects.get(id=qt.id)
+		dqt.Quote_No = str(oqt.Quote_No_1) + '_R' + str(len(qts))
+		dqt.Quote_No_1 = oqt.Quote_No_1
+		dqt.save()
+		dqt = Quotes.objects.get(id=dqt.id)
+		qt_items = Quote_Items.objects.filter(Quote_No=oqt)
+		for x in qt_items:
+			x.pk = None
+			x.save()
+			dqi = Quote_Items.objects.get(id=x.id)
+			dqi.Quote_No = dqt
+			dqi.save()
+		cqt_items = Copy_Quote_Items.objects.filter(Quote_No=oqt)
+		for x in cqt_items:
+			x.pk = None
+			x.save()
+			cdqi = Copy_Quote_Items.objects.get(id=x.id)
+			cdqi.Quote_No = dqt
+			cdqi.save()
+		qt_tc = Quote_TC.objects.filter(Quote_No=oqt)
+		for x in qt_tc:
+			x.pk = None
+			x.save()
+			qttc = Quote_TC.objects.get(id=x.id)
+			qttc.Quote_No = dqt
+			qttc.save()
+		qid = dqt.id
+	
+
 	qt = Quotes.objects.get(id=qid)
 	form_qt = QuotationEditForm(instance=get_object_or_404(Quotes, id=qt.id))
 
@@ -1131,6 +1168,14 @@ def Edit_Quotation_Form(request, firm, proj, fnc, qid):
 			# updateduedays(request, p.Invoice_No) 			
 			
 			if p.Lock_Status == 1:
+				if p.Quote_No == None:
+					msg = "Please Assign Quote No Before Confirm Quote"
+					p.Lock_Status = 0
+					p.save()
+					url = url+msg+'/'
+					return redirect(url)
+				p.Quote_No_1 = p.Quote_No if p.Quote_No_1 == None else p.Quote_No_1
+				p.save()
 				msg = "Quote Has Been Locked and Generated Successfully"
 				if update_qt_amount(request, p.id) == 0:
 					msg = "No Items Added in List of Items. Please Add Items to Complete Quote"
@@ -1286,19 +1331,19 @@ def Vendor_Wise_Statement(request, firm, proj, var1):
 		inv = Vendor_Invoices.objects.filter(PO_No__RC__Short_Name=firm, **pjl, PO_No__Vendor=x)
 		pay = Vendor_Payment_Status.objects.filter(PO_No__RC__Short_Name=firm, **pjl, PO_No__Vendor=x)
 		if inv or pay:
+			vendor.append(x)
 			if inv:
-				vendor.append(x)
 				billed.append(sum(inv.values_list('Invoice_Amount', flat=True)))
 				due.append(sum(inv.values_list('Due_Amount', flat=True)))
 				tb, td = tb+sum(inv.values_list('Invoice_Amount', flat=True)), td+sum(inv.values_list('Due_Amount', flat=True))
 			else:
-				billed.append(None)
-				due.append(None)
+				billed.append(0)
+				due.append(0)
 			if pay:
 				paid.append(sum(pay.values_list('Paid_Amount', flat=True)))
 				tp = tp + sum(pay.values_list('Paid_Amount', flat=True))
 			else:
-				paid.append(None)
+				paid.append(0)
 			if sum(inv.values_list('Invoice_Amount', flat=True)) <= (sum(pay.values_list('Paid_Amount', flat=True))):
 				advance.append(sum(pay.values_list('Paid_Amount', flat=True))-sum(inv.values_list('Invoice_Amount', flat=True)))
 				ta = ta + sum(pay.values_list('Paid_Amount', flat=True))-sum(inv.values_list('Invoice_Amount', flat=True))
