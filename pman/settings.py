@@ -27,7 +27,7 @@ SECRET_KEY = 'c_t1jqgyw#$o2a8)yk*lqoj7zlp1)#hvk_$^(0d@3&@29zvcn^'
 DEBUG = True
 
 #ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['*', 'prakom.com', 'www.prakom.com', '64.227.160.215']
+ALLOWED_HOSTS = ['*', 'wentoind.com', 'www.wentoind.com', '64.227.160.215']
 
 
 # Application definition
@@ -107,24 +107,24 @@ WSGI_APPLICATION = 'pman.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': str(BASE_DIR / 'wento1.sqlite3'),
-        # 'NAME': str(BASE_DIR / 'db1.sqlite3'),
-    }
- }
-
 # DATABASES = {
-#      'default': {
-#          'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#          'NAME': 'prakomdb',
-#          'USER': 'prakom',
-#          'PASSWORD': 'Prakom1@3',
-#          'HOST': 'localhost',
-#          'PORT': '',
-#      }
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': str(BASE_DIR / 'wento1.sqlite3'),
+#         # 'NAME': str(BASE_DIR / 'db1.sqlite3'),
+#     }
 #  }
+
+DATABASES = {
+     'default': {
+         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+         'NAME': 'wentodb',
+         'USER': 'wento',
+         'PASSWORD': 'Wento1@3',
+         'HOST': 'localhost',
+         'PORT': '',
+     }
+ }
 
 
 # Password validation
